@@ -1,5 +1,7 @@
 package io.github.tanguygab.tabadditions.spigot.commands;
 
+import me.neznamy.tab.api.TABAPI;
+import me.neznamy.tab.shared.Shared;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -8,6 +10,10 @@ import org.bukkit.configuration.file.FileConfiguration;
 
 public class TitleCmd {
     public TitleCmd(CommandSender sender, String[] args, FileConfiguration config) {
+        if (args.length < 2) {
+            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cYou have to provide a title!"));
+            return;
+        }
 
         ConfigurationSection section = config.getConfigurationSection("titles." + args[1]);
         if (section == null) {
@@ -28,7 +34,8 @@ public class TitleCmd {
             sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cThis player isn't connected"));
             return;
         }
-
+        title = Shared.platform.replaceAllPlaceholders(title, TABAPI.getPlayer(p));
+        subtitle = Shared.platform.replaceAllPlaceholders(subtitle, TABAPI.getPlayer(p));
         Bukkit.getServer().getPlayerExact(p).sendTitle(title, subtitle, fadeIn,stay,fadeOut);
     }
 

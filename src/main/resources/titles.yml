@@ -1,9 +1,3 @@
-actionbar:
-  enabled: false
-  toggle-command: /actionbar
-  permission-required-to-toggle: false
-  remember-toggle-choice: false
-
 titles:
   welcome:
     title: ""

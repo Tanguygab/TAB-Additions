@@ -1,1 +1,4 @@
-sneak-hide-nametags: false
+features:
+  sneak-hide-nametags: false
+  titles: false
+  actionbars: false

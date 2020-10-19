@@ -3,6 +3,7 @@ package io.github.tanguygab.tabadditions.spigot;
 import me.neznamy.tab.api.TABAPI;
 
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.Shared;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.ComponentBuilder;
 import org.bukkit.Bukkit;
@@ -20,6 +21,7 @@ public class BukkitEvents implements Listener {
     private final FileConfiguration config;
     private final FileConfiguration titleConfig;
     private final FileConfiguration actionbarConfig;
+    private boolean tag = false;
 
     public BukkitEvents(FileConfiguration config, FileConfiguration titleConfig, FileConfiguration actionbarConfig) {
         this.config = config;
@@ -32,10 +34,15 @@ public class BukkitEvents implements Listener {
 
         boolean sneak = e.isSneaking();
         Player p = e.getPlayer();
-        if (sneak && config.getBoolean("sneak-hide-nametags"))
-            TABAPI.hideNametag(p.getUniqueId());
+        if (sneak) {
+            tag = TABAPI.hasHiddenNametag(p.getUniqueId());
+            if (config.getBoolean("features.sneak-hide-nametags"))
+                TABAPI.hideNametag(p.getUniqueId());
+        }
         else
-            TABAPI.showNametag(p.getUniqueId());
+            if (!tag)
+                TABAPI.showNametag(p.getUniqueId());
+
     }
 
     @EventHandler
@@ -45,13 +52,14 @@ public class BukkitEvents implements Listener {
 
         pTAB.loadPropertyFromConfig("actionbar");
         String actionbar = actionbarConfig.getString("bars." + pTAB.getProperty("actionbar").get(), "");
+        actionbar = Shared.platform.replaceAllPlaceholders(actionbar, pTAB);
         p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(actionbar).create());
 
         pTAB.loadPropertyFromConfig("title");
         ConfigurationSection tSection = titleConfig.getConfigurationSection("titles." + pTAB.getProperty("title").get());
         if (tSection != null) {
-            String title = tSection.getString("title", "");
-            String subtitle = tSection.getString("subtitle", "");
+            String title = Shared.platform.replaceAllPlaceholders(tSection.getString("title", ""), pTAB);
+            String subtitle = Shared.platform.replaceAllPlaceholders(tSection.getString("subtitle", ""), pTAB);
             int fadeIn = tSection.getInt("fadein", 5);
             int stay = tSection.getInt("stay", 20);
             int fadeOut = tSection.getInt("fadeout", 5);

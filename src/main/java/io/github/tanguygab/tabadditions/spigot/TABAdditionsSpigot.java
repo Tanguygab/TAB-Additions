@@ -5,6 +5,7 @@ import io.github.tanguygab.tabadditions.spigot.commands.HelpCmd;
 import io.github.tanguygab.tabadditions.spigot.commands.TagsCmd;
 import io.github.tanguygab.tabadditions.spigot.commands.TitleCmd;
 import me.neznamy.tab.api.TABAPI;
+import me.neznamy.tab.shared.Shared;
 import net.md_5.bungee.api.ChatColor;
 
 import org.bukkit.Bukkit;
@@ -84,15 +85,17 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
             switch (args[0].toLowerCase()) {
                 case "reload": {
                     reload();
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"Config reloaded!"));
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&aConfig reloaded!"));
                     break;
                 }
                 case "actionbar": {
-                    new ActionBarCmd(sender, args, actionbarConfig);
+                    if (config.getBoolean("features.actionbars")) new ActionBarCmd(sender, args, actionbarConfig);
+                    else sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cActionbar feature is not enabled, therefore this command cannot be used"));
                     break;
                 }
                 case "title": {
-                    new TitleCmd(sender, args, titleConfig);
+                    if (config.getBoolean("features.titles")) new TitleCmd(sender, args, titleConfig);
+                    else sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cTitle feature is not enabled, therefore this command cannot be used"));
                     break;
                 }
                 case "tags": {
@@ -100,7 +103,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "test": {
-                    sender.sendMessage("Nothing to see there :D");
+                    sender.sendMessage("Nothing to see here :D");
                 }
             }
         return true;
