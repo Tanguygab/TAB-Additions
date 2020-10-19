@@ -1,0 +1,13 @@
+title:
+  enabled: false
+  toggle-command: /title
+  permission-required-to-toggle: false
+  remember-toggle-choice: false
+  disable-in-worlds:
+    - disabledworld
+  default-scoreboard: "admin"
+  per-world:
+    testworld: "twscoreboard"
+
+bars:
+  welcome: "hey"
