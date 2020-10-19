@@ -1,7 +1,7 @@
 name: TAB-Additions
 version: @version@
 main: io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot
-api-version: 1.16
+api-version: 1.13
 depend: [TAB]
 softdepend: [PlaceholderAPI]
 author: Tanguygab
