@@ -50,20 +50,23 @@ public class BukkitEvents implements Listener {
         Player p = e.getPlayer();
         TabPlayer pTAB = TABAPI.getPlayer(p.getUniqueId());
 
-        pTAB.loadPropertyFromConfig("actionbar");
-        String actionbar = actionbarConfig.getString("bars." + pTAB.getProperty("actionbar").get(), "");
-        actionbar = Shared.platform.replaceAllPlaceholders(actionbar, pTAB);
-        p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(actionbar).create());
-
-        pTAB.loadPropertyFromConfig("title");
-        ConfigurationSection tSection = titleConfig.getConfigurationSection("titles." + pTAB.getProperty("title").get());
-        if (tSection != null) {
-            String title = Shared.platform.replaceAllPlaceholders(tSection.getString("title", ""), pTAB);
-            String subtitle = Shared.platform.replaceAllPlaceholders(tSection.getString("subtitle", ""), pTAB);
-            int fadeIn = tSection.getInt("fadein", 5);
-            int stay = tSection.getInt("stay", 20);
-            int fadeOut = tSection.getInt("fadeout", 5);
-            p.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+        if (config.getBoolean("features.actionbars")) {
+            pTAB.loadPropertyFromConfig("actionbar");
+            String actionbar = actionbarConfig.getString("bars." + pTAB.getProperty("actionbar").get(), "");
+            actionbar = Shared.platform.replaceAllPlaceholders(actionbar, pTAB);
+            p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(actionbar).create());
+        }
+        if (config.getBoolean("features.titles")) {
+            pTAB.loadPropertyFromConfig("title");
+            ConfigurationSection tSection = titleConfig.getConfigurationSection("titles." + pTAB.getProperty("title").get());
+            if (tSection != null) {
+                String title = Shared.platform.replaceAllPlaceholders(tSection.getString("title", ""), pTAB);
+                String subtitle = Shared.platform.replaceAllPlaceholders(tSection.getString("subtitle", ""), pTAB);
+                int fadeIn = tSection.getInt("fadein", 5);
+                int stay = tSection.getInt("stay", 20);
+                int fadeOut = tSection.getInt("fadeout", 5);
+                p.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+            }
         }
 
     }
