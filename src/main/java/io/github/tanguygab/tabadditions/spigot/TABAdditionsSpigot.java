@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.spigot;
 
-import io.github.tanguygab.tabadditions.bungee.TABAdditionsBungeeCord;
 import io.github.tanguygab.tabadditions.shared.commands.*;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -81,20 +80,23 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         chatformats.clear();
         chatformats.addAll(chatConfig.getConfigurationSection("chat-formats").getKeys(false));
         HandlerList.unregisterAll(this);
-        Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(config,titleConfig,actionbarConfig,chatConfig), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(this, config, titleConfig, actionbarConfig, chatConfig), this);
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new TABAdditionsExpansion(this).register();
         }
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             TabPlayer pTAB = TABAPI.getPlayer(p.getUniqueId());
-            pTAB.loadPropertyFromConfig("title");
-            pTAB.loadPropertyFromConfig("actionbar");
-            pTAB.loadPropertyFromConfig("chatprefix");
-            pTAB.loadPropertyFromConfig("customchatname", pTAB.getName());
-            pTAB.loadPropertyFromConfig("chatsuffix");
+            loadProps(pTAB);
         }
 
+    }
+    public void loadProps(TabPlayer pTAB) {
+        pTAB.loadPropertyFromConfig("title");
+        pTAB.loadPropertyFromConfig("actionbar");
+        pTAB.loadPropertyFromConfig("chatprefix");
+        pTAB.loadPropertyFromConfig("customchatname", pTAB.getName());
+        pTAB.loadPropertyFromConfig("chatsuffix");
     }
 
     @Override

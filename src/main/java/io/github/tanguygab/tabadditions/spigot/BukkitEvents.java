@@ -17,20 +17,27 @@ import org.bukkit.event.Listener;
 import org.bukkit.entity.Player;
 import me.neznamy.tab.api.event.BukkitTABLoadEvent;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.TimeUnit;
+
 
 public class BukkitEvents implements Listener {
 
+    private final TABAdditionsSpigot plugin;
     private final FileConfiguration config;
     private final FileConfiguration titleConfig;
     private final FileConfiguration actionbarConfig;
     private final FileConfiguration chatConfig;
-    private boolean tag = false;
+    private Map<TabPlayer, Boolean> tag = new HashMap<>();
 
-    public BukkitEvents(FileConfiguration config, FileConfiguration titleConfig, FileConfiguration actionbarConfig, FileConfiguration chatConfig) {
+
+    public BukkitEvents(TABAdditionsSpigot plugin, FileConfiguration config, FileConfiguration titleConfig, FileConfiguration actionbarConfig, FileConfiguration chatConfig) {
         this.config = config;
         this.titleConfig = titleConfig;
         this.actionbarConfig = actionbarConfig;
         this.chatConfig = chatConfig;
+        this.plugin = plugin;
     }
 
     @EventHandler
@@ -39,12 +46,12 @@ public class BukkitEvents implements Listener {
         boolean sneak = e.isSneaking();
         TabPlayer p = TABAPI.getPlayer(e.getPlayer().getUniqueId());
         if (sneak) {
-            tag = p.hasHiddenNametag();
+            tag.put(p,p.hasHiddenNametag());
             if (config.getBoolean("features.sneak-hide-nametags"))
                 p.hideNametag();
         }
         else
-            if (!tag)
+            if (!tag.get(p))
                 p.showNametag();
 
     }
@@ -53,7 +60,7 @@ public class BukkitEvents implements Listener {
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
         TabPlayer pTAB = TABAPI.getPlayer(p.getUniqueId());
-
+        plugin.loadProps(pTAB);
         if (config.getBoolean("features.actionbars")) {
             String actionbar = actionbarConfig.getString("bars." + pTAB.getProperty("actionbar").get(), "");
             actionbar = Shared.platform.replaceAllPlaceholders(actionbar, pTAB);
