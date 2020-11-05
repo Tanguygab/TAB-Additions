@@ -2,3 +2,4 @@ features:
   sneak-hide-nametags: false
   titles: false
   actionbars: false
+  chat: false

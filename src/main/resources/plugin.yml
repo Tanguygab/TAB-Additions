@@ -10,4 +10,4 @@ commands:
   tabadditions:
     usage: /command
     permission: tabadditions.admin
-    aliases: [taba,tabaddon,tab+,tabadditt]
+    aliases: [taba,tabaddon,tab+,tabaddition]

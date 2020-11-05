@@ -1,17 +1,17 @@
 package io.github.tanguygab.tabadditions.spigot;
 
-import io.github.tanguygab.tabadditions.spigot.commands.ActionBarCmd;
-import io.github.tanguygab.tabadditions.spigot.commands.HelpCmd;
-import io.github.tanguygab.tabadditions.spigot.commands.TagsCmd;
-import io.github.tanguygab.tabadditions.spigot.commands.TitleCmd;
+import io.github.tanguygab.tabadditions.bungee.TABAdditionsBungeeCord;
+import io.github.tanguygab.tabadditions.shared.commands.*;
 import me.neznamy.tab.api.TABAPI;
-import me.neznamy.tab.shared.Shared;
-import net.md_5.bungee.api.ChatColor;
+import me.neznamy.tab.api.TabPlayer;
 
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -27,17 +27,19 @@ import java.util.Arrays;
 import java.util.List;
 
 
-
 public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, TabCompleter {
 
-    public FileConfiguration config;
-    public FileConfiguration titleConfig;
-    public FileConfiguration actionbarConfig;
-    File titleFile = new File(getDataFolder(), "titles.yml");
-    File actionbarFile = new File(getDataFolder(), "actionbars.yml");
+    private FileConfiguration config;
+    private FileConfiguration titleConfig;
+    private FileConfiguration actionbarConfig;
+    private FileConfiguration chatConfig;
+    private final File titleFile = new File(getDataFolder(), "titles.yml");
+    private final File actionbarFile = new File(getDataFolder(), "actionbars.yml");
+    private final File chatFile = new File(getDataFolder(), "chat.yml");
 
-    List<String> titles = new ArrayList<>();
-    List<String> actionbars = new ArrayList<>();
+    private final List<String> titles = new ArrayList<>();
+    private final List<String> actionbars = new ArrayList<>();
+    private final List<String> chatformats = new ArrayList<>();
 
     @Override
     public void onEnable() {reload();}
@@ -50,9 +52,12 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
             saveResource("titles.yml", false);
         if (!actionbarFile.exists())
             saveResource("actionbars.yml", false);
+        if (!chatFile.exists())
+            saveResource("chat.yml", false);
 
         titleConfig = new YamlConfiguration();
-        actionbarConfig = new YamlConfiguration();
+        actionbarConfig = new YamlConfiguration();;
+        chatConfig = new YamlConfiguration();
         try {
             titleConfig.load(titleFile);
         } catch (IOException | InvalidConfigurationException e) {
@@ -63,14 +68,32 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
+        try {
+            chatConfig.load(chatFile);
+        } catch (IOException | InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
 
         titles.clear();
         titles.addAll(titleConfig.getConfigurationSection("titles").getKeys(false));
         actionbars.clear();
         actionbars.addAll(actionbarConfig.getConfigurationSection("bars").getKeys(false));
+        chatformats.clear();
+        chatformats.addAll(chatConfig.getConfigurationSection("chat-formats").getKeys(false));
         HandlerList.unregisterAll(this);
-        Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(config,titleConfig,actionbarConfig), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(config,titleConfig,actionbarConfig,chatConfig), this);
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new TABAdditionsExpansion(this).register();
+        }
 
+        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+            TabPlayer pTAB = TABAPI.getPlayer(p.getUniqueId());
+            pTAB.loadPropertyFromConfig("title");
+            pTAB.loadPropertyFromConfig("actionbar");
+            pTAB.loadPropertyFromConfig("chatprefix");
+            pTAB.loadPropertyFromConfig("customchatname", pTAB.getName());
+            pTAB.loadPropertyFromConfig("chatsuffix");
+        }
 
     }
 
@@ -79,8 +102,10 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        if (!(sender instanceof Player)) return true;
+        TabPlayer pTAB = TABAPI.getPlayer(sender.getName());
         if (args.length < 1 || args[0].toLowerCase().equals("help"))
-            new HelpCmd(sender, this.getDescription().getVersion());
+            new HelpCmd(pTAB, this.getDescription().getVersion());
         else
             switch (args[0].toLowerCase()) {
                 case "reload": {
@@ -89,21 +114,45 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "actionbar": {
-                    if (config.getBoolean("features.actionbars")) new ActionBarCmd(sender, args, actionbarConfig);
-                    else sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cActionbar feature is not enabled, therefore this command cannot be used"));
+                    if (!config.getBoolean("features.actionbars"))
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cActionbar feature is not enabled, therefore this command cannot be used"));
+                    else if (args.length < 2)
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cYou have to provide an actionbar!"));
+                    else {
+                        ConfigurationSection section = actionbarConfig.getConfigurationSection("bars.");
+                        if (!section.contains(args[1]))
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cThis actionbar doesn't exist!"));
+                        else
+                            new ActionBarCmd(pTAB, args, section.getString(args[1]));
+                    }
                     break;
                 }
                 case "title": {
-                    if (config.getBoolean("features.titles")) new TitleCmd(sender, args, titleConfig);
-                    else sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cTitle feature is not enabled, therefore this command cannot be used"));
+                    if (!config.getBoolean("features.titles"))
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cTitle feature is not enabled, therefore this command cannot be used"));
+                    else if (args.length < 2)
+                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cYou have to provide a title!"));
+                    else {
+                        ConfigurationSection titleSection = titleConfig.getConfigurationSection("titles."+args[1]);
+                        if (titleSection == null) {
+                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cThis title doesn't exist!"));
+                        }
+                        else {
+                            List<String> titleProperties = new ArrayList<>();
+                            for (String property : titleSection.getKeys(false))
+                                titleProperties.add(titleSection.getString(property));
+                            new TitleCmd(pTAB, args, titleProperties);
+                        }
+                    }
                     break;
                 }
                 case "tags": {
-                    new TagsCmd(sender, args);
+                    new TagsCmd(pTAB, args);
                     break;
                 }
                 case "test": {
                     sender.sendMessage("Nothing to see here :D");
+                    break;
                 }
             }
         return true;

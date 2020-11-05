@@ -1,0 +1,20 @@
+chat-formats:
+  Range:
+    condition: 'inRange.100'
+    text: ""
+    hover: ""
+    channel: Range
+  VIP:
+    condition: 'player.hasPermission("group.vip")'
+    text: ""
+    hover: ""
+    channel: Private
+  _OTHER_:
+    condition: true
+    text: "_OTHER_ text test"
+    hover: ""
+    channel: global
+channels:
+  global: public
+  Range: private
+  Private: private

@@ -4,16 +4,18 @@ import me.neznamy.tab.api.TABAPI;
 
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.Shared;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.chat.ComponentBuilder;
+import me.neznamy.tab.shared.packets.PacketPlayOutChat;
+import me.neznamy.tab.shared.packets.PacketPlayOutTitle;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.entity.Player;
+import me.neznamy.tab.api.event.BukkitTABLoadEvent;
 
 
 public class BukkitEvents implements Listener {
@@ -21,27 +23,29 @@ public class BukkitEvents implements Listener {
     private final FileConfiguration config;
     private final FileConfiguration titleConfig;
     private final FileConfiguration actionbarConfig;
+    private final FileConfiguration chatConfig;
     private boolean tag = false;
 
-    public BukkitEvents(FileConfiguration config, FileConfiguration titleConfig, FileConfiguration actionbarConfig) {
+    public BukkitEvents(FileConfiguration config, FileConfiguration titleConfig, FileConfiguration actionbarConfig, FileConfiguration chatConfig) {
         this.config = config;
         this.titleConfig = titleConfig;
         this.actionbarConfig = actionbarConfig;
+        this.chatConfig = chatConfig;
     }
 
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent e) {
 
         boolean sneak = e.isSneaking();
-        Player p = e.getPlayer();
+        TabPlayer p = TABAPI.getPlayer(e.getPlayer().getUniqueId());
         if (sneak) {
-            tag = TABAPI.hasHiddenNametag(p.getUniqueId());
+            tag = p.hasHiddenNametag();
             if (config.getBoolean("features.sneak-hide-nametags"))
-                TABAPI.hideNametag(p.getUniqueId());
+                p.hideNametag();
         }
         else
             if (!tag)
-                TABAPI.showNametag(p.getUniqueId());
+                p.showNametag();
 
     }
 
@@ -51,13 +55,11 @@ public class BukkitEvents implements Listener {
         TabPlayer pTAB = TABAPI.getPlayer(p.getUniqueId());
 
         if (config.getBoolean("features.actionbars")) {
-            pTAB.loadPropertyFromConfig("actionbar");
             String actionbar = actionbarConfig.getString("bars." + pTAB.getProperty("actionbar").get(), "");
             actionbar = Shared.platform.replaceAllPlaceholders(actionbar, pTAB);
-            p.spigot().sendMessage(ChatMessageType.ACTION_BAR, new ComponentBuilder(actionbar).create());
+            pTAB.sendCustomPacket(new PacketPlayOutChat(actionbar, PacketPlayOutChat.ChatMessageType.GAME_INFO));
         }
         if (config.getBoolean("features.titles")) {
-            pTAB.loadPropertyFromConfig("title");
             ConfigurationSection tSection = titleConfig.getConfigurationSection("titles." + pTAB.getProperty("title").get());
             if (tSection != null) {
                 String title = Shared.platform.replaceAllPlaceholders(tSection.getString("title", ""), pTAB);
@@ -65,9 +67,31 @@ public class BukkitEvents implements Listener {
                 int fadeIn = tSection.getInt("fadein", 5);
                 int stay = tSection.getInt("stay", 20);
                 int fadeOut = tSection.getInt("fadeout", 5);
-                p.sendTitle(title, subtitle, fadeIn, stay, fadeOut);
+                pTAB.sendCustomPacket(PacketPlayOutTitle.TITLE(title));
+                pTAB.sendCustomPacket(PacketPlayOutTitle.SUBTITLE(subtitle));
+                pTAB.sendCustomPacket(PacketPlayOutTitle.TIMES(fadeIn,stay,fadeOut));
             }
         }
+    }
 
+    @EventHandler
+    public void onChat(AsyncPlayerChatEvent e) {
+        if (config.getBoolean("features.chat")) {
+            TabPlayer p = TABAPI.getPlayer(e.getPlayer().getUniqueId());
+            String msg = e.getMessage();
+            ConfigurationSection formats = chatConfig.getConfigurationSection("chat-formats");
+            assert formats != null;
+            String format = formats.getString("_OTHER_.text");
+
+            format = Shared.platform.replaceAllPlaceholders(format, p).replaceAll("%msg%", msg);
+
+            p.sendCustomPacket(new PacketPlayOutChat(format, PacketPlayOutChat.ChatMessageType.CHAT));
+            e.setCancelled(true);
+        }
+
+    }
+    @EventHandler
+    public void onTABLoad(BukkitTABLoadEvent e) {
+        TABAdditionsSpigot.getPlugin(TABAdditionsSpigot.class).reload();
     }
 }
