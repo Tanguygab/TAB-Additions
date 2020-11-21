@@ -1,11 +1,9 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
+import io.github.tanguygab.tabadditions.shared.Shared;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Shared;
-import me.neznamy.tab.shared.packets.PacketPlayOutChat;
 import me.neznamy.tab.shared.packets.PacketPlayOutTitle;
-import net.md_5.bungee.api.ChatColor;
 
 import java.util.List;
 
@@ -23,11 +21,11 @@ public class TitleCmd {
             p = TABAPI.getPlayer(args[2]);
 
         if (p == null) {
-            sender.sendCustomPacket(new PacketPlayOutChat(ChatColor.translateAlternateColorCodes('&', "&cThis player isn't connected!"), PacketPlayOutChat.ChatMessageType.CHAT));
+            sender.sendMessage("&cThis player isn't connected!",true);
             return;
         }
-        title = Shared.platform.replaceAllPlaceholders(title, p);
-        subtitle = Shared.platform.replaceAllPlaceholders(subtitle, p);
+        title = new Shared().parsePlaceholders(p,title);
+        subtitle = new Shared().parsePlaceholders(p,subtitle);
         p.sendCustomPacket(PacketPlayOutTitle.TITLE(title));
         p.sendCustomPacket(PacketPlayOutTitle.SUBTITLE(subtitle));
         p.sendCustomPacket(PacketPlayOutTitle.TIMES(fadeIn,stay,fadeOut));

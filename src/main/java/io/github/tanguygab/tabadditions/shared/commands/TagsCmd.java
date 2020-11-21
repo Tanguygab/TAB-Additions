@@ -2,24 +2,22 @@ package io.github.tanguygab.tabadditions.shared.commands;
 
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.packets.PacketPlayOutChat;
-import net.md_5.bungee.api.ChatColor;
 
 public class TagsCmd {
     public TagsCmd(TabPlayer sender, String[] args) {
         if (args.length < 2) {
-            sender.sendCustomPacket(new PacketPlayOutChat(ChatColor.translateAlternateColorCodes('&', "&cYou have to specify &4hide&c, &4show &cor &4toggle &cand a player."), PacketPlayOutChat.ChatMessageType.CHAT));
+            sender.sendMessage("&cYou have to specify &4hide&c, &4show &cor &4toggle &cand a player.",true);
             return;
         }
         if (args.length < 3) {
-            sender.sendCustomPacket(new PacketPlayOutChat(ChatColor.translateAlternateColorCodes('&', "&cYou didn't provide a player!"), PacketPlayOutChat.ChatMessageType.CHAT));
+            sender.sendMessage("&cYou didn't provide a player!",true);
             return;
         }
 
         TabPlayer p = TABAPI.getPlayer(args[2]);
 
         if (p == null) {
-            sender.sendCustomPacket(new PacketPlayOutChat(ChatColor.translateAlternateColorCodes('&', "&cThis player isn't connected"), PacketPlayOutChat.ChatMessageType.CHAT));
+            sender.sendMessage("&cThis player isn't connected",true);
             return;
         }
 

@@ -59,6 +59,7 @@ public class BukkitEvents implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
+        Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(plugin, () -> {
         TabPlayer pTAB = TABAPI.getPlayer(p.getUniqueId());
         plugin.loadProps(pTAB);
         if (config.getBoolean("features.actionbars")) {
@@ -79,6 +80,7 @@ public class BukkitEvents implements Listener {
                 pTAB.sendCustomPacket(PacketPlayOutTitle.TIMES(fadeIn,stay,fadeOut));
             }
         }
+        }, 1);
     }
 
     @EventHandler

@@ -73,8 +73,4 @@ public final class TABAdditionsBungeeCord extends Plugin {
         actionbarConfig = ConfigurationProvider.getProvider(YamlConfiguration.class).load(new File(getDataFolder(), "actionbars.yml"));
     }
 
-
-    @Override
-    public void onDisable() {}
-
 }

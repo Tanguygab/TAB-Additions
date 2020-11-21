@@ -30,18 +30,18 @@ public class MainCmd extends Command {
                 case "reload": {
                     try {TABAdditionsBungeeCord.class.getMethod("reload");}
                     catch (NoSuchMethodException e) {e.printStackTrace();}
-                    sender.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&',"&aConfig reloaded!")));
+                    pTAB.sendMessage("&aConfig reloaded!",true);
                     break;
                 }
                 case "actionbar": {
                     if (!TABAdditionsBungeeCord.config.getBoolean("features.actionbars"))
-                        sender.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&',"&cActionbar feature is not enabled, therefore this command cannot be used")));
+                        pTAB.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
-                        sender.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&cYou have to provide an actionbar!")));
+                        pTAB.sendMessage("&cYou have to provide an actionbar!",true);
                     else {
                         Configuration section = TABAdditionsBungeeCord.actionbarConfig.getSection("bars");
                         if (!section.contains(args[1]))
-                            sender.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&cThis actionbar doesn't exist!")));
+                            pTAB.sendMessage("&cThis actionbar doesn't exist!",true);
                         else
                             new ActionBarCmd(pTAB, args, ChatColor.translateAlternateColorCodes('&', section.getString(args[1])));
                     }
@@ -49,13 +49,13 @@ public class MainCmd extends Command {
                 }
                 case "title": {
                     if (!TABAdditionsBungeeCord.config.getBoolean("features.titles"))
-                        sender.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&',"&cTitle feature is not enabled, therefore this command cannot be used")));
+                        pTAB.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
-                        sender.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&cYou have to provide a title!")));
+                        pTAB.sendMessage("&cYou have to provide a title!",true);
                     else {
                         Configuration titleSection = TABAdditionsBungeeCord.titleConfig.getSection("titles."+args[1]);
                         if (titleSection.getKeys().isEmpty()) {
-                            sender.sendMessage(new TextComponent(ChatColor.translateAlternateColorCodes('&', "&cThis title doesn't exist!")));
+                            pTAB.sendMessage("&cThis title doesn't exist!",true);
                         }
                         else {
                             List<String> titleProperties = new ArrayList<>();
@@ -79,7 +79,7 @@ public class MainCmd extends Command {
                     break;
                 }
                 case "test": {
-                    sender.sendMessage(new TextComponent("Nothing to see here :D"));
+                    pTAB.sendMessage("&7Nothing to see here :D",true);
                 }
             }
     }

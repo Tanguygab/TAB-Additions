@@ -1,10 +1,9 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
+import io.github.tanguygab.tabadditions.shared.Shared;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Shared;
 import me.neznamy.tab.shared.packets.PacketPlayOutChat;
-import net.md_5.bungee.api.ChatColor;
 
 public class ActionBarCmd {
 
@@ -15,10 +14,10 @@ public class ActionBarCmd {
             p = TABAPI.getPlayer(args[2]);
 
         if (p == null) {
-            sender.sendCustomPacket(new PacketPlayOutChat(ChatColor.translateAlternateColorCodes('&', "&cThis player isn't connected"), PacketPlayOutChat.ChatMessageType.CHAT));
+            sender.sendMessage("&cThis player isn't connected",true);
             return;
         }
-        actionbar = Shared.platform.replaceAllPlaceholders(actionbar, p);
+        actionbar = new Shared().parsePlaceholders(p,actionbar);
         p.sendCustomPacket(new PacketPlayOutChat(actionbar, PacketPlayOutChat.ChatMessageType.GAME_INFO));
     }
 }

@@ -5,7 +5,6 @@ import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -99,8 +98,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         pTAB.loadPropertyFromConfig("chatsuffix");
     }
 
-    @Override
-    public void onDisable() {}
+
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -112,18 +110,18 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
             switch (args[0].toLowerCase()) {
                 case "reload": {
                     reload();
-                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&aConfig reloaded!"));
+                    pTAB.sendMessage("&aConfig reloaded!",true);
                     break;
                 }
                 case "actionbar": {
                     if (!config.getBoolean("features.actionbars"))
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cActionbar feature is not enabled, therefore this command cannot be used"));
+                        pTAB.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cYou have to provide an actionbar!"));
+                        pTAB.sendMessage("&cYou have to provide an actionbar!",true);
                     else {
                         ConfigurationSection section = actionbarConfig.getConfigurationSection("bars.");
                         if (!section.contains(args[1]))
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cThis actionbar doesn't exist!"));
+                            pTAB.sendMessage("&cThis actionbar doesn't exist!",true);
                         else
                             new ActionBarCmd(pTAB, args, section.getString(args[1]));
                     }
@@ -131,13 +129,13 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 }
                 case "title": {
                     if (!config.getBoolean("features.titles"))
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cTitle feature is not enabled, therefore this command cannot be used"));
+                        pTAB.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
-                        sender.sendMessage(ChatColor.translateAlternateColorCodes('&',"&cYou have to provide a title!"));
+                        pTAB.sendMessage("&cYou have to provide a title!",true);
                     else {
                         ConfigurationSection titleSection = titleConfig.getConfigurationSection("titles."+args[1]);
                         if (titleSection == null) {
-                            sender.sendMessage(ChatColor.translateAlternateColorCodes('&', "&cThis title doesn't exist!"));
+                            pTAB.sendMessage("&cThis title doesn't exist!",true);
                         }
                         else {
                             List<String> titleProperties = new ArrayList<>();
@@ -153,7 +151,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "test": {
-                    sender.sendMessage("Nothing to see here :D");
+                    pTAB.sendMessage("&7Nothing to see here :D",true);
                     break;
                 }
             }

@@ -11,7 +11,7 @@ chat-formats:
     channel: Private
   _OTHER_:
     condition: true
-    text: "_OTHER_ text test"
+    text: "%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%>> %msg%"
     hover: ""
     channel: global
 channels:
