@@ -127,43 +127,53 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
             new HelpCmd(p, this.getDescription().getVersion());
         else
             switch (args[0].toLowerCase()) {
-                case "reload" -> {
+                case "reload": {
                     reload();
-                    p.sendMessage("&aConfig reloaded!", true);
+                    p.sendMessage("&aConfig reloaded!",true);
+                    break;
                 }
-                case "actionbar" -> {
+                case "actionbar": {
                     if (!config.getBoolean("features.actionbars"))
-                        p.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used", true);
+                        p.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
-                        p.sendMessage("&cYou have to provide an actionbar!", true);
+                        p.sendMessage("&cYou have to provide an actionbar!",true);
                     else {
                         ConfigurationSection section = actionbarConfig.getConfigurationSection("bars.");
                         assert section != null;
                         if (!section.contains(args[1]))
-                            p.sendMessage("&cThis actionbar doesn't exist!", true);
+                            p.sendMessage("&cThis actionbar doesn't exist!",true);
                         else
                             new ActionBarCmd(p, args, section.getString(args[1]));
                     }
+                    break;
                 }
-                case "title" -> {
+                case "title": {
                     if (!config.getBoolean("features.titles"))
-                        p.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used", true);
+                        p.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
-                        p.sendMessage("&cYou have to provide a title!", true);
+                        p.sendMessage("&cYou have to provide a title!",true);
                     else {
-                        ConfigurationSection titleSection = titleConfig.getConfigurationSection("titles." + args[1]);
+                        ConfigurationSection titleSection = titleConfig.getConfigurationSection("titles."+args[1]);
                         if (titleSection == null) {
-                            p.sendMessage("&cThis title doesn't exist!", true);
-                        } else {
+                            p.sendMessage("&cThis title doesn't exist!",true);
+                        }
+                        else {
                             List<String> titleProperties = new ArrayList<>();
                             for (String property : titleSection.getKeys(false))
                                 titleProperties.add(titleSection.getString(property));
                             new TitleCmd(p, args, titleProperties);
                         }
                     }
+                    break;
                 }
-                case "tags" -> new TagsCmd(p, args);
-                case "test" -> p.sendMessage("&7Nothing to see here :D", true);
+                case "tags": {
+                    new TagsCmd(p, args);
+                    break;
+                }
+                case "test": {
+                    p.sendMessage("&7Nothing to see here :D",true);
+                    break;
+                }
             }
         return true;
     }
