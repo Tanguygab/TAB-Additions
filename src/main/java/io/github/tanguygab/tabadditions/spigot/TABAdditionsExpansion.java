@@ -3,7 +3,6 @@ package io.github.tanguygab.tabadditions.spigot;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Property;
 import org.bukkit.entity.Player;
 
 public class TABAdditionsExpansion extends PlaceholderExpansion {

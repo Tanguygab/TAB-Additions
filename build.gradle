@@ -5,9 +5,6 @@ apply plugin: 'java'
 group = 'io.github.tanguygab'
 version = '1.1'
 
-sourceCompatibility = '1.8'
-targetCompatibility = '1.8'
-
 repositories {
     mavenCentral()
     maven {
@@ -18,12 +15,18 @@ repositories {
         name = 'spigotmc-repo'
         url = 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
     }
+    maven {
+        name = 'placeholderapi'
+        url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
+    }
 }
 
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.16.3-R0.1-SNAPSHOT'
     compile files('../TAB.jar')
+    compile files('../SuperSkinAPI.jar')
     compileOnly 'net.md-5:bungeecord-api:1.16-R0.3'
+    compileOnly 'me.clip:placeholderapi:2.10.9'
 
 }
 

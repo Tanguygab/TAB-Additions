@@ -4,6 +4,7 @@ import io.github.tanguygab.tabadditions.shared.commands.*;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 
+import me.neznamy.tab.shared.Shared;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
@@ -20,9 +21,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, TabCompleter {
@@ -31,16 +30,24 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     private FileConfiguration titleConfig;
     private FileConfiguration actionbarConfig;
     private FileConfiguration chatConfig;
+    private FileConfiguration layoutConfig;
     private final File titleFile = new File(getDataFolder(), "titles.yml");
     private final File actionbarFile = new File(getDataFolder(), "actionbars.yml");
     private final File chatFile = new File(getDataFolder(), "chat.yml");
+    private final File layoutFile = new File(getDataFolder(), "layout.yml");
 
     private final List<String> titles = new ArrayList<>();
     private final List<String> actionbars = new ArrayList<>();
     private final List<String> chatformats = new ArrayList<>();
 
     @Override
-    public void onEnable() {reload();}
+    public void onEnable() {
+        reload();
+    }
+
+    @Override
+    public void onDisable() {
+        Layout.removeAll();}
 
     public void reload() {
         saveDefaultConfig();
@@ -52,10 +59,13 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
             saveResource("actionbars.yml", false);
         if (!chatFile.exists())
             saveResource("chat.yml", false);
+        if (!layoutFile.exists())
+            saveResource("layout.yml", false);
 
         titleConfig = new YamlConfiguration();
-        actionbarConfig = new YamlConfiguration();;
+        actionbarConfig = new YamlConfiguration();
         chatConfig = new YamlConfiguration();
+        layoutConfig = new YamlConfiguration();
         try {
             titleConfig.load(titleFile);
         } catch (IOException | InvalidConfigurationException e) {
@@ -71,6 +81,11 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
+        try {
+            layoutConfig.load(layoutFile);
+        } catch (IOException | InvalidConfigurationException e) {
+            e.printStackTrace();
+        }
 
         titles.clear();
         titles.addAll(titleConfig.getConfigurationSection("titles").getKeys(false));
@@ -78,18 +93,23 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         actionbars.addAll(actionbarConfig.getConfigurationSection("bars").getKeys(false));
         chatformats.clear();
         chatformats.addAll(chatConfig.getConfigurationSection("chat-formats").getKeys(false));
+
         HandlerList.unregisterAll(this);
-        Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(this, config, titleConfig, actionbarConfig, chatConfig), this);
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(this, config, titleConfig, actionbarConfig, chatConfig,layoutConfig), this);
+
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
             new TABAdditionsExpansion(this).register();
-        }
 
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             TabPlayer pTAB = TABAPI.getPlayer(p.getUniqueId());
             loadProps(pTAB);
         }
+        Layout.removeAll();
+        new Layout(layoutConfig,this);
+        Layout.addAll();
 
     }
+
     public void loadProps(TabPlayer pTAB) {
         pTAB.loadPropertyFromConfig("title");
         pTAB.loadPropertyFromConfig("actionbar");
@@ -99,61 +119,51 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     }
 
 
-
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) return true;
-        TabPlayer pTAB = TABAPI.getPlayer(sender.getName());
+        TabPlayer p = TABAPI.getPlayer(sender.getName());
         if (args.length < 1 || args[0].toLowerCase().equals("help"))
-            new HelpCmd(pTAB, this.getDescription().getVersion());
+            new HelpCmd(p, this.getDescription().getVersion());
         else
             switch (args[0].toLowerCase()) {
-                case "reload": {
+                case "reload" -> {
                     reload();
-                    pTAB.sendMessage("&aConfig reloaded!",true);
-                    break;
+                    p.sendMessage("&aConfig reloaded!", true);
                 }
-                case "actionbar": {
+                case "actionbar" -> {
                     if (!config.getBoolean("features.actionbars"))
-                        pTAB.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
+                        p.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used", true);
                     else if (args.length < 2)
-                        pTAB.sendMessage("&cYou have to provide an actionbar!",true);
+                        p.sendMessage("&cYou have to provide an actionbar!", true);
                     else {
                         ConfigurationSection section = actionbarConfig.getConfigurationSection("bars.");
+                        assert section != null;
                         if (!section.contains(args[1]))
-                            pTAB.sendMessage("&cThis actionbar doesn't exist!",true);
+                            p.sendMessage("&cThis actionbar doesn't exist!", true);
                         else
-                            new ActionBarCmd(pTAB, args, section.getString(args[1]));
+                            new ActionBarCmd(p, args, section.getString(args[1]));
                     }
-                    break;
                 }
-                case "title": {
+                case "title" -> {
                     if (!config.getBoolean("features.titles"))
-                        pTAB.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
+                        p.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used", true);
                     else if (args.length < 2)
-                        pTAB.sendMessage("&cYou have to provide a title!",true);
+                        p.sendMessage("&cYou have to provide a title!", true);
                     else {
-                        ConfigurationSection titleSection = titleConfig.getConfigurationSection("titles."+args[1]);
+                        ConfigurationSection titleSection = titleConfig.getConfigurationSection("titles." + args[1]);
                         if (titleSection == null) {
-                            pTAB.sendMessage("&cThis title doesn't exist!",true);
-                        }
-                        else {
+                            p.sendMessage("&cThis title doesn't exist!", true);
+                        } else {
                             List<String> titleProperties = new ArrayList<>();
                             for (String property : titleSection.getKeys(false))
                                 titleProperties.add(titleSection.getString(property));
-                            new TitleCmd(pTAB, args, titleProperties);
+                            new TitleCmd(p, args, titleProperties);
                         }
                     }
-                    break;
                 }
-                case "tags": {
-                    new TagsCmd(pTAB, args);
-                    break;
-                }
-                case "test": {
-                    pTAB.sendMessage("&7Nothing to see here :D",true);
-                    break;
-                }
+                case "tags" -> new TagsCmd(p, args);
+                case "test" -> p.sendMessage("&7Nothing to see here :D", true);
             }
         return true;
     }

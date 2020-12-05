@@ -3,3 +3,4 @@ features:
   titles: false
   actionbars: false
   chat: false
+  layout: false
