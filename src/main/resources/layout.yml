@@ -1,0 +1,57 @@
+
+layouts:
+    Lobby:
+      shape:
+        - '- Welcome PlayerName -'
+        - '&m &m &m &m'
+        - '- PlayersText FactionPlayersText -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '- Players FactionPlayers -'
+        - '&m &m &m &m'
+      slots:
+        "-":
+          type: "TEXT"
+          icon: EMPTY
+          text: "-"
+        "&m":
+          type: "TEXT"
+          icon: EMPTY
+          text: "&8&m                "
+        Welcome:
+          type: TEXT
+          icon: PLAYER-HEAD:Tanguygab
+          text: "&2Welcome"
+        PlayerName:
+          type: TEXT
+          icon: PLAYER-HEAD:%player%
+          text: "&a%player%"
+        PlayersText:
+          type: TEXT
+          icon: EMPTY
+          text: "&6Players:"
+        StaffText:
+          type: TEXT
+          icon: EMPTY
+          text: "&6Staff:"
+        Players:
+          type: PLAYERS
+          text: "%tab_tabprefix%%player%%tab_tabsuffix%"
+        Staff:
+          type: PLAYERS
+          text: "%tab_tabprefix%%player%%tab_tabsuffix%"
+          condition: "staff"
