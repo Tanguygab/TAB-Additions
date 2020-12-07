@@ -5,7 +5,6 @@ import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 
 import me.neznamy.tab.premium.Premium;
-import me.neznamy.tab.shared.Shared;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.configuration.ConfigurationSection;
@@ -79,16 +78,6 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
-        if (Premium.is()) {
-            if (!layoutFile.exists())
-                saveResource("layout.yml", false);
-            layoutConfig = new YamlConfiguration();
-            try {
-                layoutConfig.load(layoutFile);
-            } catch (IOException | InvalidConfigurationException e) {
-                e.printStackTrace();
-            }
-        }
 
         titles.clear();
         titles.addAll(titleConfig.getConfigurationSection("titles").getKeys(false));
@@ -107,10 +96,20 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
             TabPlayer pTAB = TABAPI.getPlayer(p.getUniqueId());
             loadProps(pTAB);
         }
-        Layout.removeAll();
-        new Layout(layoutConfig,this);
-        Layout.addAll();
+        if (Premium.is()) {
+            if (!layoutFile.exists())
+                saveResource("layout.yml", false);
+            layoutConfig = new YamlConfiguration();
+            try {
+                layoutConfig.load(layoutFile);
+            } catch (IOException | InvalidConfigurationException e) {
+                e.printStackTrace();
+            }
 
+            Layout.removeAll();
+            new Layout(layoutConfig,this);
+            Layout.addAll();
+        }
     }
 
     public void loadProps(TabPlayer pTAB) {

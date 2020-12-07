@@ -3,6 +3,7 @@ package io.github.tanguygab.tabadditions.spigot;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.premium.Premium;
+import me.neznamy.tab.premium.conditions.Condition;
 import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.Shared;
 import me.neznamy.tab.shared.config.Configs;
@@ -29,6 +30,8 @@ public class Layout {
         if (!Premium.is()) return;
         Layout.config = config;
         Layout.plugin = plugin;
+        fakeplayers.clear();
+        placeholders.clear();
         create();
         refresh();
     }
@@ -36,6 +39,7 @@ public class Layout {
     private static void refresh() {
         //placeholders
         Bukkit.getScheduler().scheduleAsyncRepeatingTask(plugin, () -> {
+
             for (TabPlayer p : Shared.getPlayers()) {
                 if (!placeholders.isEmpty())
                     for (Integer i : placeholders) {
@@ -47,10 +51,10 @@ public class Layout {
                         text = Shared.platform.replaceAllPlaceholders(text, p);
 
                         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(text))));
-                        //PacketAPI.removeScoreboardScore(p, fp.name, "TAB-YellowNumber");
+                        PacketAPI.removeScoreboardScore(p, fp.name, "TAB-YellowNumber");
                     }
             }
-        }, 0L,20L);
+        }, 0L, 20L);
 
         //player sets
         Bukkit.getScheduler().scheduleAsyncRepeatingTask(plugin, () -> {
@@ -87,9 +91,8 @@ public class Layout {
                         }
                     }
 
-
             }
-        }, 0L,20L);
+        }, 0L,10L);
     }
 
     private static List<TabPlayer> playerSet(ConfigurationSection slot) {
@@ -97,11 +100,18 @@ public class Layout {
         for (TabPlayer pl : Shared.getPlayers())
             pSorted.put(pl.getTeamName(), pl);
         List<TabPlayer> players = new ArrayList<>(pSorted.values());
-        if (slot.get("condition") != null)
-            if (slot.getString("condition").startsWith("!"))
-                players.removeIf(p -> Premium.conditions.get(slot.getString("condition").replaceFirst("!","")).isMet(p));
-            else
-                players.removeIf(p -> !Premium.conditions.get(slot.getString("condition")).isMet(p));
+        String condition = slot.getString("condition", "");
+        if (!condition.equals(""))
+            if (condition.startsWith("!")) {
+                Condition cond = Premium.conditions.get(condition.replaceFirst("!",""));
+                if (cond != null)
+                    players.removeIf(cond::isMet);
+            }
+            else {
+                Condition cond = Premium.conditions.get(condition);
+                if (cond != null)
+                    players.removeIf(p -> !cond.isMet(p));
+            }
         return players;
     }
 
@@ -160,8 +170,6 @@ public class Layout {
         List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(fakeplayers.values());
         for (TabPlayer p : Shared.getPlayers())
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
-        fakeplayers.clear();
-        placeholders.clear();
     }
     protected static void addAll() {
         List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(fakeplayers.values());
