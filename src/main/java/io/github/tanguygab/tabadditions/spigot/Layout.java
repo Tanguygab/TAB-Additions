@@ -70,7 +70,7 @@ public class Layout {
                                 TabPlayer pInSet = pset.get(inList);
 
 
-                                String format = set.getString("text","%tab_customtabname%");
+                                String format = set.getString("text","%player%");
                                 format = Shared.platform.replaceAllPlaceholders(format, pInSet);
 
                                 String yellownumber = Configs.config.getString("yellow-number-in-tablist","");

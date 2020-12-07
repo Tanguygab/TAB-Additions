@@ -4,6 +4,7 @@ import io.github.tanguygab.tabadditions.shared.commands.*;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 
+import me.neznamy.tab.premium.Premium;
 import me.neznamy.tab.shared.Shared;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabCompleter;
@@ -59,13 +60,10 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
             saveResource("actionbars.yml", false);
         if (!chatFile.exists())
             saveResource("chat.yml", false);
-        if (!layoutFile.exists())
-            saveResource("layout.yml", false);
 
         titleConfig = new YamlConfiguration();
         actionbarConfig = new YamlConfiguration();
         chatConfig = new YamlConfiguration();
-        layoutConfig = new YamlConfiguration();
         try {
             titleConfig.load(titleFile);
         } catch (IOException | InvalidConfigurationException e) {
@@ -81,10 +79,15 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         } catch (IOException | InvalidConfigurationException e) {
             e.printStackTrace();
         }
-        try {
-            layoutConfig.load(layoutFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
+        if (Premium.is()) {
+            if (!layoutFile.exists())
+                saveResource("layout.yml", false);
+            layoutConfig = new YamlConfiguration();
+            try {
+                layoutConfig.load(layoutFile);
+            } catch (IOException | InvalidConfigurationException e) {
+                e.printStackTrace();
+            }
         }
 
         titles.clear();
