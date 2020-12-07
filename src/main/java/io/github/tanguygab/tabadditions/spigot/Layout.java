@@ -123,21 +123,23 @@ public class Layout {
             String text = "";
             String yellownumber = "";
 
-            switch (slot.getString("type","text").toLowerCase()) {
-                case "text":
-                    text = slot.getString("text", "");
-                    yellownumber = slot.getString("yellow-number", "0");
-                    if (Placeholders.detectAll(text).size() > 0)
-                        placeholders.add(id);
-                    break;
-                case "players":
-                    List<Integer> ids = new ArrayList<>();
-                    if (playersets.containsKey(slot))
-                        ids.addAll(playersets.get(slot));
-                    ids.add(id);
-                    playersets.put(slot,ids);
+            if (slot != null) {
+                switch (slot.getString("type","text").toLowerCase()) {
+                    case "text":
+                        text = slot.getString("text", "");
+                        yellownumber = slot.getString("yellow-number", "0");
+                        if (Placeholders.detectAll(text).size() > 0)
+                            placeholders.add(id);
+                        break;
+                    case "players":
+                        List<Integer> ids = new ArrayList<>();
+                        if (playersets.containsKey(slot))
+                            ids.addAll(playersets.get(slot));
+                        ids.add(id);
+                        playersets.put(slot,ids);
 
-                    break;
+                        break;
+                }
             }
 
             String id2 = id+"";
