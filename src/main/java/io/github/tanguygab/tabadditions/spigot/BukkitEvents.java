@@ -1,24 +1,21 @@
 package io.github.tanguygab.tabadditions.spigot;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerToggleSneakEvent;
+
 import io.github.tanguygab.tabadditions.shared.SharedEvents;
 import io.github.tanguygab.tabadditions.shared.SharedTA;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-
+import me.neznamy.tab.api.event.BukkitTABLoadEvent;
 import me.neznamy.tab.shared.Shared;
 import me.neznamy.tab.shared.packets.PacketPlayOutChat;
-
-import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerToggleSneakEvent;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.Listener;
-import me.neznamy.tab.api.event.BukkitTABLoadEvent;
-
-import org.bukkit.configuration.ConfigurationSection;
-
-import java.util.HashMap;
-import java.util.Map;
 
 
 public class BukkitEvents implements Listener {

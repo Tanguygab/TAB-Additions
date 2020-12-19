@@ -10,7 +10,7 @@ public final class TABAdditionsBungeeCord extends Plugin {
 	
     @Override
     public void onEnable() {
-        SharedTA.platform = "Bungee";
+        SharedTA.platform = new BungeeTA(this);
         SharedTA.plugin = this;
         reload();
         getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","tabaddon","tabaddition"));

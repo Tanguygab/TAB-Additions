@@ -1,15 +1,14 @@
 package io.github.tanguygab.tabadditions.spigot;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
+import java.io.InputStreamReader;
+import java.net.URL;
+
+import org.bukkit.Bukkit;
+
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import org.bukkit.Bukkit;
-
-import java.io.InputStreamReader;
-import java.net.URL;
 
 public class NMS {
 

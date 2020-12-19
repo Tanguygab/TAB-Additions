@@ -23,7 +23,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @Override
     public void onEnable() {
-        SharedTA.platform = "Bukkit";
+        SharedTA.platform = new SpigotTA(this);
         SharedTA.plugin = this;
         reload();
     }

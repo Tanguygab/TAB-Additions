@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared;
 
 import io.github.tanguygab.tabadditions.spigot.NMS;
+import io.github.tanguygab.tabadditions.spigot.SpigotTA;
 import me.neznamy.tab.api.TabPlayer;
 
 import me.neznamy.tab.api.TABAPI;
@@ -46,7 +47,7 @@ public class Layout {
             icon = Shared.platform.replaceAllPlaceholders(icon, p);
             if (TABAPI.getPlayer(icon) != null)
                 skin = TABAPI.getPlayer(icon).getSkin();
-            else if (SharedTA.platform.equals("Bukkit"))
+            else if (SharedTA.platform instanceof SpigotTA)
                 skin = NMS.getPropPlayer(icon);
         }
         else if (icon.startsWith("mineskin:")) {
@@ -54,7 +55,7 @@ public class Layout {
             icon = Shared.platform.replaceAllPlaceholders(icon, p);
             try {
                 int mineskinid = Integer.parseInt(icon);
-                if (SharedTA.platform.equals("Bukkit"))
+                if (SharedTA.platform instanceof SpigotTA)
                     skin = NMS.getPropSkin(mineskinid);
             }
             catch (NumberFormatException ignored) {}
@@ -65,7 +66,7 @@ public class Layout {
     private void refresh() {
         //placeholders
         tasks.put("Layout-Placeholders",
-        SharedTA.AsyncTask(() -> {
+        SharedTA.platform.AsyncTask(() -> {
             Map<Integer,Boolean> skins = new HashMap<>();
             for (TabPlayer p : Shared.getPlayers()) {
                 if (!placeholders.isEmpty())
@@ -94,7 +95,7 @@ public class Layout {
 
         //player sets
         tasks.put("Layout-PlayerSets",
-        SharedTA.AsyncTask(() -> {
+        		SharedTA.platform.AsyncTask(() -> {
             Map<Integer,Boolean> skins = new HashMap<>();
             for (TabPlayer p : Shared.getPlayers()) {
                 if (!playersets.isEmpty())
@@ -114,7 +115,7 @@ public class Layout {
                                 TabPlayer pInSet = pset.get(inList);
 
                                 boolean vanished = false;
-                                if (SharedTA.platform.equals("Bukkit") && !((Player)p.getPlayer()).canSee(((Player)pInSet.getPlayer())))
+                                if (SharedTA.platform instanceof SpigotTA && !((Player)p.getPlayer()).canSee(((Player)pInSet.getPlayer())))
                                     vanished = true;
                                 else if (p.isVanished())
                                     vanished = true;
@@ -244,7 +245,7 @@ public class Layout {
     }
     public void removeP(TabPlayer p) {
         List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(fakeplayers.values());
-        TABAPI.getPlayer(p.getUniqueId()).sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
+       p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
     }
 
 }
