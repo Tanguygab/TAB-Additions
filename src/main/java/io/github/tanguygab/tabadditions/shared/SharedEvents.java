@@ -13,7 +13,7 @@ import java.util.Map;
 public class SharedEvents {
 
     public static void JoinEvent(String name) {
-        SharedTA.AsyncTask(()->{
+    	SharedTA.platform.AsyncTask(()->{
             TabPlayer p = TABAPI.getPlayer(name);
             SharedTA.loadProps(p);
 
@@ -32,7 +32,7 @@ public class SharedEvents {
                 }
             }
             if (SharedTA.layoutEnabled)
-                Layout.addP(p);
+                Layout.getInstance().addP(p);
         }, 1);
 
     }

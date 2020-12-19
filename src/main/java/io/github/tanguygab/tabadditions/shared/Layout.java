@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared;
 
 import io.github.tanguygab.tabadditions.spigot.NMS;
+import io.github.tanguygab.tabadditions.spigot.SpigotTA;
 import me.neznamy.tab.api.TabPlayer;
 
 import me.neznamy.tab.api.TABAPI;
@@ -19,32 +20,34 @@ import java.util.*;
 
 public class Layout {
 
-    protected static final HashMap<Integer,PacketPlayOutPlayerInfo.PlayerInfoData> fakeplayers = new HashMap<>();
-    protected static final Map<Integer,Map<String,Object>> placeholders = new HashMap<>();
-    protected static final Map<Object, List<Integer>> playersets = new HashMap<>();
-    protected static Map<String,Integer> tasks = new HashMap<>();
-    protected static Map<TabPlayer,Map<Integer,Boolean>> skinss = new HashMap<>();
-    protected static Map<TabPlayer,Map<Integer,Boolean>> skinsp = new HashMap<>();
+	private static Layout instance;
+	
+    protected final HashMap<Integer,PacketPlayOutPlayerInfo.PlayerInfoData> fakeplayers = new HashMap<>();
+    protected final Map<Integer,Map<String,Object>> placeholders = new HashMap<>();
+    protected final Map<Object, List<Integer>> playersets = new HashMap<>();
+    protected Map<String,Integer> tasks = new HashMap<>();
+    protected Map<TabPlayer,Map<Integer,Boolean>> skinss = new HashMap<>();
+    protected Map<TabPlayer,Map<Integer,Boolean>> skinsp = new HashMap<>();
 
     public Layout() {
+    	instance = this;
         if (!Shared.isPremium()) return;
-        fakeplayers.clear();
-        placeholders.clear();
-        playersets.clear();
-        skinss.clear();
-        skinsp.clear();
         create();
         refresh();
     }
+    
+    public static Layout getInstance() {
+    	return instance;
+    }
 
-    private static Object getIcon(String icon,TabPlayer p) {
+    private Object getIcon(String icon,TabPlayer p) {
         Object skin = null;
         if (icon.startsWith("player-head:")) {
             icon = icon.replace("player-head:", "");
             icon = Shared.platform.replaceAllPlaceholders(icon, p);
             if (TABAPI.getPlayer(icon) != null)
                 skin = TABAPI.getPlayer(icon).getSkin();
-            else if (SharedTA.platform.equals("Bukkit"))
+            else if (SharedTA.platform instanceof SpigotTA)
                 skin = NMS.getPropPlayer(icon);
         }
         else if (icon.startsWith("mineskin:")) {
@@ -52,7 +55,7 @@ public class Layout {
             icon = Shared.platform.replaceAllPlaceholders(icon, p);
             try {
                 int mineskinid = Integer.parseInt(icon);
-                if (SharedTA.platform.equals("Bukkit"))
+                if (SharedTA.platform instanceof SpigotTA)
                     skin = NMS.getPropSkin(mineskinid);
             }
             catch (NumberFormatException ignored) {}
@@ -60,10 +63,10 @@ public class Layout {
         return skin;
     }
 
-    private static void refresh() {
+    private void refresh() {
         //placeholders
         tasks.put("Layout-Placeholders",
-        SharedTA.AsyncTask(() -> {
+        SharedTA.platform.AsyncTask(() -> {
             Map<Integer,Boolean> skins = new HashMap<>();
             for (TabPlayer p : Shared.getPlayers()) {
                 if (!placeholders.isEmpty())
@@ -92,7 +95,7 @@ public class Layout {
 
         //player sets
         tasks.put("Layout-PlayerSets",
-        SharedTA.AsyncTask(() -> {
+        		SharedTA.platform.AsyncTask(() -> {
             Map<Integer,Boolean> skins = new HashMap<>();
             for (TabPlayer p : Shared.getPlayers()) {
                 if (!playersets.isEmpty())
@@ -112,7 +115,7 @@ public class Layout {
                                 TabPlayer pInSet = pset.get(inList);
 
                                 boolean vanished = false;
-                                if (SharedTA.platform.equals("Bukkit") && !((Player)p.getPlayer()).canSee(((Player)pInSet.getPlayer())))
+                                if (SharedTA.platform instanceof SpigotTA && !((Player)p.getPlayer()).canSee(((Player)pInSet.getPlayer())))
                                     vanished = true;
                                 else if (p.isVanished())
                                     vanished = true;
@@ -159,7 +162,7 @@ public class Layout {
         },0L,5L));
     }
 
-    private static List<TabPlayer> playerSet(Object slot) {
+    private List<TabPlayer> playerSet(Object slot) {
         Map<String,TabPlayer> pSorted = new TreeMap<>();
         for (TabPlayer pl : Shared.getPlayers())
             pSorted.put(pl.getTeamName(), pl);
@@ -179,7 +182,7 @@ public class Layout {
         return players;
     }
 
-    protected static void create() {
+    protected void create() {
         Map<String,Object> section = SharedTA.layoutConfig.getConfigurationSection("layouts.Lobby");
         assert section != null;
 
@@ -225,24 +228,24 @@ public class Layout {
         }
     }
 
-    public static void removeAll() {
+    public void removeAll() {
         List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(fakeplayers.values());
         for (TabPlayer p : Shared.getPlayers())
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
     }
-    public static void addAll() {
+    public void addAll() {
         List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(fakeplayers.values());
         for (TabPlayer p : Shared.getPlayers()) {
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
         }
     }
-    public static void addP(TabPlayer p) {
+    public void addP(TabPlayer p) {
         List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(fakeplayers.values());
         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
     }
-    public static void removeP(TabPlayer p) {
+    public void removeP(TabPlayer p) {
         List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(fakeplayers.values());
-        TABAPI.getPlayer(p.getUniqueId()).sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
+       p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
     }
 
 }

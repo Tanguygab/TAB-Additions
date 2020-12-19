@@ -14,7 +14,7 @@ public class BungeeEvents implements Listener {
     }
 
     @EventHandler
-    public void onTABLoad(BungeeTABLoadEvent e) throws NoSuchMethodException {
-        TABAdditionsBungeeCord.class.getMethod("reload");
+    public void onTABLoad(BungeeTABLoadEvent e) {
+        TABAdditionsBungeeCord.getInstance().reload();
     }
 }

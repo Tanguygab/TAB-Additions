@@ -27,8 +27,7 @@ public class MainCmd extends Command {
         else
             switch (args[0].toLowerCase()) {
                 case "reload": {
-                    try {TABAdditionsBungeeCord.class.getMethod("reload");}
-                    catch (NoSuchMethodException e) {e.printStackTrace();}
+                	TABAdditionsBungeeCord.getInstance().reload();
                     pTAB.sendMessage("&aConfig reloaded!",true);
                     break;
                 }
