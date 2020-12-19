@@ -8,13 +8,13 @@ import me.neznamy.tab.shared.packets.PacketPlayOutTitle;
 import java.util.List;
 
 public class TitleCmd {
-    public TitleCmd(TabPlayer sender, String[] args, List<String> properties) {
+    public TitleCmd(TabPlayer sender, String[] args, List<Object> properties) {
 
-        String title = properties.get(0);
-        String subtitle = properties.get(1);
-        int fadeIn = Integer.parseInt(properties.get(2));
-        int stay = Integer.parseInt(properties.get(3));
-        int fadeOut = Integer.parseInt(properties.get(4));
+        String title = properties.get(0)+"";
+        String subtitle = properties.get(1)+"";
+        int fadeIn = (int) properties.get(2);
+        int stay = (int) properties.get(3);
+        int fadeOut = (int) properties.get(4);
 
         TabPlayer p = sender;
         if (args.length > 2)

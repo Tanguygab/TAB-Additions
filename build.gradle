@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 apply plugin: 'java'
 
 group = 'io.github.tanguygab'
-version = '1.2'
+version = '1.3'
 
 repositories {
     mavenCentral()
@@ -19,14 +19,16 @@ repositories {
         name = 'placeholderapi'
         url = 'https://repo.extendedclip.com/content/repositories/placeholderapi/'
     }
+
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.16.3-R0.1-SNAPSHOT'
-    compile files('../TAB.jar')
-    compile files('../SuperSkinAPI.jar')
+    compileOnly 'org.spigotmc:spigot-api:1.16.4-R0.1-SNAPSHOT'
     compileOnly 'net.md-5:bungeecord-api:1.16-R0.3'
     compileOnly 'me.clip:placeholderapi:2.10.9'
+    compile files('../TAB.jar')
+    compile files('../nms.jar')
+
 
 }
 

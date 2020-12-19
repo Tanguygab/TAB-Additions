@@ -1,18 +1,17 @@
 package io.github.tanguygab.tabadditions.bungee;
 
+import io.github.tanguygab.tabadditions.shared.SharedTA;
 import io.github.tanguygab.tabadditions.shared.commands.*;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
-import net.md_5.bungee.config.Configuration;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class MainCmd extends Command {
 
@@ -34,41 +33,33 @@ public class MainCmd extends Command {
                     break;
                 }
                 case "actionbar": {
-                    if (!TABAdditionsBungeeCord.config.getBoolean("features.actionbars"))
+                    if (!SharedTA.config.getBoolean("features.actionbars"))
                         pTAB.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
                         pTAB.sendMessage("&cYou have to provide an actionbar!",true);
                     else {
-                        Configuration section = TABAdditionsBungeeCord.actionbarConfig.getSection("bars");
-                        if (!section.contains(args[1]))
+                        Map<String,String> section = SharedTA.actionbarConfig.getConfigurationSection("bars");
+                        if (!section.containsKey(args[1]))
                             pTAB.sendMessage("&cThis actionbar doesn't exist!",true);
                         else
-                            new ActionBarCmd(pTAB, args, ChatColor.translateAlternateColorCodes('&', section.getString(args[1])));
+                            new ActionBarCmd(pTAB, args, section.get(args[1]));
                     }
                     break;
                 }
                 case "title": {
-                    if (!TABAdditionsBungeeCord.config.getBoolean("features.titles"))
+                    if (!SharedTA.config.getBoolean("features.titles"))
                         pTAB.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
                         pTAB.sendMessage("&cYou have to provide a title!",true);
                     else {
-                        Configuration titleSection = TABAdditionsBungeeCord.titleConfig.getSection("titles."+args[1]);
-                        if (titleSection.getKeys().isEmpty()) {
+                        Map<String,String> titleSection = SharedTA.titleConfig.getConfigurationSection("titles."+args[1]);
+                        if (titleSection.keySet().isEmpty()) {
                             pTAB.sendMessage("&cThis title doesn't exist!",true);
                         }
                         else {
-                            List<String> titleProperties = new ArrayList<>();
-                            String title = titleSection.getString("title");
-                            String subtitle = titleSection.getString("subtitle");
-                            int fadein = titleSection.getInt("fadein");
-                            int stay = titleSection.getInt("stay");
-                            int fadeout = titleSection.getInt("fadeout");
-                            titleProperties.add(ChatColor.translateAlternateColorCodes('&', title));
-                            titleProperties.add(ChatColor.translateAlternateColorCodes('&', subtitle));
-                            titleProperties.add(fadein+"");
-                            titleProperties.add(stay+"");
-                            titleProperties.add(fadeout+"");
+                            List<Object> titleProperties = new ArrayList<>();
+                            for (Object property : titleSection.keySet())
+                                titleProperties.add(titleSection.get(property));
                             new TitleCmd(pTAB, args, titleProperties);
                         }
                     }

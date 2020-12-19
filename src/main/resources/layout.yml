@@ -26,33 +26,35 @@ layouts:
       slots:
         "-":
           type: "TEXT"
-          icon: EMPTY
+          icon: mineskin:1652325627
           text: ""
         "&m":
           type: "TEXT"
-          icon: EMPTY
-          text: "&8&m                "
+          icon: mineskin:1652325627
+          text: "&8&m                  "
         Welcome:
           type: TEXT
-          icon: PLAYER-HEAD:Tanguygab
+          icon: player-head:Tanguygab
           text: "%animation:Welcome%"
         PlayerName:
           type: TEXT
-          icon: PLAYER-HEAD:%player%
-          text: "&a%player%"
+          icon: player-head:%player%
+          text: "#00FF00%player%"
         PlayersText:
           type: TEXT
-          icon: EMPTY
           text: "&6Players:"
+          icon: mineskin:1652325627
         StaffText:
           type: TEXT
-          icon: EMPTY
+          icon: mineskin:1652325627
           text: "&6Staff:"
         Players:
           type: PLAYERS
-          text: "%tab_tabprefix%%player%%tab_tabsuffix%"
+          text: "%tab_tabprefix%%tab_customtabname%%tab_tabsuffix%"
           condition: "!staff"
+          vertical: true
         Staff:
           type: PLAYERS
-          text: "%tab_tabprefix%%player%%tab_tabsuffix%"
+          text: "%tab_tabprefix%%tab_customtabname%%tab_tabsuffix%"
           condition: "staff"
+          vertical: true

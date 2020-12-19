@@ -1,15 +1,13 @@
 package io.github.tanguygab.tabadditions.spigot;
 
+import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.Layout;
 import io.github.tanguygab.tabadditions.shared.commands.*;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 
-import me.neznamy.tab.premium.Premium;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabCompleter;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.InvalidConfigurationException;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -18,107 +16,37 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-import org.bukkit.configuration.file.FileConfiguration;
-import java.io.File;
-import java.io.IOException;
 import java.util.*;
 
 
 public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, TabCompleter {
 
-    private FileConfiguration config;
-    private FileConfiguration titleConfig;
-    private FileConfiguration actionbarConfig;
-    private FileConfiguration chatConfig;
-    private FileConfiguration layoutConfig;
-    private final File titleFile = new File(getDataFolder(), "titles.yml");
-    private final File actionbarFile = new File(getDataFolder(), "actionbars.yml");
-    private final File chatFile = new File(getDataFolder(), "chat.yml");
-    private final File layoutFile = new File(getDataFolder(), "layout.yml");
-
-    private final List<String> titles = new ArrayList<>();
-    private final List<String> actionbars = new ArrayList<>();
-    private final List<String> chatformats = new ArrayList<>();
-
     @Override
     public void onEnable() {
+        SharedTA.platform = "Bukkit";
+        SharedTA.plugin = this;
         reload();
     }
 
     @Override
     public void onDisable() {
-        Layout.removeAll();}
+        Layout.removeAll();
+    }
 
     public void reload() {
-        saveDefaultConfig();
-        reloadConfig();
-        config = getConfig();
-        if (!titleFile.exists())
-            saveResource("titles.yml", false);
-        if (!actionbarFile.exists())
-            saveResource("actionbars.yml", false);
-        if (!chatFile.exists())
-            saveResource("chat.yml", false);
 
-        titleConfig = new YamlConfiguration();
-        actionbarConfig = new YamlConfiguration();
-        chatConfig = new YamlConfiguration();
-        try {
-            titleConfig.load(titleFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
-        try {
-            actionbarConfig.load(actionbarFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
-        try {
-            chatConfig.load(chatFile);
-        } catch (IOException | InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
-
-        titles.clear();
-        titles.addAll(titleConfig.getConfigurationSection("titles").getKeys(false));
-        actionbars.clear();
-        actionbars.addAll(actionbarConfig.getConfigurationSection("bars").getKeys(false));
-        chatformats.clear();
-        chatformats.addAll(chatConfig.getConfigurationSection("chat-formats").getKeys(false));
+        SharedTA.reload(getDataFolder());
 
         HandlerList.unregisterAll(this);
-        Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(this, config, titleConfig, actionbarConfig, chatConfig,layoutConfig), this);
+        Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(), this);
 
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
+
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new TABAdditionsExpansion(this).register();
-
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            TabPlayer pTAB = TABAPI.getPlayer(p.getUniqueId());
-            loadProps(pTAB);
         }
-        if (Premium.is()) {
-            if (!layoutFile.exists())
-                saveResource("layout.yml", false);
-            layoutConfig = new YamlConfiguration();
-            try {
-                layoutConfig.load(layoutFile);
-            } catch (IOException | InvalidConfigurationException e) {
-                e.printStackTrace();
-            }
 
-            Layout.removeAll();
-            new Layout(layoutConfig,this);
-            Layout.addAll();
-        }
     }
 
-    public void loadProps(TabPlayer pTAB) {
-        pTAB.loadPropertyFromConfig("title");
-        pTAB.loadPropertyFromConfig("actionbar");
-        pTAB.loadPropertyFromConfig("chatprefix");
-        pTAB.loadPropertyFromConfig("customchatname", pTAB.getName());
-        pTAB.loadPropertyFromConfig("chatsuffix");
-    }
 
 
     @Override
@@ -135,34 +63,33 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "actionbar": {
-                    if (!config.getBoolean("features.actionbars"))
+                    if (!SharedTA.config.getBoolean("features.actionbars"))
                         p.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
                         p.sendMessage("&cYou have to provide an actionbar!",true);
                     else {
-                        ConfigurationSection section = actionbarConfig.getConfigurationSection("bars.");
-                        assert section != null;
-                        if (!section.contains(args[1]))
+                        Map<String,String> section = SharedTA.actionbarConfig.getConfigurationSection("bars.");
+                        if (!section.containsKey(args[1]))
                             p.sendMessage("&cThis actionbar doesn't exist!",true);
                         else
-                            new ActionBarCmd(p, args, section.getString(args[1]));
+                            new ActionBarCmd(p, args, section.get(args[1]));
                     }
                     break;
                 }
                 case "title": {
-                    if (!config.getBoolean("features.titles"))
+                    if (!SharedTA.config.getBoolean("features.titles"))
                         p.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
                         p.sendMessage("&cYou have to provide a title!",true);
                     else {
-                        ConfigurationSection titleSection = titleConfig.getConfigurationSection("titles."+args[1]);
-                        if (titleSection == null) {
+                        Map<String,String> titleSection = SharedTA.titleConfig.getConfigurationSection("titles."+args[1]);
+                        if (titleSection.isEmpty()) {
                             p.sendMessage("&cThis title doesn't exist!",true);
                         }
                         else {
-                            List<String> titleProperties = new ArrayList<>();
-                            for (String property : titleSection.getKeys(false))
-                                titleProperties.add(titleSection.getString(property));
+                            List<Object> titleProperties = new ArrayList<>();
+                            for (Object property : titleSection.keySet())
+                                titleProperties.add(titleSection.get(property));
                             new TitleCmd(p, args, titleProperties);
                         }
                     }
@@ -187,14 +114,15 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         if (args.length >= 2) {
             switch (args[0]) {
                 case "actionbar":
-                    return actionbars;
+                    if (args.length == 2)
+                        return SharedTA.actionbars;
                 case "tags": {
                     if (args.length == 2)
                         return new ArrayList<>(Arrays.asList("hide","show","toggle"));
                 }
                 case "title": {
                     if (args.length == 2)
-                        return titles;
+                        return SharedTA.titles;
                 }
             }
         }

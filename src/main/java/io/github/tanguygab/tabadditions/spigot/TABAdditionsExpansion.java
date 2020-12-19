@@ -5,6 +5,10 @@ import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.entity.Player;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 public class TABAdditionsExpansion extends PlaceholderExpansion {
 
     private final TABAdditionsSpigot plugin;
@@ -16,6 +20,11 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
     @Override
     public String getIdentifier() {
         return "tabadditions";
+    }
+
+    @Override
+    public List<String> getPlaceholders() {
+        return new ArrayList<>(Collections.singletonList("%tabadditions_tag_visible%"));
     }
 
     @Override
@@ -41,6 +50,7 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
         if (p == null) return "";
 
         if (identifier.equals("tag_visible")) return !p.hasHiddenNametag()+"";
+
 
         return "null";
     }
