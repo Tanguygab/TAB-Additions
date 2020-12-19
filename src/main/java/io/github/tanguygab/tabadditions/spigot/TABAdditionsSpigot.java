@@ -30,7 +30,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @Override
     public void onDisable() {
-        Layout.removeAll();
+        if (Layout.getInstance() != null) Layout.getInstance().removeAll();
     }
 
     public void reload() {

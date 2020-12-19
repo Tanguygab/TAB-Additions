@@ -1,20 +1,18 @@
 package io.github.tanguygab.tabadditions.shared;
 
-import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Shared;
-import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.config.Configuration;
-import org.bukkit.Bukkit;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.plugin.Plugin;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
+import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.Shared;
+import me.neznamy.tab.shared.config.YamlConfigurationFile;
+import net.md_5.bungee.api.ProxyServer;
 
 public class SharedTA {
 
@@ -76,17 +74,17 @@ public class SharedTA {
 
 
 
-        Layout.removeAll();
-        for (int i : Layout.tasks.values()) {
+        Layout.getInstance().removeAll();
+        for (int i : Layout.getInstance().tasks.values()) {
             if (platform.equals("Bukkit"))
                 Bukkit.getServer().getScheduler().cancelTask(i);
             else if (platform.equals("Bungee"))
                 ProxyServer.getInstance().getScheduler().cancel(i);
         }
-        Layout.tasks.clear();
+        Layout.getInstance().tasks.clear();
         if (layoutEnabled) {
             new Layout();
-            Layout.addAll();
+            Layout.getInstance().addAll();
         }
     }
 

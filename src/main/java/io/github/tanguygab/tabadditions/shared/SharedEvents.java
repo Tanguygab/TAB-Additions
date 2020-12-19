@@ -32,7 +32,7 @@ public class SharedEvents {
                 }
             }
             if (SharedTA.layoutEnabled)
-                Layout.addP(p);
+                Layout.getInstance().addP(p);
         }, 1);
 
     }
