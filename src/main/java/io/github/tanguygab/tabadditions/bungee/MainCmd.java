@@ -22,7 +22,7 @@ public class MainCmd extends Command {
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof ProxiedPlayer)) return;
         TabPlayer pTAB = TABAPI.getPlayer(sender.getName());
-        if (args.length < 1 || args[0].toLowerCase().equals("help"))
+        if (args.length < 1 || args[0].equalsIgnoreCase("help"))
             new HelpCmd(pTAB, ProxyServer.getInstance().getPluginManager().getPlugin("TAB-Additions").getDescription().getVersion());
         else
             switch (args[0].toLowerCase()) {

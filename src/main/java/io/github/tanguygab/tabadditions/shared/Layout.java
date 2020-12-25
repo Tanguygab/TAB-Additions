@@ -26,8 +26,7 @@ public class Layout {
     protected final Map<Integer,Map<String,Object>> placeholders = new HashMap<>();
     protected final Map<Object, List<Integer>> playersets = new HashMap<>();
     protected Map<String,Integer> tasks = new HashMap<>();
-    protected Map<TabPlayer,Map<Integer,Boolean>> skinss = new HashMap<>();
-    protected Map<TabPlayer,Map<Integer,Boolean>> skinsp = new HashMap<>();
+    private static final Map<String,Object> icons = new HashMap<>();
 
     public Layout() {
     	instance = this;
@@ -41,10 +40,13 @@ public class Layout {
     }
 
     private Object getIcon(String icon,TabPlayer p) {
+        icon = Shared.platform.replaceAllPlaceholders(icon, p);
+        if (icons.containsKey(icon))
+            return icons.get(icon);
+        String deficon = icon;
         Object skin = null;
         if (icon.startsWith("player-head:")) {
             icon = icon.replace("player-head:", "");
-            icon = Shared.platform.replaceAllPlaceholders(icon, p);
             if (TABAPI.getPlayer(icon) != null)
                 skin = TABAPI.getPlayer(icon).getSkin();
             else if (SharedTA.platform instanceof SpigotTA)
@@ -52,7 +54,6 @@ public class Layout {
         }
         else if (icon.startsWith("mineskin:")) {
             icon = icon.replace("mineskin:", "");
-            icon = Shared.platform.replaceAllPlaceholders(icon, p);
             try {
                 int mineskinid = Integer.parseInt(icon);
                 if (SharedTA.platform instanceof SpigotTA)
@@ -60,10 +61,13 @@ public class Layout {
             }
             catch (NumberFormatException ignored) {}
         }
+        icons.put(deficon,skin);
         return skin;
     }
 
     private void refresh() {
+        Map<TabPlayer,Map<Integer,Boolean>> skinss = new HashMap<>();
+        Map<TabPlayer,Map<Integer,Boolean>> skinsp = new HashMap<>();
         //placeholders
         tasks.put("Layout-Placeholders",
         SharedTA.platform.AsyncTask(() -> {
@@ -95,22 +99,23 @@ public class Layout {
 
         //player sets
         tasks.put("Layout-PlayerSets",
-        		SharedTA.platform.AsyncTask(() -> {
+                SharedTA.platform.AsyncTask(() -> {
             Map<Integer,Boolean> skins = new HashMap<>();
             for (TabPlayer p : Shared.getPlayers()) {
                 if (!playersets.isEmpty())
                     for (Object set : playersets.keySet()) {
                         List<TabPlayer> pset = playerSet(set);
                         int inList = 0;
-                        Map<String,Object> setConfig = ((Map<String,Object>) set);
+                        Map<String,Object> setConfig = (Map<String,Object>) set;
                         if (setConfig.containsKey("vertical") && (boolean)setConfig.get("vertical"))
                             Collections.sort(playersets.get(set));
                         for (Integer i : playersets.get(set)) {
                             PacketPlayOutPlayerInfo.PlayerInfoData fp = fakeplayers.get(i);
                             if (pset.size() <= inList) {
                                 String empty = "";
-                                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(empty))));
-                                p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.REMOVE, "TAB-YellowNumber", fp.name, 0));
+                                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
+                                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name,fp.uniqueId,fp.skin, fp.latency, fp.gameMode,IChatBaseComponent.fromColoredText(empty))));
+                                p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.name, 0));
                             } else {
                                 TabPlayer pInSet = pset.get(inList);
 
@@ -125,8 +130,7 @@ public class Layout {
                                     p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, null, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromString(""))));
                                     p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.name, 0));
                                 }
-                                else
-                                    {
+                                else {
 
                                     String format = "%player%";
                                     if (setConfig.containsKey("text")) format = setConfig.get("text").toString();
@@ -137,7 +141,7 @@ public class Layout {
                                     int yellownumber2 = 0;
                                     try {yellownumber2 = Integer.parseInt(yellownumber);}
                                     catch (NumberFormatException ignored) {}
-
+                                    TABAPI.getPlayer("Tanguygab").sendMessage(IChatBaseComponent.fromColoredText(format).toString()+fp.displayName.toString(),false);
                                     if (!skinss.containsKey(p)) {
                                         Object skin = pInSet.getSkin();
                                         if (setConfig.containsKey("icon"))

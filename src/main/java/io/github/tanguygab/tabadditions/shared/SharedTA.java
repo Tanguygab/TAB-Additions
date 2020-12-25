@@ -68,12 +68,13 @@ public class SharedTA {
         }
 
 
-
-        Layout.getInstance().removeAll();
-        for (int i : Layout.getInstance().tasks.values()) {
-        	platform.cancelTask(i);
+        if (Layout.getInstance() != null) {
+            Layout.getInstance().removeAll();
+            for (int i : Layout.getInstance().tasks.values()) {
+                platform.cancelTask(i);
+            }
+            Layout.getInstance().tasks.clear();
         }
-        Layout.getInstance().tasks.clear();
         if (layoutEnabled) {
             new Layout();
             Layout.getInstance().addAll();

@@ -53,7 +53,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) return true;
         TabPlayer p = TABAPI.getPlayer(sender.getName());
-        if (args.length < 1 || args[0].toLowerCase().equals("help"))
+        if (args.length < 1 || args[0].equalsIgnoreCase("help"))
             new HelpCmd(p, this.getDescription().getVersion());
         else
             switch (args[0].toLowerCase()) {
