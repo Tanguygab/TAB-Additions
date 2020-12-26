@@ -1,8 +1,8 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
-import io.github.tanguygab.tabadditions.shared.Layout;
 import io.github.tanguygab.tabadditions.shared.commands.*;
+import io.github.tanguygab.tabadditions.shared.layouts.LayoutManager;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 
@@ -30,7 +30,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @Override
     public void onDisable() {
-        if (Layout.getInstance() != null) Layout.getInstance().removeAll();
+        if (LayoutManager.getInstance() != null) LayoutManager.getInstance().removeLayoutAll();
     }
 
     public void reload() {
@@ -101,6 +101,8 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 }
                 case "test": {
                     p.sendMessage("&7Nothing to see here :D",true);
+                    p.sendMessage(LayoutManager.getInstance().getLayouts()+"",false);
+                    p.sendMessage(LayoutManager.getInstance().getLayout(p)+"",false);
                     break;
                 }
             }

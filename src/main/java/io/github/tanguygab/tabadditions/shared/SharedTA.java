@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.github.tanguygab.tabadditions.shared.layouts.LayoutManager;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.Shared;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
@@ -68,16 +69,13 @@ public class SharedTA {
         }
 
 
-        if (Layout.getInstance() != null) {
-            Layout.getInstance().removeAll();
-            for (int i : Layout.getInstance().tasks.values()) {
-                platform.cancelTask(i);
-            }
-            Layout.getInstance().tasks.clear();
+        if (LayoutManager.getInstance() != null) {
+            LayoutManager.getInstance().removeLayoutAll();
+            LayoutManager.getInstance().clearTasks();
         }
         if (layoutEnabled) {
-            new Layout();
-            Layout.getInstance().addAll();
+            new LayoutManager();
+            LayoutManager.getInstance().showLayoutAll();
         }
     }
 

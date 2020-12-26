@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared;
 
 import io.github.tanguygab.tabadditions.shared.commands.TitleCmd;
+import io.github.tanguygab.tabadditions.shared.layouts.LayoutManager;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.Shared;
@@ -32,7 +33,7 @@ public class SharedEvents {
                 }
             }
             if (SharedTA.layoutEnabled)
-                Layout.getInstance().addP(p);
+                LayoutManager.getInstance().showLayout(p,LayoutManager.getInstance().getLayout(p));
         }, 1);
 
     }
