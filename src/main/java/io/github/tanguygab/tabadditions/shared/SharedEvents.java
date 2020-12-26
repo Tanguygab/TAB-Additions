@@ -32,8 +32,10 @@ public class SharedEvents {
                     new TitleCmd(p, new String[]{}, titleProperties);
                 }
             }
-            if (SharedTA.layoutEnabled)
-                LayoutManager.getInstance().showLayout(p,LayoutManager.getInstance().getLayout(p));
+            if (SharedTA.layoutEnabled) {
+                LayoutManager lm = LayoutManager.getInstance();
+                lm.toAdd.put(p,lm.getLayout(p));
+            }
         }, 1);
 
     }

@@ -70,8 +70,7 @@ public class SharedTA {
 
 
         if (LayoutManager.getInstance() != null) {
-            LayoutManager.getInstance().removeLayoutAll();
-            LayoutManager.getInstance().clearTasks();
+            LayoutManager.getInstance().unregister();
         }
         if (layoutEnabled) {
             new LayoutManager();
