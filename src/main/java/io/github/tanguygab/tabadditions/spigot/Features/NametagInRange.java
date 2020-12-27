@@ -19,7 +19,7 @@ public class NametagInRange {
     public int load() {
 
         return Bukkit.getScheduler().scheduleSyncRepeatingTask((Plugin) SharedTA.plugin, () -> {
-            int range = SharedTA.config.getInt("features.nametag-in-range",0);
+            int range = SharedTA.nametagInRange;
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 ArrayList<Entity> entities = (ArrayList<Entity>) p.getNearbyEntities(range, range, range);
                 entities.removeIf(entity -> !(entity instanceof Player));

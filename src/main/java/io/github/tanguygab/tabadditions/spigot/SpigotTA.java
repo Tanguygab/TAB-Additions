@@ -7,12 +7,17 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 
 public class SpigotTA extends Platform {
 
-	private Plugin plugin;
+	private final Plugin plugin;
 	
 	public SpigotTA(Plugin plugin) {
 		this.plugin = plugin;
 	}
-	
+
+	@Override
+	public String type() {
+		return "Spigot";
+	}
+
 	@Override
 	public int AsyncTask(Runnable r, long delay, long period) {
 		 return Bukkit.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, r, delay, period);

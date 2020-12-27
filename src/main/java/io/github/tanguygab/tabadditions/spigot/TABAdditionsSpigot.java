@@ -23,8 +23,6 @@ import java.util.*;
 
 public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, TabCompleter {
 
-    private int nametagInSight = -1;
-
     @Override
     public void onEnable() {
         SharedTA.platform = new SpigotTA(this);
@@ -47,23 +45,6 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
             new TABAdditionsExpansion(this).register();
-
-        if (SharedTA.config.getInt("features.nametag-in-range",0) != 0) {
-            for (TabPlayer p : Shared.getPlayers())
-                for (TabPlayer p2 : Shared.getPlayers())
-                    if (p != p2)
-                        p.hideNametag(p2.getUniqueId());
-            if (nametagInSight == -1) {
-                nametagInSight = new NametagInRange().load();
-            }
-        } else {
-            Bukkit.getServer().getScheduler().cancelTask(nametagInSight);
-            nametagInSight = -1;
-            for (TabPlayer p : Shared.getPlayers())
-                for (TabPlayer p2 : Shared.getPlayers())
-                    if (p != p2)
-                        p.showNametag(p2.getUniqueId());
-        }
     }
 
     @Override

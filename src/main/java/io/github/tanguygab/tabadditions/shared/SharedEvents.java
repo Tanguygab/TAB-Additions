@@ -36,6 +36,11 @@ public class SharedEvents {
                 LayoutManager lm = LayoutManager.getInstance();
                 lm.toAdd.put(p,lm.getLayout(p));
             }
+            if (SharedTA.nametagInRange != 0)
+                for (TabPlayer p2 : Shared.getPlayers()) {
+                    p.hideNametag(p2.getUniqueId());
+                    p2.hideNametag(p.getUniqueId());
+                }
         }, 1);
 
     }

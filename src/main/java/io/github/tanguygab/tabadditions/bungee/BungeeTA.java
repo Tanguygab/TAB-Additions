@@ -8,12 +8,17 @@ import net.md_5.bungee.api.plugin.Plugin;
 
 public class BungeeTA extends Platform {
 
-	private Plugin plugin;
+	private final Plugin plugin;
 	
 	public BungeeTA(Plugin plugin) {
 		this.plugin = plugin;
 	}
-	
+
+	@Override
+	public String type() {
+		return "Bungee";
+	}
+
 	@Override
 	public int AsyncTask(Runnable r, long delay, long period) {
 		return ProxyServer.getInstance().getScheduler().schedule(plugin,r,delay/20,period/20, TimeUnit.SECONDS).getId();

@@ -42,14 +42,6 @@ public class BukkitEvents implements Listener {
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         SharedEvents.JoinEvent(e.getPlayer().getName());
-        if (SharedTA.config.getInt("features.nametag-in-range",0) != 0) {
-            Bukkit.getScheduler().scheduleAsyncDelayedTask((Plugin) SharedTA.plugin, () -> {
-                for (TabPlayer p : Shared.getPlayers()) {
-                    Shared.getPlayer(e.getPlayer().getUniqueId()).hideNametag(p.getUniqueId());
-                    p.hideNametag(e.getPlayer().getUniqueId());
-                }
-            }, 1L);
-        }
     }
 
     @EventHandler
