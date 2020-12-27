@@ -4,3 +4,4 @@ features:
   actionbars: false
   chat: false
   layout: false
+  nametag-in-range: 0

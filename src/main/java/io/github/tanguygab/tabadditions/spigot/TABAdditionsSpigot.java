@@ -3,9 +3,11 @@ package io.github.tanguygab.tabadditions.spigot;
 import io.github.tanguygab.tabadditions.shared.SharedTA;
 import io.github.tanguygab.tabadditions.shared.commands.*;
 import io.github.tanguygab.tabadditions.shared.layouts.LayoutManager;
-import me.neznamy.tab.api.TABAPI;
+import io.github.tanguygab.tabadditions.spigot.Features.BukkitEvents;
+import io.github.tanguygab.tabadditions.spigot.Features.NametagInRange;
 import me.neznamy.tab.api.TabPlayer;
 
+import me.neznamy.tab.shared.Shared;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
@@ -20,6 +22,8 @@ import java.util.*;
 
 
 public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, TabCompleter {
+
+    private int nametagInSight = -1;
 
     @Override
     public void onEnable() {
@@ -41,18 +45,31 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(), this);
 
 
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
             new TABAdditionsExpansion(this).register();
+
+        if (SharedTA.config.getInt("features.nametag-in-range",0) != 0) {
+            for (TabPlayer p : Shared.getPlayers())
+                for (TabPlayer p2 : Shared.getPlayers())
+                    if (p != p2)
+                        p.hideNametag(p2.getUniqueId());
+            if (nametagInSight == -1) {
+                nametagInSight = new NametagInRange().load();
+            }
+        } else {
+            Bukkit.getServer().getScheduler().cancelTask(nametagInSight);
+            nametagInSight = -1;
+            for (TabPlayer p : Shared.getPlayers())
+                for (TabPlayer p2 : Shared.getPlayers())
+                    if (p != p2)
+                        p.showNametag(p2.getUniqueId());
         }
-
     }
-
-
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) return true;
-        TabPlayer p = TABAPI.getPlayer(sender.getName());
+        TabPlayer p = Shared.getPlayer(sender.getName());
         if (args.length < 1 || args[0].equalsIgnoreCase("help"))
             new HelpCmd(p, this.getDescription().getVersion());
         else
@@ -101,8 +118,6 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 }
                 case "test": {
                     p.sendMessage("&7Nothing to see here :D",true);
-                    p.sendMessage(LayoutManager.getInstance().getLayouts()+"",false);
-                    p.sendMessage(LayoutManager.getInstance().getLayout(p)+"",false);
                     break;
                 }
             }

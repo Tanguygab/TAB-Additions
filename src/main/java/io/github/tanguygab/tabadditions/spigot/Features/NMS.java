@@ -1,4 +1,4 @@
-package io.github.tanguygab.tabadditions.spigot;
+package io.github.tanguygab.tabadditions.spigot.Features;
 
 import java.io.InputStreamReader;
 import java.net.URL;

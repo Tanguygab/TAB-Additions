@@ -1,7 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.layouts;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
-import io.github.tanguygab.tabadditions.spigot.NMS;
+import io.github.tanguygab.tabadditions.spigot.Features.NMS;
 import io.github.tanguygab.tabadditions.spigot.SpigotTA;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
