@@ -1,4 +1,4 @@
-package io.github.tanguygab.tabadditions.shared.layouts;
+package io.github.tanguygab.tabadditions.shared.features.layouts;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
 import io.github.tanguygab.tabadditions.spigot.Features.NMS;
@@ -25,6 +25,7 @@ public class LayoutManager {
 
     public LayoutManager() {
         instance = this;
+        if (!Shared.isPremium()) return;
         for (Object layout : SharedTA.layoutConfig.getConfigurationSection("layouts").keySet())
             layouts.put(layout.toString(),new Layout(layout.toString()));
         refresh();
@@ -32,9 +33,6 @@ public class LayoutManager {
 
     public static LayoutManager getInstance() {
         return instance;
-    }
-    public Map<String,Layout> getLayouts() {
-        return layouts;
     }
     public String getLayout(TabPlayer p) {
         String layout = SharedTA.layoutConfig.getString("default-layout","");
@@ -73,25 +71,27 @@ public class LayoutManager {
     }
 
     public void showLayout() {
-        for (TabPlayer p : toAdd.keySet()) {
+        List<TabPlayer> list = new ArrayList<>(toAdd.keySet());
+        for (TabPlayer p : list) {
             Layout layout = layouts.get(toAdd.get(p));
             List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
             players.put(p, layout.getName());
             layout.players.add(p);
+            toAdd.remove(p);
         }
-        toAdd.clear();
     }
 
     public void removeLayout() {
-        for (TabPlayer p : toRemove.keySet()) {
+        List<TabPlayer> list = new ArrayList<>(toRemove.keySet());
+        for (TabPlayer p : list) {
             Layout layout = layouts.get(toRemove.get(p));
             List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
             players.remove(p);
             layout.players.remove(p);
+            toRemove.remove(p);
         }
-        toRemove.clear();
     }
     public void showLayoutAll() {
         for (TabPlayer p : Shared.getPlayers())

@@ -1,6 +1,8 @@
+default-format: "default"
 chat-formats:
   Range:
-    condition: 'inRange.100'
+    condition: "inRange.100"
+    if-condition-not-met: ""
     text: ""
     hover: ""
     channel: Range
@@ -9,7 +11,7 @@ chat-formats:
     text: ""
     hover: ""
     channel: Private
-  _OTHER_:
+  default:
     condition: true
     text: "%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%>> %msg%"
     hover: ""

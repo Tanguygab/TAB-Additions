@@ -1,7 +1,7 @@
 package io.github.tanguygab.tabadditions.bungee;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
-import io.github.tanguygab.tabadditions.shared.commands.*;
+import io.github.tanguygab.tabadditions.shared.features.commands.*;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import net.md_5.bungee.api.CommandSender;

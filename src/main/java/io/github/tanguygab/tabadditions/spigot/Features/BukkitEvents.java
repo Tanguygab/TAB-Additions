@@ -40,6 +40,11 @@ public class BukkitEvents implements Listener {
     }
 
     @EventHandler
+    public void onTABLoad(BukkitTABLoadEvent e) {
+        TABAdditionsSpigot.getPlugin(TABAdditionsSpigot.class).reload();
+    }
+
+    @EventHandler
     public void onJoin(PlayerJoinEvent e) {
         SharedEvents.JoinEvent(e.getPlayer().getName());
     }
@@ -47,22 +52,9 @@ public class BukkitEvents implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         if (SharedTA.chatEnabled) {
-            TabPlayer p = TABAPI.getPlayer(e.getPlayer().getUniqueId());
-            String msg = e.getMessage();
-            Map<String,Object> formats = SharedTA.chatConfig.getConfigurationSection("chat-formats");
-            Map<String,Object> fSection = (Map<String, Object>) formats.get("_OTHER_");
-            String format = fSection.get("text").toString();
-
-            format = Shared.platform.replaceAllPlaceholders(format,p).replaceAll("%msg%", msg);
-            for (TabPlayer pl : Shared.getPlayers())
-                pl.sendCustomPacket(new PacketPlayOutChat(format, PacketPlayOutChat.ChatMessageType.CHAT));
-
+            SharedEvents.ChatEvent(Shared.getPlayer(e.getPlayer().getUniqueId()), e.getMessage());
             e.setCancelled(true);
         }
+    }
 
-    }
-    @EventHandler
-    public void onTABLoad(BukkitTABLoadEvent e) {
-        TABAdditionsSpigot.getPlugin(TABAdditionsSpigot.class).reload();
-    }
 }

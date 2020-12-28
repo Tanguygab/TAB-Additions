@@ -1,13 +1,13 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
-import io.github.tanguygab.tabadditions.shared.commands.*;
-import io.github.tanguygab.tabadditions.shared.layouts.LayoutManager;
+import io.github.tanguygab.tabadditions.shared.features.commands.*;
+import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.spigot.Features.BukkitEvents;
-import io.github.tanguygab.tabadditions.spigot.Features.NametagInRange;
 import me.neznamy.tab.api.TabPlayer;
 
 import me.neznamy.tab.shared.Shared;
+import me.neznamy.tab.shared.features.AlignedSuffix;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;

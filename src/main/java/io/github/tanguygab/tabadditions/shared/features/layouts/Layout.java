@@ -1,10 +1,11 @@
-package io.github.tanguygab.tabadditions.shared.layouts;
+package io.github.tanguygab.tabadditions.shared.features.layouts;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
 import io.github.tanguygab.tabadditions.spigot.SpigotTA;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.Shared;
 import me.neznamy.tab.shared.config.Configs;
+import me.neznamy.tab.shared.features.AlignedSuffix;
 import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
@@ -30,7 +31,6 @@ public class Layout {
     public Layout(String name) {
         this.name = name;
         config = SharedTA.layoutConfig.getConfigurationSection("layouts."+name);
-        if (!Shared.isPremium()) return;
         create();
     }
 
@@ -57,6 +57,11 @@ public class Layout {
                     Map<String, Object> slot = placeholders.get(i);
                     String text = slot.get("text").toString();
                     text = Shared.platform.replaceAllPlaceholders(text, p);
+                    if (text.contains("||")) {
+                        String prefixName = text.split("\\|\\|")[0];
+                        String suffix = text.split("\\|\\|")[1];
+                        text = ((AlignedSuffix)Shared.featureManager.getFeature("alignedsuffix")).fixTextWidth(null, prefixName,suffix);
+                    }
 
                     Object skin = null;
                     if (slot.containsKey("icon"))
@@ -109,6 +114,11 @@ public class Layout {
                                 String format = "%player%";
                                 if (setConfig.containsKey("text")) format = setConfig.get("text").toString();
                                 format = Shared.platform.replaceAllPlaceholders(format, pInSet);
+                                if (format.contains("||")) {
+                                    String prefixName = format.split("\\|\\|")[0];
+                                    String suffix = format.split("\\|\\|")[1];
+                                    format = ((AlignedSuffix)Shared.featureManager.getFeature("alignedsuffix")).fixTextWidth(pInSet, prefixName,suffix);
+                                }
 
                                 String yellownumber = Configs.config.getString("yellow-number-in-tablist", "");
                                 yellownumber = Shared.platform.replaceAllPlaceholders(yellownumber, pInSet);
@@ -192,6 +202,11 @@ public class Layout {
                     playersets.put(slot, ids);
                 } else {
                     text = slot.get("text").toString();
+                    if (text.contains("||")) {
+                        String prefixName = text.split("\\|\\|")[0];
+                        String suffix = text.split("\\|\\|")[1];
+                        text = ((AlignedSuffix)Shared.featureManager.getFeature("alignedsuffix")).fixTextWidth(null, prefixName,suffix);
+                    }
                     if (PlaceholderManager.detectAll(text).size() > 0 || slot.containsKey("icon"))
                         placeholders.put(id,slot);
                 }

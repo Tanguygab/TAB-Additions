@@ -1,7 +1,7 @@
 package io.github.tanguygab.tabadditions.shared;
 
-import io.github.tanguygab.tabadditions.shared.commands.TitleCmd;
-import io.github.tanguygab.tabadditions.shared.layouts.LayoutManager;
+import io.github.tanguygab.tabadditions.shared.features.commands.TitleCmd;
+import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.Shared;
@@ -43,5 +43,14 @@ public class SharedEvents {
                 }
         }, 1);
 
+    }
+
+    public static void ChatEvent(TabPlayer p, String msg) {
+        Map<String, Object> formats = SharedTA.chatConfig.getConfigurationSection("chat-formats");
+        Map<String, Object> fSection = (Map<String, Object>) formats.get("_OTHER_");
+        String format = fSection.get("text").toString();
+        format = Shared.platform.replaceAllPlaceholders(format, p).replaceAll("%msg%", msg);
+        for (TabPlayer pl : Shared.getPlayers())
+            pl.sendCustomPacket(new PacketPlayOutChat(format, PacketPlayOutChat.ChatMessageType.CHAT));
     }
 }
