@@ -104,8 +104,7 @@ public class Layout {
                             if (!(boolean)setConfig.get("vanished")){
                                 if (SharedTA.platform instanceof SpigotTA && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
                                     vanished = true;
-                                else if (p.isVanished())
-                                    vanished = true;
+                                else if (p.isVanished()) vanished = true;
                             }
 
                             if (vanished) {
