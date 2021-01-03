@@ -3,7 +3,6 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 import io.github.tanguygab.tabadditions.shared.SharedTA;
 import me.neznamy.tab.api.TabPlayer;
 
-import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,16 +20,15 @@ public class ChatManager {
     public static ChatManager getInstance() {
         return instance;
     }
-    public String getFormat(TabPlayer p) {
+    public ChatFormat getFormat(TabPlayer p) {
         String format = SharedTA.chatConfig.getString("default-format","default");
-        if (format.equalsIgnoreCase("")) return "null";
+        if (format.equalsIgnoreCase("")) return null;
 
         ChatFormat f = formats.get(format);
         while (f != null && !f.isConditionMet(p)) {
             f = formats.get(f.getChildLayout());
-            if (f == null) return "null";
-            format = f.getName();
+            if (f == null) return null;
         }
-        return format;
+        return f;
     }
 }

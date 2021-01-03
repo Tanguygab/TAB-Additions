@@ -47,7 +47,7 @@ public class SharedEvents {
 
     public static void ChatEvent(TabPlayer p, String msg) {
         Map<String, Object> formats = SharedTA.chatConfig.getConfigurationSection("chat-formats");
-        Map<String, Object> fSection = (Map<String, Object>) formats.get("_OTHER_");
+        Map<String, Object> fSection = (Map<String, Object>) formats.get(SharedTA.chatConfig.getString("default-format","default"));
         String format = fSection.get("text").toString();
         format = Shared.platform.replaceAllPlaceholders(format, p).replaceAll("%msg%", msg);
         for (TabPlayer pl : Shared.getPlayers())

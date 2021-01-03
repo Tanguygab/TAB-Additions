@@ -20,7 +20,7 @@ public class ChatFormat {
         config = SharedTA.chatConfig.getConfigurationSection("chat-formats."+name);
     }
 
-    protected String getName() {
+    public String getName() {
         return name;
     }
     protected String getChildLayout() {
@@ -40,7 +40,7 @@ public class ChatFormat {
         }
     }
 
-    private boolean isInRange(TabPlayer sender,TabPlayer viewer,String range) {
+    public boolean isInRange(TabPlayer sender,TabPlayer viewer,String range) {
         if (SharedTA.platform.type().equals("Bungee")) return true;
         int zone = (int) Math.pow(Integer.parseInt(range), 2);
         return sender.getWorldName().equals(viewer.getWorldName()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;

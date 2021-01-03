@@ -9,4 +9,6 @@ public abstract class Platform {
 	public abstract void AsyncTask(Runnable r, long delay);
 	
 	public abstract void cancelTask(int id);
+
+    public abstract void disable();
 }

@@ -32,4 +32,9 @@ public class SpigotTA extends Platform {
 	public void cancelTask(int id) {
 		Bukkit.getServer().getScheduler().cancelTask(id);
 	}
+
+	@Override
+	public void disable() {
+		plugin.getPluginLoader().disablePlugin(plugin);
+	}
 }

@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import io.github.tanguygab.tabadditions.spigot.SpigotTA;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.Shared;
@@ -24,6 +25,7 @@ public class Layout {
     protected final Map<Integer,PacketPlayOutPlayerInfo.PlayerInfoData> fakeplayers = new HashMap<>();
     protected final Map<Integer,Map<String,Object>> placeholders = new HashMap<>();
     protected final Map<Object, List<Integer>> playersets = new HashMap<>();
+    protected final Map<Object,Sorting> sorting = new HashMap<>();
 
     Map<TabPlayer, Map<Integer, Object>> skinsp = new HashMap<>();
     Map<TabPlayer, Map<Integer, Object>> skinss = new HashMap<>();
@@ -156,24 +158,41 @@ public class Layout {
         }
     }
 
+
     private List<TabPlayer> playerSet(Object slot) {
-        Map<String,TabPlayer> pSorted = new TreeMap<>();
-        for (TabPlayer pl : Shared.getPlayers())
-            pSorted.put(pl.getTeamName(), pl);
-        List<TabPlayer> players = new ArrayList<>(pSorted.values());
-        String condition = ((Map<String,String>)slot).get("condition");
-        if (condition != null && !condition.equals(""))
+        Map<String,Object> section = (Map<String, Object>) slot;
+
+        List<TabPlayer> list = new ArrayList<>(Shared.getPlayers());
+        String condition = section.get("condition").toString();
+        if (condition != null && !condition.equals("")) {
             if (condition.startsWith("!")) {
-                Condition cond = Condition.getCondition(condition.replaceFirst("!",""));
+                Condition cond = Condition.getCondition(condition.replaceFirst("!", ""));
                 if (cond != null)
-                    players.removeIf(cond::isMet);
-            }
-            else {
+                    list.removeIf(cond::isMet);
+            } else {
                 Condition cond = Condition.getCondition(condition);
                 if (cond != null)
-                    players.removeIf(p -> !cond.isMet(p));
+                    list.removeIf(p -> !cond.isMet(p));
             }
-        return players;
+        }
+
+        if (!section.containsKey("sorting")) {
+            Map<String,TabPlayer> pSorted = new TreeMap<>();
+            for (TabPlayer p : list)
+                pSorted.put(p.getTeamName(), p);
+            return new ArrayList<>(pSorted.values());
+        }
+
+
+
+        Sorting sort;
+        if (sorting.containsKey(slot)) sort = sorting.get(slot);
+        else sort = new Sorting((Map<String, Object>) section.get("sorting"), list, getName());
+        Map<String,TabPlayer> pSorted = new TreeMap<>();
+        for (TabPlayer p : list)
+            pSorted.put(sort.getPosition(p) + p.getName(), p);
+        sorting.put(slot,sort);
+        return new ArrayList<>(pSorted.values());
     }
 
     protected void create() {

@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
@@ -36,8 +37,20 @@ public class SharedTA {
     public static int nametagInRange = 0;
     public static Map<String,Integer> tasks = new HashMap<>();
 
-    public static void reload(File dataFolder) {
+    public static boolean isCompatible() {
+        try {
+            YamlConfigurationFile.class.getConstructor(InputStream.class, File.class);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 
+    public static void reload(File dataFolder) {
+        if (!isCompatible()) {
+            platform.disable();
+            return;
+        }
         try {
             if (platform.type().equals("Bungee"))
                 config = new YamlConfigurationFile(SharedTA.class.getClassLoader().getResourceAsStream("bungeeconfig.yml"), new File(dataFolder, "config.yml"));
@@ -97,7 +110,7 @@ public class SharedTA {
         if (LayoutManager.getInstance() != null) {
             LayoutManager.getInstance().unregister();
         }
-        if (layoutEnabled) {
+        if (layoutEnabled && Shared.isPremium()) {
             new LayoutManager();
             LayoutManager.getInstance().showLayoutAll();
         }

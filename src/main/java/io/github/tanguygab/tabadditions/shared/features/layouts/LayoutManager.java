@@ -25,7 +25,6 @@ public class LayoutManager {
 
     public LayoutManager() {
         instance = this;
-        if (!Shared.isPremium()) return;
         for (Object layout : SharedTA.layoutConfig.getConfigurationSection("layouts").keySet())
             layouts.put(layout.toString(),new Layout(layout.toString()));
         refresh();

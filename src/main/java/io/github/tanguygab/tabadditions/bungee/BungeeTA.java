@@ -33,4 +33,11 @@ public class BungeeTA extends Platform {
 	public void cancelTask(int id) {
 		ProxyServer.getInstance().getScheduler().cancel(id);
 	}
+
+	@Override
+	public void disable() {
+		plugin.getProxy().getPluginManager().unregisterCommands(plugin);
+		plugin.getProxy().getPluginManager().unregisterListeners(plugin);
+
+	}
 }
