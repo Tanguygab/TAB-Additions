@@ -101,10 +101,12 @@ public class Layout {
                             TabPlayer pInSet = pset.get(inList);
 
                             boolean vanished = false;
-                            if (SharedTA.platform instanceof SpigotTA && !((Player)p.getPlayer()).canSee(((Player)pInSet.getPlayer())))
-                                vanished = true;
-                            else if (p.isVanished())
-                                vanished = true;
+                            if (!(boolean)setConfig.get("vanished")){
+                                if (SharedTA.platform instanceof SpigotTA && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
+                                    vanished = true;
+                                else if (p.isVanished())
+                                    vanished = true;
+                            }
 
                             if (vanished) {
                                 p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
