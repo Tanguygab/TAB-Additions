@@ -101,7 +101,7 @@ public class Layout {
                             TabPlayer pInSet = pset.get(inList);
 
                             boolean vanished = false;
-                            if (!(boolean)setConfig.get("vanished")){
+                            if (setConfig.get("vanished") != null && !(boolean)setConfig.get("vanished")){
                                 if (SharedTA.platform instanceof SpigotTA && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
                                     vanished = true;
                                 else if (p.isVanished()) vanished = true;
