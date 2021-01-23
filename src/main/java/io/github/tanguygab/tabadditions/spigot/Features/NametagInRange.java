@@ -14,28 +14,20 @@ import java.util.Map;
 
 public class NametagInRange {
 
-    private final Map<Player, List<Entity>> list = new HashMap<>();
-
     public int load() {
 
-        return Bukkit.getScheduler().scheduleSyncRepeatingTask((Plugin) SharedTA.plugin, () -> {
-            int range = SharedTA.nametagInRange;
+        return Bukkit.getScheduler().scheduleAsyncRepeatingTask((Plugin) SharedTA.plugin, () -> {
+            int zone = (int) Math.pow(SharedTA.nametagInRange, 2);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                ArrayList<Entity> entities = (ArrayList<Entity>) p.getNearbyEntities(range, range, range);
-                entities.removeIf(entity -> !(entity instanceof Player));
-                for (Entity otherp : entities) {
-                    Shared.getPlayer(otherp.getUniqueId()).showNametag(p.getUniqueId());
-                    list.put(p,entities);
+                for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+
+                    if (p != player && p.getWorld().equals(player.getWorld()) && player.getLocation().distanceSquared(p.getLocation()) < zone) {
+                        Shared.getPlayer(player.getUniqueId()).showNametag(p.getUniqueId());
+                    }
+                    else if (Shared.getPlayer(player.getUniqueId()) != null) {
+                        Shared.getPlayer(player.getUniqueId()).hideNametag(p.getUniqueId());
+                    }
                 }
-                if (list.containsKey(p))
-                    list.get(p).removeIf(entity -> {
-                        if (!entities.contains(entity)) {
-                            if (Shared.getPlayer(entity.getUniqueId()) != null)
-                                Shared.getPlayer(entity.getUniqueId()).hideNametag(p.getUniqueId());
-                            return true;
-                        }
-                        return false;
-                    });
             }
         }, 0L, 10L);
     }

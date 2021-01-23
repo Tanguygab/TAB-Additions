@@ -6,6 +6,7 @@ import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.Shared;
 import me.neznamy.tab.shared.packets.PacketPlayOutChat;
+import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,6 +41,13 @@ public class SharedEvents {
                 for (TabPlayer p2 : Shared.getPlayers()) {
                     p.hideNametag(p2.getUniqueId());
                     p2.hideNametag(p.getUniqueId());
+                }
+            if (SharedTA.tablistNamesRadius != 0)
+                for (TabPlayer p2 : Shared.getPlayers()) {
+                    if (p != p2) {
+                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p2.getUniqueId())));
+                        p2.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p.getUniqueId())));
+                    }
                 }
         }, 1);
 

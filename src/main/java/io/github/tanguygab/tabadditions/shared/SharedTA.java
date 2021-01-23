@@ -8,9 +8,12 @@ import java.util.*;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.spigot.Features.NametagInRange;
+import io.github.tanguygab.tabadditions.spigot.Features.TablistNamesRadius;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.Shared;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
+import me.neznamy.tab.shared.packets.IChatBaseComponent;
+import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
 
 import javax.script.ScriptException;
@@ -35,6 +38,7 @@ public class SharedTA {
     public static boolean layoutEnabled;
     public static boolean sneakhideEnabled = false;
     public static int nametagInRange = 0;
+    public static int tablistNamesRadius = 0;
     public static Map<String,Integer> tasks = new HashMap<>();
 
     public static boolean isCompatible() {
@@ -68,6 +72,7 @@ public class SharedTA {
             if (platform.type().equals("Spigot")) {
                 sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
+                tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
             }
 
             for (TabPlayer p : Shared.getPlayers()) {
@@ -77,6 +82,8 @@ public class SharedTA {
             loadLayout();
             loadChat();
             loadNametagInRange();
+            loadTablistNamesRadius();
+
             refresh();
         } catch (IOException e) {
             e.printStackTrace();
@@ -90,6 +97,7 @@ public class SharedTA {
         p.loadPropertyFromConfig("customchatname", p.getName());
         p.loadPropertyFromConfig("chatsuffix");
     }
+
     private static void loadLists() {
         List<String> temp = new ArrayList<>();
         for (Object key : actionbarConfig.getConfigurationSection("bars").keySet())
@@ -122,11 +130,13 @@ public class SharedTA {
     }
     private static void loadNametagInRange() {
         if (nametagInRange != 0) {
-            for (TabPlayer p : Shared.getPlayers())
-                for (TabPlayer p2 : Shared.getPlayers())
+            for (TabPlayer p : Shared.getPlayers()) {
+                for (TabPlayer p2 : Shared.getPlayers()) {
                     if (p != p2)
                         p.hideNametag(p2.getUniqueId());
-            if (tasks.containsKey("Nametag-In-Range")) {
+                }
+            }
+            if (!tasks.containsKey("Nametag-In-Range")) {
                 tasks.put("Nametag-In-Range",new NametagInRange().load());
             }
         } else if (tasks.containsKey("Nametag-In-Range")) {
@@ -137,6 +147,29 @@ public class SharedTA {
                     if (p != p2)
                         p.showNametag(p2.getUniqueId());
         }
+    }
+    private static void loadTablistNamesRadius() {
+        if (tablistNamesRadius != 0) {
+            if (tablistNamesRadius < 100)
+                tablistNamesRadius = 100;
+            for (TabPlayer p : Shared.getPlayers()) {
+                for (TabPlayer p2 : Shared.getPlayers()) {
+                    if (p != p2)
+                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p2.getUniqueId())));
+                }
+            }
+            if (!tasks.containsKey("Tablist-Names-Radius")) {
+                tasks.put("Tablist-Names-Radius",new TablistNamesRadius().load());
+            }
+        } else if (tasks.containsKey("Tablist-Names-Radius")) {
+            Bukkit.getServer().getScheduler().cancelTask(tasks.get("Tablist-Names-Radius"));
+            tasks.remove("Tablist-Names-Radius");
+            for (TabPlayer p : Shared.getPlayers())
+                for (TabPlayer p2 : Shared.getPlayers())
+                    if (p != p2)
+                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p2.getUniqueId())));
+        }
+
     }
 
     private static void refresh() {
