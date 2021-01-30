@@ -4,7 +4,6 @@ import io.github.tanguygab.tabadditions.shared.SharedTA;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import net.md_5.bungee.api.plugin.Plugin;
 
-
 public final class TABAdditionsBungeeCord extends Plugin {
 
 	private static TABAdditionsBungeeCord instance;
@@ -30,5 +29,6 @@ public final class TABAdditionsBungeeCord extends Plugin {
         SharedTA.reload(getDataFolder());
         getProxy().getPluginManager().unregisterListeners(this);
         getProxy().getPluginManager().registerListener(this, new BungeeEvents());
+        SharedTA.floodgate = getProxy().getPluginManager().getPlugin("Floodgate") != null;
     }
 }

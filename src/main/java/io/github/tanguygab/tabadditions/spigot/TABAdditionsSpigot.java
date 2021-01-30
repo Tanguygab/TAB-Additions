@@ -1,15 +1,12 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.commands.*;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.spigot.Features.BukkitEvents;
 import me.neznamy.tab.api.TabPlayer;
 
-import me.neznamy.tab.shared.Shared;
-import me.neznamy.tab.shared.features.AlignedSuffix;
-import me.neznamy.tab.shared.features.sorting.Sorting;
+import me.neznamy.tab.shared.TAB;
 import org.bukkit.Bukkit;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
@@ -47,12 +44,13 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
             new TABAdditionsExpansion(this).register();
+        SharedTA.floodgate = Bukkit.getPluginManager().getPlugin("Floodgate") != null;
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (!(sender instanceof Player)) return true;
-        TabPlayer p = Shared.getPlayer(sender.getName());
+        TabPlayer p = TAB.getInstance().getPlayer(sender.getName());
         if (args.length < 1 || args[0].equalsIgnoreCase("help"))
             new HelpCmd(p, this.getDescription().getVersion());
         else
@@ -101,8 +99,6 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 }
                 case "test": {
                     p.sendMessage("&7Nothing to see here :D",true);
-                    Sorting sorting = new Sorting();
-                    p.sendMessage(ChatManager.getInstance().getFormat(p).getName()+ChatManager.getInstance().getFormat(p).isInRange(p,Shared.getPlayer(args[1]),"5"),false);
                     break;
                 }
             }

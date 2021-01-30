@@ -1,11 +1,12 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.features.Skins;
 import io.github.tanguygab.tabadditions.spigot.Features.NMS;
 import io.github.tanguygab.tabadditions.spigot.SpigotTA;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Shared;
+import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 
 import java.util.ArrayList;
@@ -54,8 +55,8 @@ public class LayoutManager {
 
     private void refresh() {
         task = SharedTA.platform.AsyncTask(() -> {
-            for (TabPlayer p : Shared.getPlayers()) {
-                if (players.containsKey(p) && !players.get(p).equals(getLayout(p))) {
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                if (!SharedTA.checkBedrock(p) && players.containsKey(p) && !players.get(p).equals(getLayout(p))) {
                     toRemove.put(p, players.get(p));
                     toAdd.put(p,getLayout(p));
                 }
@@ -93,17 +94,19 @@ public class LayoutManager {
         }
     }
     public void showLayoutAll() {
-        for (TabPlayer p : Shared.getPlayers())
-            toAdd.put(p,getLayout(p));
+        for (TabPlayer p : TAB.getInstance().getPlayers())
+            if (!SharedTA.checkBedrock(p))
+                toAdd.put(p,getLayout(p));
     }
 
     public void removeLayoutAll() {
-        for (TabPlayer p : Shared.getPlayers())
-            toRemove.put(p,getLayout(p));
+        for (TabPlayer p : TAB.getInstance().getPlayers())
+            if (!SharedTA.checkBedrock(p))
+                toRemove.put(p,getLayout(p));
     }
 
     protected Object getIcon(String icon,TabPlayer p) {
-        icon = Shared.platform.replaceAllPlaceholders(icon, p);
+        icon = TAB.getInstance().getPlatform().replaceAllPlaceholders(icon, p);
         if (icons.containsKey(icon))
             return icons.get(icon);
         String deficon = icon;
@@ -112,15 +115,22 @@ public class LayoutManager {
             icon = icon.replace("player-head:", "");
             if (TABAPI.getPlayer(icon) != null)
                 skin = TABAPI.getPlayer(icon).getSkin();
-            else if (SharedTA.platform instanceof SpigotTA)
-                skin = NMS.getPropPlayer(icon);
+            else if (SharedTA.platform.type().equals("Spigot"))
+                skin = NMS.asPropertyMap(Skins.getPropPlayer(icon));
+            else {
+                skin = Skins.asSkin(Skins.getPropPlayer(icon));
+            }
+
         }
         else if (icon.startsWith("mineskin:")) {
             icon = icon.replace("mineskin:", "");
             try {
                 int mineskinid = Integer.parseInt(icon);
-                if (SharedTA.platform instanceof SpigotTA)
-                    skin = NMS.getPropSkin(mineskinid);
+                if (SharedTA.platform.type().equals("Spigot"))
+                    skin = NMS.asPropertyMap(Skins.getPropSkin(mineskinid));
+                else {
+                    skin = Skins.asSkin(Skins.getPropSkin(mineskinid));
+                }
             }
             catch (NumberFormatException ignored) {}
         }

@@ -2,7 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.commands;
 
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Shared;
+import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.PacketPlayOutChat;
 
 public class ActionBarCmd {
@@ -17,7 +17,7 @@ public class ActionBarCmd {
             sender.sendMessage("&cThis player isn't connected",true);
             return;
         }
-        actionbar = Shared.platform.replaceAllPlaceholders(actionbar,p);
+        actionbar = TAB.getInstance().getPlatform().replaceAllPlaceholders(actionbar,p);
         p.sendCustomPacket(new PacketPlayOutChat(actionbar, PacketPlayOutChat.ChatMessageType.GAME_INFO));
     }
 }

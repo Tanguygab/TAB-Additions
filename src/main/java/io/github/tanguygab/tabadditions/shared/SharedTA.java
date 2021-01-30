@@ -10,13 +10,11 @@ import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.spigot.Features.NametagInRange;
 import io.github.tanguygab.tabadditions.spigot.Features.TablistNamesRadius;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Shared;
+import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
-
-import javax.script.ScriptException;
+import org.geysermc.floodgate.FloodgateAPI;
 
 public class SharedTA {
 
@@ -39,6 +37,7 @@ public class SharedTA {
     public static boolean sneakhideEnabled = false;
     public static int nametagInRange = 0;
     public static int tablistNamesRadius = 0;
+    public static boolean floodgate = false;
     public static Map<String,Integer> tasks = new HashMap<>();
 
     public static boolean isCompatible() {
@@ -75,7 +74,7 @@ public class SharedTA {
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
             }
 
-            for (TabPlayer p : Shared.getPlayers()) {
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 loadProps(p);
             }
             loadLists();
@@ -118,7 +117,7 @@ public class SharedTA {
         if (LayoutManager.getInstance() != null) {
             LayoutManager.getInstance().unregister();
         }
-        if (layoutEnabled && Shared.isPremium()) {
+        if (layoutEnabled && TAB.getInstance().isPremium()) {
             new LayoutManager();
             LayoutManager.getInstance().showLayoutAll();
         }
@@ -130,8 +129,8 @@ public class SharedTA {
     }
     private static void loadNametagInRange() {
         if (nametagInRange != 0) {
-            for (TabPlayer p : Shared.getPlayers()) {
-                for (TabPlayer p2 : Shared.getPlayers()) {
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
                     if (p != p2)
                         p.hideNametag(p2.getUniqueId());
                 }
@@ -142,8 +141,8 @@ public class SharedTA {
         } else if (tasks.containsKey("Nametag-In-Range")) {
             Bukkit.getServer().getScheduler().cancelTask(tasks.get("Nametag-In-Range"));
             tasks.remove("Nametag-In-Range");
-            for (TabPlayer p : Shared.getPlayers())
-                for (TabPlayer p2 : Shared.getPlayers())
+            for (TabPlayer p : TAB.getInstance().getPlayers())
+                for (TabPlayer p2 : TAB.getInstance().getPlayers())
                     if (p != p2)
                         p.showNametag(p2.getUniqueId());
         }
@@ -152,8 +151,8 @@ public class SharedTA {
         if (tablistNamesRadius != 0) {
             if (tablistNamesRadius < 100)
                 tablistNamesRadius = 100;
-            for (TabPlayer p : Shared.getPlayers()) {
-                for (TabPlayer p2 : Shared.getPlayers()) {
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
                     if (p != p2)
                         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p2.getUniqueId())));
                 }
@@ -164,8 +163,8 @@ public class SharedTA {
         } else if (tasks.containsKey("Tablist-Names-Radius")) {
             Bukkit.getServer().getScheduler().cancelTask(tasks.get("Tablist-Names-Radius"));
             tasks.remove("Tablist-Names-Radius");
-            for (TabPlayer p : Shared.getPlayers())
-                for (TabPlayer p2 : Shared.getPlayers())
+            for (TabPlayer p : TAB.getInstance().getPlayers())
+                for (TabPlayer p2 : TAB.getInstance().getPlayers())
                     if (p != p2)
                         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p2.getUniqueId())));
         }
@@ -174,7 +173,7 @@ public class SharedTA {
 
     private static void refresh() {
         tasks.put("Global-Refresh",platform.AsyncTask(()-> {
-            List<TabPlayer> list = new ArrayList<>(Shared.getPlayers());
+            List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
             List<String> chatprops = new ArrayList<>(Arrays.asList("chatprefix","customchatname","chatsuffix"));
             for (TabPlayer p : list) {
                 for (String prop : chatprops)
@@ -183,5 +182,10 @@ public class SharedTA {
                     else p.loadPropertyFromConfig(prop);
             }
         },0L,5L));
+    }
+
+    public static boolean checkBedrock(TabPlayer p) {
+        if (!floodgate) return false;
+        return FloodgateAPI.isBedrockPlayer(p.getUniqueId());
     }
 }

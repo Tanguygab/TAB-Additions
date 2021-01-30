@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
-import org.bukkit.Bukkit;
+import me.neznamy.tab.shared.TAB;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -16,9 +16,6 @@ import io.github.tanguygab.tabadditions.shared.SharedTA;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.event.BukkitTABLoadEvent;
-import me.neznamy.tab.shared.Shared;
-import me.neznamy.tab.shared.packets.PacketPlayOutChat;
-import org.bukkit.plugin.Plugin;
 
 
 public class BukkitEvents implements Listener {
@@ -52,7 +49,7 @@ public class BukkitEvents implements Listener {
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
         if (SharedTA.chatEnabled) {
-            SharedEvents.ChatEvent(Shared.getPlayer(e.getPlayer().getUniqueId()), e.getMessage());
+            SharedEvents.ChatEvent(TAB.getInstance().getPlayer(e.getPlayer().getUniqueId()), e.getMessage());
             e.setCancelled(true);
         }
     }

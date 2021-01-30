@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.layouts.sorting;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.Configs;
 
 import java.util.*;
@@ -64,7 +65,7 @@ public class Sorting {
     public static LinkedHashMap<String, String> loadSortingList() {
         LinkedHashMap<String, String> sortedGroups = new LinkedHashMap<>();
         int index = 1;
-        List<String> configList = Configs.config.getStringList("group-sorting-priority-list", Arrays.asList("Owner", "Admin", "Mod", "Helper", "Builder", "Premium", "Player", "default"));
+        List<String> configList = TAB.getInstance().getConfiguration().config.getStringList("group-sorting-priority-list", Arrays.asList("Owner", "Admin", "Mod", "Helper", "Builder", "Premium", "Player", "default"));
         int charCount = String.valueOf(configList.size()).length(); //1 char for <10 groups, 2 chars for <100 etc
         for (Object group : configList){
             String sort = index+"";

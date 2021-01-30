@@ -2,16 +2,11 @@ package io.github.tanguygab.tabadditions.spigot.Features;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Shared;
+import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class TablistNamesRadius {
 
@@ -23,11 +18,11 @@ public class TablistNamesRadius {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
 
                     if (p != player && p.getWorld().equals(player.getWorld()) && player.getLocation().distanceSquared(p.getLocation()) < zone) {
-                        TabPlayer p2 = Shared.getPlayer(player.getUniqueId());
-                        Shared.getPlayer(p.getUniqueId()).sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p2.getName(), p2.getTablistUUID(), p2.getSkin(), (int)p2.getPing(), PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, null)));
+                        TabPlayer p2 = TAB.getInstance().getPlayer(player.getUniqueId());
+                        TAB.getInstance().getPlayer(p.getUniqueId()).sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p2.getName(), p2.getTablistUUID(), p2.getSkin(), (int)p2.getPing(), PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, null)));
                     }
                     else if (p != player) {
-                        Shared.getPlayer(p.getUniqueId()).sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(player.getUniqueId())));
+                        TAB.getInstance().getPlayer(p.getUniqueId()).sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(player.getUniqueId())));
                     }
                 }
             }

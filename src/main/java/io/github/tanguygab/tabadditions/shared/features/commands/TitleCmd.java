@@ -2,7 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.commands;
 
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Shared;
+import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.PacketPlayOutTitle;
 
 import java.util.List;
@@ -24,8 +24,8 @@ public class TitleCmd {
             sender.sendMessage("&cThis player isn't connected!",true);
             return;
         }
-        title = Shared.platform.replaceAllPlaceholders(title,p);
-        subtitle = Shared.platform.replaceAllPlaceholders(subtitle,p);
+        title = TAB.getInstance().getPlatform().replaceAllPlaceholders(title,p);
+        subtitle = TAB.getInstance().getPlatform().replaceAllPlaceholders(subtitle,p);
         p.sendCustomPacket(PacketPlayOutTitle.TITLE(title));
         p.sendCustomPacket(PacketPlayOutTitle.SUBTITLE(subtitle));
         p.sendCustomPacket(PacketPlayOutTitle.TIMES(fadeIn,stay,fadeOut));
