@@ -3,7 +3,7 @@ import org.apache.tools.ant.filters.ReplaceTokens
 apply plugin: 'java'
 
 group = 'io.github.tanguygab'
-version = '1.4.2'
+version = '1.4.3'
 
 repositories {
     mavenCentral()
