@@ -22,7 +22,7 @@ public class Skins {
 
             return new String[]{value,signature};
         } catch (Exception e) {
-            throw new Error(e);
+            return null;
         }
     }
 
@@ -36,7 +36,7 @@ public class Skins {
 
             return new String[]{value,signature};
         } catch (Exception e) {
-            throw new Error(e);
+            return null;
         }
     }
 }
