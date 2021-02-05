@@ -10,9 +10,11 @@ import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.spigot.Features.NametagInRange;
 import io.github.tanguygab.tabadditions.spigot.Features.TablistNamesRadius;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
+import me.neznamy.tab.shared.placeholders.Placeholder;
 import org.bukkit.Bukkit;
 import org.geysermc.floodgate.FloodgateAPI;
 
@@ -82,6 +84,7 @@ public class SharedTA {
             loadChat();
             loadNametagInRange();
             loadTablistNamesRadius();
+            loadPlaceholders();
 
             refresh();
         } catch (IOException e) {
@@ -95,6 +98,44 @@ public class SharedTA {
         p.loadPropertyFromConfig("chatprefix");
         p.loadPropertyFromConfig("customchatname", p.getName());
         p.loadPropertyFromConfig("chatsuffix");
+        p.loadPropertyFromConfig("moreheader");
+        p.loadPropertyFromConfig("morefooter");
+
+        Property footer = p.getProperty("footer");
+        Property header = p.getProperty("header");
+
+        if (header != null) {
+            String moreheader = p.getProperty("moreheader").getCurrentRawValue();
+            if (moreheader.length() > 2) {
+                moreheader = moreheader.substring(1).substring(0, moreheader.length()-1);
+
+                List<String> lines = Arrays.asList(moreheader.split(", "));
+
+                String result = "";
+                for (String line : lines) {
+                    if (lines.indexOf(line) == lines.size() - 1)
+                        result = result + "\n" + '\u00a7' + "r";
+                    result = result + line;
+                }
+                header.setTemporaryValue(header.getCurrentRawValue() + "\n" + result);
+            }
+        }
+        if (footer != null) {
+            String morefooter = p.getProperty("morefooter").getCurrentRawValue();
+            if (morefooter.length() > 2) {
+                morefooter = morefooter.substring(1).substring(0, morefooter.length()-1);
+
+                List<String> lines = Arrays.asList(morefooter.split(", "));
+
+                String result = "";
+                for (String line : lines) {
+                    if (lines.indexOf(line) == lines.size() - 1)
+                        result = result + "\n" + '\u00a7' + "r";
+                    result = result + line;
+                }
+                footer.setTemporaryValue(footer.getCurrentRawValue() + "\n" + result);
+            }
+        }
     }
 
     private static void loadLists() {
@@ -170,6 +211,23 @@ public class SharedTA {
         }
 
     }
+    private static void loadPlaceholders() {
+        List<String> props = Arrays.asList("tabprefix","tabsuffix","customtabname",
+                "tagprefix","tagsuffix","customtagname",
+                "chatprefix","chatsuffix","customchatname",
+                "abovename","belowname","title","actionbar");
+        for (String prop : props) {
+            TAB.getInstance().getPlaceholderManager().registerPlaceholder(new Placeholder("%prop-"+prop+"%", 100) {
+                @Override
+                public String getLastValue(TabPlayer p) {
+                    Property property = p.getProperty(prop);
+                    if (property != null)
+                        return property.updateAndGet();
+                    return "";
+                }
+            });
+        }
+    }
 
     private static void refresh() {
         tasks.put("Global-Refresh",platform.AsyncTask(()-> {
@@ -181,7 +239,13 @@ public class SharedTA {
                         p.getProperty(prop).update();
                     else p.loadPropertyFromConfig(prop);
             }
-        },0L,5L));
+        },0L,500L));
+    }
+
+    public static String parsePlaceholders(String str, TabPlayer p) {
+        str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
+        str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
+        return str;
     }
 
     public static boolean checkBedrock(TabPlayer p) {

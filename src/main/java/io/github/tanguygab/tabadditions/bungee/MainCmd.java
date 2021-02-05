@@ -2,8 +2,8 @@ package io.github.tanguygab.tabadditions.bungee;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
 import io.github.tanguygab.tabadditions.shared.features.commands.*;
-import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.TAB;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -19,55 +19,55 @@ public class MainCmd extends Command {
 
     public void execute(CommandSender sender, String[] args) {
         if (!(sender instanceof ProxiedPlayer)) return;
-        TabPlayer pTAB = TABAPI.getPlayer(sender.getName());
+        TabPlayer p = TAB.getInstance().getPlayer(sender.getName());
         if (args.length < 1 || args[0].equalsIgnoreCase("help"))
-            new HelpCmd(pTAB, ProxyServer.getInstance().getPluginManager().getPlugin("TAB-Additions").getDescription().getVersion());
+            new HelpCmd(p, ProxyServer.getInstance().getPluginManager().getPlugin("TAB-Additions").getDescription().getVersion());
         else
             switch (args[0].toLowerCase()) {
                 case "reload": {
-                	TABAdditionsBungeeCord.getInstance().reload();
-                    pTAB.sendMessage("&aConfig reloaded!",true);
+                	((TABAdditionsBungeeCord)SharedTA.plugin).reload();
+                    p.sendMessage("&aConfig reloaded!",true);
                     break;
                 }
                 case "actionbar": {
                     if (!SharedTA.config.getBoolean("features.actionbars"))
-                        pTAB.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
+                        p.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
-                        pTAB.sendMessage("&cYou have to provide an actionbar!",true);
+                        p.sendMessage("&cYou have to provide an actionbar!",true);
                     else {
                         Map<String,String> section = SharedTA.actionbarConfig.getConfigurationSection("bars");
                         if (!section.containsKey(args[1]))
-                            pTAB.sendMessage("&cThis actionbar doesn't exist!",true);
+                            p.sendMessage("&cThis actionbar doesn't exist!",true);
                         else
-                            new ActionBarCmd(pTAB, args, section.get(args[1]));
+                            new ActionBarCmd(p, args, section.get(args[1]));
                     }
                     break;
                 }
                 case "title": {
                     if (!SharedTA.config.getBoolean("features.titles"))
-                        pTAB.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
+                        p.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
-                        pTAB.sendMessage("&cYou have to provide a title!",true);
+                        p.sendMessage("&cYou have to provide a title!",true);
                     else {
                         Map<String,String> titleSection = SharedTA.titleConfig.getConfigurationSection("titles."+args[1]);
                         if (titleSection.keySet().isEmpty()) {
-                            pTAB.sendMessage("&cThis title doesn't exist!",true);
+                            p.sendMessage("&cThis title doesn't exist!",true);
                         }
                         else {
                             List<Object> titleProperties = new ArrayList<>();
                             for (Object property : titleSection.keySet())
                                 titleProperties.add(titleSection.get(property));
-                            new TitleCmd(pTAB, args, titleProperties);
+                            new TitleCmd(p, args, titleProperties);
                         }
                     }
                     break;
                 }
                 case "tags": {
-                    new TagsCmd(pTAB, args);
+                    new TagsCmd(p, args);
                     break;
                 }
                 case "test": {
-                    pTAB.sendMessage("&7Nothing to see here :D",true);
+                    p.sendMessage("&7Nothing to see here :D",true);
                 }
             }
     }

@@ -20,13 +20,22 @@ public class BungeeTA extends Platform {
 	}
 
 	@Override
+	public Object getSkin(String[] props) {
+		String[][] s = new String[1][3];
+		s[0][0] = "textures";
+		s[0][1] = props[0];
+		s[0][2] = props[1];
+		return s;
+	}
+
+	@Override
 	public int AsyncTask(Runnable r, long delay, long period) {
-		return ProxyServer.getInstance().getScheduler().schedule(plugin,r,delay/20,period/20, TimeUnit.SECONDS).getId();
+		return ProxyServer.getInstance().getScheduler().schedule(plugin,r,delay,period, TimeUnit.MILLISECONDS).getId();
 	}
 
 	@Override
 	public void AsyncTask(Runnable r, long delay) {
-		ProxyServer.getInstance().getScheduler().schedule(plugin,r,delay/20,TimeUnit.SECONDS);
+		ProxyServer.getInstance().getScheduler().schedule(plugin,r,delay,TimeUnit.MILLISECONDS);
 	}
 
 	@Override

@@ -14,7 +14,6 @@ import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.rgb.TextColor;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -27,7 +26,7 @@ public class SharedEvents {
 
             if (SharedTA.actionbarsEnabled) {
                 String actionbar = SharedTA.actionbarConfig.getString("bars." + p.getProperty("actionbar").get(),"");
-                actionbar = TAB.getInstance().getPlatform().replaceAllPlaceholders(actionbar,p);
+                actionbar = SharedTA.parsePlaceholders(actionbar,p);
                 p.sendCustomPacket(new PacketPlayOutChat(actionbar, PacketPlayOutChat.ChatMessageType.GAME_INFO));
             }
             if (SharedTA.titlesEnabled) {
@@ -55,7 +54,7 @@ public class SharedEvents {
                         p2.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p.getUniqueId())));
                     }
                 }
-        }, 1);
+        }, 50);
 
     }
 
@@ -67,7 +66,7 @@ public class SharedEvents {
 
             for (IChatBaseComponent txt : comp.getExtra()) {
                 int pos = comp.getExtra().indexOf(txt);
-                String msg2 = TAB.getInstance().getPlatform().replaceAllPlaceholders(txt.getText(), p).replaceAll("%msg%", msg);
+                String msg2 = SharedTA.parsePlaceholders(txt.getText(), p).replaceAll("%msg%", msg);
                 txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
                 txt.toString(ProtocolVersion.v1_16_4);
 
@@ -97,13 +96,13 @@ public class SharedEvents {
                 comp.getExtra().set(pos, txt);
             }
             if (comp.getHoverValue() != null) {
-                String txt = TAB.getInstance().getPlatform().replaceAllPlaceholders(comp.getHoverValue()+"", p).replaceAll("%msg%", msg);
+                String txt = SharedTA.parsePlaceholders(comp.getHoverValue()+"", p).replaceAll("%msg%", msg);
                 IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
                 hover.toString(ProtocolVersion.v1_16_4);
                 comp.onHoverShowText(hover);
             }
             if (comp.getClickValue() != null) {
-                String txt = TAB.getInstance().getPlatform().replaceAllPlaceholders(comp.getClickValue()+"", p).replaceAll("%msg%", msg);
+                String txt = SharedTA.parsePlaceholders(comp.getClickValue()+"", p).replaceAll("%msg%", msg);
                 comp.onClickSuggestCommand(txt);
             }
         }

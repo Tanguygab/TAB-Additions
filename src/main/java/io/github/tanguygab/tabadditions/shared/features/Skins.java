@@ -8,16 +8,6 @@ import java.net.URL;
 
 public class Skins {
 
-    public static Object asSkin(String[] props) {
-        String[][] s = new String[3][3];
-        for (int i = 0;i<3;i++){
-            s[i][0] = "";
-            s[i][1] = props[0];
-            s[i][2] = props[1];
-        }
-        return s;
-    }
-
     public static String[] getPropPlayer(String name) {
         try {
             URL url_0 = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);

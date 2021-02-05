@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.layouts.sorting;
 
 import java.util.List;
 
+import io.github.tanguygab.tabadditions.shared.SharedTA;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 
@@ -17,7 +18,7 @@ public abstract class SortingType {
 	}
 	
 	protected String setPlaceholders(String string, TabPlayer p) {
-		return TAB.getInstance().getPlatform().replaceAllPlaceholders(string,p);
+		return SharedTA.parsePlaceholders(string,p);
 	}
 	
 	public abstract String getChars(TabPlayer p);

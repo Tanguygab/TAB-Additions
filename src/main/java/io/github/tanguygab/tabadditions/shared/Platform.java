@@ -4,6 +4,8 @@ public abstract class Platform {
 
 	public abstract String type();
 
+	public abstract Object getSkin(String[] props);
+
 	public abstract int AsyncTask(Runnable r, long delay, long period);
 	
 	public abstract void AsyncTask(Runnable r, long delay);
@@ -11,4 +13,5 @@ public abstract class Platform {
 	public abstract void cancelTask(int id);
 
     public abstract void disable();
+
 }

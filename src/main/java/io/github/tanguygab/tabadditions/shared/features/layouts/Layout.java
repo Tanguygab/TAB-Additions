@@ -57,11 +57,13 @@ public class Layout {
                     PacketPlayOutPlayerInfo.PlayerInfoData fp = fakeplayers.get(i);
                     Map<String, Object> slot = placeholders.get(i);
                     String text = slot.get("text")+"";
-                    text = TAB.getInstance().getPlatform().replaceAllPlaceholders(text, p);
+                    text = SharedTA.parsePlaceholders(text, p);
                     if (text.contains("||")) {
                         String prefixName = text.split("\\|\\|")[0];
                         String suffix = text.split("\\|\\|")[1];
-                        text = ((AlignedSuffix)TAB.getInstance().getFeatureManager().getFeature("alignedsuffix")).fixTextWidth(null, prefixName,suffix);
+                        AlignedSuffix alignedSuffix = ((AlignedSuffix)TAB.getInstance().getFeatureManager().getFeature("alignedsuffix"));
+                        if (alignedSuffix != null)
+                            text = alignedSuffix.fixTextWidth(null, prefixName,suffix);
                     }
 
                     Object skin = null;
@@ -110,7 +112,7 @@ public class Layout {
                             if (setConfig.containsKey("empty")) {
                                 Map<String,String> empty = (Map<String, String>) setConfig.get("empty");
                                 if (empty.containsKey("text"))
-                                    format = TAB.getInstance().getPlatform().replaceAllPlaceholders(empty.get("text"), p);
+                                    format = SharedTA.parsePlaceholders(empty.get("text"), p);
                                 if (empty.containsKey("icon"))
                                     skin = LayoutManager.getInstance().getIcon(empty.get("icon")+"",p);
                             }
@@ -124,15 +126,19 @@ public class Layout {
                         } else {
                             String format = "%player%";
                             if (setConfig.containsKey("text")) format = setConfig.get("text")+"";
-                            format = TAB.getInstance().getPlatform().replaceAllPlaceholders(format, pInSet);
+                            format = SharedTA.parsePlaceholders(format, pInSet);
                             if (format.contains("||")) {
                                 String prefixName = format.split("\\|\\|")[0];
-                                String suffix = format.split("\\|\\|")[1];
-                                format = ((AlignedSuffix)TAB.getInstance().getFeatureManager().getFeature("alignedsuffix")).fixTextWidth(pInSet, prefixName,suffix);
+                                String suffix = "";
+                                if (format.split("\\|\\|").length > 1)
+                                    suffix = format.split("\\|\\|")[1];
+                                AlignedSuffix alignedSuffix = ((AlignedSuffix)TAB.getInstance().getFeatureManager().getFeature("alignedsuffix"));
+                                if (alignedSuffix != null)
+                                    format = alignedSuffix.fixTextWidth(pInSet, prefixName,suffix);
                             }
 
                             String yellownumber = TAB.getInstance().getConfiguration().config.getString("yellow-number-in-tablist", "");
-                            yellownumber = TAB.getInstance().getPlatform().replaceAllPlaceholders(yellownumber, pInSet);
+                            yellownumber = SharedTA.parsePlaceholders(yellownumber, pInSet);
                             int yellownumber2 = 0;
                             try {yellownumber2 = Integer.parseInt(yellownumber);}
                             catch (NumberFormatException ignored) {}
@@ -163,8 +169,8 @@ public class Layout {
         Map<String,Object> section = (Map<String, Object>) slot;
 
         List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
-        String condition = section.get("condition").toString();
-        if (condition != null && !condition.equals("")) {
+        if (section.get("condition") != null && !section.get("condition").toString().equals("")) {
+            String condition = section.get("condition")+"";
             if (condition.startsWith("!")) {
                 Condition cond = Condition.getCondition(condition.replaceFirst("!", ""));
                 if (cond != null)
