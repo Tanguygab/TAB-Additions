@@ -7,13 +7,17 @@ import io.github.tanguygab.tabadditions.shared.SharedEvents;
 import io.github.tanguygab.tabadditions.shared.SharedTA;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.event.BungeeTABLoadEvent;
+import me.neznamy.tab.platforms.bungee.BungeePlatform;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.placeholders.Placeholder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+
+import java.util.Map;
 
 
 public class BungeeEvents implements Listener {
@@ -49,6 +53,13 @@ public class BungeeEvents implements Listener {
                     break;
                 case "ntpreview":
                     result = ""+p.isPreviewingNametag();
+                    break;
+                case "Replace":
+                    if (TAB.getInstance().getConfiguration().premiumconfig != null) {
+                        String output = TAB.getInstance().getPlatform().replaceAllPlaceholders(value,p);
+                        Map<Object, String> replacements = TAB.getInstance().getConfiguration().premiumconfig.getConfigurationSection("placeholder-output-replacements." + value);
+                        result =  Placeholder.findReplacement(replacements, output).replace("%value%", output);
+                    }
                     break;
                 case "Placeholder":
                     value = in.readUTF();
