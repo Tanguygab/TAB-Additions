@@ -1,6 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.entity.Player;
 
@@ -15,15 +15,15 @@ public class ChatManager {
 
     public ChatManager() {
         instance = this;
-        for (Object format : SharedTA.chatConfig.getConfigurationSection("chat-formats").keySet())
-            formats.put(format.toString(),new ChatFormat(format.toString(),SharedTA.chatConfig.getConfigurationSection("chat-formats."+format)));
+        for (Object format : TABAdditions.getInstance().getConfig("chat").getConfigurationSection("chat-formats").keySet())
+            formats.put(format.toString(),new ChatFormat(format.toString(), TABAdditions.getInstance().getConfig("chat").getConfigurationSection("chat-formats."+format)));
     }
 
     public static ChatManager getInstance() {
         return instance;
     }
     public ChatFormat getFormat(TabPlayer p) {
-        String format = SharedTA.chatConfig.getString("default-format","default");
+        String format = TABAdditions.getInstance().getConfig("chat").getString("default-format","default");
         if (format.equalsIgnoreCase("")) return defFormat();
 
         ChatFormat f = formats.get(format);
@@ -36,7 +36,7 @@ public class ChatManager {
         return f;
     }
     public boolean isInRange(TabPlayer sender,TabPlayer viewer,String range) {
-        if (SharedTA.platform.type().equals("Bungee")) return true;
+        if (TABAdditions.getInstance().getPlatform().type().equals("Bungee")) return true;
         int zone = (int) Math.pow(Integer.parseInt(range), 2);
         return sender.getWorldName().equals(viewer.getWorldName()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
     }

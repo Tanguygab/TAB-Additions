@@ -1,8 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 
 import javax.script.ScriptEngineManager;
@@ -33,7 +32,7 @@ public class ChatFormat {
     public boolean isConditionMet(TabPlayer p) {
         Object cond = config.get("condition");
         if (cond == null) return true;
-        String condition = SharedTA.parsePlaceholders(cond.toString(),p);
+        String condition = TABAdditions.getInstance().parsePlaceholders(cond.toString(),p);
 
         Map<String,Boolean> conditions = ChatManager.getInstance().conditions;
         boolean value;

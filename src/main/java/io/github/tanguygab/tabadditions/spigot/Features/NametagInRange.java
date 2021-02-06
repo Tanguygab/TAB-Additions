@@ -1,6 +1,6 @@
 package io.github.tanguygab.tabadditions.spigot.Features;
 
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.shared.TAB;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -10,8 +10,8 @@ public class NametagInRange {
 
     public int load() {
 
-        return Bukkit.getScheduler().scheduleAsyncRepeatingTask((Plugin) SharedTA.plugin, () -> {
-            int zone = (int) Math.pow(SharedTA.nametagInRange, 2);
+        return Bukkit.getScheduler().scheduleAsyncRepeatingTask((Plugin) TABAdditions.getInstance().getPlugin(), () -> {
+            int zone = (int) Math.pow(TABAdditions.getInstance().nametagInRange, 2);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
 

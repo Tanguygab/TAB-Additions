@@ -20,17 +20,17 @@ import java.util.Map;
 public class SharedEvents {
 
     public static void JoinEvent(String name) {
-    	SharedTA.platform.AsyncTask(()->{
+    	TABAdditions.getInstance().getPlatform().AsyncTask(()->{
             TabPlayer p = TABAPI.getPlayer(name);
-            SharedTA.loadProps(p);
+            TABAdditions.getInstance().loadProps(p);
 
-            if (SharedTA.actionbarsEnabled) {
-                String actionbar = SharedTA.actionbarConfig.getString("bars." + p.getProperty("actionbar").get(),"");
-                actionbar = SharedTA.parsePlaceholders(actionbar,p);
+            if (TABAdditions.getInstance().actionbarsEnabled) {
+                String actionbar = TABAdditions.getInstance().actionbarConfig.getString("bars." + p.getProperty("actionbar").get(),"");
+                actionbar = TABAdditions.getInstance().parsePlaceholders(actionbar,p);
                 p.sendCustomPacket(new PacketPlayOutChat(actionbar, PacketPlayOutChat.ChatMessageType.GAME_INFO));
             }
-            if (SharedTA.titlesEnabled) {
-                Map<String,String> tSection = SharedTA.titleConfig.getConfigurationSection("titles." + p.getProperty("title").get());
+            if (TABAdditions.getInstance().titlesEnabled) {
+                Map<String,String> tSection = TABAdditions.getInstance().titleConfig.getConfigurationSection("titles." + p.getProperty("title").get());
                 if (tSection != null) {
                     List<Object> titleProperties = new ArrayList<>();
                     for (Object property : tSection.keySet())
@@ -38,16 +38,16 @@ public class SharedEvents {
                     new TitleCmd(p, new String[]{}, titleProperties);
                 }
             }
-            if (SharedTA.layoutEnabled && !SharedTA.checkBedrock(p)) {
+            if (TABAdditions.getInstance().layoutEnabled && !TABAdditions.getInstance().checkBedrock(p)) {
                 LayoutManager lm = LayoutManager.getInstance();
                 lm.toAdd.put(p,lm.getLayout(p));
             }
-            if (SharedTA.nametagInRange != 0)
+            if (TABAdditions.getInstance().nametagInRange != 0)
                 for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
                     p.hideNametag(p2.getUniqueId());
                     p2.hideNametag(p.getUniqueId());
                 }
-            if (SharedTA.tablistNamesRadius != 0)
+            if (TABAdditions.getInstance().tablistNamesRadius != 0)
                 for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
                     if (p != p2) {
                         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p2.getUniqueId())));
@@ -66,7 +66,7 @@ public class SharedEvents {
 
             for (IChatBaseComponent txt : comp.getExtra()) {
                 int pos = comp.getExtra().indexOf(txt);
-                String msg2 = SharedTA.parsePlaceholders(txt.getText(), p).replaceAll("%msg%", msg);
+                String msg2 = TABAdditions.getInstance().parsePlaceholders(txt.getText(), p).replaceAll("%msg%", msg);
                 txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
                 txt.toString(ProtocolVersion.v1_16_4);
 
@@ -96,13 +96,13 @@ public class SharedEvents {
                 comp.getExtra().set(pos, txt);
             }
             if (comp.getHoverValue() != null) {
-                String txt = SharedTA.parsePlaceholders(comp.getHoverValue()+"", p).replaceAll("%msg%", msg);
+                String txt = TABAdditions.getInstance().parsePlaceholders(comp.getHoverValue()+"", p).replaceAll("%msg%", msg);
                 IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
                 hover.toString(ProtocolVersion.v1_16_4);
                 comp.onHoverShowText(hover);
             }
             if (comp.getClickValue() != null) {
-                String txt = SharedTA.parsePlaceholders(comp.getClickValue()+"", p).replaceAll("%msg%", msg);
+                String txt = TABAdditions.getInstance().parsePlaceholders(comp.getClickValue()+"", p).replaceAll("%msg%", msg);
                 comp.onClickSuggestCommand(txt);
             }
         }

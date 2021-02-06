@@ -1,6 +1,6 @@
 package io.github.tanguygab.tabadditions.spigot;
 
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.commands.*;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.spigot.Features.BukkitEvents;
@@ -24,8 +24,9 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @Override
     public void onEnable() {
-        SharedTA.platform = new SpigotTA(this);
-        SharedTA.plugin = this;
+        new TABAdditions();
+        TABAdditions.getInstance().setPlatform(new SpigotTA(this));
+        TABAdditions.getInstance().setPlugin(this);
         reload();
     }
 
@@ -35,16 +36,14 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     }
 
     public void reload() {
-
-        SharedTA.reload(getDataFolder());
+        TABAdditions.getInstance().reload(getDataFolder());
 
         HandlerList.unregisterAll(this);
         Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(), this);
 
-
         if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
             new TABAdditionsExpansion(this).register();
-        SharedTA.floodgate = Bukkit.getPluginManager().getPlugin("Floodgate") != null;
+        TABAdditions.getInstance().floodgate = Bukkit.getPluginManager().getPlugin("Floodgate") != null;
     }
 
     @Override
@@ -61,12 +60,12 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "actionbar": {
-                    if (!SharedTA.config.getBoolean("features.actionbars"))
+                    if (!TABAdditions.getInstance().getConfig("").getBoolean("features.actionbars"))
                         p.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
                         p.sendMessage("&cYou have to provide an actionbar!",true);
                     else {
-                        Map<String,String> section = SharedTA.actionbarConfig.getConfigurationSection("bars.");
+                        Map<String,String> section = TABAdditions.getInstance().actionbarConfig.getConfigurationSection("bars.");
                         if (!section.containsKey(args[1]))
                             p.sendMessage("&cThis actionbar doesn't exist!",true);
                         else
@@ -75,12 +74,12 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "title": {
-                    if (!SharedTA.config.getBoolean("features.titles"))
+                    if (!TABAdditions.getInstance().getConfig("").getBoolean("features.titles"))
                         p.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
                         p.sendMessage("&cYou have to provide a title!",true);
                     else {
-                        Map<String,String> titleSection = SharedTA.titleConfig.getConfigurationSection("titles."+args[1]);
+                        Map<String,String> titleSection = TABAdditions.getInstance().titleConfig.getConfigurationSection("titles."+args[1]);
                         if (titleSection.isEmpty()) {
                             p.sendMessage("&cThis title doesn't exist!",true);
                         }
@@ -94,7 +93,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "fp": {
-                    if (SharedTA.rfpEnabled) {
+                    if (TABAdditions.getInstance().rfpEnabled) {
                         if (args.length < 2)
                             p.sendMessage("You have to provide add, remove, edit or list.", false);
                         else if (!args[1].equalsIgnoreCase("list") && args.length < 3)
@@ -125,7 +124,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
             switch (args[0]) {
                 case "actionbar":
                     if (args.length == 2)
-                        return SharedTA.actionbars;
+                        return TABAdditions.getInstance().actionbars;
                 case "tags": {
                     if (args.length == 2)
                         return new ArrayList<>(Arrays.asList("hide","show","toggle"));
@@ -140,7 +139,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 }
                 case "title": {
                     if (args.length == 2)
-                        return SharedTA.titles;
+                        return TABAdditions.getInstance().titles;
                 }
             }
         }

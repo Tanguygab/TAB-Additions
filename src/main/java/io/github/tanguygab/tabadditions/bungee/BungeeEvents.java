@@ -4,10 +4,9 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.github.tanguygab.tabadditions.shared.SharedEvents;
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.event.BungeeTABLoadEvent;
-import me.neznamy.tab.platforms.bungee.BungeePlatform;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.Placeholder;
@@ -29,7 +28,7 @@ public class BungeeEvents implements Listener {
 
     @EventHandler
     public void onTABLoad(BungeeTABLoadEvent e) {
-        ((TABAdditionsBungeeCord)SharedTA.plugin).reload();
+        ((TABAdditionsBungeeCord) TABAdditions.getInstance().getPlugin()).reload();
     }
 
     @EventHandler
