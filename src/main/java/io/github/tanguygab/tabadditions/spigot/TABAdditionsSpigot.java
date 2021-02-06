@@ -100,7 +100,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                         else if (!args[1].equalsIgnoreCase("list") && args.length < 3)
                             p.sendMessage("You have to provide a fake player name.", false);
                         else if (args[1].equalsIgnoreCase("edit") && args.length < 4)
-                            p.sendMessage("You have to provide a fake player name.", false);
+                            p.sendMessage("You have to provide an action.", false);
                         else new RealFakePlayer(p, args);
                     }
                     break;

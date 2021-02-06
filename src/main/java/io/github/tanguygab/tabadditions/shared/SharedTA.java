@@ -71,8 +71,8 @@ public class SharedTA {
             titlesEnabled = config.getBoolean("features.titles",false);
             actionbarsEnabled = config.getBoolean("features.actionbars",false);
             layoutEnabled = config.getBoolean("features.layout",false);
-            chatEnabled = config.getBoolean("features.chat",false);
             rfpEnabled = config.getBoolean("features.real-fake-players",false);
+            chatEnabled = config.getBoolean("features.chat",false);
             if (platform.type().equals("Spigot")) {
                 sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
