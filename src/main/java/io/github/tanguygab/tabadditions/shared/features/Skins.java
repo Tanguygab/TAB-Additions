@@ -2,7 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 
@@ -48,7 +48,7 @@ public class Skins {
     }
 
     public static Object getIcon(String icon, TabPlayer p) {
-        icon = SharedTA.parsePlaceholders(icon, p);
+        icon = TABAdditions.getInstance().parsePlaceholders(icon, p);
         if (icons.containsKey(icon))
             return icons.get(icon);
         String deficon = icon;
@@ -70,7 +70,7 @@ public class Skins {
             catch (NumberFormatException ignored) {}
         }
         if (skin == null) {
-            skin = SharedTA.platform.getSkin(props);
+            skin = TABAdditions.getInstance().getPlatform().getSkin(props);
         }
         icons.put(deficon,skin);
         return skin;

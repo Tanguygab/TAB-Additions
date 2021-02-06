@@ -1,9 +1,8 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts.sorting;
 
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.config.Configs;
 
 import java.util.*;
 
@@ -29,7 +28,7 @@ public class Sorting {
         }
         else types.add(new Groups(""));
 
-        SharedTA.platform.AsyncTask(()->{
+        TABAdditions.getInstance().getPlatform().AsyncTask(()->{
             List<TabPlayer> players1 = players;
             for (TabPlayer p : players1) {
                 if (!p.isLoaded()) continue;

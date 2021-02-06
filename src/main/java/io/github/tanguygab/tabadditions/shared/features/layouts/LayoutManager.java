@@ -1,6 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts;
 
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
@@ -18,7 +18,7 @@ public class LayoutManager {
 
     public LayoutManager() {
         instance = this;
-        for (Object layout : SharedTA.layoutConfig.getConfigurationSection("layouts").keySet())
+        for (Object layout : TABAdditions.getInstance().getConfig("layout").getConfigurationSection("layouts").keySet())
             layouts.put(layout.toString(),new Layout(layout.toString()));
         refresh();
     }
@@ -27,7 +27,7 @@ public class LayoutManager {
         return instance;
     }
     public String getLayout(TabPlayer p) {
-        String layout = SharedTA.layoutConfig.getString("default-layout","");
+        String layout = TABAdditions.getInstance().getConfig("layout").getString("default-layout","");
         if (layout.equalsIgnoreCase("")) return "null";
 
         Layout l = layouts.get(layout);
@@ -40,15 +40,15 @@ public class LayoutManager {
     }
 
     public void unregister() {
-        SharedTA.platform.cancelTask(task);
+        TABAdditions.getInstance().getPlatform().cancelTask(task);
         removeLayoutAll();
         removeLayout();
     }
 
     private void refresh() {
-        task = SharedTA.platform.AsyncTask(() -> {
+        task = TABAdditions.getInstance().getPlatform().AsyncTask(() -> {
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
-                if (!SharedTA.checkBedrock(p) && players.containsKey(p) && !players.get(p).equals(getLayout(p))) {
+                if (!TABAdditions.getInstance().checkBedrock(p) && players.containsKey(p) && !players.get(p).equals(getLayout(p))) {
                     toRemove.put(p, players.get(p));
                     toAdd.put(p,getLayout(p));
                 }
@@ -87,13 +87,13 @@ public class LayoutManager {
     }
     public void showLayoutAll() {
         for (TabPlayer p : TAB.getInstance().getPlayers())
-            if (!SharedTA.checkBedrock(p))
+            if (!TABAdditions.getInstance().checkBedrock(p))
                 toAdd.put(p,getLayout(p));
     }
 
     public void removeLayoutAll() {
         for (TabPlayer p : TAB.getInstance().getPlayers())
-            if (!SharedTA.checkBedrock(p))
+            if (!TABAdditions.getInstance().checkBedrock(p))
                 toRemove.put(p,getLayout(p));
     }
 

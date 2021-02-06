@@ -1,6 +1,6 @@
 package io.github.tanguygab.tabadditions.spigot.Features;
 
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
@@ -12,8 +12,8 @@ public class TablistNamesRadius {
 
     public int load() {
 
-        return Bukkit.getScheduler().scheduleAsyncRepeatingTask((Plugin) SharedTA.plugin, () -> {
-            int zone = (int) Math.pow(SharedTA.tablistNamesRadius, 2);
+        return Bukkit.getScheduler().scheduleAsyncRepeatingTask((Plugin) TABAdditions.getInstance().getPlugin(), () -> {
+            int zone = (int) Math.pow(TABAdditions.getInstance().tablistNamesRadius, 2);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
 

@@ -1,6 +1,6 @@
 package io.github.tanguygab.tabadditions.bungee;
 
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.commands.*;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
@@ -25,17 +25,17 @@ public class MainCmd extends Command {
         else
             switch (args[0].toLowerCase()) {
                 case "reload": {
-                	((TABAdditionsBungeeCord)SharedTA.plugin).reload();
+                	((TABAdditionsBungeeCord) TABAdditions.getInstance().getPlugin()).reload();
                     p.sendMessage("&aConfig reloaded!",true);
                     break;
                 }
                 case "actionbar": {
-                    if (!SharedTA.config.getBoolean("features.actionbars"))
+                    if (!TABAdditions.getInstance().getConfig("").getBoolean("features.actionbars"))
                         p.sendMessage("&cActionbar feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
                         p.sendMessage("&cYou have to provide an actionbar!",true);
                     else {
-                        Map<String,String> section = SharedTA.actionbarConfig.getConfigurationSection("bars");
+                        Map<String,String> section = TABAdditions.getInstance().getConfig("actionbar").getConfigurationSection("bars");
                         if (!section.containsKey(args[1]))
                             p.sendMessage("&cThis actionbar doesn't exist!",true);
                         else
@@ -44,12 +44,12 @@ public class MainCmd extends Command {
                     break;
                 }
                 case "title": {
-                    if (!SharedTA.config.getBoolean("features.titles"))
+                    if (!TABAdditions.getInstance().getConfig("").getBoolean("features.titles"))
                         p.sendMessage("&cTitle feature is not enabled, therefore this command cannot be used",true);
                     else if (args.length < 2)
                         p.sendMessage("&cYou have to provide a title!",true);
                     else {
-                        Map<String,String> titleSection = SharedTA.titleConfig.getConfigurationSection("titles."+args[1]);
+                        Map<String,String> titleSection = TABAdditions.getInstance().getConfig("title").getConfigurationSection("titles."+args[1]);
                         if (titleSection.keySet().isEmpty()) {
                             p.sendMessage("&cThis title doesn't exist!",true);
                         }

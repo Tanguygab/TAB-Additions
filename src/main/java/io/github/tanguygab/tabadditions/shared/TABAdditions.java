@@ -2,7 +2,6 @@ package io.github.tanguygab.tabadditions.shared;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.*;
 
 import io.github.tanguygab.tabadditions.shared.features.Skins;
@@ -19,54 +18,73 @@ import me.neznamy.tab.shared.placeholders.Placeholder;
 import org.bukkit.Bukkit;
 import org.geysermc.floodgate.FloodgateAPI;
 
-public class SharedTA {
+public class TABAdditions {
 
-    public static Platform platform;
-    public static Object plugin;
-    public static YamlConfigurationFile config;
-    public static YamlConfigurationFile layoutConfig;
-    public static YamlConfigurationFile titleConfig;
-    public static YamlConfigurationFile actionbarConfig;
-    public static YamlConfigurationFile chatConfig;
+    private static TABAdditions instance;
+    public TABAdditions() {
+        instance = this;
+    }
 
-    public static List<String> titles;
-    public static List<String> actionbars;
-    public static List<String> chatformats;
+    private Object plugin;
+    private Platform platform;
+    private final Map<String,Integer> tasks = new HashMap<>();
 
-    public static boolean titlesEnabled;
-    public static boolean actionbarsEnabled;
-    public static boolean chatEnabled;
-    public static boolean layoutEnabled;
-    public static boolean sneakhideEnabled = false;
-    public static int nametagInRange = 0;
-    public static int tablistNamesRadius = 0;
-    public static boolean rfpEnabled;
-    public static boolean floodgate = false;
-    public static Map<String,Integer> tasks = new HashMap<>();
+    private YamlConfigurationFile config;
+    public YamlConfigurationFile layoutConfig;
+    public YamlConfigurationFile titleConfig;
+    public YamlConfigurationFile actionbarConfig;
+    public YamlConfigurationFile chatConfig;
 
-    public static boolean isCompatible() {
-        try {
-            YamlConfigurationFile.class.getConstructor(InputStream.class, File.class);
-            return true;
-        } catch (Exception e) {
-            return false;
+    public List<String> titles;
+    public List<String> actionbars;
+    public List<String> chatformats;
+
+    public boolean titlesEnabled;
+    public boolean actionbarsEnabled;
+    public boolean chatEnabled;
+    public boolean layoutEnabled;
+    public boolean sneakhideEnabled = false;
+    public int nametagInRange = 0;
+    public int tablistNamesRadius = 0;
+    public boolean rfpEnabled;
+
+    public boolean floodgate = false;
+
+    public static TABAdditions getInstance() {
+        return instance;
+    }
+    public Platform getPlatform() {
+        return platform;
+    }
+    public Object getPlugin() {
+        return plugin;
+    }
+    public void setPlatform(Platform platform) {
+        this.platform = platform;
+    }
+    public void setPlugin(Object plugin) {
+        this.plugin = plugin;
+    }
+    public YamlConfigurationFile getConfig(String cfg) {
+        switch (cfg) {
+            case "layout": return layoutConfig;
+            case "title": return titleConfig;
+            case "actionbar": return actionbarConfig;
+            case "chat": return chatConfig;
+            default: return config;
         }
     }
 
-    public static void reload(File dataFolder) {
-        if (!isCompatible()) {
-            platform.disable();
-            return;
-        }
+    public void reload(File dataFolder) {
         try {
             if (platform.type().equals("Bungee"))
-                config = new YamlConfigurationFile(SharedTA.class.getClassLoader().getResourceAsStream("bungeeconfig.yml"), new File(dataFolder, "config.yml"));
+                config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("bungeeconfig.yml"), new File(dataFolder, "config.yml"));
             else
-                config = new YamlConfigurationFile(SharedTA.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
-            titleConfig = new YamlConfigurationFile(SharedTA.class.getClassLoader().getResourceAsStream("titles.yml"), new File(dataFolder, "titles.yml"));
-            actionbarConfig = new YamlConfigurationFile(SharedTA.class.getClassLoader().getResourceAsStream("actionbars.yml"), new File(dataFolder, "actionbars.yml"));
-            chatConfig = new YamlConfigurationFile(SharedTA.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
-            layoutConfig = new YamlConfigurationFile(SharedTA.class.getClassLoader().getResourceAsStream("layout.yml"), new File(dataFolder, "layout.yml"));
+                config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
+            titleConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("titles.yml"), new File(dataFolder, "titles.yml"));
+            actionbarConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("actionbars.yml"), new File(dataFolder, "actionbars.yml"));
+            chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
+            layoutConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("layout.yml"), new File(dataFolder, "layout.yml"));
 
             titlesEnabled = config.getBoolean("features.titles",false);
             actionbarsEnabled = config.getBoolean("features.actionbars",false);
@@ -92,11 +110,12 @@ public class SharedTA {
 
             refresh();
         } catch (IOException e) {
+            platform.disable();
             e.printStackTrace();
         }
     }
 
-    protected static void loadProps(TabPlayer p) {
+    protected void loadProps(TabPlayer p) {
         p.loadPropertyFromConfig("title");
         p.loadPropertyFromConfig("actionbar");
         p.loadPropertyFromConfig("chatprefix");
@@ -105,44 +124,9 @@ public class SharedTA {
         p.loadPropertyFromConfig("moreheader");
         p.loadPropertyFromConfig("morefooter");
 
-        Property footer = p.getProperty("footer");
-        Property header = p.getProperty("header");
-
-        if (header != null) {
-            String moreheader = p.getProperty("moreheader").getCurrentRawValue();
-            if (moreheader.length() > 2) {
-                moreheader = moreheader.substring(1).substring(0, moreheader.length()-1);
-
-                List<String> lines = Arrays.asList(moreheader.split(", "));
-
-                String result = "";
-                for (String line : lines) {
-                    if (lines.indexOf(line) == lines.size() - 1)
-                        result = result + "\n" + '\u00a7' + "r";
-                    result = result + line;
-                }
-                header.setTemporaryValue(header.getCurrentRawValue() + "\n" + result);
-            }
-        }
-        if (footer != null) {
-            String morefooter = p.getProperty("morefooter").getCurrentRawValue();
-            if (morefooter.length() > 2) {
-                morefooter = morefooter.substring(1).substring(0, morefooter.length()-1);
-
-                List<String> lines = Arrays.asList(morefooter.split(", "));
-
-                String result = "";
-                for (String line : lines) {
-                    if (lines.indexOf(line) == lines.size() - 1)
-                        result = result + "\n" + '\u00a7' + "r";
-                    result = result + line;
-                }
-                footer.setTemporaryValue(footer.getCurrentRawValue() + "\n" + result);
-            }
-        }
     }
 
-    private static void loadLists() {
+    private void loadLists() {
         List<String> temp = new ArrayList<>();
         for (Object key : actionbarConfig.getConfigurationSection("bars").keySet())
             temp.add(key.toString());
@@ -158,7 +142,7 @@ public class SharedTA {
             temp.add(key.toString());
         chatformats = new ArrayList<>(temp);
     }
-    private static void loadLayout() {
+    private void loadLayout() {
         if (LayoutManager.getInstance() != null) {
             LayoutManager.getInstance().unregister();
         }
@@ -167,12 +151,12 @@ public class SharedTA {
             LayoutManager.getInstance().showLayoutAll();
         }
     }
-    private static void loadChat() {
+    private void loadChat() {
         if (chatEnabled) {
             new ChatManager();
         }
     }
-    private static void loadNametagInRange() {
+    private void loadNametagInRange() {
         if (nametagInRange != 0) {
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
@@ -192,7 +176,7 @@ public class SharedTA {
                         p.showNametag(p2.getUniqueId());
         }
     }
-    private static void loadTablistNamesRadius() {
+    private void loadTablistNamesRadius() {
         if (tablistNamesRadius != 0) {
             if (tablistNamesRadius < 100)
                 tablistNamesRadius = 100;
@@ -215,7 +199,7 @@ public class SharedTA {
         }
 
     }
-    private static void loadPlaceholders() {
+    private void loadPlaceholders() {
         List<String> props = Arrays.asList("tabprefix","tabsuffix","customtabname",
                 "tagprefix","tagsuffix","customtagname",
                 "chatprefix","chatsuffix","customchatname",
@@ -231,8 +215,17 @@ public class SharedTA {
                 }
             });
         }
+        List<String> moreprops = new ArrayList<>(Arrays.asList("moreheader","morefooter"));
+        for (String prop : moreprops) {
+            TAB.getInstance().getPlaceholderManager().registerPlaceholder(new Placeholder("%"+prop+"%",100) {
+                @Override
+                public String getLastValue(TabPlayer p) {
+                    return getMoreProps(p,prop);
+                }
+            });
+        }
     }
-    private static void loadFakePlayers() {
+    private void loadFakePlayers() {
         if (rfpEnabled) {
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
@@ -257,26 +250,49 @@ public class SharedTA {
         }
     }
 
-    private static void refresh() {
+    private String getMoreProps(TabPlayer p, String prop) {
+        if (p.getProperty(prop) != null) {
+            String more = p.getProperty(prop).updateAndGet();
+            if (more.startsWith("[") && more.endsWith("]")) {
+                more = more.substring(1).substring(0, more.length()-2);
+
+                List<String> lines = Arrays.asList(more.split(", "));
+
+                String result = "";
+                for (String line : lines) {
+                    if (lines.indexOf(line) == lines.size() - 1)
+                        result = result + "\n" + '\u00a7' + "r";
+                    result = result + line;
+                }
+                return result;
+            }
+            return "\n"+'\u00a7'+"r"+p.getProperty(prop).updateAndGet();
+        }
+        return "5";
+    }
+
+    private void refresh() {
         tasks.put("Global-Refresh",platform.AsyncTask(()-> {
             List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
-            List<String> chatprops = new ArrayList<>(Arrays.asList("chatprefix","customchatname","chatsuffix"));
+            List<String> props = new ArrayList<>(Arrays.asList("chatprefix","customchatname","chatsuffix","moreheader","morefooter"));
             for (TabPlayer p : list) {
-                for (String prop : chatprops)
-                    if (p.getProperty(prop) != null)
+                for (String prop : props) {
+                    p.loadPropertyFromConfig(prop);
+                    if (p.getProperty(prop) != null) {
                         p.getProperty(prop).update();
-                    else p.loadPropertyFromConfig(prop);
+                    }
+                }
             }
         },0L,500L));
     }
 
-    public static String parsePlaceholders(String str, TabPlayer p) {
+    public String parsePlaceholders(String str, TabPlayer p) {
         str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
         str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
         return str;
     }
 
-    public static boolean checkBedrock(TabPlayer p) {
+    public boolean checkBedrock(TabPlayer p) {
         if (!floodgate) return false;
         return FloodgateAPI.isBedrockPlayer(p.getUniqueId());
     }

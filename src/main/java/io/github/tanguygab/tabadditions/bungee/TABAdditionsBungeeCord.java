@@ -1,6 +1,6 @@
 package io.github.tanguygab.tabadditions.bungee;
 
-import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -8,8 +8,9 @@ public final class TABAdditionsBungeeCord extends Plugin {
 	
     @Override
     public void onEnable() {
-        SharedTA.platform = new BungeeTA(this);
-        SharedTA.plugin = this;
+        new TABAdditions();
+        TABAdditions.getInstance().setPlatform(new BungeeTA(this));
+        TABAdditions.getInstance().setPlugin(this);
         reload();
         getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
         getProxy().registerChannel("tabadditions:channel");
@@ -21,10 +22,10 @@ public final class TABAdditionsBungeeCord extends Plugin {
     }
 
     public void reload() {
-        SharedTA.reload(getDataFolder());
+        TABAdditions.getInstance().reload(getDataFolder());
         getProxy().getPluginManager().unregisterListeners(this);
         getProxy().getPluginManager().registerListener(this, new BungeeEvents());
 
-        SharedTA.floodgate = getProxy().getPluginManager().getPlugin("Floodgate") != null;
+        TABAdditions.getInstance().floodgate = getProxy().getPluginManager().getPlugin("Floodgate") != null;
     }
 }
