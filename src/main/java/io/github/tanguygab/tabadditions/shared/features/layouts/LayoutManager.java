@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
-import io.github.tanguygab.tabadditions.shared.features.Skins;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
@@ -12,7 +11,6 @@ public class LayoutManager {
 
     private static LayoutManager instance;
     private final Map<String, Layout> layouts = new HashMap<>();
-    public final Map<String,Object> icons = new HashMap<>();
     private final Map<TabPlayer,String> players = new HashMap<>();
     private Integer task;
     public final Map<TabPlayer,String> toAdd = new HashMap<>();
@@ -99,32 +97,5 @@ public class LayoutManager {
                 toRemove.put(p,getLayout(p));
     }
 
-    public Object getIcon(String icon,TabPlayer p) {
-        icon = SharedTA.parsePlaceholders(icon, p);
-        if (icons.containsKey(icon))
-            return icons.get(icon);
-        String deficon = icon;
-        Object skin = null;
-        String[] props = new String[1];
-        if (icon.startsWith("player-head:")) {
-            icon = icon.replace("player-head:", "");
-            if (TAB.getInstance().getPlayer(icon) != null)
-                skin = TAB.getInstance().getPlayer(icon).getSkin();
-            props = Skins.getPropPlayer(icon);
 
-        }
-        else if (icon.startsWith("mineskin:")) {
-            icon = icon.replace("mineskin:", "");
-            try {
-                int mineskinid = Integer.parseInt(icon);
-                props = Skins.getPropSkin(mineskinid);
-            }
-            catch (NumberFormatException ignored) {}
-        }
-        if (skin == null) {
-                skin = SharedTA.platform.getSkin(props);
-        }
-        icons.put(deficon,skin);
-        return skin;
-    }
 }

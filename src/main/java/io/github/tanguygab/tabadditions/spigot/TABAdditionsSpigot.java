@@ -93,6 +93,16 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     }
                     break;
                 }
+                case "fp": {
+                    if (args.length < 2)
+                        p.sendMessage("You have to provide add, remove, edit or list.",false);
+                    else if (!args[1].equalsIgnoreCase("list") && args.length < 3)
+                        p.sendMessage("You have to provide a fake player name.",false);
+                    else if (args[1].equalsIgnoreCase("edit") && args.length < 4)
+                        p.sendMessage("You have to provide a fake player name.",false);
+                    else new RealFakePlayer(p,args);
+                    break;
+                }
                 case "tags": {
                     new TagsCmd(p, args);
                     break;
@@ -108,7 +118,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1)
-            return new ArrayList<>(Arrays.asList("help","reload","actionbar","title","tags"));
+            return new ArrayList<>(Arrays.asList("help","reload","actionbar","title","tags","fp"));
         if (args.length >= 2) {
             switch (args[0]) {
                 case "actionbar":
@@ -117,6 +127,14 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 case "tags": {
                     if (args.length == 2)
                         return new ArrayList<>(Arrays.asList("hide","show","toggle"));
+                }
+                case "fp": {
+                    if (args.length == 2)
+                        return new ArrayList<>(Arrays.asList("add","remove","edit","list"));
+                    if (!args[1].equalsIgnoreCase("list") && args.length == 3)
+                        return new ArrayList<>(Collections.singletonList("<name>"));
+                    if (args[1].equalsIgnoreCase("edit") && args.length == 4)
+                        return new ArrayList<>(Arrays.asList("name","skin","latency","group"));
                 }
                 case "title": {
                     if (args.length == 2)
