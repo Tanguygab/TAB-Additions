@@ -40,6 +40,7 @@ public class SharedTA {
     public static boolean sneakhideEnabled = false;
     public static int nametagInRange = 0;
     public static int tablistNamesRadius = 0;
+    public static boolean rfpEnabled;
     public static boolean floodgate = false;
     public static Map<String,Integer> tasks = new HashMap<>();
 
@@ -71,6 +72,7 @@ public class SharedTA {
             actionbarsEnabled = config.getBoolean("features.actionbars",false);
             layoutEnabled = config.getBoolean("features.layout",false);
             chatEnabled = config.getBoolean("features.chat",false);
+            rfpEnabled = config.getBoolean("features.real-fake-players",false);
             if (platform.type().equals("Spigot")) {
                 sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
@@ -231,26 +233,27 @@ public class SharedTA {
         }
     }
     private static void loadFakePlayers() {
+        if (rfpEnabled) {
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
+                for (Object fp : config.getConfigurationSection("fakeplayers").keySet()) {
+                    PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(UUID.fromString(config.getString("fakeplayers." + fp + ".uuid")));
+                    rfp.name = parsePlaceholders(config.getString("fakeplayers." + fp + ".name", fp + ""), p);
+                    rfp.skin = Skins.getIcon(config.getString("fakeplayers." + fp + ".skin", ""), p);
+                    int lat = config.getInt("fakeplayers." + fp + ".latency", 0);
+                    if (lat <= 1)
+                        rfp.latency = 1000;
+                    if (lat == 2)
+                        rfp.latency = 600;
+                    if (lat == 3)
+                        rfp.latency = 300;
+                    if (lat >= 4)
+                        rfp.latency = 200;
 
-        for (TabPlayer p : TAB.getInstance().getPlayers()) {
-            List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
-            for (Object fp : config.getConfigurationSection("fakeplayers").keySet()) {
-                PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(UUID.fromString(config.getString("fakeplayers." + fp + ".uuid")));
-                rfp.name = parsePlaceholders(config.getString("fakeplayers." + fp + ".name", fp + ""),p);
-                rfp.skin = Skins.getIcon(config.getString("fakeplayers." + fp + ".skin",""),p);
-                int lat = config.getInt("fakeplayers." + fp + ".latency", 0);
-                if (lat <= 1)
-                    rfp.latency = 1000;
-                if (lat == 2)
-                    rfp.latency = 600;
-                if (lat == 3)
-                    rfp.latency = 300;
-                if (lat >= 4)
-                    rfp.latency = 200;
-
-                fps.add(rfp);
+                    fps.add(rfp);
+                }
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
             }
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
         }
     }
 

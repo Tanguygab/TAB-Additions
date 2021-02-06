@@ -94,13 +94,15 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "fp": {
-                    if (args.length < 2)
-                        p.sendMessage("You have to provide add, remove, edit or list.",false);
-                    else if (!args[1].equalsIgnoreCase("list") && args.length < 3)
-                        p.sendMessage("You have to provide a fake player name.",false);
-                    else if (args[1].equalsIgnoreCase("edit") && args.length < 4)
-                        p.sendMessage("You have to provide a fake player name.",false);
-                    else new RealFakePlayer(p,args);
+                    if (SharedTA.rfpEnabled) {
+                        if (args.length < 2)
+                            p.sendMessage("You have to provide add, remove, edit or list.", false);
+                        else if (!args[1].equalsIgnoreCase("list") && args.length < 3)
+                            p.sendMessage("You have to provide a fake player name.", false);
+                        else if (args[1].equalsIgnoreCase("edit") && args.length < 4)
+                            p.sendMessage("You have to provide a fake player name.", false);
+                        else new RealFakePlayer(p, args);
+                    }
                     break;
                 }
                 case "tags": {
