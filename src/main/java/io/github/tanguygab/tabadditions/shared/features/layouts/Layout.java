@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts;
 
 import io.github.tanguygab.tabadditions.shared.SharedTA;
+import io.github.tanguygab.tabadditions.shared.features.Skins;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import io.github.tanguygab.tabadditions.spigot.SpigotTA;
 import me.neznamy.tab.api.TabPlayer;
@@ -51,7 +52,8 @@ public class Layout {
 
     protected void refreshPlaceholders() {
         Map<Integer, Object> skins = new HashMap<>();
-        for (TabPlayer p : players) {
+        ArrayList<TabPlayer> list = new ArrayList<>(players);
+        for (TabPlayer p : list) {
             if (!placeholders.isEmpty())
                 for (Integer i : placeholders.keySet()) {
                     PacketPlayOutPlayerInfo.PlayerInfoData fp = fakeplayers.get(i);
@@ -68,7 +70,7 @@ public class Layout {
 
                     Object skin = null;
                     if (slot.containsKey("icon"))
-                        skin = LayoutManager.getInstance().getIcon(slot.get("icon")+"", p);
+                        skin = Skins.getIcon(slot.get("icon")+"", p);
                     if (!skinsp.containsKey(p) || (skin != null && skinsp.get(p).get(i) != skin)) {
                         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
                         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
@@ -83,7 +85,8 @@ public class Layout {
 
     protected void refreshSets() {
         Map<Integer,Object> skins = new HashMap<>();
-        for (TabPlayer p : players) {
+        ArrayList<TabPlayer> list = new ArrayList<>(players);
+        for (TabPlayer p : list) {
             if (!playersets.isEmpty())
                 for (Object set : playersets.keySet()) {
                     List<TabPlayer> pset = playerSet(set);
@@ -114,7 +117,7 @@ public class Layout {
                                 if (empty.containsKey("text"))
                                     format = SharedTA.parsePlaceholders(empty.get("text"), p);
                                 if (empty.containsKey("icon"))
-                                    skin = LayoutManager.getInstance().getIcon(empty.get("icon")+"",p);
+                                    skin = Skins.getIcon(empty.get("icon")+"",p);
                             }
                             if (!skinss.containsKey(p) || (skinss.get(p).get(i) != skin)) {
                                 p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
@@ -145,7 +148,7 @@ public class Layout {
 
                             Object skin = pInSet.getSkin();
                             if (setConfig.containsKey("icon"))
-                                skin = LayoutManager.getInstance().getIcon(setConfig.get("icon")+"",pInSet);
+                                skin = Skins.getIcon(setConfig.get("icon")+"",pInSet);
                             if (!skinss.containsKey(p) || (skin != null && skinss.get(p).get(i) != skin)) {
                                 p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
                                 p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(format))));

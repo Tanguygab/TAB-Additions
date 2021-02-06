@@ -2,11 +2,18 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import io.github.tanguygab.tabadditions.shared.SharedTA;
+import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.TAB;
 
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Skins {
+
+    public final static Map<String,Object> icons = new HashMap<>();
 
     public static String[] getPropPlayer(String name) {
         try {
@@ -38,5 +45,34 @@ public class Skins {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    public static Object getIcon(String icon, TabPlayer p) {
+        icon = SharedTA.parsePlaceholders(icon, p);
+        if (icons.containsKey(icon))
+            return icons.get(icon);
+        String deficon = icon;
+        Object skin = null;
+        String[] props = new String[1];
+        if (icon.startsWith("player-head:")) {
+            icon = icon.replace("player-head:", "");
+            if (TAB.getInstance().getPlayer(icon) != null)
+                skin = TAB.getInstance().getPlayer(icon).getSkin();
+            props = Skins.getPropPlayer(icon);
+
+        }
+        else if (icon.startsWith("mineskin:")) {
+            icon = icon.replace("mineskin:", "");
+            try {
+                int mineskinid = Integer.parseInt(icon);
+                props = Skins.getPropSkin(mineskinid);
+            }
+            catch (NumberFormatException ignored) {}
+        }
+        if (skin == null) {
+            skin = SharedTA.platform.getSkin(props);
+        }
+        icons.put(deficon,skin);
+        return skin;
     }
 }

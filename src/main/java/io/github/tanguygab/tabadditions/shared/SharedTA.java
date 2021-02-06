@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
+import io.github.tanguygab.tabadditions.shared.features.Skins;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.spigot.Features.NametagInRange;
@@ -85,6 +86,7 @@ public class SharedTA {
             loadNametagInRange();
             loadTablistNamesRadius();
             loadPlaceholders();
+            loadFakePlayers();
 
             refresh();
         } catch (IOException e) {
@@ -226,6 +228,29 @@ public class SharedTA {
                     return "";
                 }
             });
+        }
+    }
+    private static void loadFakePlayers() {
+
+        for (TabPlayer p : TAB.getInstance().getPlayers()) {
+            List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
+            for (Object fp : config.getConfigurationSection("fakeplayers").keySet()) {
+                PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(UUID.fromString(config.getString("fakeplayers." + fp + ".uuid")));
+                rfp.name = parsePlaceholders(config.getString("fakeplayers." + fp + ".name", fp + ""),p);
+                rfp.skin = Skins.getIcon(config.getString("fakeplayers." + fp + ".skin",""),p);
+                int lat = config.getInt("fakeplayers." + fp + ".latency", 0);
+                if (lat <= 1)
+                    rfp.latency = 1000;
+                if (lat == 2)
+                    rfp.latency = 600;
+                if (lat == 3)
+                    rfp.latency = 300;
+                if (lat >= 4)
+                    rfp.latency = 200;
+
+                fps.add(rfp);
+            }
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
         }
     }
 
