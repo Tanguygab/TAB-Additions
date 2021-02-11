@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
+import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.entity.Player;
@@ -36,7 +37,7 @@ public class ChatManager {
         return f;
     }
     public boolean isInRange(TabPlayer sender,TabPlayer viewer,String range) {
-        if (TABAdditions.getInstance().getPlatform().type().equals("Bungee")) return true;
+        if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE) return true;
         int zone = (int) Math.pow(Integer.parseInt(range), 2);
         return sender.getWorldName().equals(viewer.getWorldName()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
     }

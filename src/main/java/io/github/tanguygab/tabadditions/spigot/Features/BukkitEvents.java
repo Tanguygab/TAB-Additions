@@ -8,7 +8,6 @@ import me.neznamy.tab.shared.TAB;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.event.player.PlayerChatTabCompleteEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerToggleSneakEvent;
 
@@ -17,7 +16,6 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.event.BukkitTABLoadEvent;
-import org.bukkit.event.server.TabCompleteEvent;
 
 
 public class BukkitEvents implements Listener {

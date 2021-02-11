@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts;
 
+import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.Skins;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
@@ -106,7 +107,7 @@ public class Layout {
                     boolean vanished = false;
                     if (pInSet != null) {
                         if (setConfig.get("vanished") != null && !(boolean) setConfig.get("vanished")) {
-                            if (TABAdditions.getInstance().getPlatform().type().equals("Spigot") && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
+                            if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
                                 vanished = true;
                             else vanished = p.isVanished();
                         }

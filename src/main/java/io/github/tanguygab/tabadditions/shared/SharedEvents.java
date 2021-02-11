@@ -105,6 +105,6 @@ public class SharedEvents {
         //TAB.getInstance().getPlayer("Tanguygab").sendMessage(format2.toString(),false);
 
         for (TabPlayer pl : TAB.getInstance().getPlayers())
-            pl.sendCustomPacket(new PacketPlayOutChat(format2, PacketPlayOutChat.ChatMessageType.CHAT));
+        	pl.sendMessage(format2);
     }
 }

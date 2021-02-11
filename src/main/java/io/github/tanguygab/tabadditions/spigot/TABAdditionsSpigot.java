@@ -19,14 +19,11 @@ import org.bukkit.command.CommandSender;
 
 import java.util.*;
 
-
 public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, TabCompleter {
 
     @Override
     public void onEnable() {
-        new TABAdditions();
-        TABAdditions.getInstance().setPlatform(new SpigotTA(this));
-        TABAdditions.getInstance().setPlugin(this);
+        TABAdditions.setInstance(new TABAdditions(new SpigotTA(this), this));
         reload();
     }
 

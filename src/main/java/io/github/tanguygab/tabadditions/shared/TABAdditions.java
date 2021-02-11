@@ -21,10 +21,6 @@ import org.geysermc.floodgate.FloodgateAPI;
 public class TABAdditions {
 
     private static TABAdditions instance;
-    public TABAdditions() {
-        instance = this;
-    }
-
     private Object plugin;
     private Platform platform;
     private final Map<String,Integer> tasks = new HashMap<>();
@@ -50,21 +46,27 @@ public class TABAdditions {
 
     public boolean floodgate = false;
 
+    public TABAdditions(Platform platform, Object plugin) {
+    	this.platform = platform;
+    	this.plugin = plugin;
+    }
+    
+    public static void setInstance(TABAdditions instance) {
+    	TABAdditions.instance = instance;
+    }
+    
     public static TABAdditions getInstance() {
         return instance;
     }
+    
     public Platform getPlatform() {
         return platform;
     }
+    
     public Object getPlugin() {
         return plugin;
     }
-    public void setPlatform(Platform platform) {
-        this.platform = platform;
-    }
-    public void setPlugin(Object plugin) {
-        this.plugin = plugin;
-    }
+
     public YamlConfigurationFile getConfig(String cfg) {
         switch (cfg) {
             case "layout": return layoutConfig;
@@ -77,7 +79,7 @@ public class TABAdditions {
 
     public void reload(File dataFolder) {
         try {
-            if (platform.type().equals("Bungee"))
+            if (platform.getType() == PlatformType.BUNGEE)
                 config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("bungeeconfig.yml"), new File(dataFolder, "config.yml"));
             else
                 config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
@@ -91,7 +93,7 @@ public class TABAdditions {
             layoutEnabled = config.getBoolean("features.layout",false);
             rfpEnabled = config.getBoolean("features.real-fake-players",false);
             chatEnabled = config.getBoolean("features.chat",false);
-            if (platform.type().equals("Spigot")) {
+            if (platform.getType() == PlatformType.SPIGOT) {
                 sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);

@@ -8,9 +8,7 @@ public final class TABAdditionsBungeeCord extends Plugin {
 	
     @Override
     public void onEnable() {
-        new TABAdditions();
-        TABAdditions.getInstance().setPlatform(new BungeeTA(this));
-        TABAdditions.getInstance().setPlugin(this);
+        TABAdditions.setInstance(new TABAdditions(new BungeeTA(this), this));
         reload();
         getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
         getProxy().registerChannel("tabadditions:channel");
@@ -25,7 +23,6 @@ public final class TABAdditionsBungeeCord extends Plugin {
         TABAdditions.getInstance().reload(getDataFolder());
         getProxy().getPluginManager().unregisterListeners(this);
         getProxy().getPluginManager().registerListener(this, new BungeeEvents());
-
         TABAdditions.getInstance().floodgate = getProxy().getPluginManager().getPlugin("Floodgate") != null;
     }
 }
