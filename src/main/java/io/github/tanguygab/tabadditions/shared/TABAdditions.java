@@ -21,10 +21,6 @@ import org.geysermc.floodgate.FloodgateAPI;
 public class TABAdditions {
 
     private static TABAdditions instance;
-    public TABAdditions() {
-        instance = this;
-    }
-
     private Object plugin;
     private Platform platform;
     private final Map<String,Integer> tasks = new HashMap<>();
@@ -50,21 +46,27 @@ public class TABAdditions {
 
     public boolean floodgate = false;
 
+    public TABAdditions(Platform platform, Object plugin) {
+    	this.platform = platform;
+    	this.plugin = plugin;
+    }
+    
+    public static void setInstance(TABAdditions instance) {
+    	TABAdditions.instance = instance;
+    }
+    
     public static TABAdditions getInstance() {
         return instance;
     }
+    
     public Platform getPlatform() {
         return platform;
     }
+    
     public Object getPlugin() {
         return plugin;
     }
-    public void setPlatform(Platform platform) {
-        this.platform = platform;
-    }
-    public void setPlugin(Object plugin) {
-        this.plugin = plugin;
-    }
+
     public YamlConfigurationFile getConfig(String cfg) {
         switch (cfg) {
             case "layout": return layoutConfig;
