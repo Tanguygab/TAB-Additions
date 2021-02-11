@@ -34,14 +34,12 @@ public class BungeeEvents implements Listener {
     @EventHandler
     public void onMessageReceived(PluginMessageEvent e) {
         if (!e.getTag().equalsIgnoreCase("tabadditions:channel")) return;
-
         ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
         String subChannel = in.readUTF();
         if (subChannel.equalsIgnoreCase("PlaceholderAPI")) {
             String type = in.readUTF().toLowerCase();
-            String player = in.readUTF();
             String value = "";
-            TabPlayer p = TAB.getInstance().getPlayer(player);
+            TabPlayer p = TAB.getInstance().getPlayer(((ProxiedPlayer) e.getReceiver()).getUniqueId());
             String result = "";
             switch (type) {
                 case "scoreboard_visible":
