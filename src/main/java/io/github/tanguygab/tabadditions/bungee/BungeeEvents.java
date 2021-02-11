@@ -38,7 +38,7 @@ public class BungeeEvents implements Listener {
         ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
         String subChannel = in.readUTF();
         if (subChannel.equalsIgnoreCase("PlaceholderAPI")) {
-            String type = in.readUTF();
+            String type = in.readUTF().toLowerCase();
             String player = in.readUTF();
             String value = "";
             TabPlayer p = TAB.getInstance().getPlayer(player);
@@ -53,19 +53,19 @@ public class BungeeEvents implements Listener {
                 case "ntpreview":
                     result = ""+p.isPreviewingNametag();
                     break;
-                case "Replace":
+                case "replace":
                     if (TAB.getInstance().getConfiguration().premiumconfig != null) {
                         String output = TAB.getInstance().getPlatform().replaceAllPlaceholders(value,p);
                         Map<Object, String> replacements = TAB.getInstance().getConfiguration().premiumconfig.getConfigurationSection("placeholder-output-replacements." + value);
                         result =  Placeholder.findReplacement(replacements, output).replace("%value%", output);
                     }
                     break;
-                case "Placeholder":
+                case "placeholder":
                     value = in.readUTF();
                     result = new Property(p, value).get();
                     type = value;
                     break;
-                case "Property":
+                case "property":
                     value = in.readUTF();
                     String placeholder = value.replace("_raw", "");
                     Property prop = p.getProperty(placeholder);
