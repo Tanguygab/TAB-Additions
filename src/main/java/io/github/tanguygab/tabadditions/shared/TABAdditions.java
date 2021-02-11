@@ -77,7 +77,7 @@ public class TABAdditions {
 
     public void reload(File dataFolder) {
         try {
-            if (platform.type().equals("Bungee"))
+            if (platform.getType() == PlatformType.BUNGEE)
                 config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("bungeeconfig.yml"), new File(dataFolder, "config.yml"));
             else
                 config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
@@ -91,7 +91,7 @@ public class TABAdditions {
             layoutEnabled = config.getBoolean("features.layout",false);
             rfpEnabled = config.getBoolean("features.real-fake-players",false);
             chatEnabled = config.getBoolean("features.chat",false);
-            if (platform.type().equals("Spigot")) {
+            if (platform.getType() == PlatformType.SPIGOT) {
                 sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);

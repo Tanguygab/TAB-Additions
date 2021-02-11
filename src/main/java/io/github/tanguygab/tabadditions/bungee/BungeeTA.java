@@ -3,6 +3,7 @@ package io.github.tanguygab.tabadditions.bungee;
 import java.util.concurrent.TimeUnit;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
+import io.github.tanguygab.tabadditions.shared.PlatformType;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 
@@ -15,8 +16,8 @@ public class BungeeTA extends Platform {
 	}
 
 	@Override
-	public String type() {
-		return "Bungee";
+	public PlatformType getType() {
+		return PlatformType.BUNGEE;
 	}
 
 	@Override

@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
+import io.github.tanguygab.tabadditions.shared.PlatformType;
 
 public class SpigotTA extends Platform {
 
@@ -16,8 +17,8 @@ public class SpigotTA extends Platform {
 	}
 
 	@Override
-	public String type() {
-		return "Spigot";
+	public PlatformType getType() {
+		return PlatformType.SPIGOT;
 	}
 
 	@Override

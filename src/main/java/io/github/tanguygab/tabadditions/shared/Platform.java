@@ -2,7 +2,7 @@ package io.github.tanguygab.tabadditions.shared;
 
 public abstract class Platform {
 
-	public abstract String type();
+	public abstract PlatformType getType();
 
 	public abstract Object getSkin(String[] props);
 
