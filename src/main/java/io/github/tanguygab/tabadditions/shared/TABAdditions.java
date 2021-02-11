@@ -215,15 +215,6 @@ public class TABAdditions {
                 }
             });
         }
-        List<String> moreprops = new ArrayList<>(Arrays.asList("moreheader","morefooter"));
-        for (String prop : moreprops) {
-            TAB.getInstance().getPlaceholderManager().registerPlaceholder(new Placeholder("%"+prop+"%",100) {
-                @Override
-                public String getLastValue(TabPlayer p) {
-                    return getMoreProps(p,prop);
-                }
-            });
-        }
     }
     private void loadFakePlayers() {
         if (rfpEnabled) {
@@ -250,31 +241,10 @@ public class TABAdditions {
         }
     }
 
-    private String getMoreProps(TabPlayer p, String prop) {
-        if (p.getProperty(prop) != null) {
-            String more = p.getProperty(prop).updateAndGet();
-            if (more.startsWith("[") && more.endsWith("]")) {
-                more = more.substring(1).substring(0, more.length()-2);
-
-                List<String> lines = Arrays.asList(more.split(", "));
-
-                String result = "";
-                for (String line : lines) {
-                    if (lines.indexOf(line) == lines.size() - 1)
-                        result = result + "\n" + '\u00a7' + "r";
-                    result = result + line;
-                }
-                return result;
-            }
-            return "\n"+'\u00a7'+"r"+p.getProperty(prop).updateAndGet();
-        }
-        return "5";
-    }
-
     private void refresh() {
         tasks.put("Global-Refresh",platform.AsyncTask(()-> {
             List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
-            List<String> props = new ArrayList<>(Arrays.asList("chatprefix","customchatname","chatsuffix","moreheader","morefooter"));
+            List<String> props = new ArrayList<>(Arrays.asList("chatprefix","customchatname","chatsuffix"));
             for (TabPlayer p : list) {
                 for (String prop : props) {
                     p.loadPropertyFromConfig(prop);

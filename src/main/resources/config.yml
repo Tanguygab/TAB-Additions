@@ -5,3 +5,4 @@ features:
   chat: false
   layout: false
   nametag-in-range: 0
+  real-fake-players: false

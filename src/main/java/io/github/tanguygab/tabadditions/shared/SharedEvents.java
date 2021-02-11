@@ -6,7 +6,6 @@ import io.github.tanguygab.tabadditions.shared.features.commands.TitleCmd;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.ProtocolVersion;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutChat;
@@ -14,6 +13,7 @@ import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.rgb.TextColor;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -68,37 +68,33 @@ public class SharedEvents {
                 int pos = comp.getExtra().indexOf(txt);
                 String msg2 = TABAdditions.getInstance().parsePlaceholders(txt.getText(), p).replaceAll("%msg%", msg);
                 txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
-                txt.toString(ProtocolVersion.v1_16_4);
 
-
-/*                List<IChatBaseComponent> colors = new ArrayList<>(txt.getExtra());
+                List<IChatBaseComponent> colors = new ArrayList<>(txt.getExtra());
                 Collections.reverse(colors);
                 TextColor color = null;
                 for (IChatBaseComponent c : colors) {
                     if (c.getColor() != null) {
                         color = c.getColor();
-                        break;
                     }
                     else if (txt.getColor() != null) {
                         color = txt.getColor();
-                        break;
                     }
+                    //TAB.getInstance().getPlayer("Tanguygab").sendMessage(c.toString(),false);
                 }
-                if (oldColor != null)
+                if (oldColor != null) {
                     txt.setColor(oldColor);
+                    //TAB.getInstance().getPlayer("Tanguygab").sendMessage(oldColor.toString(true), false);
+                }
                 oldColor = color;
 
-                if (oldColor != null)
-                    TAB.getInstance().getPlayer("Tanguygab").sendMessage(oldColor.toString(true),false);
                 if (color != null)
-                    TAB.getInstance().getPlayer("Tanguygab").sendMessage(color.toString(true),false);
-*/
+                    //TAB.getInstance().getPlayer("Tanguygab").sendMessage(color.toString(true),false);
+
                 comp.getExtra().set(pos, txt);
             }
             if (comp.getHoverValue() != null) {
                 String txt = TABAdditions.getInstance().parsePlaceholders(comp.getHoverValue()+"", p).replaceAll("%msg%", msg);
                 IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
-                hover.toString(ProtocolVersion.v1_16_4);
                 comp.onHoverShowText(hover);
             }
             if (comp.getClickValue() != null) {
@@ -106,7 +102,7 @@ public class SharedEvents {
                 comp.onClickSuggestCommand(txt);
             }
         }
-        //TAB.getInstance().getPlayer("Tanguygab").sendMessage(format2.toString(ProtocolVersion.v1_16_4),false);
+        //TAB.getInstance().getPlayer("Tanguygab").sendMessage(format2.toString(),false);
 
         for (TabPlayer pl : TAB.getInstance().getPlayers())
             pl.sendCustomPacket(new PacketPlayOutChat(format2, PacketPlayOutChat.ChatMessageType.CHAT));
