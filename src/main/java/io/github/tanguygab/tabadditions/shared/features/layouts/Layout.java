@@ -95,9 +95,9 @@ public class Layout {
                 List<TabPlayer> pset = playerSet(set);
                 int inList = 0;
                 Map<String,Object> setConfig = (Map<String,Object>) set;
-                if (setConfig.containsKey("vertical") && (boolean)setConfig.get("vertical"))
-                    Collections.sort(playersets.get(set));
                 List<Integer> intlist = new ArrayList<>(playersets.get(set));
+                if (setConfig.containsKey("vertical") && (boolean)setConfig.get("vertical"))
+                    Collections.sort(intlist);
                 for (Integer i : intlist) {
                     PacketPlayOutPlayerInfo.PlayerInfoData fp = fakeplayers.get(i);
 
@@ -237,7 +237,9 @@ public class Layout {
                     if (text.contains("||")) {
                         String prefixName = text.split("\\|\\|")[0];
                         String suffix = text.split("\\|\\|")[1];
-                        text = ((AlignedSuffix)TAB.getInstance().getFeatureManager().getFeature("alignedsuffix")).fixTextWidth(null, prefixName,suffix);
+                        AlignedSuffix alignedSuffix = ((AlignedSuffix)TAB.getInstance().getFeatureManager().getFeature("alignedsuffix"));
+                        if (alignedSuffix != null)
+                            text = alignedSuffix.fixTextWidth(null, prefixName,suffix);
                     }
                     if (TAB.getInstance().getPlaceholderManager().detectAll(text).size() > 0 || slot.containsKey("icon"))
                         placeholders.put(id,slot);

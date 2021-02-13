@@ -62,10 +62,9 @@ layouts:
         # text also supports aligned-tabsuffix feature, you just have to put the "suffix" after ||
         # when a player set' text contains placeholders, they will be parsed for the displayed player instead of viewer
         text: "%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%"
-        # the condition for players to be shown in this player set. if prefixed by a !, will list playesr who don't meet the condition.
+        # the condition for players to be shown in this player set. if prefixed by a !, will list players who don't meet the condition.
         # set to "" or remove the line for no condition
-        # if you want that "staff" condition, check below
-        condition: '!staff'
+        condition: "permission:!tab.staff"
         # if a player set' icon contains placeholders, they will be parsed for the displayed player instead of viewer
         # here, player-head:%player% will display the head of the player %player%, which will be parsed into the name of the displayed player
         icon: player-head:%player%
@@ -80,24 +79,20 @@ layouts:
             - PLACEHOLDER_HIGH_TO_LOW_%player_level%
           # should the sorting be case-sensitive?
           case-sensitive: true
+        empty:
+          icon: mineskin:1753261242
       Staff:
         type: PLAYERS
         text: "%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%"
-        condition: staff
+        condition: "permission:tab.staff"
         # if you want that "staff" condition, check 3 lines below
         icon: player-head:%player%
+        vertical: true
+        empty:
+          icon: mineskin:1753261242
   # this layout is called staff
   staff:
-    #In your premiumconfig, add this under your conditions section:
-    # staff:
-    #   conditions:
-    #     - "%rank%=admin"
-    #     - "%rank%=staff"
-    #   type: OR
-    #   yes: ""
-    #   no: ""
-    # condition that players must meet in order to see this layout
-    condition: "staff"
+    condition: "permission:tab.staff"
     # if condition not met, fallback on the specified layout
     if-condition-not-met: "default"
     shape:
@@ -162,4 +157,5 @@ layouts:
         type: PLAYERS
         text: '%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%'
         condition: staff
+        vertical: true
         icon: player-head:%player%
