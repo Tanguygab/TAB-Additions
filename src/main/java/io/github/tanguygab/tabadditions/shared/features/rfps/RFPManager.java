@@ -2,9 +2,12 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
+import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
+import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
 
 import java.util.*;
 
@@ -72,8 +75,11 @@ public class RFPManager {
     public void showRFP(TabPlayer p) {
         List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
         List<RFP> rfps = new ArrayList<>(this.rfps.values());
-        for (RFP rfp : rfps)
+        for (RFP rfp : rfps) {
             fps.add(rfp.get(p));
+            p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()).setTeamOptions(69));
+            PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),rfp.getProps()[0],rfp.getProps()[1],true,false, Collections.singletonList(rfp.getName()),null, TabFeature.NAMETAGS);
+        }
         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
     }
 

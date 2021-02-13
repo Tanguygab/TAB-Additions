@@ -2,7 +2,6 @@ package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.commands.*;
-import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import io.github.tanguygab.tabadditions.spigot.Features.BukkitEvents;
@@ -137,7 +136,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                         List<RFP> rfps = RFPManager.getInstance().getRFPS();
                         List<String> rfpnames = new ArrayList<>();
                         for (RFP rfp : rfps)
-                            rfpnames.add(rfp.getName());
+                            rfpnames.add(rfp.getConfigName());
                         return rfpnames;
                     }
                     if (args[1].equalsIgnoreCase("edit") && args.length == 4)

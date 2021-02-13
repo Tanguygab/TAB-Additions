@@ -13,7 +13,7 @@ public class RealFakePlayerCmd {
             output = "&a";
             for (RFP rfp : RFPManager.getInstance().getRFPS()) {
                 if (!output.equalsIgnoreCase("&a")) output = output+", ";
-                output = output+rfp.getName();
+                output = output+rfp.getConfigName();
             }
             p.sendMessage(output,true);
             return;

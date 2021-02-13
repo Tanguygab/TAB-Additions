@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.Skins;
+import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
@@ -40,24 +41,30 @@ public class RFP {
         if (config.containsKey("group"))
             group = config.get("group")+"";
         else group = "";
-
     }
 
-    public String getName() {
+    public String getConfigName() {
         return configname;
+    }
+    public String getName() {
+        String value = name;
+        if (value.length() > 15)
+            value = value.substring(0, 15);
+        return value;
     }
     public UUID getUUID() {
         return uuid;
     }
     public String getInfo() {
         String[] props = getProps();
-        return "&aInformation on FakePlayer "+ configname + ":" +
-                "\nName: " + name +
-                "\nLatency bar: " + latency +
-                "\nSkin: " + skin +
-                "\nGroup: " + group +
-                "\nPrefix: " + props[0] +
-                "\nSuffix: " + props[1];
+        return "&6Information on FakePlayer &2"+ configname + "&6:" +
+                "\n&aName: &f" + name +
+                "\n&aLatency bar: &f" + latency +
+                "\n&aSkin: &f" + skin +
+                "\n&aGroup: &f" + group +
+                "\n&aPrefix: &f" + props[0] +
+                "\n&aSuffix: &f" + props[1] +
+                "\n&aTeam: &f" + getSortingTeam();
     }
     public String[] getProps() {
         String prefix = "";
@@ -85,8 +92,7 @@ public class RFP {
 
     public PacketPlayOutPlayerInfo.PlayerInfoData get(TabPlayer p) {
         PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(uuid);
-        rfp.name = name;
-        rfp.displayName = IChatBaseComponent.fromColoredText(TABAdditions.getInstance().parsePlaceholders(getProps()[0]+name+getProps()[1],p));
+        rfp.name = getName();
         rfp.uniqueId = uuid;
         rfp.skin = Skins.getIcon(skin, p);
         if (latency <= 1)
@@ -99,6 +105,26 @@ public class RFP {
             rfp.latency = 200;
         else rfp.latency = 100;
         return rfp;
+    }
+    public String getSortingTeam() {
+        String chars = Sorting.loadSortingList().get(group);
+        if (chars == null) chars = "9";
+
+        int id = 65;
+        boolean done = false;
+        String potentialTeamName = chars+name+"";
+        if (potentialTeamName.length() > 15)
+            potentialTeamName = potentialTeamName.substring(0, 15);
+        potentialTeamName += (char) id;
+        while (!done) {
+            for (TabPlayer all : TAB.getInstance().getPlayers()) {
+                if (all.getTeamName() != null && all.getTeamName().equals(potentialTeamName)) {
+                    id = id + 1;
+                }
+            }
+            done = true;
+        }
+        return potentialTeamName;
     }
 
     public void forceUpdate() {
