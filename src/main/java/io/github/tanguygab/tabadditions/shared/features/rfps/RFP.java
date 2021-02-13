@@ -138,14 +138,12 @@ public class RFP {
         String old = name;
         name = value;
         TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".name", value);
-        TABAdditions.getInstance().getConfig("").save();
         return "&aFakePlayer's name changed from "+old+" to "+value+".";
     }
     public String setSkin(String value) {
         String old = skin;
         skin = value;
         TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".skin", value);
-        TABAdditions.getInstance().getConfig("").save();
         return "&aFakePlayer's skin changed from "+old+" to "+value+".";
     }
     public String setLatency(String value) {
@@ -156,7 +154,6 @@ public class RFP {
             if (num > 5) num = 5;
             latency = num;
             TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".latency", num);
-            TABAdditions.getInstance().getConfig("").save();
             return "&aFakePlayer latency changed from "+old+" to "+num+".";
         } catch (NumberFormatException ignored) {
             return "&cCouldn't change FakePlayer's latency to "+name+", provided a number!";
@@ -166,17 +163,14 @@ public class RFP {
         String old = group;
         group = value;
         TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".group", value);
-        TABAdditions.getInstance().getConfig("").save();
         return "&aFakePlayer's group changed from "+old+" to "+value+".";
     }
     public String setPrefix(String value) {
         TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".prefix", value);
-        TABAdditions.getInstance().getConfig("").save();
         return "&aFakePlayer's prefix changed to "+value+".";
     }
     public String setSuffix(String value) {
         TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".suffix", value);
-        TABAdditions.getInstance().getConfig("").save();
         return "&aFakePlayer's prefix changed to "+value+".";
     }
 
