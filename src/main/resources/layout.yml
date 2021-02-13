@@ -61,7 +61,7 @@ layouts:
         type: PLAYERS
         # text also supports aligned-tabsuffix feature, you just have to put the "suffix" after ||
         # when a player set' text contains placeholders, they will be parsed for the displayed player instead of viewer
-        text: "%prop-tabprefix%%prop-customtabname%||%prop-tabsuffix%"
+        text: "%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%"
         # the condition for players to be shown in this player set. if prefixed by a !, will list playesr who don't meet the condition.
         # set to "" or remove the line for no condition
         # if you want that "staff" condition, check below
@@ -82,7 +82,7 @@ layouts:
           case-sensitive: true
       Staff:
         type: PLAYERS
-        text: "%prop-tabprefix%%prop-customtabname%||%prop-tabsuffix%"
+        text: "%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%"
         condition: staff
         # if you want that "staff" condition, check 3 lines below
         icon: player-head:%player%
@@ -152,7 +152,7 @@ layouts:
         text: '&8TPS: %tps%'
       Players:
         type: PLAYERS
-        text: '%prop-tabprefix%%prop-customtabname%||%prop-tabsuffix%'
+        text: '%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%'
         condition: '!staff'
         icon: player-head:%player%
         vertical: true
@@ -160,6 +160,6 @@ layouts:
         vanished: true
       Staff:
         type: PLAYERS
-        text: '%prop-tabprefix%%prop-customtabname%||%prop-tabsuffix%'
+        text: '%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%'
         condition: staff
         icon: player-head:%player%
