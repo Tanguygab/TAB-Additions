@@ -7,6 +7,7 @@ import java.util.*;
 import io.github.tanguygab.tabadditions.shared.features.Skins;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
+import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import io.github.tanguygab.tabadditions.spigot.Features.NametagInRange;
 import io.github.tanguygab.tabadditions.spigot.Features.TablistNamesRadius;
 import me.neznamy.tab.api.TabPlayer;
@@ -21,8 +22,8 @@ import org.geysermc.floodgate.FloodgateAPI;
 public class TABAdditions {
 
     private static TABAdditions instance;
-    private Object plugin;
-    private Platform platform;
+    private final Object plugin;
+    private final Platform platform;
     private final Map<String,Integer> tasks = new HashMap<>();
 
     private YamlConfigurationFile config;
@@ -104,17 +105,22 @@ public class TABAdditions {
             }
             loadLists();
             loadLayout();
+            loadRFP();
             loadChat();
             loadNametagInRange();
             loadTablistNamesRadius();
             loadPlaceholders();
-            loadFakePlayers();
 
             refresh();
         } catch (IOException e) {
             platform.disable();
             e.printStackTrace();
         }
+    }
+
+    public void disable() {
+        if (LayoutManager.getInstance() != null) LayoutManager.getInstance().unregister();
+        if (RFPManager.getInstance() != null) RFPManager.getInstance().unregister();
     }
 
     protected void loadProps(TabPlayer p) {
@@ -151,6 +157,15 @@ public class TABAdditions {
         if (layoutEnabled && TAB.getInstance().isPremium()) {
             new LayoutManager();
             LayoutManager.getInstance().showLayoutAll();
+        }
+    }
+    private void loadRFP() {
+        if (RFPManager.getInstance() != null) {
+            RFPManager.getInstance().unregister();
+        }
+        if (rfpEnabled) {
+            new RFPManager();
+            RFPManager.getInstance().showRFPAll();
         }
     }
     private void loadChat() {
@@ -216,30 +231,6 @@ public class TABAdditions {
                     return "";
                 }
             });
-        }
-    }
-    private void loadFakePlayers() {
-        if (rfpEnabled) {
-            for (TabPlayer p : TAB.getInstance().getPlayers()) {
-                List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
-                for (Object fp : config.getConfigurationSection("fakeplayers").keySet()) {
-                    PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(UUID.fromString(config.getString("fakeplayers." + fp + ".uuid")));
-                    rfp.name = parsePlaceholders(config.getString("fakeplayers." + fp + ".name", fp + ""), p);
-                    rfp.skin = Skins.getIcon(config.getString("fakeplayers." + fp + ".skin", ""), p);
-                    int lat = config.getInt("fakeplayers." + fp + ".latency", 0);
-                    if (lat <= 1)
-                        rfp.latency = 1000;
-                    if (lat == 2)
-                        rfp.latency = 600;
-                    if (lat == 3)
-                        rfp.latency = 300;
-                    if (lat >= 4)
-                        rfp.latency = 200;
-
-                    fps.add(rfp);
-                }
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
-            }
         }
     }
 

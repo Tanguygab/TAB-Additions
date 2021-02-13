@@ -19,7 +19,7 @@ public class LayoutManager {
     public LayoutManager() {
         instance = this;
         for (Object layout : TABAdditions.getInstance().getConfig("layout").getConfigurationSection("layouts").keySet())
-            layouts.put(layout.toString(),new Layout(layout.toString()));
+            layouts.put(layout+"",new Layout(layout.toString()));
         refresh();
     }
 

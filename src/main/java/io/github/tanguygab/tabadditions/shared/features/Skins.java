@@ -53,7 +53,8 @@ public class Skins {
             return icons.get(icon);
         String deficon = icon;
         Object skin = null;
-        String[] props = new String[1];
+        String[] props = null;
+        if (icon == null || icon.equals("")) return null;
         if (icon.startsWith("player-head:")) {
             icon = icon.replace("player-head:", "");
             if (TAB.getInstance().getPlayer(icon) != null)
@@ -69,7 +70,7 @@ public class Skins {
             }
             catch (NumberFormatException ignored) {}
         }
-        if (skin == null) {
+        if (skin == null && props != null) {
             skin = TABAdditions.getInstance().getPlatform().getSkin(props);
         }
         icons.put(deficon,skin);

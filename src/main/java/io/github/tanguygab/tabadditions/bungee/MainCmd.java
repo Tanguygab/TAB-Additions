@@ -62,6 +62,18 @@ public class MainCmd extends Command {
                     }
                     break;
                 }
+                case "fp": {
+                    if (TABAdditions.getInstance().rfpEnabled) {
+                        if (args.length < 2)
+                            p.sendMessage("You have to provide add, remove, edit, info or list.", false);
+                        else if (!args[1].equalsIgnoreCase("list") && args.length < 3)
+                            p.sendMessage("You have to provide a fake player name.", false);
+                        else if (args[1].equalsIgnoreCase("edit") && args.length < 4)
+                            p.sendMessage("You have to provide an action.", false);
+                        else new RealFakePlayerCmd(p, args);
+                    }
+                    break;
+                }
                 case "tags": {
                     new TagsCmd(p, args);
                     break;

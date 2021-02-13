@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.bungee;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import net.md_5.bungee.api.plugin.Plugin;
 
 public final class TABAdditionsBungeeCord extends Plugin {
@@ -16,7 +15,7 @@ public final class TABAdditionsBungeeCord extends Plugin {
 
     @Override
     public void onDisable() {
-        if (LayoutManager.getInstance() != null) LayoutManager.getInstance().unregister();
+        TABAdditions.getInstance().disable();
     }
 
     public void reload() {

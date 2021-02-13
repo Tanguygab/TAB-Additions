@@ -4,6 +4,7 @@ import io.github.tanguygab.tabadditions.shared.features.chat.ChatFormat;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.commands.TitleCmd;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
+import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
@@ -54,6 +55,9 @@ public class SharedEvents {
                         p2.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p.getUniqueId())));
                     }
                 }
+            if (TABAdditions.getInstance().rfpEnabled) {
+                RFPManager.getInstance().showRFPAll();
+            }
         }, 50);
 
     }

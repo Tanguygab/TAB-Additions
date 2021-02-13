@@ -3,6 +3,8 @@ package io.github.tanguygab.tabadditions.spigot;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.commands.*;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
+import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
+import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import io.github.tanguygab.tabadditions.spigot.Features.BukkitEvents;
 import me.neznamy.tab.api.TabPlayer;
 
@@ -29,7 +31,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @Override
     public void onDisable() {
-        if (LayoutManager.getInstance() != null) LayoutManager.getInstance().unregister();
+        TABAdditions.getInstance().disable();
     }
 
     public void reload() {
@@ -92,12 +94,12 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 case "fp": {
                     if (TABAdditions.getInstance().rfpEnabled) {
                         if (args.length < 2)
-                            p.sendMessage("You have to provide add, remove, edit or list.", false);
+                            p.sendMessage("You have to provide add, remove, edit, info or list.", false);
                         else if (!args[1].equalsIgnoreCase("list") && args.length < 3)
                             p.sendMessage("You have to provide a fake player name.", false);
                         else if (args[1].equalsIgnoreCase("edit") && args.length < 4)
                             p.sendMessage("You have to provide an action.", false);
-                        else new RealFakePlayer(p, args);
+                        else new RealFakePlayerCmd(p, args);
                     }
                     break;
                 }
@@ -127,12 +129,19 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                         return new ArrayList<>(Arrays.asList("hide","show","toggle"));
                 }
                 case "fp": {
+                    if (!TABAdditions.getInstance().rfpEnabled)
+                        return null;
                     if (args.length == 2)
-                        return new ArrayList<>(Arrays.asList("add","remove","edit","list"));
-                    if (!args[1].equalsIgnoreCase("list") && args.length == 3)
-                        return new ArrayList<>(Collections.singletonList("<name>"));
+                        return new ArrayList<>(Arrays.asList("add","remove","edit","list","info"));
+                    if (!args[1].equalsIgnoreCase("list") && args.length == 3) {
+                        List<RFP> rfps = RFPManager.getInstance().getRFPS();
+                        List<String> rfpnames = new ArrayList<>();
+                        for (RFP rfp : rfps)
+                            rfpnames.add(rfp.getName());
+                        return rfpnames;
+                    }
                     if (args[1].equalsIgnoreCase("edit") && args.length == 4)
-                        return new ArrayList<>(Arrays.asList("name","skin","latency","group"));
+                        return new ArrayList<>(Arrays.asList("name","skin","latency","group","prefix","suffix"));
                 }
                 case "title": {
                     if (args.length == 2)
