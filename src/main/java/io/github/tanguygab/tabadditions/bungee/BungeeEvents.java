@@ -11,6 +11,7 @@ import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.Placeholder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -24,6 +25,16 @@ public class BungeeEvents implements Listener {
     @EventHandler
     public void onJoin(ServerSwitchEvent e) {
         SharedEvents.JoinEvent(e.getPlayer().getName());
+    }
+
+    @EventHandler
+    public void onChat(ChatEvent e) {
+        if (e.isCommand() || e.isProxyCommand()) return;
+        if (!(e.getSender() instanceof ProxiedPlayer)) return;
+        if (TABAdditions.getInstance().chatEnabled) {
+            SharedEvents.ChatEvent(TAB.getInstance().getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()), e.getMessage());
+            e.setCancelled(true);
+        }
     }
 
     @EventHandler
