@@ -39,7 +39,7 @@ public class SharedEvents {
                     new TitleCmd(p, new String[]{}, titleProperties);
                 }
             }
-            if (TABAdditions.getInstance().layoutEnabled && !TABAdditions.getInstance().checkBedrock(p)) {
+            if (TABAdditions.getInstance().layoutEnabled && TAB.getInstance().isPremium() && !TABAdditions.getInstance().checkBedrock(p)) {
                 LayoutManager lm = LayoutManager.getInstance();
                 lm.toAdd.put(p,lm.getLayout(p));
             }
@@ -66,36 +66,36 @@ public class SharedEvents {
         ChatFormat format = ChatManager.getInstance().getFormat(p);
         IChatBaseComponent format2 = format.getText();
         TextColor oldColor = null;
+        List<IChatBaseComponent> list = new ArrayList<>();
         for (IChatBaseComponent comp : format2.getExtra()) {
 
+            List<IChatBaseComponent> list2 = new ArrayList<>();
             for (IChatBaseComponent txt : comp.getExtra()) {
-                int pos = comp.getExtra().indexOf(txt);
-                String msg2 = TABAdditions.getInstance().parsePlaceholders(txt.getText(), p).replaceAll("%msg%", msg);
+                String msg2 = TABAdditions.getInstance().parsePlaceholders(txt.toRawText(), p).replaceAll("%msg%", msg);
                 txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
 
                 List<IChatBaseComponent> colors = new ArrayList<>(txt.getExtra());
-                Collections.reverse(colors);
                 TextColor color = null;
-                for (IChatBaseComponent c : colors) {
+                Collections.reverse(colors);
+                for (IChatBaseComponent c : txt.getExtra()) {
                     if (c.getColor() != null) {
                         color = c.getColor();
+                        break;
                     }
-                    else if (txt.getColor() != null) {
+                    if (txt.getColor() != null) {
                         color = txt.getColor();
+                        break;
                     }
-                    //TAB.getInstance().getPlayer("Tanguygab").sendMessage(c.toString(),false);
                 }
-                if (oldColor != null) {
+                if (oldColor != null && txt.getColor() == null) {
                     txt.setColor(oldColor);
-                    //TAB.getInstance().getPlayer("Tanguygab").sendMessage(oldColor.toString(true), false);
                 }
-                oldColor = color;
-
                 if (color != null)
-                    //TAB.getInstance().getPlayer("Tanguygab").sendMessage(color.toString(true),false);
+                    oldColor = color;
 
-                comp.getExtra().set(pos, txt);
+                list2.add(txt);
             }
+            comp.setExtra(list2);
             if (comp.getHoverValue() != null) {
                 String txt = TABAdditions.getInstance().parsePlaceholders(comp.getHoverValue()+"", p).replaceAll("%msg%", msg);
                 IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
@@ -105,8 +105,9 @@ public class SharedEvents {
                 String txt = TABAdditions.getInstance().parsePlaceholders(comp.getClickValue()+"", p).replaceAll("%msg%", msg);
                 comp.onClickSuggestCommand(txt);
             }
+            list.add(comp);
         }
-        //TAB.getInstance().getPlayer("Tanguygab").sendMessage(format2.toString(),false);
+        format2.setExtra(list);
 
         for (TabPlayer pl : TAB.getInstance().getPlayers())
         	pl.sendMessage(format2);
