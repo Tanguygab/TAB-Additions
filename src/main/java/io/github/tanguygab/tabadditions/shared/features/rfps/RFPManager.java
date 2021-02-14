@@ -55,9 +55,14 @@ public class RFPManager {
 
         RFP rfp = new RFP(name,config.getConfigurationSection("fakeplayers."+name));
         rfps.put(name,rfp);
-        for (TabPlayer p : TAB.getInstance().getPlayers())
+        for (TabPlayer p : TAB.getInstance().getPlayers()) {
+            p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()).setTeamOptions(69));
+            String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p);
+            String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p);
+            PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(rfp.getName()),null, TabFeature.NAMETAGS);
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, rfp.get(p)));
 
+        }
         return "&aAdded FakePlayer";
     }
     public String deleteRFP(String name) {
@@ -78,7 +83,9 @@ public class RFPManager {
         for (RFP rfp : rfps) {
             fps.add(rfp.get(p));
             p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()).setTeamOptions(69));
-            PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),rfp.getProps()[0],rfp.getProps()[1],true,false, Collections.singletonList(rfp.getName()),null, TabFeature.NAMETAGS);
+            String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p);
+            String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p);
+            PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(rfp.getName()),null, TabFeature.NAMETAGS);
         }
         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
     }
@@ -86,8 +93,10 @@ public class RFPManager {
     public void removeRFP(TabPlayer p) {
             List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
             List<RFP> rfps = new ArrayList<>(this.rfps.values());
-            for (RFP rfp : rfps)
+            for (RFP rfp : rfps) {
                 fps.add(new PacketPlayOutPlayerInfo.PlayerInfoData(rfp.getUUID()));
+                p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()).setTeamOptions(69));
+            }
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
     }
     public void showRFPAll() {

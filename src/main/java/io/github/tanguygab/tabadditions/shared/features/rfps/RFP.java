@@ -4,10 +4,14 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.Skins;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
+import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
 
+import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 
@@ -73,17 +77,25 @@ public class RFP {
         Map<String,Object> config = TABAdditions.getInstance().getConfig("").getConfigurationSection("fakeplayers."+configname);
         Map<String,Object> tabConfig = TAB.getInstance().getConfiguration().config.getConfigurationSection("Groups");
 
+        String configGroup = "";
+        for (String g : tabConfig.keySet()) {
+            if (g.equalsIgnoreCase(group)) {
+                configGroup = g;
+                break;
+            }
+        }
+
         if (config.containsKey("prefix"))
             prefix = config.get("prefix")+"";
-        else if (tabConfig.containsKey(group) && ((Map<String,Object>)tabConfig.get(group)).containsKey("tabprefix"))
-            prefix = ((Map<String,Object>)tabConfig.get(group)).get("tabprefix")+"";
+        else if (!configGroup.equals("") && ((Map<String,Object>)tabConfig.get(configGroup)).containsKey("tabprefix"))
+            prefix = ((Map<String,Object>)tabConfig.get(configGroup)).get("tabprefix")+"";
         else if (tabConfig.containsKey("_OTHER_") && ((Map<String,Object>)tabConfig.get("_OTHER_")).containsKey("tabprefix"))
             prefix = ((Map<String,Object>)tabConfig.get("_OTHER_")).get("tabprefix")+"";
 
         if (config.containsKey("suffix"))
             suffix = config.get("suffix")+"";
-        else if (tabConfig.containsKey(group) && ((Map<String,Object>)tabConfig.get(group)).containsKey("tabsuffix"))
-            suffix = ((Map<String,Object>)tabConfig.get(group)).get("tabsuffix")+"";
+        else if (!configGroup.equals("") && ((Map<String,Object>)tabConfig.get(configGroup)).containsKey("tabsuffix"))
+            suffix = ((Map<String,Object>)tabConfig.get(configGroup)).get("tabsuffix")+"";
         else if (tabConfig.containsKey("_OTHER_") && ((Map<String,Object>)tabConfig.get("_OTHER_")).containsKey("tabsuffix"))
             suffix = ((Map<String,Object>)tabConfig.get("_OTHER_")).get("tabsuffix")+"";
 
@@ -129,7 +141,11 @@ public class RFP {
 
     public void forceUpdate() {
         for (TabPlayer p : TAB.getInstance().getPlayers()) {
+            p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()).setTeamOptions(69));
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, get(p)));
+            String prefix = TABAdditions.getInstance().parsePlaceholders(getProps()[0],p);
+            String suffix = TABAdditions.getInstance().parsePlaceholders(getProps()[1],p);
+            PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabFeature.NAMETAGS);
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, get(p)));
         }
     }
@@ -160,6 +176,7 @@ public class RFP {
         }
     }
     public String setGroup(String value) {
+        value = value.toLowerCase();
         String old = group;
         group = value;
         TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".group", value);
