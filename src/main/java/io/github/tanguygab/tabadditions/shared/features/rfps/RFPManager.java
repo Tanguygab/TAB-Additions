@@ -15,6 +15,9 @@ public class RFPManager {
 
     private static RFPManager instance;
     private final Map<String, RFP> rfps = new HashMap<>();
+    private final Map<TabPlayer,Map<RFP, Object>> skins = new HashMap<>();
+    private Integer task;
+    private boolean refresh;
 
     public RFPManager() {
         instance = this;
@@ -22,7 +25,8 @@ public class RFPManager {
         for (Object rfp : config.keySet())
             rfps.put(rfp+"",new RFP(rfp+"", (Map<String, Object>) config.get(rfp+"")));
         showRFPAll();
-
+        refresh = TABAdditions.getInstance().getConfig("").getBoolean("real-fake-players-have-skins",true);
+        refresh();
     }
 
     public static RFPManager getInstance() {
@@ -30,7 +34,29 @@ public class RFPManager {
     }
 
     public void unregister() {
+        TABAdditions.getInstance().getPlatform().cancelTask(task);
         removeRFPAll();
+        refresh = false;
+    }
+
+    public void refresh() {
+        task = TABAdditions.getInstance().getPlatform().AsyncTask(()-> {
+            List<RFP> rfps = new ArrayList<>(this.rfps.values());
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                if (!skins.containsKey(p))
+                    skins.put(p,new HashMap<>());
+
+                for (RFP rfp : rfps) {
+                    Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p);
+                    if (skin != null && skins.get(p).get(rfp) != skin) {
+                        if (!refresh)
+                            return;
+                        rfp.forceUpdate(skin);
+                    }
+                    skins.get(p).put(rfp,skin);
+                }
+            }
+        },0L,500L);
     }
 
     public List<RFP> getRFPS() {
@@ -65,6 +91,16 @@ public class RFPManager {
         }
         return "&aAdded FakePlayer";
     }
+
+    public String deleteAll() {
+        if (rfps.isEmpty()) return "&cNo FakePlayers found.";
+
+        List<String> list = new ArrayList<>(rfps.keySet());
+        for (String name : list)
+            deleteRFP(name);
+        return "&aRemoved all FakePlayers.";
+    }
+
     public String deleteRFP(String name) {
         if (!rfps.containsKey(name)) return "&cThis FakePlayer doesn't exist!";
 
@@ -78,16 +114,18 @@ public class RFPManager {
     }
 
     public void showRFP(TabPlayer p) {
-        List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
-        List<RFP> rfps = new ArrayList<>(this.rfps.values());
-        for (RFP rfp : rfps) {
-            fps.add(rfp.get(p));
-            p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()).setTeamOptions(69));
-            String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p);
-            String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p);
-            PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(rfp.getName()),null, TabFeature.NAMETAGS);
-        }
-        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
+        //TABAdditions.getInstance().getPlatform().AsyncTask(()->{
+            List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
+            List<RFP> rfps = new ArrayList<>(this.rfps.values());
+            for (RFP rfp : rfps) {
+                fps.add(rfp.get(p));
+                p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()).setTeamOptions(69));
+                String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p);
+                String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p);
+                PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(rfp.getName()),null, TabFeature.NAMETAGS);
+            }
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
+        //},0);
     }
 
     public void removeRFP(TabPlayer p) {

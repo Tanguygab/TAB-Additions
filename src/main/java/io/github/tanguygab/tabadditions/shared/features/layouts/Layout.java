@@ -70,7 +70,7 @@ public class Layout {
 
                 Object skin = null;
                 if (slot.containsKey("icon"))
-                    skin = Skins.getIcon(slot.get("icon")+"", p);
+                    skin = TABAdditions.getInstance().getSkins().getIcon(slot.get("icon")+"", p);
                 if (!skinsp.containsKey(p) || (skin != null && skinsp.get(p).get(i) != skin)) {
                     p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
                     p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
@@ -121,7 +121,7 @@ public class Layout {
                             if (empty.containsKey("text"))
                                 format = TABAdditions.getInstance().parsePlaceholders(empty.get("text"), p);
                             if (empty.containsKey("icon"))
-                                skin = Skins.getIcon(empty.get("icon")+"",p);
+                                skin = TABAdditions.getInstance().getSkins().getIcon(empty.get("icon")+"",p);
                         }
                         if (!skinss.containsKey(p) || (skinss.get(p).get(i) != skin)) {
                             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
@@ -152,7 +152,7 @@ public class Layout {
 
                         Object skin = pInSet.getSkin();
                         if (setConfig.containsKey("icon"))
-                            skin = Skins.getIcon(setConfig.get("icon")+"",pInSet);
+                            skin = TABAdditions.getInstance().getSkins().getIcon(setConfig.get("icon")+"",pInSet);
                         if (!skinss.containsKey(p) || (skin != null && skinss.get(p).get(i) != skin)) {
                             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
                             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(format))));

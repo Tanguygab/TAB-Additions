@@ -1,13 +1,11 @@
 package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.Skins;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
 
@@ -21,7 +19,7 @@ public class RFP {
     private String name;
     private final UUID uuid;
     private int latency;
-    private String skin;
+    public String skin;
     private String group;
 
     public RFP(String configname,Map<String,Object> config) {
@@ -106,7 +104,7 @@ public class RFP {
         PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(uuid);
         rfp.name = getName();
         rfp.uniqueId = uuid;
-        rfp.skin = Skins.getIcon(skin, p);
+        //rfp.skin = Skins.getIcon(skin, p);
         if (latency <= 1)
             rfp.latency = 1000;
         else if (latency == 2)
@@ -139,15 +137,17 @@ public class RFP {
         return potentialTeamName;
     }
 
-    public void forceUpdate() {
-        for (TabPlayer p : TAB.getInstance().getPlayers()) {
-            p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()).setTeamOptions(69));
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, get(p)));
-            String prefix = TABAdditions.getInstance().parsePlaceholders(getProps()[0],p);
-            String suffix = TABAdditions.getInstance().parsePlaceholders(getProps()[1],p);
-            PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabFeature.NAMETAGS);
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, get(p)));
-        }
+    public void forceUpdate(Object skin) {
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                PacketPlayOutPlayerInfo.PlayerInfoData fp = get(p);
+                if (skin != null) fp.skin = skin;
+                p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()).setTeamOptions(69));
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp));
+                String prefix = TABAdditions.getInstance().parsePlaceholders(getProps()[0],p);
+                String suffix = TABAdditions.getInstance().parsePlaceholders(getProps()[1],p);
+                PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabFeature.NAMETAGS);
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp));
+            }
     }
 
     public String setName(String value) {

@@ -1,31 +1,38 @@
 package io.github.tanguygab.tabadditions.shared.features.commands;
 
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
-import me.neznamy.tab.api.TabPlayer;
 
 public class RealFakePlayerCmd {
-    public RealFakePlayerCmd(TabPlayer p, String[] args) {
+    public RealFakePlayerCmd(String nameS, String[] args) {
+        TABAdditions instance = TABAdditions.getInstance();
         String output = "";
 
         if (args[1].equalsIgnoreCase("list")) {
-            p.sendMessage("Fakeplayers list:",true);
+            instance.sendMessage(nameS,"Fakeplayers list:");
             output = "&a";
             for (RFP rfp : RFPManager.getInstance().getRFPS()) {
                 if (!output.equalsIgnoreCase("&a")) output = output+", ";
                 output = output+rfp.getConfigName();
             }
-            p.sendMessage(output,true);
+            instance.sendMessage(nameS,output);
             return;
         }
 
         String name = args[2];
 
-        if (args[1].equalsIgnoreCase("add"))
-            output = RFPManager.getInstance().addRFP(name);
+        if (args[1].equalsIgnoreCase("add")) {
+            if (name.equalsIgnoreCase("_ALL_"))
+                output = "&cYou can't use that name";
+            else output = RFPManager.getInstance().addRFP(name);
+        }
 
-        else if (args[1].equalsIgnoreCase("remove"))
-            output = RFPManager.getInstance().deleteRFP(name);
+        else if (args[1].equalsIgnoreCase("remove")) {
+            if (name.equals("_ALL_"))
+                output = RFPManager.getInstance().deleteAll();
+            else output = RFPManager.getInstance().deleteRFP(name);
+        }
 
         else if (args[1].equalsIgnoreCase("info"))
             output = RFPManager.getInstance().getRFP(name).getInfo();
@@ -53,9 +60,9 @@ public class RealFakePlayerCmd {
             if (prop.equalsIgnoreCase("suffix"))
                 output = RFPManager.getInstance().getRFP(name).setSuffix(value);
 
-            RFPManager.getInstance().getRFP(name).forceUpdate();
+            RFPManager.getInstance().getRFP(name).forceUpdate(null);
         }
 
-        p.sendMessage(output,true);
+        instance.sendMessage(nameS,output);
     }
 }
