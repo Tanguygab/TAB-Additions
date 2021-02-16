@@ -1,9 +1,6 @@
 package io.github.tanguygab.tabadditions.spigot.Features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -12,17 +9,16 @@ public class TablistNamesRadius {
 
     public int load() {
 
-        return Bukkit.getScheduler().scheduleAsyncRepeatingTask((Plugin) TABAdditions.getInstance().getPlugin(), () -> {
+        return Bukkit.getScheduler().scheduleSyncRepeatingTask((Plugin) TABAdditions.getInstance().getPlugin(), () -> {
             int zone = (int) Math.pow(TABAdditions.getInstance().tablistNamesRadius, 2);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
 
                     if (p != player && p.getWorld().equals(player.getWorld()) && player.getLocation().distanceSquared(p.getLocation()) < zone) {
-                        TabPlayer p2 = TAB.getInstance().getPlayer(player.getUniqueId());
-                        TAB.getInstance().getPlayer(p.getUniqueId()).sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(p2.getName(), p2.getTablistUUID(), p2.getSkin(), (int)p2.getPing(), PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, null)));
+                        p.showPlayer((Plugin) TABAdditions.getInstance().getPlugin(),player);
                     }
                     else if (p != player) {
-                        TAB.getInstance().getPlayer(p.getUniqueId()).sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(player.getUniqueId())));
+                        p.hidePlayer((Plugin) TABAdditions.getInstance().getPlugin(),player);
                     }
                 }
             }
