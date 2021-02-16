@@ -16,6 +16,7 @@ import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.placeholders.Placeholder;
+import net.md_5.bungee.api.ChatColor;
 import org.bukkit.Bukkit;
 import org.geysermc.floodgate.FloodgateAPI;
 
@@ -24,6 +25,7 @@ public class TABAdditions {
     private static TABAdditions instance;
     private final Object plugin;
     private final Platform platform;
+    private final Skins skins;
     private final Map<String,Integer> tasks = new HashMap<>();
 
     private YamlConfigurationFile config;
@@ -50,6 +52,7 @@ public class TABAdditions {
     public TABAdditions(Platform platform, Object plugin) {
     	this.platform = platform;
     	this.plugin = plugin;
+    	skins = new Skins();
     }
     
     public static void setInstance(TABAdditions instance) {
@@ -66,6 +69,10 @@ public class TABAdditions {
     
     public Object getPlugin() {
         return plugin;
+    }
+
+    public Skins getSkins() {
+        return skins;
     }
 
     public YamlConfigurationFile getConfig(String cfg) {
@@ -195,8 +202,6 @@ public class TABAdditions {
     }
     private void loadTablistNamesRadius() {
         if (tablistNamesRadius != 0) {
-            if (tablistNamesRadius < 100)
-                tablistNamesRadius = 100;
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
                     if (p != p2)
@@ -252,7 +257,15 @@ public class TABAdditions {
     public String parsePlaceholders(String str, TabPlayer p) {
         str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
         str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
+        if (platform.getType() == PlatformType.BUNGEE)
+            str = ChatColor.translateAlternateColorCodes('&',str);
         return str;
+    }
+
+    public void sendMessage(String name,String msg) {
+        if (name.equals("~Console~"))
+            TAB.getInstance().getPlatform().sendConsoleMessage(msg,true);
+        else TAB.getInstance().getPlayer(name).sendMessage(msg,true);
     }
 
     public boolean checkBedrock(TabPlayer p) {

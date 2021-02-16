@@ -1,23 +1,27 @@
 package io.github.tanguygab.tabadditions.shared.features.commands;
 
-import me.neznamy.tab.api.TABAPI;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.TAB;
 
 public class TagsCmd {
-    public TagsCmd(TabPlayer sender, String[] args) {
+    public TagsCmd(String name, String[] args) {
+
+        TABAdditions instance = TABAdditions.getInstance();
+
         if (args.length < 2) {
-            sender.sendMessage("&cYou have to specify &4hide&c, &4show &cor &4toggle &cand a player.",true);
+            instance.sendMessage(name,"&cYou have to specify &4hide&c, &4show &cor &4toggle &cand a player.");
             return;
         }
         if (args.length < 3) {
-            sender.sendMessage("&cYou didn't provide a player!",true);
+            instance.sendMessage(name,"&cYou didn't provide a player!");
             return;
         }
 
-        TabPlayer p = TABAPI.getPlayer(args[2]);
+        TabPlayer p = TAB.getInstance().getPlayer(args[2]);
 
         if (p == null) {
-            sender.sendMessage("&cThis player isn't connected",true);
+            instance.sendMessage(name,"&cThis player isn't connected");
             return;
         }
 

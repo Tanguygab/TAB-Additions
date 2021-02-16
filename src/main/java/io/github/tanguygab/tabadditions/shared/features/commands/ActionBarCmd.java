@@ -1,23 +1,26 @@
 package io.github.tanguygab.tabadditions.shared.features.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.PacketPlayOutChat;
 
 public class ActionBarCmd {
 
-    public ActionBarCmd(TabPlayer sender, String[] args, String actionbar) {
+    public ActionBarCmd(String name, String[] args, String actionbar) {
 
-        TabPlayer p = sender;
+        TABAdditions instance = TABAdditions.getInstance();
+        TabPlayer p = null;
         if (args.length > 2)
-            p = TABAPI.getPlayer(args[2]);
+            p = TAB.getInstance().getPlayer(args[2]);
+        else if (!name.equals("~Console~"))
+            p = TAB.getInstance().getPlayer(name);
 
         if (p == null) {
-            sender.sendMessage("&cThis player isn't connected",true);
+            instance.sendMessage(name,"&cThis player isn't connected");
             return;
         }
-        actionbar = TABAdditions.getInstance().parsePlaceholders(actionbar,p);
+        actionbar = instance.parsePlaceholders(actionbar,p);
         p.sendCustomPacket(new PacketPlayOutChat(actionbar, PacketPlayOutChat.ChatMessageType.GAME_INFO));
     }
 }
