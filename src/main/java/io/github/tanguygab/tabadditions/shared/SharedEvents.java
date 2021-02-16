@@ -5,6 +5,7 @@ import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.commands.TitleCmd;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
+import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
@@ -12,11 +13,10 @@ import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutChat;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.rgb.TextColor;
+import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SharedEvents {
 
@@ -32,11 +32,11 @@ public class SharedEvents {
             }
             if (TABAdditions.getInstance().titlesEnabled) {
                 Map<String,String> tSection = TABAdditions.getInstance().titleConfig.getConfigurationSection("titles." + p.getProperty("title").get());
-                if (tSection != null) {
+                if (tSection != null && tSection.size() >= 5) {
                     List<Object> titleProperties = new ArrayList<>();
                     for (Object property : tSection.keySet())
                         titleProperties.add(tSection.get(property));
-                    new TitleCmd(p, new String[]{}, titleProperties);
+                    new TitleCmd(name, new String[]{}, titleProperties);
                 }
             }
             if (TABAdditions.getInstance().layoutEnabled && TAB.getInstance().isPremium() && !TABAdditions.getInstance().checkBedrock(p)) {
@@ -67,6 +67,38 @@ public class SharedEvents {
         IChatBaseComponent format2 = format.getText();
         TextColor oldColor = null;
         List<IChatBaseComponent> list = new ArrayList<>();
+
+        //[item]
+        if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT && msg.contains("[item]")) {
+            ItemStack item = ((Player) p.getPlayer()).getInventory().getItemInMainHand();
+            if (item != null) {
+
+                IChatBaseComponent itemmsg = new IChatBaseComponent("");
+                List<IChatBaseComponent> msglist = new ArrayList<>();
+                List<String> ar = new ArrayList<>(Arrays.asList(msg.split("\\[item]")));
+
+                if (ar.isEmpty()) ar.add("");
+                for (String txt2 : ar) {
+
+                    msglist.add(IChatBaseComponent.fromColoredText(txt2));
+                    if ((ar.size() == 1 || ar.indexOf(txt2) != ar.size() - 1)) {
+                        IChatBaseComponent itemtxt = new IChatBaseComponent();
+                        String type = item.getType().toString().replace("_", " ").toLowerCase();
+                        itemtxt = itemtxt.setText(type);
+                        itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) TABAdditions.getInstance().getPlugin()).itemStack(item));
+                        p.sendMessage(itemtxt.getHoverValue() + "", false);
+                        msglist.add(itemtxt);
+                    }
+
+                }
+
+                itemmsg.setExtra(msglist);
+                p.sendMessage(itemmsg);
+
+            }
+        }
+
+
         for (IChatBaseComponent comp : format2.getExtra()) {
 
             List<IChatBaseComponent> list2 = new ArrayList<>();
@@ -97,18 +129,20 @@ public class SharedEvents {
             }
             comp.setExtra(list2);
             if (comp.getHoverValue() != null) {
-                String txt = TABAdditions.getInstance().parsePlaceholders(comp.getHoverValue()+"", p).replaceAll("%msg%", msg);
+                String txt = TABAdditions.getInstance().parsePlaceholders(comp.getHoverValue() + "", p).replaceAll("%msg%", msg);
                 IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
                 comp.onHoverShowText(hover);
             }
             if (comp.getClickValue() != null) {
-                String txt = TABAdditions.getInstance().parsePlaceholders(comp.getClickValue()+"", p).replaceAll("%msg%", msg);
+                String txt = TABAdditions.getInstance().parsePlaceholders(comp.getClickValue() + "", p).replaceAll("%msg%", msg);
                 comp.onClickSuggestCommand(txt);
             }
             list.add(comp);
         }
         format2.setExtra(list);
 
+        TAB.getInstance().getPlatform().sendConsoleMessage(format2+"", true);
+        TAB.getInstance().getPlatform().sendConsoleMessage(format2.toLegacyText(), true);
         for (TabPlayer pl : TAB.getInstance().getPlayers())
         	pl.sendMessage(format2);
     }

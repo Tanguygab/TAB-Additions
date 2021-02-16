@@ -47,7 +47,7 @@ public class ChatManager {
         Map<String,Object> components = new HashMap<>();
         Map<String,Object> text = new HashMap<>();
 
-        text.put("text","%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%é&7>> &r%msg%");
+        text.put("text","%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%&7» &r%msg%");
         components.put("text",text);
         map.put("components",components);
         return new ChatFormat("default", map);

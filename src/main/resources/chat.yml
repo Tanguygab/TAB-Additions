@@ -19,7 +19,7 @@ chat-formats:
         hover:
           - "Suffix hover"
       msg:
-        text: ">> %msg%"
+        text: "&7» %msg%"
         hover:
           - "%time%"
         suggest: "Hey %player_name%"
