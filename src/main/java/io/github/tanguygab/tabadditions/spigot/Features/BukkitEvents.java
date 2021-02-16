@@ -13,7 +13,6 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 import io.github.tanguygab.tabadditions.shared.SharedEvents;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.event.BukkitTABLoadEvent;
 
@@ -26,7 +25,8 @@ public class BukkitEvents implements Listener {
     public void onSneak(PlayerToggleSneakEvent e) {
         if (TABAdditions.getInstance().sneakhideEnabled) {
             boolean sneak = e.isSneaking();
-            TabPlayer p = TABAPI.getPlayer(e.getPlayer().getUniqueId());
+            TabPlayer p = TAB.getInstance().getPlayer(e.getPlayer().getUniqueId());
+            if (TAB.getInstance().isDisabled()) return;
 
             if (sneak) {
                 tag.put(p, p.hasHiddenNametag());
@@ -43,11 +43,13 @@ public class BukkitEvents implements Listener {
 
     @EventHandler
     public void onJoin(PlayerJoinEvent e) {
+        if (TAB.getInstance().isDisabled()) return;
         SharedEvents.JoinEvent(e.getPlayer().getName());
     }
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent e) {
+        if (TAB.getInstance().isDisabled()) return;
         if (TABAdditions.getInstance().chatEnabled) {
             SharedEvents.ChatEvent(TAB.getInstance().getPlayer(e.getPlayer().getUniqueId()), e.getMessage());
             e.setCancelled(true);
