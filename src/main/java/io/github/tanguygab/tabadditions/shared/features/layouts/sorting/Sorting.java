@@ -3,6 +3,8 @@ package io.github.tanguygab.tabadditions.shared.features.layouts.sorting;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.cpu.TabFeature;
+import me.neznamy.tab.shared.cpu.UsageType;
 
 import java.util.*;
 
@@ -28,14 +30,14 @@ public class Sorting {
         }
         else types.add(new Groups(""));
 
-        TABAdditions.getInstance().getPlatform().AsyncTask(()->{
+        TAB.getInstance().getCPUManager().runTaskLater(1000,"handling TAB+ Layout Sorting", TabFeature.SORTING,null,()->{
             List<TabPlayer> players1 = players;
             for (TabPlayer p : players1) {
                 if (!p.isLoaded()) continue;
                 String newPos = getPosition(p);
                 p.setProperty("Layout-Sorting-"+layoutname,newPos);
             }
-        },1000);
+        });
     }
 
     private void compile(List<String> slottypes){

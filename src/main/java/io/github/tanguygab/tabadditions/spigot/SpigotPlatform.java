@@ -33,21 +33,6 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public int AsyncTask(Runnable r, long delay, long period) {
-		 return Bukkit.getServer().getScheduler().scheduleAsyncRepeatingTask(plugin, r, delay*20/1000, period*20/1000);
-	}
-
-	@Override
-	public void AsyncTask(Runnable r, long delay) {
-		 Bukkit.getServer().getScheduler().scheduleAsyncDelayedTask(plugin,r,delay*20/1000);
-	}
-
-	@Override
-	public void cancelTask(int id) {
-		Bukkit.getServer().getScheduler().cancelTask(id);
-	}
-
-	@Override
 	public void reload() {
 		TABAdditions.getInstance().reload();
 

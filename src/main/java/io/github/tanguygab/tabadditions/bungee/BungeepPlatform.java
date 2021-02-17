@@ -31,21 +31,6 @@ public class BungeepPlatform extends Platform {
 	}
 
 	@Override
-	public int AsyncTask(Runnable r, long delay, long period) {
-		return ProxyServer.getInstance().getScheduler().schedule(plugin,r,delay,period, TimeUnit.MILLISECONDS).getId();
-	}
-
-	@Override
-	public void AsyncTask(Runnable r, long delay) {
-		ProxyServer.getInstance().getScheduler().schedule(plugin,r,delay,TimeUnit.MILLISECONDS);
-	}
-
-	@Override
-	public void cancelTask(int id) {
-		ProxyServer.getInstance().getScheduler().cancel(id);
-	}
-
-	@Override
 	public void reload() {
 		TABAdditions.getInstance().reload();
 		plugin.getProxy().getPluginManager().unregisterListeners(plugin);

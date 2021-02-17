@@ -147,8 +147,10 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     @Override
-    public void onJoin(TabPlayer tabPlayer) {
-
+    public void onJoin(TabPlayer p) {
+        if (TABAdditions.getInstance().checkBedrock(p)) return;
+        LayoutManager lm = LayoutManager.getInstance();
+        lm.toAdd.put(p,lm.getLayout(p));
     }
 
     @Override

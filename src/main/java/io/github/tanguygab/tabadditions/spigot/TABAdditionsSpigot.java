@@ -140,20 +140,15 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     public String itemStack(ItemStack item) {
         try {
-            Class<?> craftItemStackClazz = ReflectionUtil.getOBCClass("inventory.CraftItemStack");
-            Method asNMSCopyMethod = ReflectionUtil.getMethod(craftItemStackClazz, "asNMSCopy", ItemStack.class);
-            Object nmsItemStackObj = asNMSCopyMethod.invoke(null, item);
-
-            Class<?> nmsItemStackClazz = ReflectionUtil.getNMSClass("ItemStack");
-            Class<?> nbtTagCompoundClazz = ReflectionUtil.getNMSClass("NBTTagCompound");
-            Method saveNmsItemStackMethod = ReflectionUtil.getMethod(nmsItemStackClazz, "save", nbtTagCompoundClazz);
-
-            Object nmsNbtTagCompoundObj = nbtTagCompoundClazz.newInstance();
-            Object itemAsJsonObject = saveNmsItemStackMethod.invoke(nmsItemStackObj, nmsNbtTagCompoundObj);
-
-            return itemAsJsonObject.toString();
+            String pack = getServer().getClass().getPackage().getName().split("\\.")[3];
+            return Class.forName("net.minecraft.server." + pack + ".ItemStack")
+                    .getMethod("save", Class.forName("net.minecraft.server." + pack + ".NBTTagCompound"))
+                    .invoke(Class.forName("org.bukkit.craftbukkit." + pack + ".inventory.CraftItemStack")
+                                    .getMethod("asNMSCopy", ItemStack.class).invoke(null, item),
+                            Class.forName("net.minecraft.server." + pack + ".NBTTagCompound")
+                                    .getConstructor().newInstance()).toString();
         } catch (Exception e) {
-            throw new Error(e);
+            return null;
         }
     }
 }

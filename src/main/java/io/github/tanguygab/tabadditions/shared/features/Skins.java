@@ -6,6 +6,8 @@ import com.google.gson.JsonParser;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.cpu.TabFeature;
+import me.neznamy.tab.shared.cpu.UsageType;
 
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -32,10 +34,10 @@ public class Skins {
             if (attempts < 1) {
                 if (!task) {
                     task = true;
-                    TABAdditions.getInstance().getPlatform().AsyncTask(() -> {
+                    TAB.getInstance().getCPUManager().runTaskLater(1000,"getting props from players", TabFeature.OTHER, null,() -> {
                         attempts = 3;
                         task = false;
-                    }, 1000);
+                    });
                 }
                 return new String[]{"",""};
             }

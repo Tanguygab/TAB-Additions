@@ -3,7 +3,6 @@ package io.github.tanguygab.tabadditions.bungee;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import io.github.tanguygab.tabadditions.shared.SharedEvents;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.event.BungeeTABLoadEvent;
@@ -11,7 +10,6 @@ import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.Placeholder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
 import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
@@ -21,11 +19,6 @@ import java.util.Map;
 
 
 public class BungeeEvents implements Listener {
-
-    @EventHandler
-    public void onJoin(ServerSwitchEvent e) {
-        SharedEvents.JoinEvent(e.getPlayer().getName());
-    }
 
     @EventHandler
     public void onTABLoad(BungeeTABLoadEvent e) {

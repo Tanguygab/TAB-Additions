@@ -19,6 +19,7 @@ import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.cpu.TabFeature;
+import me.neznamy.tab.shared.cpu.UsageType;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.placeholders.Placeholder;
 import net.md_5.bungee.api.ChatColor;
@@ -236,7 +237,7 @@ public class TABAdditions {
     }
 
     private void refresh() {
-        tasks.put("Global-Refresh",platform.AsyncTask(()-> {
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing chat propreties",TabFeature.ADDON_FEATURE_3, UsageType.REPEATING_TASK,()-> {
             List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
             List<String> props = new ArrayList<>(Arrays.asList("chatprefix","customchatname","chatsuffix"));
             for (TabPlayer p : list) {
@@ -247,7 +248,7 @@ public class TABAdditions {
                     }
                 }
             }
-        },0L,500L));
+        });
     }
 
     public String parsePlaceholders(String str, TabPlayer p) {
