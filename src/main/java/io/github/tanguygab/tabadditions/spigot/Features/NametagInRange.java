@@ -65,6 +65,6 @@ public class NametagInRange implements Loadable, JoinEventListener {
 
     @Override
     public TabFeature getFeatureType() {
-        return null;
+        return feature;
     }
 }
