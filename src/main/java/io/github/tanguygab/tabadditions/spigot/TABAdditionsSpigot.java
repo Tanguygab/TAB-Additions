@@ -1,14 +1,12 @@
 package io.github.tanguygab.tabadditions.spigot;
 
+import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.commands.*;
+import io.github.tanguygab.tabadditions.shared.commands.*;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
-import io.github.tanguygab.tabadditions.spigot.Features.BukkitEvents;
-import org.bukkit.Bukkit;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.event.HandlerList;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -23,24 +21,13 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @Override
     public void onEnable() {
-        TABAdditions.setInstance(new TABAdditions(new SpigotTA(this), this));
-        reload();
+        TABAdditions.setInstance(new TABAdditions(new SpigotPlatform(this), this,getDataFolder()));
+        TABAdditions.getInstance().load();
     }
 
     @Override
     public void onDisable() {
         TABAdditions.getInstance().disable();
-    }
-
-    public void reload() {
-        TABAdditions.getInstance().reload(getDataFolder());
-
-        HandlerList.unregisterAll(this);
-        Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(), this);
-
-        if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
-            new TABAdditionsExpansion(this).register();
-        TABAdditions.getInstance().floodgate = Bukkit.getPluginManager().getPlugin("Floodgate") != null;
     }
 
     @Override
@@ -52,18 +39,13 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         if (args.length < 1 || args[0].equalsIgnoreCase("help"))
             new HelpCmd(name,getDescription().getVersion());
         else switch (args[0].toLowerCase()) {
-            case "reload": {
-                reload();
-                instance.sendMessage(name, "&aConfig reloaded!");
-                break;
-            }
             case "actionbar": {
-                if (!instance.getConfig("").getBoolean("features.actionbars"))
+                if (!instance.getConfig(ConfigType.ACTIONBAR).getBoolean("features.actionbars"))
                     instance.sendMessage(name, "&cActionbar feature is not enabled, therefore this command cannot be used");
                 else if (args.length < 2)
                     instance.sendMessage(name, "&cYou have to provide an actionbar!");
                 else {
-                    Map<String, String> section = instance.actionbarConfig.getConfigurationSection("bars.");
+                    Map<String, String> section = instance.getConfig(ConfigType.ACTIONBAR).getConfigurationSection("bars.");
                     if (!section.containsKey(args[1]))
                         instance.sendMessage(name, "&cThis actionbar doesn't exist!");
                     else
@@ -72,12 +54,12 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 break;
             }
             case "title": {
-                if (!instance.getConfig("").getBoolean("features.titles"))
+                if (!instance.getConfig(ConfigType.MAIN).getBoolean("features.titles"))
                     instance.sendMessage(name,"&cTitle feature is not enabled, therefore this command cannot be used");
                 else if (args.length < 2)
                     instance.sendMessage(name,"&cYou have to provide a title!");
                 else {
-                    Map<String, String> titleSection = instance.titleConfig.getConfigurationSection("titles." + args[1]);
+                    Map<String, String> titleSection = instance.getConfig(ConfigType.TITLE).getConfigurationSection("titles." + args[1]);
                     if (titleSection.isEmpty()) {
                         instance.sendMessage(name,"&cThis title doesn't exist!");
                     } else {
@@ -122,9 +104,11 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 case "actionbar":
                     if (args.length == 2)
                         return TABAdditions.getInstance().actionbars;
+                    break;
                 case "tags": {
                     if (args.length == 2)
                         return new ArrayList<>(Arrays.asList("hide","show","toggle"));
+                    break;
                 }
                 case "fp": {
                     if (!TABAdditions.getInstance().rfpEnabled)
@@ -142,10 +126,12 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     }
                     if (args[1].equalsIgnoreCase("edit") && args.length == 4)
                         return new ArrayList<>(Arrays.asList("name","skin","latency","group","prefix","suffix"));
+                    break;
                 }
                 case "title": {
                     if (args.length == 2)
                         return TABAdditions.getInstance().titles;
+                    break;
                 }
             }
         }

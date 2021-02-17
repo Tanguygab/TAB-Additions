@@ -2,17 +2,20 @@ package io.github.tanguygab.tabadditions.spigot;
 
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.spigot.Features.BukkitEvents;
 import org.bukkit.Bukkit;
+import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 
-public class SpigotTA extends Platform {
+public class SpigotPlatform extends Platform {
 
 	private final Plugin plugin;
 	
-	public SpigotTA(Plugin plugin) {
+	public SpigotPlatform(Plugin plugin) {
 		this.plugin = plugin;
 	}
 
@@ -42,6 +45,18 @@ public class SpigotTA extends Platform {
 	@Override
 	public void cancelTask(int id) {
 		Bukkit.getServer().getScheduler().cancelTask(id);
+	}
+
+	@Override
+	public void reload() {
+		TABAdditions.getInstance().reload();
+
+		HandlerList.unregisterAll(plugin);
+		Bukkit.getServer().getPluginManager().registerEvents(new BukkitEvents(), plugin);
+
+		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
+			new TABAdditionsExpansion(plugin).register();
+		TABAdditions.getInstance().floodgate = Bukkit.getPluginManager().getPlugin("Floodgate") != null;
 	}
 
 	@Override

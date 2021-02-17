@@ -1,33 +1,57 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts;
 
+import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.cpu.TabFeature;
+import me.neznamy.tab.shared.cpu.UsageType;
+import me.neznamy.tab.shared.features.types.Loadable;
+import me.neznamy.tab.shared.features.types.event.CommandListener;
+import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 
 import java.util.*;
 
-public class LayoutManager {
-
+public class LayoutManager implements Loadable, JoinEventListener, CommandListener {
     private static LayoutManager instance;
+
+    private final TabFeature feature;
+    private String togglecmd;
     private final Map<String, Layout> layouts = new HashMap<>();
     private final Map<TabPlayer,String> players = new HashMap<>();
-    private Integer task;
     public final Map<TabPlayer,String> toAdd = new HashMap<>();
     public final Map<TabPlayer,String> toRemove = new HashMap<>();
+    public final List<TabPlayer> toggledOff = new ArrayList<>();
 
-    public LayoutManager() {
+    public LayoutManager(TabFeature feature) {
+        feature.setDisplayName("TAB+ Layout");
+        this.feature = feature;
         instance = this;
-        for (Object layout : TABAdditions.getInstance().getConfig("layout").getConfigurationSection("layouts").keySet())
-            layouts.put(layout+"",new Layout(layout.toString()));
-        refresh();
+        load();
     }
 
     public static LayoutManager getInstance() {
         return instance;
     }
+
+    @Override
+    public void load() {
+        for (Object layout : TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getConfigurationSection("layouts").keySet())
+            layouts.put(layout+"",new Layout(layout.toString()));
+        togglecmd = TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getString("toggle-cmd","layout");
+        refresh();
+        showLayoutAll();
+    }
+
+    @Override
+    public void unload() {
+        removeLayoutAll();
+        removeLayout();
+    }
+
     public String getLayout(TabPlayer p) {
-        String layout = TABAdditions.getInstance().getConfig("layout").getString("default-layout","");
+        String layout = TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getString("default-layout","");
         if (layout.equalsIgnoreCase("")) return "null";
 
         Layout l = layouts.get(layout);
@@ -39,14 +63,8 @@ public class LayoutManager {
         return layout;
     }
 
-    public void unregister() {
-        TABAdditions.getInstance().getPlatform().cancelTask(task);
-        removeLayoutAll();
-        removeLayout();
-    }
-
     private void refresh() {
-        task = TABAdditions.getInstance().getPlatform().AsyncTask(() -> {
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling TAB+ Layout",feature, UsageType.REPEATING_TASK,()->{
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 if (!TABAdditions.getInstance().checkBedrock(p) && players.containsKey(p) && !players.get(p).equals(getLayout(p))) {
                     toRemove.put(p, players.get(p));
@@ -59,7 +77,7 @@ public class LayoutManager {
                 layout.refreshPlaceholders();
                 layout.refreshSets();
             }
-        },0L,500L);
+        });
     }
 
     public void showLayout() {
@@ -73,7 +91,6 @@ public class LayoutManager {
             toAdd.remove(p);
         }
     }
-
     public void removeLayout() {
         List<TabPlayer> list = new ArrayList<>(toRemove.keySet());
         for (TabPlayer p : list) {
@@ -85,6 +102,7 @@ public class LayoutManager {
             toRemove.remove(p);
         }
     }
+
     public void showLayoutAll() {
         for (TabPlayer p : TAB.getInstance().getPlayers())
             if (!TABAdditions.getInstance().checkBedrock(p))
@@ -98,4 +116,43 @@ public class LayoutManager {
     }
 
 
+    @Override
+    public boolean onCommand(TabPlayer p, String msg) {
+        if (msg.equals("/"+togglecmd) || msg.startsWith("/"+togglecmd+" ")) {
+            String[] args = msg.split(" ");
+            String type = "";
+            if (args.length > 1) type = args[1];
+            boolean output = true;
+            if (args.length > 2) output = false;
+            if (toggledOff.contains(p)) {
+                if (type.equalsIgnoreCase("off")) {
+                    if (output) p.sendMessage("&cYou have already disabled this!",true);
+                } else {
+                    toggledOff.remove(p);
+                    toAdd.put(p,getLayout(p));
+                    if (output) p.sendMessage("&7Enabled.",true);
+                }
+            } else {
+                if (type.equalsIgnoreCase("on")) {
+                    if (output) p.sendMessage("&cYou have already enabled this!", true);
+                } else {
+                    toggledOff.add(p);
+                    toRemove.put(p, getLayout(p));
+                    if (output) p.sendMessage("&7Disabled.",true);
+                }
+            }
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void onJoin(TabPlayer tabPlayer) {
+
+    }
+
+    @Override
+    public TabFeature getFeatureType() {
+        return feature;
+    }
 }

@@ -4,6 +4,7 @@ import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -11,9 +12,9 @@ import java.util.List;
 
 public class TABAdditionsExpansion extends PlaceholderExpansion {
 
-    private final TABAdditionsSpigot plugin;
+    private final Plugin plugin;
 
-    public TABAdditionsExpansion(TABAdditionsSpigot plugin){
+    public TABAdditionsExpansion(Plugin plugin){
         this.plugin = plugin;
     }
 

@@ -1,4 +1,4 @@
-package io.github.tanguygab.tabadditions.shared.features.commands;
+package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;

@@ -1,19 +1,23 @@
 package io.github.tanguygab.tabadditions.shared.features.rfps;
 
+import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.cpu.TabFeature;
+import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
+import me.neznamy.tab.shared.rgb.TextColor;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class RFP {
+
+    private final YamlConfigurationFile configfile;
 
     private final String configname;
     private String name;
@@ -23,6 +27,7 @@ public class RFP {
     private String group;
 
     public RFP(String configname,Map<String,Object> config) {
+        configfile = TABAdditions.getInstance().getConfig(ConfigType.MAIN);
         this.configname = configname;
         if (config.containsKey("name"))
             name = config.get("name") + "";
@@ -72,7 +77,7 @@ public class RFP {
         String prefix = "";
         String suffix = "";
 
-        Map<String,Object> config = TABAdditions.getInstance().getConfig("").getConfigurationSection("fakeplayers."+configname);
+        Map<String,Object> config = configfile.getConfigurationSection("fakeplayers."+configname);
         Map<String,Object> tabConfig = TAB.getInstance().getConfiguration().config.getConfigurationSection("Groups");
 
         String configGroup = "";
@@ -103,8 +108,13 @@ public class RFP {
     public PacketPlayOutPlayerInfo.PlayerInfoData get(TabPlayer p) {
         PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(uuid);
         rfp.name = getName();
+        String[] props = getProps();
+        props[0] = TABAdditions.getInstance().parsePlaceholders(props[0],p);
+        props[1] = TABAdditions.getInstance().parsePlaceholders(props[1],p);
+
+
+        rfp.displayName = IChatBaseComponent.fromColoredText(props[0]+getName()+props[1]);
         rfp.uniqueId = uuid;
-        //rfp.skin = Skins.getIcon(skin, p);
         if (latency <= 1)
             rfp.latency = 1000;
         else if (latency == 2)
@@ -152,14 +162,18 @@ public class RFP {
 
     public String setName(String value) {
         String old = name;
-        name = value;
-        TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".name", value);
+        if (value == null)
+            name = "";
+        else name = value;
+        configfile.set("fakeplayers." + configname + ".name", value);
         return "&aFakePlayer's name changed from "+old+" to "+value+".";
     }
     public String setSkin(String value) {
         String old = skin;
-        skin = value;
-        TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".skin", value);
+        if (value == null)
+            skin = "";
+        else skin = value;
+        configfile.set("fakeplayers." + configname + ".skin", value);
         return "&aFakePlayer's skin changed from "+old+" to "+value+".";
     }
     public String setLatency(String value) {
@@ -169,25 +183,30 @@ public class RFP {
             if (num < 1) num = 1;
             if (num > 5) num = 5;
             latency = num;
-            TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".latency", num);
+            configfile.set("fakeplayers." + configname + ".latency", num);
             return "&aFakePlayer latency changed from "+old+" to "+num+".";
         } catch (NumberFormatException ignored) {
             return "&cCouldn't change FakePlayer's latency to "+name+", provided a number!";
         }
     }
     public String setGroup(String value) {
-        value = value.toLowerCase();
         String old = group;
-        group = value;
-        TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".group", value);
+
+        if (value == null)
+            group = "";
+        else {
+            value = value.toLowerCase();
+            group = value;
+        }
+        configfile.set("fakeplayers." + configname + ".group", value);
         return "&aFakePlayer's group changed from "+old+" to "+value+".";
     }
     public String setPrefix(String value) {
-        TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".prefix", value);
+        configfile.set("fakeplayers." + configname + ".prefix", value);
         return "&aFakePlayer's prefix changed to "+value+".";
     }
     public String setSuffix(String value) {
-        TABAdditions.getInstance().getConfig("").set("fakeplayers." + configname + ".suffix", value);
+        configfile.set("fakeplayers." + configname + ".suffix", value);
         return "&aFakePlayer's prefix changed to "+value+".";
     }
 

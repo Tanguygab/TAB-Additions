@@ -1,4 +1,4 @@
-package io.github.tanguygab.tabadditions.shared.features.commands;
+package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 
@@ -15,7 +15,7 @@ public class HelpCmd {
                 + "   &8| &aSends the specfied title to the player\n"
                 + " - &3/tab+ tags <hide/show/toggle> <player>\n"
                 + "   &8| &aHides/shows/toggles the name of the specified player \n"
-                + " - &3/tab+ reload\n"
+                + " - &3/tab reload\n"
                 + "   &8| &aReloads the configuration file\n"
                 + "&m                                        ");
     }

@@ -1,4 +1,4 @@
-package io.github.tanguygab.tabadditions.shared.features.commands;
+package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
@@ -40,8 +40,13 @@ public class RealFakePlayerCmd {
         else if (args[1].equalsIgnoreCase("edit")) {
             String prop = args[3];
             String value = null;
-            if (args.length > 4)
-                value = args[4];
+            if (args.length > 4) {
+                value = "";
+                for (int i = 4; i < args.length; i++) {
+                    if (i != 4) value = value + " ";
+                    value = value + args[i];
+                }
+            }
             if (prop.equalsIgnoreCase("name"))
                 output = RFPManager.getInstance().getRFP(name).setName(value);
 

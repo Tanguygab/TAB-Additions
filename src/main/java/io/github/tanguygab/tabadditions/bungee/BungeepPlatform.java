@@ -4,14 +4,15 @@ import java.util.concurrent.TimeUnit;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 
-public class BungeeTA extends Platform {
+public class BungeepPlatform extends Platform {
 
 	private final Plugin plugin;
 	
-	public BungeeTA(Plugin plugin) {
+	public BungeepPlatform(Plugin plugin) {
 		this.plugin = plugin;
 	}
 
@@ -42,6 +43,14 @@ public class BungeeTA extends Platform {
 	@Override
 	public void cancelTask(int id) {
 		ProxyServer.getInstance().getScheduler().cancel(id);
+	}
+
+	@Override
+	public void reload() {
+		TABAdditions.getInstance().reload();
+		plugin.getProxy().getPluginManager().unregisterListeners(plugin);
+		plugin.getProxy().getPluginManager().registerListener(plugin, new BungeeEvents());
+		TABAdditions.getInstance().floodgate = plugin.getProxy().getPluginManager().getPlugin("Floodgate") != null;
 	}
 
 	@Override

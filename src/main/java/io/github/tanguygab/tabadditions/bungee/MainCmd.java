@@ -1,7 +1,8 @@
 package io.github.tanguygab.tabadditions.bungee;
 
+import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.commands.*;
+import io.github.tanguygab.tabadditions.shared.commands.*;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
@@ -24,18 +25,14 @@ public class MainCmd extends Command {
             new HelpCmd(name, ProxyServer.getInstance().getPluginManager().getPlugin("TAB-Additions").getDescription().getVersion());
         else
             switch (args[0].toLowerCase()) {
-                case "reload": {
-                	((TABAdditionsBungeeCord) TABAdditions.getInstance().getPlugin()).reload();
-                    instance.sendMessage(name,"&aConfig reloaded!");
-                    break;
-                }
+
                 case "actionbar": {
-                    if (!TABAdditions.getInstance().getConfig("").getBoolean("features.actionbars"))
+                    if (!TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("features.actionbars"))
                         instance.sendMessage(name,"&cActionbar feature is not enabled, therefore this command cannot be used");
                     else if (args.length < 2)
                         instance.sendMessage(name,"&cYou have to provide an actionbar!");
                     else {
-                        Map<String,String> section = TABAdditions.getInstance().getConfig("actionbar").getConfigurationSection("bars");
+                        Map<String,String> section = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getConfigurationSection("bars");
                         if (!section.containsKey(args[1]))
                             instance.sendMessage(name,"&cThis actionbar doesn't exist!");
                         else
@@ -44,12 +41,12 @@ public class MainCmd extends Command {
                     break;
                 }
                 case "title": {
-                    if (!TABAdditions.getInstance().getConfig("").getBoolean("features.titles"))
+                    if (!TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("features.titles"))
                         instance.sendMessage(name,"&cTitle feature is not enabled, therefore this command cannot be used");
                     else if (args.length < 2)
                         instance.sendMessage(name,"&cYou have to provide a title!");
                     else {
-                        Map<String,String> titleSection = TABAdditions.getInstance().getConfig("title").getConfigurationSection("titles."+args[1]);
+                        Map<String,String> titleSection = TABAdditions.getInstance().getConfig(ConfigType.TITLE).getConfigurationSection("titles."+args[1]);
                         if (titleSection.keySet().isEmpty()) {
                             instance.sendMessage(name,"&cThis title doesn't exist!");
                         }

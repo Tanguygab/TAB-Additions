@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts;
 
+import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.Skins;
@@ -32,7 +33,7 @@ public class Layout {
 
     public Layout(String name) {
         this.name = name;
-        config = TABAdditions.getInstance().getConfig("layout").getConfigurationSection("layouts."+name);
+        config = TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getConfigurationSection("layouts."+name);
         create();
     }
 

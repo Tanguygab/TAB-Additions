@@ -1,62 +1,37 @@
 package io.github.tanguygab.tabadditions.shared.features.rfps;
 
+import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.cpu.TabFeature;
+import me.neznamy.tab.shared.features.types.Loadable;
+import me.neznamy.tab.shared.features.types.Refreshable;
+import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
 
 import java.util.*;
 
-public class RFPManager {
+public class RFPManager implements Refreshable, JoinEventListener, Loadable {
 
     private static RFPManager instance;
+    private final TabFeature feature;
     private final Map<String, RFP> rfps = new HashMap<>();
     private final Map<TabPlayer,Map<RFP, Object>> skins = new HashMap<>();
-    private Integer task;
     private boolean refresh;
 
-    public RFPManager() {
+    public RFPManager(TabFeature feature) {
+        feature.setDisplayName("Real Fake Players");
+        this.feature = feature;
         instance = this;
-        Map<String,Object> config = TABAdditions.getInstance().getConfig("").getConfigurationSection("fakeplayers");
-        for (Object rfp : config.keySet())
-            rfps.put(rfp+"",new RFP(rfp+"", (Map<String, Object>) config.get(rfp+"")));
-        showRFPAll();
-        refresh = TABAdditions.getInstance().getConfig("").getBoolean("real-fake-players-have-skins",true);
-        refresh();
+        load();
     }
 
     public static RFPManager getInstance() {
         return instance;
-    }
-
-    public void unregister() {
-        TABAdditions.getInstance().getPlatform().cancelTask(task);
-        removeRFPAll();
-        refresh = false;
-    }
-
-    public void refresh() {
-        task = TABAdditions.getInstance().getPlatform().AsyncTask(()-> {
-            List<RFP> rfps = new ArrayList<>(this.rfps.values());
-            for (TabPlayer p : TAB.getInstance().getPlayers()) {
-                if (!skins.containsKey(p))
-                    skins.put(p,new HashMap<>());
-
-                for (RFP rfp : rfps) {
-                    Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p);
-                    if (skin != null && skins.get(p).get(rfp) != skin) {
-                        if (!refresh)
-                            return;
-                        rfp.forceUpdate(skin);
-                    }
-                    skins.get(p).put(rfp,skin);
-                }
-            }
-        },0L,500L);
     }
 
     public List<RFP> getRFPS() {
@@ -73,7 +48,7 @@ public class RFPManager {
 
         UUID uuid = UUID.randomUUID();
 
-        YamlConfigurationFile config = TABAdditions.getInstance().getConfig("");
+        YamlConfigurationFile config = TABAdditions.getInstance().getConfig(ConfigType.MAIN);
 
         config.set("fakeplayers."+name+".name", name);
         config.set("fakeplayers."+name+".uuid", uuid+"");
@@ -91,7 +66,17 @@ public class RFPManager {
         }
         return "&aAdded FakePlayer";
     }
+    public String deleteRFP(String name) {
+        if (!rfps.containsKey(name)) return "&cThis FakePlayer doesn't exist!";
 
+        RFP rfp = rfps.get(name);
+        rfps.remove(name);
+        TABAdditions.getInstance().getConfig(ConfigType.MAIN).set("fakeplayers."+name,null);
+        for (TabPlayer p : TAB.getInstance().getPlayers())
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, rfp.get(p)));
+
+        return "&aRemoved FakePlayer.";
+    }
     public String deleteAll() {
         if (rfps.isEmpty()) return "&cNo FakePlayers found.";
 
@@ -101,20 +86,7 @@ public class RFPManager {
         return "&aRemoved all FakePlayers.";
     }
 
-    public String deleteRFP(String name) {
-        if (!rfps.containsKey(name)) return "&cThis FakePlayer doesn't exist!";
-
-        RFP rfp = rfps.get(name);
-        rfps.remove(name);
-        TABAdditions.getInstance().getConfig("").set("fakeplayers."+name,null);
-        for (TabPlayer p : TAB.getInstance().getPlayers())
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, rfp.get(p)));
-
-        return "&aRemoved FakePlayer.";
-    }
-
     public void showRFP(TabPlayer p) {
-        //TABAdditions.getInstance().getPlatform().AsyncTask(()->{
             List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
             List<RFP> rfps = new ArrayList<>(this.rfps.values());
             for (RFP rfp : rfps) {
@@ -125,9 +97,7 @@ public class RFPManager {
                 PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(rfp.getName()),null, TabFeature.NAMETAGS);
             }
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
-        //},0);
     }
-
     public void removeRFP(TabPlayer p) {
             List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
             List<RFP> rfps = new ArrayList<>(this.rfps.values());
@@ -137,14 +107,66 @@ public class RFPManager {
             }
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
     }
+
     public void showRFPAll() {
         for (TabPlayer p : TAB.getInstance().getPlayers())
             showRFP(p);
     }
-
     public void removeRFPAll() {
         for (TabPlayer p : TAB.getInstance().getPlayers())
             removeRFP(p);
+    }
+
+    @Override
+    public void load() {
+        Map<String,Object> config = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getConfigurationSection("fakeplayers");
+        for (Object rfp : config.keySet())
+            rfps.put(rfp+"",new RFP(rfp+"", (Map<String, Object>) config.get(rfp+"")));
+        refresh = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("real-fake-players-have-skins",true);
+        showRFPAll();
+    }
+
+    @Override
+    public void unload() {
+        removeRFPAll();
+        refresh = false;
+    }
+
+    @Override
+    public void refresh(TabPlayer p, boolean b) {
+        List<RFP> rfps = new ArrayList<>(this.rfps.values());
+            if (!skins.containsKey(p))
+                skins.put(p,new HashMap<>());
+
+            for (RFP rfp : rfps) {
+                Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p);
+                if (skin != null && skins.get(p).get(rfp) != skin) {
+                    if (!refresh)
+                        return;
+                    rfp.forceUpdate(skin);
+                }
+                skins.get(p).put(rfp,skin);
+            }
+    }
+
+    @Override
+    public void onJoin(TabPlayer p) {
+        showRFPAll();
+    }
+
+    @Override
+    public TabFeature getFeatureType() {
+        return feature;
+    }
+
+    @Override
+    public List<String> getUsedPlaceholders() {
+        return new ArrayList<>();
+    }
+
+    @Override
+    public void refreshUsedPlaceholders() {
+
     }
 
 }

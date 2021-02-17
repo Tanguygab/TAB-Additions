@@ -28,18 +28,8 @@ public class BungeeEvents implements Listener {
     }
 
     @EventHandler
-    public void onChat(ChatEvent e) {
-        if (e.isCommand() || e.isProxyCommand()) return;
-        if (!(e.getSender() instanceof ProxiedPlayer)) return;
-        if (TABAdditions.getInstance().chatEnabled) {
-            SharedEvents.ChatEvent(TAB.getInstance().getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()), e.getMessage());
-            e.setCancelled(true);
-        }
-    }
-
-    @EventHandler
     public void onTABLoad(BungeeTABLoadEvent e) {
-        ((TABAdditionsBungeeCord) TABAdditions.getInstance().getPlugin()).reload();
+        TABAdditions.getInstance().getPlatform().reload();
     }
 
     @EventHandler
