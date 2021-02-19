@@ -7,7 +7,9 @@ import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.cpu.TabFeature;
+import me.neznamy.tab.shared.cpu.UsageType;
 import me.neznamy.tab.shared.features.types.Loadable;
+import me.neznamy.tab.shared.features.types.Refreshable;
 import me.neznamy.tab.shared.features.types.event.ChatEventListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
@@ -26,7 +28,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public final Map<String,Boolean> conditions = new HashMap<>();
 
     public ChatManager(TabFeature feature) {
-        feature.setDisplayName("Chat");
+        feature.setDisplayName("&aChat");
         this.feature = feature;
         instance = this;
         load();
@@ -158,11 +160,13 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         for (Object format : plinstance.getConfig(ConfigType.CHAT).getConfigurationSection("chat-formats").keySet())
             formats.put(format.toString(),new ChatFormat(format.toString(), plinstance.getConfig(ConfigType.CHAT).getConfigurationSection("chat-formats."+format)));
 
-        for (TabPlayer p : TAB.getInstance().getPlayers()) {
-            p.loadPropertyFromConfig("chatprefix");
-            p.loadPropertyFromConfig("customchatname",p.getName());
-            p.loadPropertyFromConfig("chatsuffix");
-        }
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props",feature, UsageType.REPEATING_TASK,() -> {
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                p.loadPropertyFromConfig("chatprefix");
+                p.loadPropertyFromConfig("customchatname",p.getName());
+                p.loadPropertyFromConfig("chatsuffix");
+            }
+        });
     }
 
     @Override
@@ -181,4 +185,5 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public TabFeature getFeatureType() {
         return feature;
     }
+
 }

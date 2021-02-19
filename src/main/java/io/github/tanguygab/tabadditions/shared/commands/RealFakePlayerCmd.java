@@ -3,16 +3,19 @@ package io.github.tanguygab.tabadditions.shared.commands;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
+import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.TAB;
 
 public class RealFakePlayerCmd {
     public RealFakePlayerCmd(String nameS, String[] args) {
         TABAdditions instance = TABAdditions.getInstance();
+        RFPManager rfpm = (RFPManager) TAB.getInstance().getFeatureManager().getFeature("Real Fake Players");
         String output = "";
 
         if (args[1].equalsIgnoreCase("list")) {
             instance.sendMessage(nameS,"Fakeplayers list:");
             output = "&a";
-            for (RFP rfp : RFPManager.getInstance().getRFPS()) {
+            for (RFP rfp : rfpm.getRFPS()) {
                 if (!output.equalsIgnoreCase("&a")) output = output+", ";
                 output = output+rfp.getConfigName();
             }
@@ -25,17 +28,17 @@ public class RealFakePlayerCmd {
         if (args[1].equalsIgnoreCase("add")) {
             if (name.equalsIgnoreCase("_ALL_"))
                 output = "&cYou can't use that name";
-            else output = RFPManager.getInstance().addRFP(name);
+            else output = rfpm.addRFP(name);
         }
 
         else if (args[1].equalsIgnoreCase("remove")) {
             if (name.equals("_ALL_"))
-                output = RFPManager.getInstance().deleteAll();
-            else output = RFPManager.getInstance().deleteRFP(name);
+                output = rfpm.deleteAll();
+            else output = rfpm.deleteRFP(name);
         }
 
         else if (args[1].equalsIgnoreCase("info"))
-            output = RFPManager.getInstance().getRFP(name).getInfo();
+            output = rfpm.getRFP(name).getInfo();
 
         else if (args[1].equalsIgnoreCase("edit")) {
             String prop = args[3];
@@ -48,24 +51,25 @@ public class RealFakePlayerCmd {
                 }
             }
             if (prop.equalsIgnoreCase("name"))
-                output = RFPManager.getInstance().getRFP(name).setName(value);
+                output = rfpm.getRFP(name).setName(value);
 
             if (prop.equalsIgnoreCase("latency"))
-                output = RFPManager.getInstance().getRFP(name).setLatency(value);
+                output = rfpm.getRFP(name).setLatency(value);
 
             if (prop.equalsIgnoreCase("skin"))
-                output = RFPManager.getInstance().getRFP(name).setSkin(value);
+                output = rfpm.getRFP(name).setSkin(value);
 
             if (prop.equalsIgnoreCase("group"))
-                output = RFPManager.getInstance().getRFP(name).setGroup(value);
+                output = rfpm.getRFP(name).setGroup(value);
 
             if (prop.equalsIgnoreCase("prefix"))
-                output = RFPManager.getInstance().getRFP(name).setPrefix(value);
+                output = rfpm.getRFP(name).setPrefix(value);
 
             if (prop.equalsIgnoreCase("suffix"))
-                output = RFPManager.getInstance().getRFP(name).setSuffix(value);
+                output = rfpm.getRFP(name).setSuffix(value);
 
-            RFPManager.getInstance().getRFP(name).forceUpdate(null);
+            for (TabPlayer p : TAB.getInstance().getPlayers())
+                rfpm.getRFP(name).forceUpdate(p,null);
         }
 
         instance.sendMessage(nameS,output);

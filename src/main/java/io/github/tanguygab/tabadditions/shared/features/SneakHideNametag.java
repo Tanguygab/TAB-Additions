@@ -16,7 +16,7 @@ public class SneakHideNametag implements SneakEventListener {
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
 
     public SneakHideNametag(TabFeature feature) {
-        feature.setDisplayName("Sneak Hide Nametag");
+        feature.setDisplayName("&aSneak Hide Nametag");
         this.feature = feature;
     }
 

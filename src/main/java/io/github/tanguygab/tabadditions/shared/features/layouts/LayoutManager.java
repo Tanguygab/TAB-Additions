@@ -25,7 +25,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     public final List<TabPlayer> toggledOff = new ArrayList<>();
 
     public LayoutManager(TabFeature feature) {
-        feature.setDisplayName("TAB+ Layout");
+        feature.setDisplayName("&aTAB+ Layout");
         this.feature = feature;
         instance = this;
         load();
@@ -70,6 +70,8 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
                     toRemove.put(p, players.get(p));
                     toAdd.put(p,getLayout(p));
                 }
+                if (!players.containsKey(p) && !getLayout(p).equals("null"))
+                    toAdd.put(p,getLayout(p));
             }
             removeLayout();
             showLayout();
@@ -84,22 +86,26 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
         List<TabPlayer> list = new ArrayList<>(toAdd.keySet());
         for (TabPlayer p : list) {
             Layout layout = layouts.get(toAdd.get(p));
-            List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
-            players.put(p, layout.getName());
-            layout.players.add(p);
-            toAdd.remove(p);
+            if (layout != null) {
+                List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
+                players.put(p, layout.getName());
+                layout.players.add(p);
+                toAdd.remove(p);
+            }
         }
     }
     public void removeLayout() {
         List<TabPlayer> list = new ArrayList<>(toRemove.keySet());
         for (TabPlayer p : list) {
             Layout layout = layouts.get(toRemove.get(p));
-            List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
-            players.remove(p);
-            layout.players.remove(p);
-            toRemove.remove(p);
+            if (layout != null) {
+                List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
+                players.remove(p);
+                layout.players.remove(p);
+                toRemove.remove(p);
+            }
         }
     }
 

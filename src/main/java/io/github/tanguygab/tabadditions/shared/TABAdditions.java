@@ -4,28 +4,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import io.github.tanguygab.tabadditions.shared.features.ActionBar;
-import io.github.tanguygab.tabadditions.shared.features.Skins;
-import io.github.tanguygab.tabadditions.shared.features.SneakHideNametag;
-import io.github.tanguygab.tabadditions.shared.features.Title;
+import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
-import io.github.tanguygab.tabadditions.spigot.Features.NametagInRange;
-import io.github.tanguygab.tabadditions.spigot.Features.TablistNamesRadius;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.cpu.UsageType;
-import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.placeholders.Placeholder;
-import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.geysermc.floodgate.FloodgateAPI;
 
 public class TABAdditions {
@@ -42,10 +31,6 @@ public class TABAdditions {
     private YamlConfigurationFile titleConfig;
     private YamlConfigurationFile actionbarConfig;
     private YamlConfigurationFile chatConfig;
-
-    public List<String> titles;
-    public List<String> actionbars;
-    public List<String> chatformats;
 
     public boolean titlesEnabled;
     public boolean actionbarsEnabled;
@@ -134,15 +119,44 @@ public class TABAdditions {
             loadProps(p);
         }
 
-        loadLists();
-        loadTablistNamesRadius();
         loadPlaceholders();
-
-        refresh();
     }
 
     public void disable() {
-        if (RFPManager.getInstance() != null) RFPManager.getInstance().unload();
+        FeatureManager fm = TAB.getInstance().getFeatureManager();
+
+        //ActionBar
+        fm.getFeature("ActionBar");
+
+        //Title
+        fm.unregisterFeature("Title");
+
+        //Chat
+        if (fm.isFeatureEnabled("Chat"))
+            ((ChatManager)fm.getFeature("Chat")).unload();
+        fm.unregisterFeature("Chat");
+
+        //Layout
+        if (fm.isFeatureEnabled("TAB+ Layout"))
+            ((LayoutManager)fm.getFeature("TAB+ Layout")).unload();
+        fm.unregisterFeature("TAB+ Layout");
+        //RFP
+        if (fm.isFeatureEnabled("Real Fake Players"))
+            ((RFPManager)fm.getFeature("Real Fake Players")).unload();
+        fm.unregisterFeature("Real Fake Players");
+
+        //Sneak Hide Nametag
+        fm.unregisterFeature("Sneak Hide Nametag");
+
+        //Nametag in Range
+        if (fm.isFeatureEnabled("Nametag in Range"))
+            ((NametagInRange)fm.getFeature("Nametag in Range")).unload();
+        fm.unregisterFeature("Nametag in Range");
+
+        //Tablist Names Radius
+        if (fm.isFeatureEnabled("Tablist Names Radius"))
+            ((TablistNamesRadius)fm.getFeature("Tablist Names Radius")).unload();
+        fm.unregisterFeature("Tablist Names Radius");
     }
 
     protected void loadProps(TabPlayer p) {
@@ -165,7 +179,7 @@ public class TABAdditions {
         //Chat
         if (chatEnabled)
             fm.registerFeature("Chat", new ChatManager(TabFeature.ADDON_FEATURE_3));
-        //Layout ADDON_4
+        //Layout
         if (layoutEnabled && TAB.getInstance().isPremium())
             fm.registerFeature("TAB+ Layout",new LayoutManager(TabFeature.ADDON_FEATURE_4));
         //RFP
@@ -177,57 +191,25 @@ public class TABAdditions {
         //Nametag in Range
         if (nametagInRange != 0)
             fm.registerFeature("Nametag in Range",new NametagInRange(TabFeature.ADDON_FEATURE_7));
+        //Tablist Names Radius
+        if (tablistNamesRadius != 0)
+            fm.registerFeature("Tablist Names Radius",new TablistNamesRadius(TabFeature.ADDON_FEATURE_8));
     }
 
-    private void loadLists() {
-        List<String> temp = new ArrayList<>();
-        for (Object key : actionbarConfig.getConfigurationSection("bars").keySet())
-            temp.add(key.toString());
-        actionbars = new ArrayList<>(temp);
-
-        temp.clear();
-        for (Object key : titleConfig.getConfigurationSection("titles").keySet())
-            temp.add(key.toString());
-        titles = new ArrayList<>(temp);
-
-        temp.clear();
-        for (Object key : titleConfig.getConfigurationSection("chat").keySet())
-            temp.add(key.toString());
-        chatformats = new ArrayList<>(temp);
-    }
-
-    private void loadTablistNamesRadius() {
-        if (tablistNamesRadius != 0) {
-            for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
-                    if (p != p2)
-                        p.hidePlayer((Plugin) plugin,p2);
-                }
-            }
-            if (!tasks.containsKey("Tablist-Names-Radius")) {
-                tasks.put("Tablist-Names-Radius",new TablistNamesRadius().load());
-            }
-        } else if (tasks.containsKey("Tablist-Names-Radius")) {
-            Bukkit.getServer().getScheduler().cancelTask(tasks.get("Tablist-Names-Radius"));
-            tasks.remove("Tablist-Names-Radius");
-            for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
-                    if (p != p2)
-                        p.showPlayer((Plugin) plugin, p2);
-                }
-            }
-        }
-    }
     private void loadPlaceholders() {
-        List<String> props = Arrays.asList("tabprefix","tabsuffix","customtabname",
+        List<Object> props = new ArrayList<>(Arrays.asList("tabprefix","tabsuffix","customtabname",
                 "tagprefix","tagsuffix","customtagname",
                 "chatprefix","chatsuffix","customchatname",
-                "abovename","belowname","title","actionbar");
-        for (String prop : props) {
+                "abovename","belowname","title","actionbar"));
+        if (TAB.getInstance().isPremium()) {
+            props.addAll(TAB.getInstance().getConfiguration().premiumconfig.getStringList("unlimited-nametag-mode-dynamic-lines"));
+            props.addAll(TAB.getInstance().getConfiguration().premiumconfig.getConfigurationSection("unlimited-nametag-mode-static-lines").keySet());
+        }
+        for (Object prop : props) {
             TAB.getInstance().getPlaceholderManager().registerPlaceholder(new Placeholder("%prop-"+prop+"%", 100) {
                 @Override
                 public String getLastValue(TabPlayer p) {
-                    Property property = p.getProperty(prop);
+                    Property property = p.getProperty(prop+"");
                     if (property != null)
                         return property.updateAndGet();
                     return "";
@@ -236,26 +218,10 @@ public class TABAdditions {
         }
     }
 
-    private void refresh() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing chat propreties",TabFeature.ADDON_FEATURE_3, UsageType.REPEATING_TASK,()-> {
-            List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
-            List<String> props = new ArrayList<>(Arrays.asList("chatprefix","customchatname","chatsuffix"));
-            for (TabPlayer p : list) {
-                for (String prop : props) {
-                    p.loadPropertyFromConfig(prop);
-                    if (p.getProperty(prop) != null) {
-                        p.getProperty(prop).update();
-                    }
-                }
-            }
-        });
-    }
-
     public String parsePlaceholders(String str, TabPlayer p) {
         str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
         str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
-        if (platform.getType() == PlatformType.BUNGEE)
-            str = ChatColor.translateAlternateColorCodes('&',str);
+        str = TAB.getInstance().getPlaceholderManager().color(str);
         return str;
     }
 

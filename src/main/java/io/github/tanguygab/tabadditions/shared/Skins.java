@@ -1,13 +1,10 @@
-package io.github.tanguygab.tabadditions.shared.features;
+package io.github.tanguygab.tabadditions.shared;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.cpu.UsageType;
 
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -18,8 +15,6 @@ public class Skins {
     public static Skins instance;
     public final Map<String,Object> icons = new HashMap<>();
 
-    public boolean task = false;
-    public int attempts = 3;
 
     public Skins() {
         instance = this;
@@ -31,27 +26,13 @@ public class Skins {
 
     public String[] getPropPlayer(String name) {
         try {
-            if (attempts < 1) {
-                if (!task) {
-                    task = true;
-                    TAB.getInstance().getCPUManager().runTaskLater(1000,"getting props from players", TabFeature.OTHER, null,() -> {
-                        attempts = 3;
-                        task = false;
-                    });
-                }
-                return new String[]{"",""};
-            }
-            URL url_0 = new URL("https://api.mojang.com/users/profiles/minecraft/" + name);
+            URL url_0 = new URL("https://api.ashcon.app/mojang/v2/user/" + name);
             InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());
-            attempts = attempts-1;
             JsonElement parser = new JsonParser().parse(reader_0);
             if (!parser.isJsonObject())
                 return new String[]{"null","null"};
-            String uuid = parser.getAsJsonObject().get("id").getAsString();
 
-            URL url_1 = new URL("https://api.mineskin.org/generate/user/" + uuid);
-            InputStreamReader reader_1 = new InputStreamReader(url_1.openStream());
-            JsonObject skin = new JsonParser().parse(reader_1).getAsJsonObject().get("data").getAsJsonObject().get("texture").getAsJsonObject();
+            JsonObject skin = parser.getAsJsonObject().get("textures").getAsJsonObject().get("raw").getAsJsonObject();
             String value = skin.get("value").getAsString();
             String signature = skin.get("signature").getAsString();
             return new String[]{value,signature};

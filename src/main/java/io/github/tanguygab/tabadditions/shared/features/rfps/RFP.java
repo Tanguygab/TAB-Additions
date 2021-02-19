@@ -147,17 +147,15 @@ public class RFP {
         return potentialTeamName;
     }
 
-    public void forceUpdate(Object skin) {
-            for (TabPlayer p : TAB.getInstance().getPlayers()) {
-                PacketPlayOutPlayerInfo.PlayerInfoData fp = get(p);
-                if (skin != null) fp.skin = skin;
-                p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()).setTeamOptions(69));
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp));
-                String prefix = TABAdditions.getInstance().parsePlaceholders(getProps()[0],p);
-                String suffix = TABAdditions.getInstance().parsePlaceholders(getProps()[1],p);
-                PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabFeature.NAMETAGS);
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp));
-            }
+    public void forceUpdate(TabPlayer p, Object skin) {
+        PacketPlayOutPlayerInfo.PlayerInfoData fp = get(p);
+        if (skin != null) fp.skin = skin;
+        p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()).setTeamOptions(69));
+        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp));
+        String prefix = TABAdditions.getInstance().parsePlaceholders(getProps()[0],p);
+        String suffix = TABAdditions.getInstance().parsePlaceholders(getProps()[1],p);
+        PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabFeature.NAMETAGS);
+        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp));
     }
 
     public String setName(String value) {

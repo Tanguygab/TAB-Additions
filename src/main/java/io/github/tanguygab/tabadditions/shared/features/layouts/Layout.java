@@ -3,7 +3,6 @@ package io.github.tanguygab.tabadditions.shared.features.layouts;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.Skins;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
@@ -41,12 +40,14 @@ public class Layout {
         return name;
     }
     protected String getChildLayout() {
-        return config.get("if-condition-not-met").toString();
+        if (config.containsKey("if-condition-not-met"))
+            return config.get("if-condition-not-met")+"";
+        return "";
     }
     protected boolean isConditionMet(TabPlayer p) {
+        if (!config.containsKey("condition")) return true;
         Object conditionname = config.get("condition");
-        if (conditionname == null) return true;
-        Condition condition = Condition.getCondition(conditionname.toString());
+        Condition condition = Condition.getCondition(conditionname+"");
         if (condition == null) return true;
         return condition.isMet(p);
     }

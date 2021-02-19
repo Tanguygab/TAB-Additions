@@ -15,23 +15,17 @@ import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
 
 import java.util.*;
 
-public class RFPManager implements Refreshable, JoinEventListener, Loadable {
+public class RFPManager implements JoinEventListener, Loadable {
 
-    private static RFPManager instance;
     private final TabFeature feature;
     private final Map<String, RFP> rfps = new HashMap<>();
     private final Map<TabPlayer,Map<RFP, Object>> skins = new HashMap<>();
     private boolean refresh;
 
     public RFPManager(TabFeature feature) {
-        feature.setDisplayName("Real Fake Players");
+        feature.setDisplayName("&aReal Fake Players");
         this.feature = feature;
-        instance = this;
         load();
-    }
-
-    public static RFPManager getInstance() {
-        return instance;
     }
 
     public List<RFP> getRFPS() {
@@ -124,6 +118,7 @@ public class RFPManager implements Refreshable, JoinEventListener, Loadable {
             rfps.put(rfp+"",new RFP(rfp+"", (Map<String, Object>) config.get(rfp+"")));
         refresh = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("real-fake-players-have-skins",true);
         showRFPAll();
+        refresh();
     }
 
     @Override
@@ -132,21 +127,23 @@ public class RFPManager implements Refreshable, JoinEventListener, Loadable {
         refresh = false;
     }
 
-    @Override
-    public void refresh(TabPlayer p, boolean b) {
-        List<RFP> rfps = new ArrayList<>(this.rfps.values());
+    public void refresh() {
+        for (TabPlayer p : TAB.getInstance().getPlayers()) {
+            List<RFP> rfps = new ArrayList<>(this.rfps.values());
             if (!skins.containsKey(p))
-                skins.put(p,new HashMap<>());
+                skins.put(p, new HashMap<>());
 
             for (RFP rfp : rfps) {
                 Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p);
                 if (skin != null && skins.get(p).get(rfp) != skin) {
                     if (!refresh)
                         return;
-                    rfp.forceUpdate(skin);
+                    if (p != null)
+                    rfp.forceUpdate(p,skin);
                 }
-                skins.get(p).put(rfp,skin);
+                skins.get(p).put(rfp, skin);
             }
+        }
     }
 
     @Override
@@ -159,14 +156,5 @@ public class RFPManager implements Refreshable, JoinEventListener, Loadable {
         return feature;
     }
 
-    @Override
-    public List<String> getUsedPlaceholders() {
-        return new ArrayList<>();
-    }
-
-    @Override
-    public void refreshUsedPlaceholders() {
-
-    }
 
 }

@@ -8,11 +8,11 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 
-public class BungeepPlatform extends Platform {
+public class BungeePlatform extends Platform {
 
 	private final Plugin plugin;
 	
-	public BungeepPlatform(Plugin plugin) {
+	public BungeePlatform(Plugin plugin) {
 		this.plugin = plugin;
 	}
 

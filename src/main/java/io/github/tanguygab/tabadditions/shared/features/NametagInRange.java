@@ -1,4 +1,4 @@
-package io.github.tanguygab.tabadditions.spigot.Features;
+package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
@@ -16,7 +16,7 @@ public class NametagInRange implements Loadable, JoinEventListener {
     private final TabFeature feature;
 
     public NametagInRange(TabFeature feature) {
-        feature.setDisplayName("Nametag in Range");
+        feature.setDisplayName("&aNametag in Range");
         this.feature = feature;
         for (TabPlayer p : TAB.getInstance().getPlayers()) {
             for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
@@ -35,6 +35,7 @@ public class NametagInRange implements Loadable, JoinEventListener {
         }
     }
 
+    @Override
     public void load() {
         TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling Nametag In Range", feature, UsageType.REPEATING_TASK,()->{
             int zone = (int) Math.pow(TABAdditions.getInstance().nametagInRange, 2);

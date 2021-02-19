@@ -16,7 +16,7 @@ public class Title implements JoinEventListener {
     private final TabFeature feature;
 
     public Title(TabFeature feature) {
-        feature.setDisplayName("Title");
+        feature.setDisplayName("&aTitle");
         this.feature = feature;
     }
 
@@ -30,6 +30,13 @@ public class Title implements JoinEventListener {
                 titleProperties.add(tSection.get(property));
             new TitleCmd(p.getName(), new String[]{}, titleProperties);
         }
+    }
+
+    public List<String> getLists() {
+        List<String> list = new ArrayList<>();
+        for (Object key : TABAdditions.getInstance().getConfig(ConfigType.TITLE).getConfigurationSection("titles").keySet())
+            list.add(key.toString());
+        return list;
     }
 
     @Override
