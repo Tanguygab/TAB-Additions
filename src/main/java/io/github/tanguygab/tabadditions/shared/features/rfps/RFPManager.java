@@ -7,6 +7,7 @@ import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.cpu.TabFeature;
+import me.neznamy.tab.shared.cpu.UsageType;
 import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.features.types.Refreshable;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
@@ -20,7 +21,6 @@ public class RFPManager implements JoinEventListener, Loadable {
     private final TabFeature feature;
     private final Map<String, RFP> rfps = new HashMap<>();
     private final Map<TabPlayer,Map<RFP, Object>> skins = new HashMap<>();
-    private boolean refresh;
 
     public RFPManager(TabFeature feature) {
         feature.setDisplayName("&aReal Fake Players");
@@ -116,7 +116,6 @@ public class RFPManager implements JoinEventListener, Loadable {
         Map<String,Object> config = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getConfigurationSection("fakeplayers");
         for (Object rfp : config.keySet())
             rfps.put(rfp+"",new RFP(rfp+"", (Map<String, Object>) config.get(rfp+"")));
-        refresh = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("real-fake-players-have-skins",true);
         showRFPAll();
         refresh();
     }
@@ -124,25 +123,26 @@ public class RFPManager implements JoinEventListener, Loadable {
     @Override
     public void unload() {
         removeRFPAll();
-        refresh = false;
     }
 
     public void refresh() {
         for (TabPlayer p : TAB.getInstance().getPlayers()) {
-            List<RFP> rfps = new ArrayList<>(this.rfps.values());
-            if (!skins.containsKey(p))
-                skins.put(p, new HashMap<>());
+            TAB.getInstance().getCPUManager().runTask("refreshing RFPs skins for"+p.getName(),()->{
+                List<RFP> rfps = new ArrayList<>(this.rfps.values());
+                if (!skins.containsKey(p))
+                    skins.put(p, new HashMap<>());
 
-            for (RFP rfp : rfps) {
-                Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p);
-                if (skin != null && skins.get(p).get(rfp) != skin) {
-                    if (!refresh)
-                        return;
-                    if (p != null)
-                    rfp.forceUpdate(p,skin);
+                for (RFP rfp : rfps) {
+                    TAB.getInstance().getCPUManager().runTask("refreshing RFP ("+rfp.getConfigName()+") skin for "+p.getName(),()->{
+                        Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p);
+                        if (skin != null && skins.get(p).get(rfp) != skin) {
+                            if (p != null)
+                                rfp.forceUpdate(p,skin);
+                        }
+                        skins.get(p).put(rfp, skin);
+                    });
                 }
-                skins.get(p).put(rfp, skin);
-            }
+            });
         }
     }
 

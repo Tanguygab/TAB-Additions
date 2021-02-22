@@ -5,17 +5,17 @@ chat-formats:
     condition: 'true'
     components:
       prefix:
-        text: "%tab_chatprefix% "
+        text: "%prop-chatprefix% "
         hover:
           - "Prefix hover"
       name:
-        text: "%tab_customchatname%"
+        text: "%prop-customchatname%"
         hover:
           - "&cHP: %player_health%"
           - "&aMode: #00FF00%player_gamemode%"
         suggest: "/msg %player_name% "
       suffix:
-        text: " %tab_chatsuffix%"
+        text: " %prop-chatsuffix%"
         hover:
           - "Suffix hover"
       msg:

@@ -3,7 +3,6 @@ package io.github.tanguygab.tabadditions.shared.features;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.features.types.Feature;
 import me.neznamy.tab.shared.features.types.event.SneakEventListener;
 
 import java.util.HashMap;

@@ -23,7 +23,9 @@ public class ActionBar implements JoinEventListener {
     @Override
     public void onJoin(TabPlayer p) {
         p.loadPropertyFromConfig("actionbar");
-        String actionbar = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getString("bars." + p.getProperty("actionbar").get(),"");
+        String prop = p.getProperty("actionbar").updateAndGet();
+        if (prop.equals("")) return;
+        String actionbar = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getString("bars." + prop,"");
         if (actionbar.equals("")) return;
         actionbar = TABAdditions.getInstance().parsePlaceholders(actionbar,p);
         p.sendCustomPacket(new PacketPlayOutChat(actionbar, PacketPlayOutChat.ChatMessageType.GAME_INFO));

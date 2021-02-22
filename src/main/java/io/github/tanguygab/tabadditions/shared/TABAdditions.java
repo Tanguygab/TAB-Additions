@@ -24,7 +24,6 @@ public class TABAdditions {
     private final Platform platform;
     private final File dataFolder;
     private final Skins skins;
-    private final Map<String,Integer> tasks = new HashMap<>();
 
     private YamlConfigurationFile config;
     private YamlConfigurationFile layoutConfig;

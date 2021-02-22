@@ -64,7 +64,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     private void refresh() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling TAB+ Layout",feature, UsageType.REPEATING_TASK,()->{
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(100,"handling TAB+ Layout",feature, UsageType.REPEATING_TASK,()->{
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 if (!TABAdditions.getInstance().checkBedrock(p) && players.containsKey(p) && !players.get(p).equals(getLayout(p))) {
                     toRemove.put(p, players.get(p));

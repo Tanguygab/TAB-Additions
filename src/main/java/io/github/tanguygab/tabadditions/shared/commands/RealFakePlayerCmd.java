@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
+import io.github.tanguygab.tabadditions.shared.Skins;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
@@ -68,8 +69,12 @@ public class RealFakePlayerCmd {
             if (prop.equalsIgnoreCase("suffix"))
                 output = rfpm.getRFP(name).setSuffix(value);
 
-            for (TabPlayer p : TAB.getInstance().getPlayers())
-                rfpm.getRFP(name).forceUpdate(p,null);
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                Object skin = null;
+                if (prop.equalsIgnoreCase("skin"))
+                    skin = Skins.getInstance().getIcon(value,p);
+                rfpm.getRFP(name).forceUpdate(p,skin);
+            }
         }
 
         instance.sendMessage(nameS,output);

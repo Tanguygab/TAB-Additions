@@ -62,7 +62,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         Map<String,Object> components = new HashMap<>();
         Map<String,Object> text = new HashMap<>();
 
-        text.put("text","%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%&7» &r%msg%");
+        text.put("text","%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%&7\u00bb &r%msg%");
         components.put("text",text);
         map.put("components",components);
         return new ChatFormat("default", map);
@@ -146,7 +146,6 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         }
         format2.setExtra(list);
 
-        TAB.getInstance().getPlatform().sendConsoleMessage(format2+"", true);
         TAB.getInstance().getPlatform().sendConsoleMessage(format2.toLegacyText(), true);
         for (TabPlayer pl : TAB.getInstance().getPlayers())
             pl.sendMessage(format2);
