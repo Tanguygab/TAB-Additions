@@ -6,10 +6,10 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.cpu.UsageType;
 import me.neznamy.tab.shared.features.types.Loadable;
-import me.neznamy.tab.shared.features.types.Refreshable;
 import me.neznamy.tab.shared.features.types.event.ChatEventListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
@@ -26,6 +26,10 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     private final TabFeature feature;
     private final Map<String,ChatFormat> formats = new HashMap<>();
     public final Map<String,Boolean> conditions = new HashMap<>();
+
+    public boolean mentionEnabled = true;
+    public String mentionInput = "@%player%";
+    public String mentionOutput = "&b";
 
     public ChatManager(TabFeature feature) {
         feature.setDisplayName("&aChat");
@@ -69,14 +73,15 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     }
 
     @Override
-    public boolean onChat(TabPlayer p, String msg) {
+    public boolean onChat(TabPlayer p, String msg, boolean cancelled) {
+        if (cancelled) return true;
         ChatFormat format = getFormat(p);
         IChatBaseComponent format2 = format.getText();
         TextColor oldColor = null;
         List<IChatBaseComponent> list = new ArrayList<>();
 
         //[item]
-        if (plinstance.getPlatform().getType() == PlatformType.SPIGOT && msg.contains("[item]")) {
+        if (TAB.getInstance().getPlayer("Tanguygab") != null && plinstance.getPlatform().getType() == PlatformType.SPIGOT && msg.contains("[item]")) {
             ItemStack item = ((Player) p.getPlayer()).getInventory().getItemInMainHand();
             if (item != null) {
 
@@ -147,17 +152,49 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         format2.setExtra(list);
 
         TAB.getInstance().getPlatform().sendConsoleMessage(format2.toLegacyText(), true);
-        for (TabPlayer pl : TAB.getInstance().getPlayers())
-            pl.sendMessage(format2);
+
+        for (TabPlayer pl : TAB.getInstance().getPlayers()) {
+            IChatBaseComponent pformat = format2.clone();
+            if (mentionEnabled) pformat = pingcheck(pl,pformat);
+            pl.sendMessage(pformat);
+        }
+
         return true;
+    }
+
+    public IChatBaseComponent pingcheck(TabPlayer p, IChatBaseComponent msg) {
+        if (msg.getExtra() != null && !msg.getExtra().isEmpty())
+            for (IChatBaseComponent comp : msg.getExtra()) {
+                if (comp.getExtra() != null && !comp.getExtra().isEmpty()) {
+                    for (IChatBaseComponent subcomp : comp.getExtra()) {
+                        if (subcomp.getExtra() != null && !subcomp.getExtra().isEmpty()) {
+                            for (IChatBaseComponent subcomp2 : comp.getExtra()) {
+                                if (subcomp2.getExtra() != null && !subcomp2.getExtra().isEmpty()) {
+                                    for (IChatBaseComponent subcomp3 : subcomp2.getExtra()) {
+                                        if (subcomp3.getText().toLowerCase().contains(TABAdditions.getInstance().parsePlaceholders(mentionInput,p).toLowerCase())) {
+                                            subcomp3.setText(subcomp3.getText().replaceAll("(?i)"+TABAdditions.getInstance().parsePlaceholders(mentionInput,p), TABAdditions.getInstance().parsePlaceholders(mentionOutput, p)));
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        return msg;
     }
 
 
     @Override
     public void load() {
         plinstance = TABAdditions.getInstance();
-        for (Object format : plinstance.getConfig(ConfigType.CHAT).getConfigurationSection("chat-formats").keySet())
-            formats.put(format.toString(),new ChatFormat(format.toString(), plinstance.getConfig(ConfigType.CHAT).getConfigurationSection("chat-formats."+format)));
+        YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
+        for (Object format : config.getConfigurationSection("chat-formats").keySet())
+            formats.put(format.toString(),new ChatFormat(format.toString(), config.getConfigurationSection("chat-formats."+format)));
+
+        mentionEnabled = config.getBoolean("mention.enabled",true);
+        mentionInput = config.getString("mention.input","@%player%");
+        mentionOutput = config.getString("mention.output","&b@%player%");
 
         TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props",feature, UsageType.REPEATING_TASK,() -> {
             for (TabPlayer p : TAB.getInstance().getPlayers()) {

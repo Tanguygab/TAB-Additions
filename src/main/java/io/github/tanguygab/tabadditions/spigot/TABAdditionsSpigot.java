@@ -50,7 +50,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
             new HelpCmd(name,getDescription().getVersion());
         else switch (args[0].toLowerCase()) {
             case "actionbar": {
-                if (!instance.getConfig(ConfigType.ACTIONBAR).getBoolean("features.actionbars"))
+                if (!instance.actionbarsEnabled)
                     instance.sendMessage(name, "&cActionbar feature is not enabled, therefore this command cannot be used");
                 else if (args.length < 2)
                     instance.sendMessage(name, "&cYou have to provide an actionbar!");
@@ -64,7 +64,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                 break;
             }
             case "title": {
-                if (!instance.getConfig(ConfigType.MAIN).getBoolean("features.titles"))
+                if (!instance.titlesEnabled)
                     instance.sendMessage(name,"&cTitle feature is not enabled, therefore this command cannot be used");
                 else if (args.length < 2)
                     instance.sendMessage(name,"&cYou have to provide a title!");
@@ -112,8 +112,8 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         if (args.length >= 2) {
             switch (args[0]) {
                 case "actionbar":
-                    if (args.length == 2)
-                        return ((ActionBar)TAB.getInstance().getFeatureManager().getFeature("Actionbar")).getLists();
+                    if (args.length == 2 && TABAdditions.getInstance().actionbarsEnabled)
+                        return ((ActionBar)TAB.getInstance().getFeatureManager().getFeature("ActionBar")).getLists();
                     break;
                 case "tags": {
                     if (args.length == 2)
@@ -139,7 +139,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "title": {
-                    if (args.length == 2)
+                    if (args.length == 2 && TABAdditions.getInstance().titlesEnabled)
                         return ((Title)TAB.getInstance().getFeatureManager().getFeature("Title")).getLists();
                     break;
                 }

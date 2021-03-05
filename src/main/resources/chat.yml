@@ -1,5 +1,10 @@
 default-format: "default"
 
+mention:
+  enabled: true
+  input: '@%player%'
+  output: '&b@%player%'
+
 chat-formats:
   default:
     condition: 'true'
