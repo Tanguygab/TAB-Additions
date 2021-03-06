@@ -14,6 +14,8 @@ import me.neznamy.tab.shared.features.types.event.ChatEventListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.rgb.TextColor;
+import org.bukkit.Instrument;
+import org.bukkit.Note;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -28,6 +30,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public final Map<String,Boolean> conditions = new HashMap<>();
 
     public boolean mentionEnabled = true;
+    public boolean mentionForEveryone = true;
     public String mentionInput = "@%player%";
     public String mentionOutput = "&b";
 
@@ -55,6 +58,27 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         }
         return f;
     }
+    @Override
+    public void load() {
+        plinstance = TABAdditions.getInstance();
+        YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
+        for (Object format : config.getConfigurationSection("chat-formats").keySet())
+            formats.put(format.toString(),new ChatFormat(format.toString(), config.getConfigurationSection("chat-formats."+format)));
+
+        mentionEnabled = config.getBoolean("mention.enabled",true);
+        mentionForEveryone = config.getBoolean("mention.output-for-everyone",true);
+        mentionInput = config.getString("mention.input","@%player%");
+        mentionOutput = config.getString("mention.output","&b@%player%");
+
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props",feature, UsageType.REPEATING_TASK,() -> {
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                p.loadPropertyFromConfig("chatprefix");
+                p.loadPropertyFromConfig("customchatname",p.getName());
+                p.loadPropertyFromConfig("chatsuffix");
+            }
+        });
+    }
+
     public boolean isInRange(TabPlayer sender,TabPlayer viewer,String range) {
         if (plinstance.getPlatform().getType() == PlatformType.BUNGEE) return true;
         int zone = (int) Math.pow(Integer.parseInt(range), 2);
@@ -153,10 +177,16 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
         TAB.getInstance().getPlatform().sendConsoleMessage(format2.toLegacyText(), true);
 
+
+        IChatBaseComponent pformat = format2;
+        if (mentionForEveryone && mentionEnabled)
+            for (TabPlayer pl : TAB.getInstance().getPlayers())
+                if (pl != p)
+                    pformat = pingcheck(pl,pformat);
         for (TabPlayer pl : TAB.getInstance().getPlayers()) {
-            IChatBaseComponent pformat = format2.clone();
-            if (mentionEnabled) pformat = pingcheck(pl,pformat);
-            pl.sendMessage(pformat);
+            IChatBaseComponent ppformat = pformat.clone();
+            if (!mentionForEveryone && mentionEnabled && pl != p) ppformat = pingcheck(pl,ppformat);
+            pl.sendMessage(ppformat);
         }
 
         return true;
@@ -173,6 +203,10 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                                     for (IChatBaseComponent subcomp3 : subcomp2.getExtra()) {
                                         if (subcomp3.getText().toLowerCase().contains(TABAdditions.getInstance().parsePlaceholders(mentionInput,p).toLowerCase())) {
                                             subcomp3.setText(subcomp3.getText().replaceAll("(?i)"+TABAdditions.getInstance().parsePlaceholders(mentionInput,p), TABAdditions.getInstance().parsePlaceholders(mentionOutput, p)));
+                                            if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
+                                                Player player = (Player) p.getPlayer();
+                                                player.playNote(player.getLocation(), Instrument.PLING, Note.flat(1, Note.Tone.A));
+                                            }
                                         }
                                     }
                                 }
@@ -184,26 +218,6 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         return msg;
     }
 
-
-    @Override
-    public void load() {
-        plinstance = TABAdditions.getInstance();
-        YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
-        for (Object format : config.getConfigurationSection("chat-formats").keySet())
-            formats.put(format.toString(),new ChatFormat(format.toString(), config.getConfigurationSection("chat-formats."+format)));
-
-        mentionEnabled = config.getBoolean("mention.enabled",true);
-        mentionInput = config.getString("mention.input","@%player%");
-        mentionOutput = config.getString("mention.output","&b@%player%");
-
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props",feature, UsageType.REPEATING_TASK,() -> {
-            for (TabPlayer p : TAB.getInstance().getPlayers()) {
-                p.loadPropertyFromConfig("chatprefix");
-                p.loadPropertyFromConfig("customchatname",p.getName());
-                p.loadPropertyFromConfig("chatsuffix");
-            }
-        });
-    }
 
     @Override
     public void unload() {

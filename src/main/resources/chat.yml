@@ -4,6 +4,7 @@ mention:
   enabled: true
   input: '@%player%'
   output: '&b@%player%'
+  output-for-everyone: true
 
 chat-formats:
   default:
