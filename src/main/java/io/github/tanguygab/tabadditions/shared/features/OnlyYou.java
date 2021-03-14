@@ -44,9 +44,13 @@ public class OnlyYou implements JoinEventListener, Loadable {
     @Override
     public void onJoin(TabPlayer tabPlayer) {
         Player p = Bukkit.getServer().getPlayer(tabPlayer.getUniqueId());
-        for (Player p2 : Bukkit.getServer().getOnlinePlayers())
-            if (p != p2)
-                p.hidePlayer(plugin, p2);
+        Bukkit.getServer().getScheduler().runTask(plugin, ()->{
+                for (Player p2 : Bukkit.getServer().getOnlinePlayers())
+                    if (p != p2) {
+                        p.hidePlayer(plugin, p2);
+                        p2.hidePlayer(plugin,p);
+                    }
+        });
     }
 
     @Override

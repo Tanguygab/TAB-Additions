@@ -151,8 +151,9 @@ public class RFP {
         if (skin != null) fp.skin = skin;
         p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()).setTeamOptions(69));
         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp));
-        String prefix = TABAdditions.getInstance().parsePlaceholders(getProps()[0],p);
-        String suffix = TABAdditions.getInstance().parsePlaceholders(getProps()[1],p);
+        String[] props = getProps();
+        String prefix = TABAdditions.getInstance().parsePlaceholders(props[0],p);
+        String suffix = TABAdditions.getInstance().parsePlaceholders(props[1],p);
         PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabFeature.NAMETAGS);
         p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp));
     }

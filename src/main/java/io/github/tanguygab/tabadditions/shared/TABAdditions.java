@@ -238,9 +238,21 @@ public class TABAdditions {
     }
 
     public String parsePlaceholders(String str, TabPlayer p) {
-        str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
-        str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str,p);
-        str = TAB.getInstance().getPlaceholderManager().color(str);
+        return parsePlaceholders(str, p, 0);
+    }
+
+    public String parsePlaceholders(String str, TabPlayer p, int attempts) {
+        if (str == null) return "";
+        if (p == null) return str;
+        try {
+            str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str, p);
+            str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str, p);
+            str = TAB.getInstance().getPlaceholderManager().color(str);
+        } catch (Exception e) {
+            if (attempts == 3) return "";
+            attempts=attempts+1;
+            return parsePlaceholders(str,p,attempts);
+        }
         return str;
     }
 

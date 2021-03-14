@@ -11,6 +11,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class Skins {
 
@@ -25,8 +26,13 @@ public class Skins {
     }
 
     public String[] getPropPlayer(String name) {
-        if (TABAdditions.getInstance().getConfig(ConfigType.SKINS).hasConfigOption("player-head:"+name))
-            return TABAdditions.getInstance().getConfig(ConfigType.SKINS).getStringList("player-head:"+name).toArray(new String[0]);
+        if (TABAdditions.getInstance().getConfig(ConfigType.SKINS).hasConfigOption("player-head:"+name)) {
+            Object output = TABAdditions.getInstance().getConfig(ConfigType.SKINS).getObject("player-head:"+name);
+            if (output instanceof String[])
+                return (String[]) output;
+            if (output instanceof ArrayList)
+                return ((ArrayList<String>)output).toArray(new String[0]);
+        }
         try {
             URL url_0 = new URL("https://api.ashcon.app/mojang/v2/user/" + name);
             InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());

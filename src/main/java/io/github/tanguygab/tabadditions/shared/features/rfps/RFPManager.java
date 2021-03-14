@@ -114,9 +114,10 @@ public class RFPManager implements JoinEventListener, Loadable {
         for (Object rfp : config.keySet())
             rfps.put(rfp+"",new RFP(rfp+"", (Map<String, Object>) config.get(rfp+"")));
         showRFPAll();
-        for (TabPlayer p : TAB.getInstance().getPlayers()) {
+
+        TAB.getInstance().getCPUManager().runTask("loading RFPs for all players", () -> {
             List<RFP> rfps = new ArrayList<>(this.rfps.values());
-            TAB.getInstance().getCPUManager().runTask("loading RFPs for " + p.getName(), () -> {
+            for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 for (RFP rfp : rfps) {
                     Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p);
                     if (skin != null) {
@@ -129,8 +130,8 @@ public class RFPManager implements JoinEventListener, Loadable {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-            });
-        }
+            }
+        });
     }
 
     @Override
