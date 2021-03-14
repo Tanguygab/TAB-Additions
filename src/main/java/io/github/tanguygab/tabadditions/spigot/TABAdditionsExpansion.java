@@ -1,12 +1,16 @@
 package io.github.tanguygab.tabadditions.spigot;
 
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.neznamy.tab.api.TABAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.TAB;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -25,7 +29,7 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
 
     @Override
     public List<String> getPlaceholders() {
-        return new ArrayList<>(Collections.singletonList("%tabadditions_tag_visible%"));
+        return new ArrayList<>(Arrays.asList("%tabadditions_tag_visible%", "%tabadditions_fakeplayers_amount%"));
     }
 
     @Override
@@ -51,6 +55,8 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
         if (p == null) return "";
 
         if (identifier.equals("tag_visible")) return !p.hasHiddenNametag()+"";
+        if (identifier.equals("fakeplayers_amount") && TABAdditions.getInstance().rfpEnabled)
+            return ((RFPManager)TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size()+"";
 
 
         return "null";
