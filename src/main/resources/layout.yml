@@ -85,7 +85,6 @@ layouts:
         type: PLAYERS
         text: "%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%"
         condition: "permission:tab.staff"
-        # if you want that "staff" condition, check 3 lines below
         icon: player-head:%player%
         vertical: true
         empty:
