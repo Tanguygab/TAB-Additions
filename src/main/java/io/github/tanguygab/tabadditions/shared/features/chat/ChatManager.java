@@ -104,42 +104,16 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         TextColor oldColor = null;
         List<IChatBaseComponent> list = new ArrayList<>();
 
-        //[item]
-        if (TAB.getInstance().getPlayer("Tanguygab") != null && plinstance.getPlatform().getType() == PlatformType.SPIGOT && msg.contains("[item]")) {
-            ItemStack item = ((Player) p.getPlayer()).getInventory().getItemInMainHand();
-            if (item != null) {
-
-                IChatBaseComponent itemmsg = new IChatBaseComponent("");
-                List<IChatBaseComponent> msglist = new ArrayList<>();
-                List<String> ar = new ArrayList<>(Arrays.asList(msg.split("\\[item]")));
-
-                if (ar.isEmpty()) ar.add("");
-                for (String txt2 : ar) {
-
-                    msglist.add(IChatBaseComponent.fromColoredText(txt2));
-                    if ((ar.size() == 1 || ar.indexOf(txt2) != ar.size() - 1)) {
-                        IChatBaseComponent itemtxt = new IChatBaseComponent();
-                        String type = item.getType().toString().replace("_", " ").toLowerCase();
-                        itemtxt = itemtxt.setText(type);
-                        itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
-                        p.sendMessage(itemtxt.getHoverValue() + "", false);
-                        msglist.add(itemtxt);
-                    }
-
-                }
-
-                itemmsg.setExtra(msglist);
-                p.sendMessage(itemmsg);
-
-            }
-        }
-
-
         for (IChatBaseComponent comp : format2.getExtra()) {
 
             List<IChatBaseComponent> list2 = new ArrayList<>();
             for (IChatBaseComponent txt : comp.getExtra()) {
                 String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p).replaceAll("%msg%", msg);
+                //[item]
+                if (txt.toRawText().contains("%msg%") && TAB.getInstance().getPlayer("Tanguygab") != null && plinstance.getPlatform().getType() == PlatformType.SPIGOT && msg.contains("[item]")) {
+                    txt = itemcheck(p, txt, msg);
+                    p.sendMessage(txt);
+                }
                 txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
 
                 TextColor color = null;
@@ -190,6 +164,45 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         }
 
         return true;
+    }
+
+    public IChatBaseComponent itemcheck(TabPlayer p, IChatBaseComponent comp, String msg) {
+
+        List<IChatBaseComponent> msglist = new ArrayList<>();
+        String[] list = comp.getText().split("%msg%");
+        msglist.add(new IChatBaseComponent(list[0]));
+
+
+        ItemStack item = ((Player) p.getPlayer()).getInventory().getItemInMainHand();
+
+        IChatBaseComponent itemmsg = new IChatBaseComponent("");
+        List<String> ar = new ArrayList<>(Arrays.asList(msg.split("\\[item]")));
+
+        if (ar.isEmpty()) ar.add("");
+        for (String txt2 : ar) {
+
+            msglist.add(IChatBaseComponent.fromColoredText(txt2));
+            if ((ar.size() == 1 || ar.indexOf(txt2) != ar.size() - 1)) {
+                IChatBaseComponent itemtxt = new IChatBaseComponent();
+                String type = item.getType().toString().replace("_", " ").toLowerCase();
+                String type2 = "";
+                List<String> typelist = new ArrayList<>(Arrays.asList(type.split(" ")));
+                for (String str : typelist) {
+                    type2 = type2 + str.substring(0, 1).toUpperCase() + str.substring(1);
+                    if (typelist.indexOf(str) != typelist.size() - 1) type2 = type2 + " ";
+                }
+                itemtxt = itemtxt.setText(type2);
+                itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
+                msglist.add(itemtxt);
+            }
+
+        }
+
+        if (list.length > 1) msglist.add(new IChatBaseComponent(list[1]));
+        itemmsg.setExtra(msglist);
+        p.sendMessage(itemmsg);
+        comp.setExtra(msglist);
+        return comp;
     }
 
     public IChatBaseComponent pingcheck(TabPlayer p, IChatBaseComponent msg) {
