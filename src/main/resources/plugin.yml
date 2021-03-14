@@ -3,7 +3,7 @@ version: 1.5.2
 main: io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot
 api-version: 1.13
 depend: [TAB]
-softdepend: [PlaceholderAPI,SuperSkinAPI,floodgate-bukkit]
+softdepend: [PlaceholderAPI,SuperSkinAPI,floodgate-bukkit,DiscordSRV]
 author: Tanguygab
 description: More features for the plugin TAB !
 commands:

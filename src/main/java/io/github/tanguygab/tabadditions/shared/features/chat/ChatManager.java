@@ -1,5 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
+import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.api.ApiManager;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
@@ -14,6 +16,7 @@ import me.neznamy.tab.shared.features.types.event.ChatEventListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.rgb.TextColor;
+import org.bukkit.Bukkit;
 import org.bukkit.Instrument;
 import org.bukkit.Note;
 import org.bukkit.entity.Player;
@@ -162,6 +165,9 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
             if (!mentionForEveryone && mentionEnabled && pl != p) ppformat = pingcheck(pl,ppformat);
             pl.sendMessage(ppformat);
         }
+        if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT && Bukkit.getServer().getPluginManager().isPluginEnabled("DiscordSRV"))
+            if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true))
+                DiscordSRV.getPlugin().processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()),msg,DiscordSRV.getPlugin().getMainChatChannel(),false);
 
         return true;
     }

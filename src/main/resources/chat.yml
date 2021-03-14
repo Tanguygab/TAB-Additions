@@ -5,6 +5,7 @@ mention:
   input: '@%player%'
   output: '&b@%player%'
   output-for-everyone: true
+DiscordSRV-Support: true
 
 chat-formats:
   default:
