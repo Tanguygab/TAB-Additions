@@ -22,14 +22,16 @@ public class TABAdditions {
     private static TABAdditions instance;
     private final Object plugin;
     private final Platform platform;
-    private final File dataFolder;
+    public final File dataFolder;
     private final Skins skins;
+    public boolean enabled;
 
     private YamlConfigurationFile config;
     private YamlConfigurationFile layoutConfig;
     private YamlConfigurationFile titleConfig;
     private YamlConfigurationFile actionbarConfig;
     private YamlConfigurationFile chatConfig;
+    private YamlConfigurationFile skinsFile;
 
     public boolean titlesEnabled;
     public boolean actionbarsEnabled;
@@ -39,6 +41,7 @@ public class TABAdditions {
     public int nametagInRange = 0;
     public int tablistNamesRadius = 0;
     public boolean rfpEnabled;
+    public boolean onlyyou = false;
 
     public boolean floodgate = false;
 
@@ -75,11 +78,13 @@ public class TABAdditions {
             case TITLE: return titleConfig;
             case ACTIONBAR: return actionbarConfig;
             case CHAT: return chatConfig;
+            case SKINS: return skinsFile;
             default: return config;
         }
     }
 
     public void load() {
+        enabled = true;
         loadFiles();
         platform.reload();
     }
@@ -93,7 +98,9 @@ public class TABAdditions {
             titleConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("titles.yml"), new File(dataFolder, "titles.yml"));
             actionbarConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("actionbars.yml"), new File(dataFolder, "actionbars.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
-            layoutConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("layout.yml"), new File(dataFolder, "layout.yml"));
+            skinsFile = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("skins.yml"), new File(dataFolder, "skins.yml"));
+            if (TAB.getInstance().isPremium())
+                layoutConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("layout.yml"), new File(dataFolder, "layout.yml"));
 
             titlesEnabled = config.getBoolean("features.titles",false);
             actionbarsEnabled = config.getBoolean("features.actionbars",false);
@@ -104,6 +111,7 @@ public class TABAdditions {
                 sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
+                onlyyou = config.getBoolean("features.only-you",false);
             }
         } catch (IOException e) {
             platform.disable();
@@ -156,6 +164,13 @@ public class TABAdditions {
         if (fm.isFeatureEnabled("Tablist Names Radius"))
             ((TablistNamesRadius)fm.getFeature("Tablist Names Radius")).unload();
         fm.unregisterFeature("Tablist Names Radius");
+
+        //Only You
+        fm.unregisterFeature("Only You");
+
+        enabled = false;
+        TAB.getInstance().unload();
+        TAB.getInstance().load();
     }
 
     protected void loadProps(TabPlayer p) {
@@ -193,6 +208,9 @@ public class TABAdditions {
         //Tablist Names Radius
         if (tablistNamesRadius != 0)
             fm.registerFeature("Tablist Names Radius",new TablistNamesRadius(TabFeature.ADDON_FEATURE_8));
+        //Only You
+        if (onlyyou)
+            fm.registerFeature("Only You",new OnlyYou(TabFeature.ADDON_FEATURE_9));
     }
 
     private void loadPlaceholders() {

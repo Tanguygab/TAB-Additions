@@ -6,3 +6,4 @@ features:
   layout: false
   nametag-in-range: 0
   real-fake-players: false
+  only-you: false
