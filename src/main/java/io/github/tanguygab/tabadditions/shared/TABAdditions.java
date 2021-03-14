@@ -166,6 +166,8 @@ public class TABAdditions {
         fm.unregisterFeature("Tablist Names Radius");
 
         //Only You
+        if (fm.isFeatureEnabled("Only You"))
+            ((OnlyYou)fm.getFeature("Only You")).unload();
         fm.unregisterFeature("Only You");
 
         enabled = false;
