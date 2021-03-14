@@ -40,8 +40,8 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
         for (Object layout : TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getConfigurationSection("layouts").keySet())
             layouts.put(layout+"",new Layout(layout.toString()));
         togglecmd = TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getString("toggle-cmd","layout");
-        refresh();
         showLayoutAll();
+        refresh();
     }
 
     @Override
@@ -114,13 +114,11 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
             if (!TABAdditions.getInstance().checkBedrock(p))
                 toAdd.put(p,getLayout(p));
     }
-
     public void removeLayoutAll() {
         for (TabPlayer p : TAB.getInstance().getPlayers())
             if (!TABAdditions.getInstance().checkBedrock(p))
                 toRemove.put(p,getLayout(p));
     }
-
 
     @Override
     public boolean onCommand(TabPlayer p, String msg) {
