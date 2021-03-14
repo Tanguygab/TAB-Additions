@@ -11,7 +11,6 @@ import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
-import me.neznamy.tab.shared.rgb.TextColor;
 
 import java.util.*;
 
