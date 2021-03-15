@@ -15,6 +15,7 @@ import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.features.types.event.ChatEventListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
+import me.neznamy.tab.shared.rgb.RGBUtils;
 import me.neznamy.tab.shared.rgb.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Instrument;
@@ -23,6 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class ChatManager implements ChatEventListener, Loadable, JoinEventListener {
 
@@ -102,6 +104,16 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     @Override
     public boolean onChat(TabPlayer p, String msg, boolean cancelled) {
         if (cancelled) return true;
+
+        List<String> codes = Arrays.asList("a", "b", "c", "d", "f", "k", "l", "m", "n", "o", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+        for (String code : codes) {
+            if (!p.hasPermission("tabadditions.chat.color.&" + code))
+                msg = msg.replaceAll("&" + code, "");
+        }
+        msg = new RGBUtils().applyFormats(msg);
+        if (!p.hasPermission("tabadditions.chat.color.rgb"))
+            msg = msg.replaceAll("#[0-9a-fA-F]{6}","");
+
         ChatFormat format = getFormat(p);
         IChatBaseComponent format2 = format.getText();
         TextColor oldColor = null;
