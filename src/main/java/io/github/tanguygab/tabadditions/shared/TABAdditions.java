@@ -14,7 +14,9 @@ import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.cpu.TabFeature;
+import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.placeholders.Placeholder;
+import org.bukkit.entity.Player;
 import org.geysermc.floodgate.FloodgateAPI;
 
 public class TABAdditions {
@@ -224,14 +226,58 @@ public class TABAdditions {
             props.addAll(TAB.getInstance().getConfiguration().premiumconfig.getStringList("unlimited-nametag-mode-dynamic-lines"));
             props.addAll(TAB.getInstance().getConfiguration().premiumconfig.getConfigurationSection("unlimited-nametag-mode-static-lines").keySet());
         }
+        PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
         for (Object prop : props) {
-            TAB.getInstance().getPlaceholderManager().registerPlaceholder(new Placeholder("%prop-"+prop+"%", 100) {
+            pm.registerPlaceholder(new Placeholder("%prop-"+prop+"%", 100) {
                 @Override
                 public String getLastValue(TabPlayer p) {
                     Property property = p.getProperty(prop+"");
                     if (property != null)
                         return property.updateAndGet();
                     return "";
+                }
+            });
+        }
+        pm.registerPlaceholder(new Placeholder("%onlinerfp%",1000) {
+            @Override
+            public String getLastValue(TabPlayer tabPlayer) {
+                int count = TAB.getInstance().getPlayers().size();
+                if (TAB.getInstance().getFeatureManager().isFeatureEnabled("Real Fake Players"))
+                    count = count+((RFPManager)TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
+                return count+"";
+            }
+        });
+        pm.registerPlaceholder(new Placeholder("%canseeonlinerfp%",1000) {
+            @Override
+            public String getLastValue(TabPlayer p) {
+                int count = 0;
+                try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p));}
+                catch (NumberFormatException ignored) {}
+                if (TAB.getInstance().getFeatureManager().isFeatureEnabled("Real Fake Players"))
+                    count = count + ((RFPManager) TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
+                return count+"";
+            }
+        });
+        if (platform.getType()==PlatformType.SPIGOT) {
+            pm.registerPlaceholder(new Placeholder("%canseeworldonline%", 1000) {
+                @Override
+                public String getLastValue(TabPlayer p) {
+                    int count = 0;
+                    for (TabPlayer all : TAB.getInstance().getPlayers())
+                        if (all.getWorldName().equals(p.getWorldName()) && ((Player) p.getPlayer()).canSee((Player) all.getPlayer()))
+                            count++;
+                    return count+"";
+                }
+            });
+            pm.registerPlaceholder(new Placeholder("%canseeworldonlinerfp%",1000) {
+                @Override
+                public String getLastValue(TabPlayer p) {
+                    int count = 0;
+                    try {count = Integer.parseInt(parsePlaceholders("%canseeworldonline%",p));}
+                    catch (NumberFormatException ignored) {}
+                    if (TAB.getInstance().getFeatureManager().isFeatureEnabled("Real Fake Players"))
+                        count = count + ((RFPManager) TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
+                    return count+"";
                 }
             });
         }
