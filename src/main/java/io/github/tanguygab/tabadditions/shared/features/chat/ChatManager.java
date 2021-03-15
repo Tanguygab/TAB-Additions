@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.api.ApiManager;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
@@ -24,7 +23,6 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class ChatManager implements ChatEventListener, Loadable, JoinEventListener {
 
@@ -32,7 +30,6 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     private static ChatManager instance;
     private final TabFeature feature;
     private final Map<String,ChatFormat> formats = new HashMap<>();
-    public final Map<String,Boolean> conditions = new HashMap<>();
 
     public boolean mentionEnabled = true;
     public boolean mentionForEveryone = true;
@@ -68,7 +65,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         plinstance = TABAdditions.getInstance();
         YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         for (Object format : config.getConfigurationSection("chat-formats").keySet())
-            formats.put(format.toString(),new ChatFormat(format.toString(), config.getConfigurationSection("chat-formats."+format)));
+            formats.put(format+"",new ChatFormat(format+"", config.getConfigurationSection("chat-formats."+format)));
 
         mentionEnabled = config.getBoolean("mention.enabled",true);
         mentionForEveryone = config.getBoolean("mention.output-for-everyone",true);
@@ -84,9 +81,9 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         });
     }
 
-    public boolean isInRange(TabPlayer sender,TabPlayer viewer,String range) {
+    public boolean isInRange(TabPlayer sender,TabPlayer viewer,int range) {
         if (plinstance.getPlatform().getType() == PlatformType.BUNGEE) return true;
-        int zone = (int) Math.pow(Integer.parseInt(range), 2);
+        int zone = (int) Math.pow(range, 2);
         return sender.getWorldName().equals(viewer.getWorldName()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
     }
 
@@ -173,15 +170,27 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                 if (pl != p)
                     pformat = pingcheck(pl,pformat);
         for (TabPlayer pl : TAB.getInstance().getPlayers()) {
-            IChatBaseComponent ppformat = pformat.clone();
-            if (!mentionForEveryone && mentionEnabled && pl != p) ppformat = pingcheck(pl,ppformat);
-            pl.sendMessage(ppformat);
+            if (canSee(p,pl)) {
+                IChatBaseComponent ppformat = pformat.clone();
+                if (!mentionForEveryone && mentionEnabled && pl != p) ppformat = pingcheck(pl, ppformat);
+                pl.sendMessage(ppformat);
+            }
         }
         if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT && Bukkit.getServer().getPluginManager().isPluginEnabled("DiscordSRV"))
-            if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true))
-                DiscordSRV.getPlugin().processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()),msg,DiscordSRV.getPlugin().getMainChatChannel(),false);
+            if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true)) {
+                DiscordSRV discord = DiscordSRV.getPlugin();
+                if (canSee(p, null))
+                    discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()), msg, discord.getMainChatChannel(), false);
+                else if (getFormat(p).isViewConditionMet(p,null) && !discord.getOptionalChannel(format.getChannel()).equals(discord.getMainChatChannel())) discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()),msg, discord.getOptionalChannel(format.getChannel()),false);
+            }
 
         return true;
+    }
+
+    public boolean canSee(TabPlayer sender, TabPlayer viewer) {
+        if (viewer != null && !getFormat(sender).getChannel().equals(getFormat(viewer).getChannel())) return false;
+        else if (viewer == null && !getFormat(sender).getChannel().equals("")) return false;
+        return getFormat(sender).isViewConditionMet(sender, viewer);
     }
 
     public IChatBaseComponent itemcheck(TabPlayer p, IChatBaseComponent comp, String msg) {

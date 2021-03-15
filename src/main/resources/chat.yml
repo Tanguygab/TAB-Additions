@@ -9,7 +9,6 @@ DiscordSRV-Support: true
 
 chat-formats:
   default:
-    condition: 'true'
     components:
       prefix:
         text: "%prop-chatprefix% "

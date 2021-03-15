@@ -1,12 +1,9 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
-import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
-
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
+import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -31,21 +28,40 @@ public class ChatFormat {
         return child+"";
     }
     public boolean isConditionMet(TabPlayer p) {
-        Object cond = config.get("condition");
-        if (cond == null) return true;
-        String condition = TABAdditions.getInstance().parsePlaceholders(cond.toString(),p);
+        if (!config.containsKey("condition")) return true;
+        String conditionname = TAB.getInstance().getPlatform().replaceAllPlaceholders(config.get("condition")+"",p);
+        Condition condition = Condition.getCondition(conditionname);
+        if (condition == null) return true;
+        return condition.isMet(p);
+    }
 
-        Map<String,Boolean> conditions = ChatManager.getInstance().conditions;
-        boolean value;
-        if (conditions.containsKey(condition))
-            return conditions.get(condition);
-        try {
-            value = Boolean.parseBoolean(String.valueOf(new ScriptEngineManager().getEngineByName("javascript").eval(condition)));
-            ChatManager.getInstance().conditions.put(condition,value);
-            return value;
-        } catch (ScriptException e) {
-            return false;
+    public String getChannel() {
+        if (!config.containsKey("channel")) return "";
+        return config.get("channel")+"";
+    }
+
+    public boolean isInChannel(TabPlayer sender, TabPlayer viewer) {
+        if (!config.containsKey("channel")) return true;
+        if (sender == viewer) return true;
+        ChatManager cm = ChatManager.getInstance();
+        return cm.getFormat(sender).getChannel().equals(cm.getFormat(viewer).getChannel());
+        //if (!ChatManager.getInstance().channels.containsKey(config.get("channel")+"")) return true;
+        //return ChatManager.getInstance().channels.get(config.get("channel")+"").isViewConditionMet(sender,viewer);
+    }
+
+    public boolean isViewConditionMet(TabPlayer sender, TabPlayer viewer) {
+        if (!config.containsKey("view-condition") || config.get("view-condition").equals("")) return true;
+        if (sender == null || viewer == null) return false;
+        String conditionname = TAB.getInstance().getPlatform().replaceAllPlaceholders(config.get("view-condition")+"",viewer);
+        if (conditionname.startsWith("inRange:")) {
+            try {
+                int range = Integer.parseInt(conditionname.replace("inRange:",""));
+                return ChatManager.getInstance().isInRange(sender,viewer,range);
+            } catch (NumberFormatException e) {return true;}
         }
+        Condition condition = Condition.getCondition(conditionname);
+        if (condition == null) return true;
+        return condition.isMet(viewer);
     }
 
     public IChatBaseComponent getText() {

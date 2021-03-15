@@ -47,8 +47,8 @@ public class Layout {
     }
     protected boolean isConditionMet(TabPlayer p) {
         if (!config.containsKey("condition")) return true;
-        Object conditionname = config.get("condition");
-        Condition condition = Condition.getCondition(conditionname+"");
+        String conditionname = TAB.getInstance().getPlatform().replaceAllPlaceholders(config.get("condition")+"",p);
+        Condition condition = Condition.getCondition(conditionname);
         if (condition == null) return true;
         return condition.isMet(p);
     }
