@@ -50,16 +50,18 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
     @Override
     public String onPlaceholderRequest(Player player, String identifier){
 
+        if (identifier.equals("fakeplayers_amount") && TABAdditions.getInstance().rfpEnabled)
+            return ((RFPManager)TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size()+"";
+
         if (player == null) return "";
         TabPlayer p = TABAPI.getPlayer(player.getUniqueId());
         if (p == null) return "";
 
         if (identifier.equals("tag_visible")) return !p.hasHiddenNametag()+"";
-        if (identifier.equals("fakeplayers_amount") && TABAdditions.getInstance().rfpEnabled)
-            return ((RFPManager)TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size()+"";
 
 
-        return "null";
+
+        return "";
     }
 
 }
