@@ -16,6 +16,7 @@ import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.placeholders.Placeholder;
+import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.FloodgateAPI;
 
@@ -286,6 +287,20 @@ public class TABAdditions {
     public String parsePlaceholders(String str, TabPlayer p) {
         return parsePlaceholders(str, p, 0);
     }
+    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, boolean senderdefault) {
+        if (senderdefault) str = parsePlaceholders(str,sender);
+        else str = parsePlaceholders(str,viewer);
+
+        List<String> list = TAB.getInstance().getPlaceholderManager().detectAll(str);
+        for (String pl : list) {
+            if (pl.startsWith("%sender:"))
+                str = str.replace(pl,parsePlaceholders(pl.replace("sender:",""),sender));
+            else if (pl.startsWith("%viewer:"))
+                str = str.replace(pl,parsePlaceholders(pl.replace("viewer:",""),viewer));
+        }
+
+        return str;
+    }
 
     public String parsePlaceholders(String str, TabPlayer p, int attempts) {
         if (str == null) return "";
@@ -300,6 +315,19 @@ public class TABAdditions {
             return parsePlaceholders(str,p,attempts);
         }
         return str;
+    }
+
+    public boolean isConditionMet(String str, TabPlayer p) {
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,p);
+        for (String cond : conditionname.split(";")) {
+            Condition condition = Condition.getCondition(cond.replace("!",""));
+            if (condition != null) {
+                if (cond.startsWith("!") && condition.isMet(p)) return false;
+                if (!cond.startsWith("!") && !condition.isMet(p)) return false;
+            }
+        }
+
+        return true;
     }
 
     public void sendMessage(String name,String msg) {

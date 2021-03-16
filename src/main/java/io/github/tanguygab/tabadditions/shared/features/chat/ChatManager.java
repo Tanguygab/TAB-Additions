@@ -188,6 +188,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     }
 
     public boolean canSee(TabPlayer sender, TabPlayer viewer) {
+        if (sender == viewer) return true;
         if (viewer != null && !getFormat(sender).getChannel().equals(getFormat(viewer).getChannel())) return false;
         else if (viewer == null && !getFormat(sender).getChannel().equals("")) return false;
         return getFormat(sender).isViewConditionMet(sender, viewer);

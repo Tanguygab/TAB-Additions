@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
@@ -29,10 +30,7 @@ public class ChatFormat {
     }
     public boolean isConditionMet(TabPlayer p) {
         if (!config.containsKey("condition")) return true;
-        String conditionname = TAB.getInstance().getPlatform().replaceAllPlaceholders(config.get("condition")+"",p);
-        Condition condition = Condition.getCondition(conditionname);
-        if (condition == null) return true;
-        return condition.isMet(p);
+        return TABAdditions.getInstance().isConditionMet(config.get("condition")+"",p);
     }
 
     public String getChannel() {
@@ -40,28 +38,28 @@ public class ChatFormat {
         return config.get("channel")+"";
     }
 
-    public boolean isInChannel(TabPlayer sender, TabPlayer viewer) {
-        if (!config.containsKey("channel")) return true;
-        if (sender == viewer) return true;
-        ChatManager cm = ChatManager.getInstance();
-        return cm.getFormat(sender).getChannel().equals(cm.getFormat(viewer).getChannel());
-        //if (!ChatManager.getInstance().channels.containsKey(config.get("channel")+"")) return true;
-        //return ChatManager.getInstance().channels.get(config.get("channel")+"").isViewConditionMet(sender,viewer);
-    }
-
     public boolean isViewConditionMet(TabPlayer sender, TabPlayer viewer) {
         if (!config.containsKey("view-condition") || config.get("view-condition").equals("")) return true;
         if (sender == null || viewer == null) return false;
-        String conditionname = TAB.getInstance().getPlatform().replaceAllPlaceholders(config.get("view-condition")+"",viewer);
-        if (conditionname.startsWith("inRange:")) {
-            try {
-                int range = Integer.parseInt(conditionname.replace("inRange:",""));
-                return ChatManager.getInstance().isInRange(sender,viewer,range);
-            } catch (NumberFormatException e) {return true;}
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(config.get("view-condition")+"",sender,viewer,false);
+        for (String cond : conditionname.split(";")) {
+            if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
+                try {
+                    int range = Integer.parseInt(cond.replace("!", "").replace("inRange:", ""));
+                    boolean result = ChatManager.getInstance().isInRange(sender, viewer, range);
+                    if (cond.startsWith("!") && result) return false;
+                    if (!cond.startsWith("!") && !result) return false;
+                } catch (NumberFormatException ignored) {}
+            } else {
+                Condition condition = Condition.getCondition(cond.replace("!",""));
+                if (condition != null) {
+                    if (cond.startsWith("!") && condition.isMet(viewer)) return false;
+                    if (!cond.startsWith("!") && !condition.isMet(viewer)) return false;
+                }
+            }
         }
-        Condition condition = Condition.getCondition(conditionname);
-        if (condition == null) return true;
-        return condition.isMet(viewer);
+        return true;
+
     }
 
     public IChatBaseComponent getText() {

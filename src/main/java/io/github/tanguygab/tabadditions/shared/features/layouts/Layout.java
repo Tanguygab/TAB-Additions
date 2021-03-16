@@ -47,10 +47,7 @@ public class Layout {
     }
     protected boolean isConditionMet(TabPlayer p) {
         if (!config.containsKey("condition")) return true;
-        String conditionname = TAB.getInstance().getPlatform().replaceAllPlaceholders(config.get("condition")+"",p);
-        Condition condition = Condition.getCondition(conditionname);
-        if (condition == null) return true;
-        return condition.isMet(p);
+        return TABAdditions.getInstance().isConditionMet(config.get("condition")+"",p);
     }
 
     protected void refreshPlaceholders() {
@@ -188,18 +185,8 @@ public class Layout {
         Map<String,Object> section = (Map<String, Object>) slot;
 
         List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
-        if (section.get("condition") != null && !section.get("condition").toString().equals("")) {
-            String condition = section.get("condition")+"";
-            if (condition.startsWith("!")) {
-                Condition cond = Condition.getCondition(condition.replaceFirst("!", ""));
-                if (cond != null)
-                    list.removeIf(cond::isMet);
-            } else {
-                Condition cond = Condition.getCondition(condition);
-                if (cond != null)
-                    list.removeIf(p -> !cond.isMet(p));
-            }
-        }
+        if (section.get("condition") != null && !section.get("condition").toString().equals(""))
+            list.removeIf(p -> TABAdditions.getInstance().isConditionMet(config.get("condition")+"",p));
 
         if (!section.containsKey("sorting")) {
             Map<String,TabPlayer> pSorted = new TreeMap<>();
