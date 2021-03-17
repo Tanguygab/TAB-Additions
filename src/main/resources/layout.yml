@@ -1,36 +1,39 @@
 # the default layout is staff
-default-layout: "staff"
+default-layout: staff
+
+# the command to toggle the layout ingame
+toggle-cmd: layout
 
 layouts:
   # this layout is called default
   default:
     # shape of the layout "default"
     shape:
-      - '- Welcome PlayerName -'
-      - '&m &m &m &m'
-      - '- PlayersText StaffText -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '&m &m &m &m'
+    - '- Welcome PlayerName -'
+    - '&m &m &m &m'
+    - '- PlayersText StaffText -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '&m &m &m &m'
     # slots of the layout "default"
     slots:
       # slot "-"
       '-':
-        # type of the slot, can either be TEXT or PLAYERS
+        # type of the slot, can either be TEXT, PLAYERS or LIST
         type: TEXT
         # icon of the slot, can be "mineskin:<id>" or "player-head:<playerName>", the id and playerName both support placeholders
         icon: mineskin:1753261242
@@ -61,6 +64,7 @@ layouts:
         type: PLAYERS
         # text also supports aligned-tabsuffix feature, you just have to put the "suffix" after ||
         # when a player set' text contains placeholders, they will be parsed for the displayed player instead of viewer
+        # you can also use %place% to show the place of the player in the list, could be useful if you want to make a top/leaderboard
         text: "%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%"
         # the condition for players to be shown in this player set. if prefixed by a !, will list players who don't meet the condition.
         # set to "" or remove the line for no condition
@@ -80,41 +84,53 @@ layouts:
           # should the sorting be case-sensitive?
           case-sensitive: true
         empty:
-          icon: mineskin:1753261242
+          # these icon and text will be displayed if a there are more slots than players,
+          # leaving some of those slots with no players assigned = empty
+          icon: player-head:MHF_Question
+          text: ""
+        more:
+          # these icon and text will be displayed on the last slot of the list if
+          # there are more players than slots, meaning that some players can't be displayed
+          # You can use the %num% placeholder to display the amount of players left to show
+          icon: player-head:MHF_Cow
+          text: "&6and %num% players more!"
       Staff:
         type: PLAYERS
-        text: "%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%"
-        condition: "permission:tab.staff"
+        text: '%prop-tabprefix%%%prop-customtabname%%%prop-tabsuffix%'
+        condition: permission:tab.staff
         icon: player-head:%player%
         vertical: true
         empty:
-          icon: mineskin:1753261242
+          icon: player-head:MHF_Question
+        more:
+          icon: player-head:MHF_Cow
+          text: "&6and %num% staff more!"
   # this layout is called staff
   staff:
-    condition: "permission:tab.staff"
+    condition: permission:tab.staff
     # if condition not met, fallback on the specified layout
-    if-condition-not-met: "default"
+    if-condition-not-met: default
     shape:
-      - '- Welcome PlayerName -'
-      - '&m &m &m &m'
-      - '- PlayersText StaffText -'
-      - '- Players Staff TPS'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '- Players Staff -'
-      - '&m &m &m &m'
+    - '- Welcome PlayerName -'
+    - '&m &m &m &m'
+    - '- PlayersText StaffText TPSText'
+    - '- Players Staff TPS'
+    - '- Players Staff TPS'
+    - '- Players Staff TPS'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '- Players Staff -'
+    - '&m &m &m &m'
     slots:
       '-':
         type: TEXT
@@ -140,21 +156,48 @@ layouts:
         type: TEXT
         icon: mineskin:1753261242
         text: '&6Staff:'
-      TPS:
+      TPSText:
         type: TEXT
+        icon: mineskin:1753261242
+        text: '&6TPS: 1, 5, 15 minutes:'
+      TPS:
+        # the LIST type acts just like the PLAYERS type, but with text used in the input
+        # it can be a placeholder
+        type: LIST
         icon: mineskin:447044
-        text: '&8TPS: %tps%'
+        # the input of the list, this defines what elements are in the list
+        input: '%server_tps%'
+        # the separator, it specifies how to cut the the input into multiple elements
+        separator: ', ' 
+        # you can use %name% to get the element of the list at this position
+        text: '%name%'
       Players:
         type: PLAYERS
-        text: '%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%'
-        condition: '!staff'
+        text: '%prop-tabprefix%%%prop-customtabname%%%prop-tabsuffix%'
+        condition: "!permission:tab.staff"
         icon: player-head:%player%
         vertical: true
         # show vanished players?
         vanished: true
+        sorting:
+          types:
+          - GROUPS
+          - PLACEHOLDER_HIGH_TO_LOW_%health%
+          - PLACEHOLDER_HIGH_TO_LOW_%player_level%
+          case-sensitive: true
+        empty:
+          icon: player-head:MHF_Question
+        more:
+          icon: player-head:MHF_Cow
+          text: "&6and %num% players more!"
       Staff:
         type: PLAYERS
-        text: '%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%'
-        condition: staff
-        vertical: true
+        text: '%prop-tabprefix%%%prop-customtabname%%%prop-tabsuffix%'
+        condition: permission:tab.staff
         icon: player-head:%player%
+        vertical: true
+        empty:
+          icon: player-head:MHF_Question
+        more:
+          icon: player-head:MHF_Cow
+          text: "&6and %num% staff more!"

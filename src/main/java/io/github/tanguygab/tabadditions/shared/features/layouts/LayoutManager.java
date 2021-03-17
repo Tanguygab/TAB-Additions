@@ -78,6 +78,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
             for (Layout layout : layouts.values()) {
                 layout.refreshPlaceholders();
                 layout.refreshSets();
+                layout.refreshLists();
             }
         });
     }
