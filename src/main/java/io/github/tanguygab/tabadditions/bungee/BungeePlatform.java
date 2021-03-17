@@ -1,11 +1,9 @@
 package io.github.tanguygab.tabadditions.bungee;
 
-import java.util.concurrent.TimeUnit;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
 
 public class BungeePlatform extends Platform {
@@ -23,11 +21,11 @@ public class BungeePlatform extends Platform {
 
 	@Override
 	public Object getSkin(String[] props) {
-		String[][] s = new String[1][3];
-		s[0][0] = "textures";
-		s[0][1] = props[0];
-		s[0][2] = props[1];
-		return s;
+		String[][] properties = new String[1][3];
+		properties[0][0] = "textures";
+		properties[0][1] = props[0];
+		properties[0][2] = props[1];
+		return properties;
 	}
 
 	@Override
