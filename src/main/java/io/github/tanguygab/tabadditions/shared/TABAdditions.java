@@ -281,6 +281,41 @@ public class TABAdditions {
                     return count+"";
                 }
             });
+        } else {
+            pm.registerPlaceholder(new Placeholder("%money%",1000) {
+                @Override
+                public String getLastValue(TabPlayer p) {
+                    return parsePlaceholders("%vault_eco_balance%",p);
+                }
+            });
+            pm.registerPlaceholder(new Placeholder("%deaths%",1000) {
+                @Override
+                public String getLastValue(TabPlayer p) {
+                    return parsePlaceholders("%statistic_deaths%",p);
+                }
+            });
+            pm.registerPlaceholder(new Placeholder("%health%",100) {
+                @Override
+                public String getLastValue(TabPlayer p) {
+                    return parsePlaceholders("%player_health%",p);
+                }
+            });
+            pm.registerPlaceholder(new Placeholder("%tps%",1000) {
+                @Override
+                public String getLastValue(TabPlayer p) {
+                    return parsePlaceholders("%server_tps_1%",p);
+                }
+            });
+            pm.registerPlaceholder(new Placeholder("%afk%",500) {
+                @Override
+                public String getLastValue(TabPlayer p) {
+                    String afk = parsePlaceholders("%essentials_afk%",p);
+                    String output;
+                    if (afk.equals("yes")) output = TAB.getInstance().getConfiguration().config.getString("placeholders.afk-yes"," &4*&4&lAFK&4*&r");
+                    else output = TAB.getInstance().getConfiguration().config.getString("placeholders.afk-no","");
+                    return output;
+                }
+            });
         }
     }
 
@@ -305,10 +340,14 @@ public class TABAdditions {
     public String parsePlaceholders(String str, TabPlayer p, int attempts) {
         if (str == null) return "";
         if (p == null) return str;
+        PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
+        List<String> placeholders = pm.detectAll(str);
+        for (String placeholder : placeholders)
+            pm.categorizeUsedPlaceholder(placeholder);
         try {
             str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str, p);
             str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str, p);
-            str = TAB.getInstance().getPlaceholderManager().color(str);
+            str = pm.color(str);
         } catch (Exception e) {
             if (attempts == 3) return "";
             attempts=attempts+1;
@@ -318,9 +357,13 @@ public class TABAdditions {
     }
 
     public boolean isConditionMet(String str, TabPlayer p) {
+        if (str == null || str.equals("null")) return true;
         String conditionname = TABAdditions.getInstance().parsePlaceholders(str,p);
         for (String cond : conditionname.split(";")) {
-            Condition condition = Condition.getCondition(cond.replace("!",""));
+            String fcond = cond;
+            if (fcond.startsWith("!"))
+                fcond = fcond.replaceFirst("!", "");
+            Condition condition = Condition.getCondition(fcond);
             if (condition != null) {
                 if (cond.startsWith("!") && condition.isMet(p)) return false;
                 if (!cond.startsWith("!") && !condition.isMet(p)) return false;

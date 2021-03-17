@@ -186,7 +186,7 @@ public class Layout {
 
         List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
         if (section.get("condition") != null && !section.get("condition").toString().equals(""))
-            list.removeIf(p -> TABAdditions.getInstance().isConditionMet(config.get("condition")+"",p));
+            list.removeIf(p -> !TABAdditions.getInstance().isConditionMet(section.get("condition")+"",p));
 
         if (!section.containsKey("sorting")) {
             Map<String,TabPlayer> pSorted = new TreeMap<>();

@@ -129,7 +129,7 @@ public class Skins {
             }
             catch (NumberFormatException ignored) {}
         }
-        if (skin == null && props != null && !props[0].equals("") && !props[1].equals("")) {
+        if (skin == null && props != null && props.length >= 2 && !props[0].equals("") && !props[1].equals("")) {
             skin = TABAdditions.getInstance().getPlatform().getSkin(props);
         }
         return skin;
