@@ -16,6 +16,7 @@ import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.rgb.RGBUtils;
 import me.neznamy.tab.shared.rgb.TextColor;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Instrument;
 import org.bukkit.Note;
@@ -120,13 +121,12 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
             List<IChatBaseComponent> list2 = new ArrayList<>();
             for (IChatBaseComponent txt : comp.getExtra()) {
-                String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p).replaceAll("%msg%", msg);
-                //[item]
-                if (txt.toRawText().contains("%msg%") && TAB.getInstance().getPlayer("Tanguygab") != null && plinstance.getPlatform().getType() == PlatformType.SPIGOT && msg.contains("[item]")) {
+                if (txt.toRawText().contains("%msg%") && plinstance.getPlatform().getType() == PlatformType.SPIGOT && msg.contains("[item]")) {
                     txt = itemcheck(p, txt, msg);
-                    p.sendMessage(txt);
+                } else {
+                    String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p).replaceAll("%msg%", msg);
+                    txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
                 }
-                txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
 
                 TextColor color = null;
                 for (IChatBaseComponent c : txt.getExtra()) {
@@ -197,7 +197,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public IChatBaseComponent itemcheck(TabPlayer p, IChatBaseComponent comp, String msg) {
 
         List<IChatBaseComponent> msglist = new ArrayList<>();
-        String[] list = comp.getText().split("%msg%");
+        String[] list = TABAdditions.getInstance().parsePlaceholders(comp.getText(),p).split("%msg%");
         msglist.add(new IChatBaseComponent(list[0]));
 
 
@@ -205,12 +205,14 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
         IChatBaseComponent itemmsg = new IChatBaseComponent("");
         List<String> ar = new ArrayList<>(Arrays.asList(msg.split("\\[item]")));
+        int itemcount = StringUtils.countMatches(msg,"[item]");
 
         if (ar.isEmpty()) ar.add("");
         for (String txt2 : ar) {
+            IChatBaseComponent txt3 = IChatBaseComponent.fromColoredText(txt2);
+            msglist.add(txt3);
 
-            msglist.add(IChatBaseComponent.fromColoredText(txt2));
-            if ((ar.size() == 1 || ar.indexOf(txt2) != ar.size() - 1)) {
+            if (itemcount != 0) {
                 IChatBaseComponent itemtxt = new IChatBaseComponent();
                 String type = item.getType().toString().replace("_", " ").toLowerCase();
                 String type2 = "";
@@ -222,14 +224,15 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                 itemtxt = itemtxt.setText(type2);
                 itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
                 msglist.add(itemtxt);
+                itemcount = itemcount-1;
             }
 
         }
 
         if (list.length > 1) msglist.add(new IChatBaseComponent(list[1]));
         itemmsg.setExtra(msglist);
-        p.sendMessage(itemmsg);
         comp.setExtra(msglist);
+        comp.setText("");
         return comp;
     }
 

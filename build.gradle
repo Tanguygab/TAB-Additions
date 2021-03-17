@@ -1,9 +1,12 @@
 import org.apache.tools.ant.filters.ReplaceTokens
-
-apply plugin: 'java'
+plugins {
+    id 'java'
+    id'com.github.johnrengelman.shadow' version '6.1.0'
+}
 
 group = 'io.github.tanguygab'
 version = '1.5.3'
+
 
 repositories {
     mavenCentral()
@@ -37,9 +40,13 @@ dependencies {
     compileOnly 'com.discordsrv:discordsrv:1.21.1'
     compileOnly files('../TAB.jar')
     compileOnly files('../nms.jar')
-    compile files('../FloodgateBungee.jar')
+    compile 'org.apache.commons:commons-lang3:3.5'
+    compileOnly files('../FloodgateBungee.jar')
 
+}
 
+shadowJar {
+    archiveClassifier.set('')
 }
 
 processResources {
