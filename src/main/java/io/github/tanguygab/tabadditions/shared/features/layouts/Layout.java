@@ -322,7 +322,8 @@ public class Layout {
         if (!section.containsKey("sorting")) {
             Map<String,TabPlayer> pSorted = new TreeMap<>();
             for (TabPlayer p : list)
-                pSorted.put(p.getTeamName(), p);
+                if (p != null)
+                    pSorted.put(p.getTeamName(), p);
             return new ArrayList<>(pSorted.values());
         }
 
@@ -333,7 +334,8 @@ public class Layout {
         else sort = new Sorting((Map<String, Object>) section.get("sorting"), list, getName());
         Map<String,TabPlayer> pSorted = new TreeMap<>();
         for (TabPlayer p : list)
-            pSorted.put(sort.getPosition(p) + p.getName(), p);
+            if (p != null)
+                pSorted.put(sort.getPosition(p) + p.getName(), p);
         sorting.put(slot,sort);
         return new ArrayList<>(pSorted.values());
     }
