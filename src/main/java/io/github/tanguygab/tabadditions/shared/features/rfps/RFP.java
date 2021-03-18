@@ -114,7 +114,9 @@ public class RFP {
 
         rfp.displayName = IChatBaseComponent.fromColoredText(props[0]+getName()+props[1]);
         rfp.uniqueId = uuid;
-        if (latency <= 1)
+        if (configfile.getBoolean("real-latency") != null && configfile.getBoolean("real-latency"))
+            rfp.latency = latency;
+        else if (latency <= 1)
             rfp.latency = 1000;
         else if (latency == 2)
             rfp.latency = 600;
@@ -178,8 +180,10 @@ public class RFP {
         int old = latency;
         try {
             int num = Integer.parseInt(value);
-            if (num < 1) num = 1;
-            if (num > 5) num = 5;
+            if (configfile.getBoolean("real-latency") != null && configfile.getBoolean("real-latency"))
+                latency = num;
+            else if (num < 1) num = 1;
+            else if (num > 5) num = 5;
             latency = num;
             configfile.set("fakeplayers." + configname + ".latency", num);
             return "&aFakePlayer latency changed from "+old+" to "+num+".";
