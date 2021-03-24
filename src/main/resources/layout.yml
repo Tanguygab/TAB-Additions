@@ -68,7 +68,7 @@ layouts:
         text: "%prop-tabprefix%%%prop-customtabname%||%prop-tabsuffix%"
         # the condition for players to be shown in this player set. if prefixed by a !, will list players who don't meet the condition.
         # set to "" or remove the line for no condition
-        condition: "permission:!tab.staff"
+        condition: "!permission:tab.staff"
         # if a player set' icon contains placeholders, they will be parsed for the displayed player instead of viewer
         # here, player-head:%player% will display the head of the player %player%, which will be parsed into the name of the displayed player
         icon: player-head:%player%
