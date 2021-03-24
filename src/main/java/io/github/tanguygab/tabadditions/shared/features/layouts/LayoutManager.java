@@ -75,10 +75,10 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
             }
             removeLayout();
             showLayout();
-            for (Layout layout : layouts.values()) {
-                layout.refreshPlaceholders();
-                layout.refreshSets();
-                layout.refreshLists();
+            for (TabPlayer p : players.keySet()) {
+                layouts.get(players.get(p)).refreshPlaceholders(p);
+                layouts.get(players.get(p)).refreshLists(p);
+                layouts.get(players.get(p)).refreshSets(p);
             }
         });
     }
@@ -87,12 +87,16 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
         List<TabPlayer> list = new ArrayList<>(toAdd.keySet());
         for (TabPlayer p : list) {
             Layout layout = layouts.get(toAdd.get(p));
-            if (layout != null) {
+            if (layout != null && !toggledOff.contains(p)) {
                 List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
                 p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
                 players.put(p, layout.getName());
                 layout.players.add(p);
                 toAdd.remove(p);
+                Map<Integer,String> mapSlots = new HashMap<>();
+                for (int i = 0; i < 80; i++)
+                    mapSlots.put(i,"");
+                layout.placeholdersToRefresh.put(p,mapSlots);
             }
         }
     }
@@ -100,7 +104,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
         List<TabPlayer> list = new ArrayList<>(toRemove.keySet());
         for (TabPlayer p : list) {
             Layout layout = layouts.get(toRemove.get(p));
-            if (layout != null) {
+            if (layout != null && !toggledOff.contains(p)) {
                 List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
                 p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
                 players.remove(p);
@@ -112,12 +116,12 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
 
     public void showLayoutAll() {
         for (TabPlayer p : TAB.getInstance().getPlayers())
-            if (!TABAdditions.getInstance().checkBedrock(p))
+            if (!TABAdditions.getInstance().checkBedrock(p) && !toggledOff.contains(p))
                 toAdd.put(p,getLayout(p));
     }
     public void removeLayoutAll() {
         for (TabPlayer p : TAB.getInstance().getPlayers())
-            if (!TABAdditions.getInstance().checkBedrock(p))
+            if (!TABAdditions.getInstance().checkBedrock(p)  && !toggledOff.contains(p))
                 toRemove.put(p,getLayout(p));
     }
 
@@ -152,13 +156,14 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     @Override
+    public TabFeature getFeatureType() {
+        return feature;
+    }
+
+    @Override
     public void onJoin(TabPlayer p) {
         if (TABAdditions.getInstance().checkBedrock(p)) return;
         toAdd.put(p,getLayout(p));
     }
 
-    @Override
-    public TabFeature getFeatureType() {
-        return feature;
-    }
 }
