@@ -28,9 +28,9 @@ public class Layout {
     private final Map<Object, List<Integer>> lists = new HashMap<>();
     private final Map<Object,Sorting> sorting = new HashMap<>();
 
-    Map<TabPlayer, Map<Integer, String>> skinsp = new HashMap<>();
-    Map<TabPlayer, Map<Integer, String>> skinss = new HashMap<>();
-    Map<TabPlayer, Map<Integer, String>> skinsl = new HashMap<>();
+    protected final Map<TabPlayer, Map<Integer, String>> skinsp = new HashMap<>();
+    protected final Map<TabPlayer, Map<Integer, String>> skinss = new HashMap<>();
+    protected final Map<TabPlayer, Map<Integer, String>> skinsl = new HashMap<>();
 
 
     public Layout(String name) {

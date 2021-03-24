@@ -9,11 +9,12 @@ import me.neznamy.tab.shared.cpu.UsageType;
 import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.features.types.event.CommandListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
+import me.neznamy.tab.shared.features.types.event.QuitEventListener;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 
 import java.util.*;
 
-public class LayoutManager implements Loadable, JoinEventListener, CommandListener {
+public class LayoutManager implements Loadable, JoinEventListener, CommandListener, QuitEventListener {
     private static LayoutManager instance;
 
     private final TabFeature feature;
@@ -104,11 +105,15 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
         List<TabPlayer> list = new ArrayList<>(toRemove.keySet());
         for (TabPlayer p : list) {
             Layout layout = layouts.get(toRemove.get(p));
-            if (layout != null && !toggledOff.contains(p)) {
+            if (layout != null) {
                 List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
                 p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
                 players.remove(p);
                 layout.players.remove(p);
+                layout.placeholdersToRefresh.remove(p);
+                layout.skinsl.remove(p);
+                layout.skinsp.remove(p);
+                layout.skinss.remove(p);
                 toRemove.remove(p);
             }
         }
@@ -166,4 +171,11 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
         toAdd.put(p,getLayout(p));
     }
 
+    @Override
+    public void onQuit(TabPlayer p) {
+        toAdd.remove(p);
+        toggledOff.remove(p);
+        toRemove.remove(p);
+        players.remove(p);
+    }
 }
