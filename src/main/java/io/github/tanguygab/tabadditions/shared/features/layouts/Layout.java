@@ -191,7 +191,7 @@ public class Layout {
         Map<Object, List<Integer>> playersets = new HashMap<>(this.playersets);
         Map<Integer,String> skins = new HashMap<>();
         for (Object set : playersets.keySet()) {
-            List<TabPlayer> pset = playerSet(set);
+            List<TabPlayer> pset = playerSet(set,p);
             int inList = 0;
             Map<String,Object> setConfig = (Map<String,Object>) set;
             List<Integer> intlist = new ArrayList<>(playersets.get(set));
@@ -255,7 +255,7 @@ public class Layout {
                 } else {
                     String format = "%player%";
                     if (setConfig.containsKey("text")) format = (setConfig.get("text")+"").replace("%place%",inList+1+"");
-                    format = TABAdditions.getInstance().parsePlaceholders(format, pInSet);
+                    format = TABAdditions.getInstance().parsePlaceholders(format, pInSet, p, pInSet);
                     if (format.contains("||")) {
                         String prefixName = format.split("\\|\\|")[0];
                         String suffix = "";
@@ -267,7 +267,7 @@ public class Layout {
                     }
 
                     String yellownumber = TAB.getInstance().getConfiguration().config.getString("yellow-number-in-tablist", "");
-                    yellownumber = TABAdditions.getInstance().parsePlaceholders(yellownumber, pInSet);
+                    yellownumber = TABAdditions.getInstance().parsePlaceholders(yellownumber, pInSet, p, pInSet);
                     int yellownumber2 = 0;
                     try {yellownumber2 = Integer.parseInt(yellownumber);}
                     catch (NumberFormatException ignored) {}
@@ -275,7 +275,7 @@ public class Layout {
                     Object skin = pInSet.getSkin();
                     String icon = "player-head:"+pInSet.getName();
                     if (setConfig.containsKey("icon")) {
-                        icon = TABAdditions.getInstance().parsePlaceholders((setConfig.get("icon")+"").replace("%place%",inList+1+""),pInSet);
+                        icon = TABAdditions.getInstance().parsePlaceholders((setConfig.get("icon")+"").replace("%place%",inList+1+""),pInSet,p,pInSet);
                         skin = TABAdditions.getInstance().getSkins().getIcon(icon, pInSet);
                     }
                     if (!skinss.containsKey(p) || (skin != null && !skinss.get(p).get(i).equals(icon))) {
@@ -310,12 +310,14 @@ public class Layout {
     }
 
 
-    private List<TabPlayer> playerSet(Object slot) {
+    private List<TabPlayer> playerSet(Object slot, TabPlayer viewer) {
         Map<String,Object> section = (Map<String, Object>) slot;
 
         List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
-        if (section.get("condition") != null && !section.get("condition").toString().equals(""))
-            list.removeIf(p -> !TABAdditions.getInstance().isConditionMet(section.get("condition")+"",p));
+        if (section.get("condition") != null && !section.get("condition").toString().equals("")) {
+            String cond = section.get("condition")+"";
+            list.removeIf(p -> !TABAdditions.getInstance().isConditionMet( TABAdditions.getInstance().parsePlaceholders(cond, p, viewer,p), p));
+        }
 
         if (!section.containsKey("sorting")) {
             Map<String,TabPlayer> pSorted = new TreeMap<>();

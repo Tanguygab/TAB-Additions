@@ -41,7 +41,7 @@ public class ChatFormat {
     public boolean isViewConditionMet(TabPlayer sender, TabPlayer viewer) {
         if (!config.containsKey("view-condition") || config.get("view-condition").equals("")) return true;
         if (sender == null || viewer == null) return false;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(config.get("view-condition")+"",sender,viewer,false);
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(config.get("view-condition")+"",sender,viewer,viewer);
         for (String cond : conditionname.split(";")) {
             if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
                 try {

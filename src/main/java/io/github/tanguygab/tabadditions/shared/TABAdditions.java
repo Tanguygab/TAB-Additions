@@ -17,6 +17,7 @@ import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.placeholders.Placeholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.FloodgateAPI;
 
@@ -45,6 +46,7 @@ public class TABAdditions {
     public int tablistNamesRadius = 0;
     public boolean rfpEnabled;
     public boolean onlyyou = false;
+    public boolean unlimitedItemLines = false;
 
     public boolean floodgate = false;
 
@@ -115,6 +117,9 @@ public class TABAdditions {
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
                 onlyyou = config.getBoolean("features.only-you",false);
+                if (config.hasConfigOption("features.unlimited-item-lines") && Bukkit.getServer().getVersion().contains("1.16.5"))
+                    unlimitedItemLines = config.getBoolean("features.unlimited-item-lines");
+
             }
         } catch (IOException e) {
             platform.disable();
@@ -173,6 +178,10 @@ public class TABAdditions {
             ((OnlyYou)fm.getFeature("Only You")).unload();
         fm.unregisterFeature("Only You");
 
+        //Unlimited Item Lines
+        if (unlimitedItemLines)
+            fm.unregisterFeature("Unlimited Item Lines");
+
         enabled = false;
         TAB.getInstance().unload();
         TAB.getInstance().load();
@@ -216,6 +225,9 @@ public class TABAdditions {
         //Only You
         if (onlyyou)
             fm.registerFeature("Only You",new OnlyYou(TabFeature.ADDON_FEATURE_9));
+        //Unlimited Item Lines
+        if (TAB.getInstance().getFeatureManager().isFeatureEnabled("nametagx") && unlimitedItemLines)
+            fm.registerFeature("Unlimited Item Lines",new UnlimitedItemLines(TabFeature.ADDON_FEATURE_10));
     }
 
     private void loadPlaceholders() {
@@ -322,9 +334,7 @@ public class TABAdditions {
     public String parsePlaceholders(String str, TabPlayer p) {
         return parsePlaceholders(str, p, 0);
     }
-    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, boolean senderdefault) {
-        if (senderdefault) str = parsePlaceholders(str,sender);
-        else str = parsePlaceholders(str,viewer);
+    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabPlayer def) {
 
         List<String> list = TAB.getInstance().getPlaceholderManager().detectAll(str);
         for (String pl : list) {
@@ -333,6 +343,7 @@ public class TABAdditions {
             else if (pl.startsWith("%viewer:"))
                 str = str.replace(pl,parsePlaceholders(pl.replace("viewer:",""),viewer));
         }
+        str = parsePlaceholders(str,def);
 
         return str;
     }
