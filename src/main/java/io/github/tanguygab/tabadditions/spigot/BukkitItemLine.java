@@ -33,6 +33,7 @@ public class BukkitItemLine extends BukkitArmorStand {
     @Override
     public Object[] getSpawnPackets(TabPlayer viewer) {
         Material mat = Material.getMaterial(prop.getFormat(viewer));
+        if (mat == null) mat = Material.AIR;
         ItemStack itemStack = new ItemStack(mat);
         Player p = (Player) viewer.getPlayer();
         if (glow)
