@@ -10,6 +10,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
 import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -18,19 +19,24 @@ import java.lang.reflect.Method;
 
 public class BukkitItemLine extends BukkitArmorStand {
 
-    public Material mat;
+    public Property prop;
     public int entityId;
+    public boolean glow;
 
-    public BukkitItemLine(int entityId, TabPlayer owner, Property property, double yOffset, boolean staticOffset) {
+    public BukkitItemLine(int entityId, TabPlayer owner, Property property, double yOffset, boolean staticOffset, boolean glow) {
         super(entityId, owner, property, yOffset, staticOffset);
-        mat = Material.getMaterial(property.get());
         this.entityId = entityId;
+        prop = property;
+        this.glow = glow;
     }
 
     @Override
     public Object[] getSpawnPackets(TabPlayer viewer) {
+        Material mat = Material.getMaterial(prop.getFormat(viewer));
         ItemStack itemStack = new ItemStack(mat);
         Player p = (Player) viewer.getPlayer();
+        if (glow)
+            itemStack.addEnchantment(Enchantment.PROTECTION_ENVIRONMENTAL, 1);
 
         try {
             Method getloc = BukkitArmorStand.class.getDeclaredMethod("getLocation");

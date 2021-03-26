@@ -68,10 +68,15 @@ public class UnlimitedItemLines implements Loadable,WorldChangeListener, JoinEve
 
     public BukkitItemLine createItemLine(TabPlayer p, ArmorStand as) {
         Property prop = as.getProperty();
-        prop.changeRawValue(prop.getOriginalRawValue().replace("ITEM:","").toUpperCase().replace(" ","_"));
-        if (Material.getMaterial(prop.get()) == null) return null;
+        prop.changeRawValue(prop.getOriginalRawValue().replace("ITEM:",""));
+        boolean glow = false;
+        if (prop.getFormat(p).contains(",glow")) {
+            glow = true;
+            prop.changeRawValue(prop.getOriginalRawValue().replace(",glow",""));
+        }
+        if (Material.getMaterial(prop.getFormat(p)) == null) return null;
 
-        return new BukkitItemLine(as.getEntityId(),p,prop,as.getOffset(),as.hasStaticOffset());
+        return new BukkitItemLine(as.getEntityId(),p,prop,as.getOffset(),as.hasStaticOffset(),glow);
     }
 
     @Override
