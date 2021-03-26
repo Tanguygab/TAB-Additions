@@ -5,7 +5,7 @@ plugins {
 }
 
 group = 'io.github.tanguygab'
-version = '1.5.4'
+version = '1.5.5'
 
 
 repositories {
@@ -34,12 +34,12 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+    compileOnly files('../nms.jar')
     compileOnly 'net.md-5:bungeecord-proxy:1.16-R0.5-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.10.9'
     compileOnly 'com.discordsrv:discordsrv:1.21.1'
     compileOnly files('../TAB.jar')
-    compileOnly files('../nms.jar')
     compile 'org.apache.commons:commons-lang3:3.5'
     compileOnly files('../FloodgateBungee.jar')
 

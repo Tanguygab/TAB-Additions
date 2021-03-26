@@ -1,5 +1,5 @@
 name: TAB-Additions
-version: @version@
+version: 1.5.5
 main: io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot
 api-version: 1.13
 depend: [TAB]

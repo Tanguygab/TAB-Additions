@@ -1,5 +1,5 @@
 name: TAB-Additions
-version: @version@
+version: 1.5.5
 main: io.github.tanguygab.tabadditions.bungee.TABAdditionsBungeeCord
 description: More features for the plugin TAB !
 softdepends: [floodgate-bungee]
