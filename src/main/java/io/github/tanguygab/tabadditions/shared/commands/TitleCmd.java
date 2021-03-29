@@ -30,9 +30,9 @@ public class TitleCmd {
         }
         title = instance.parsePlaceholders(title,p);
         subtitle = instance.parsePlaceholders(subtitle,p);
-        p.sendCustomPacket(PacketPlayOutTitle.TITLE(title));
-        p.sendCustomPacket(PacketPlayOutTitle.SUBTITLE(subtitle));
-        p.sendCustomPacket(PacketPlayOutTitle.TIMES(fadeIn,stay,fadeOut));
+        p.sendCustomPacket(PacketPlayOutTitle.title(title));
+        p.sendCustomPacket(PacketPlayOutTitle.subtitle(subtitle));
+        p.sendCustomPacket(PacketPlayOutTitle.times(fadeIn,stay,fadeOut));
     }
 
 }

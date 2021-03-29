@@ -11,14 +11,11 @@ import org.bukkit.plugin.Plugin;
 
 public class TablistNamesRadius implements Loadable, JoinEventListener {
 
-    private final TabFeature feature;
     private final Plugin plugin;
     private int task = -1;
     private boolean enabled = true;
 
-    public TablistNamesRadius(TabFeature feature) {
-        feature.setDisplayName("Tablist Names Radius");
-        this.feature = feature;
+    public TablistNamesRadius() {
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
@@ -73,7 +70,7 @@ public class TablistNamesRadius implements Loadable, JoinEventListener {
     }
 
     @Override
-    public TabFeature getFeatureType() {
-        return feature;
+    public Object getFeatureType() {
+        return TAFeature.TABLIST_NAMES_RADIUS;
     }
 }

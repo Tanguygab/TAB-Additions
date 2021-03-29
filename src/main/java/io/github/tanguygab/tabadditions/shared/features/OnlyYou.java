@@ -11,12 +11,9 @@ import org.bukkit.plugin.Plugin;
 
 public class OnlyYou implements JoinEventListener, Loadable {
 
-    private final TabFeature feature;
     private final Plugin plugin;
 
-    public OnlyYou(TabFeature feature) {
-        feature.setDisplayName("&aOnly You");
-        this.feature = feature;
+    public OnlyYou() {
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
         load();
     }
@@ -54,7 +51,7 @@ public class OnlyYou implements JoinEventListener, Loadable {
     }
 
     @Override
-    public TabFeature getFeatureType() {
-        return feature;
+    public Object getFeatureType() {
+        return TAFeature.ONLY_YOU;
     }
 }

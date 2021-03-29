@@ -6,11 +6,9 @@ import me.neznamy.tab.api.ArmorStandManager;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.features.types.event.WorldChangeListener;
-import org.bukkit.Material;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
@@ -18,11 +16,7 @@ import java.util.Map;
 
 public class UnlimitedItemLines implements Loadable,WorldChangeListener, JoinEventListener {
 
-    private final TabFeature feature;
-
-    public UnlimitedItemLines(TabFeature feature) {
-        feature.setDisplayName("&aUnlimited Item Lines");
-        this.feature = feature;
+    public UnlimitedItemLines() {
         load();
     }
 
@@ -80,7 +74,7 @@ public class UnlimitedItemLines implements Loadable,WorldChangeListener, JoinEve
     }
 
     @Override
-    public TabFeature getFeatureType() {
-        return feature;
+    public Object getFeatureType() {
+        return TAFeature.UNLIMITED_ITEM_LINES;
     }
 }

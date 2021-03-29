@@ -13,8 +13,8 @@ import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.features.PlaceholderManager;
+import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.placeholders.Placeholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.Bukkit;
@@ -117,7 +117,7 @@ public class TABAdditions {
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
                 onlyyou = config.getBoolean("features.only-you",false);
-                if (config.hasConfigOption("features.unlimited-item-lines") && Bukkit.getServer().getVersion().contains("1.16.5"))
+                if (config.hasConfigOption("features.unlimited-item-lines") && Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].equals("v1_16_R3"))
                     unlimitedItemLines = config.getBoolean("features.unlimited-item-lines");
 
             }
@@ -140,47 +140,11 @@ public class TABAdditions {
     public void disable() {
         FeatureManager fm = TAB.getInstance().getFeatureManager();
 
-        //ActionBar
-        fm.getFeature("ActionBar");
-
-        //Title
-        fm.unregisterFeature("Title");
-
-        //Chat
-        if (fm.isFeatureEnabled("Chat"))
-            ((ChatManager)fm.getFeature("Chat")).unload();
-        fm.unregisterFeature("Chat");
-
-        //Layout
-        if (fm.isFeatureEnabled("TAB+ Layout"))
-            ((LayoutManager)fm.getFeature("TAB+ Layout")).unload();
-        fm.unregisterFeature("TAB+ Layout");
-        //RFP
-        if (fm.isFeatureEnabled("Real Fake Players"))
-            ((RFPManager)fm.getFeature("Real Fake Players")).unload();
-        fm.unregisterFeature("Real Fake Players");
-
-        //Sneak Hide Nametag
-        fm.unregisterFeature("Sneak Hide Nametag");
-
-        //Nametag in Range
-        if (fm.isFeatureEnabled("Nametag in Range"))
-            ((NametagInRange)fm.getFeature("Nametag in Range")).unload();
-        fm.unregisterFeature("Nametag in Range");
-
-        //Tablist Names Radius
-        if (fm.isFeatureEnabled("Tablist Names Radius"))
-            ((TablistNamesRadius)fm.getFeature("Tablist Names Radius")).unload();
-        fm.unregisterFeature("Tablist Names Radius");
-
-        //Only You
-        if (fm.isFeatureEnabled("Only You"))
-            ((OnlyYou)fm.getFeature("Only You")).unload();
-        fm.unregisterFeature("Only You");
-
-        //Unlimited Item Lines
-        if (unlimitedItemLines)
-            fm.unregisterFeature("Unlimited Item Lines");
+        for (TAFeature feature : TAFeature.values()) {
+            if (fm.isFeatureEnabled(feature.toString()) && fm.getFeature(feature.toString()) instanceof Loadable)
+                ((Loadable) fm.getFeature(feature.toString())).unload();
+            fm.unregisterFeature(feature.toString());
+        }
 
         enabled = false;
         TAB.getInstance().unload();
@@ -200,34 +164,34 @@ public class TABAdditions {
         FeatureManager fm = TAB.getInstance().getFeatureManager();
         //ActionBar
         if (actionbarsEnabled)
-            fm.registerFeature("ActionBar", new ActionBar(TabFeature.ADDON_FEATURE_1));
+            fm.registerFeature(TAFeature.ACTIONBAR.toString(), new ActionBar());
         //Title
         if (titlesEnabled)
-            fm.registerFeature("Title", new Title(TabFeature.ADDON_FEATURE_2));
+            fm.registerFeature(TAFeature.TITLE.toString(), new Title());
         //Chat
         if (chatEnabled)
-            fm.registerFeature("Chat", new ChatManager(TabFeature.ADDON_FEATURE_3));
+            fm.registerFeature(TAFeature.CHAT.toString(), new ChatManager());
         //Layout
         if (layoutEnabled && TAB.getInstance().isPremium())
-            fm.registerFeature("TAB+ Layout",new LayoutManager(TabFeature.ADDON_FEATURE_4));
+            fm.registerFeature(TAFeature.TA_LAYOUT.toString(), new LayoutManager());
         //RFP
         if (rfpEnabled)
-            fm.registerFeature("Real Fake Players",new RFPManager(TabFeature.ADDON_FEATURE_5));
+            fm.registerFeature(TAFeature.RFP.toString(), new RFPManager());
         //Sneak Hide Nametag
         if (sneakhideEnabled)
-            fm.registerFeature("Sneak Hide Nametag", new SneakHideNametag(TabFeature.ADDON_FEATURE_6));
+            fm.registerFeature(TAFeature.SNEAK_HIDE_NAMETAG.toString(), new SneakHideNametag());
         //Nametag in Range
         if (nametagInRange != 0)
-            fm.registerFeature("Nametag in Range",new NametagInRange(TabFeature.ADDON_FEATURE_7));
+            fm.registerFeature(TAFeature.NAMETAG_IN_RANGE.toString(), new NametagInRange());
         //Tablist Names Radius
         if (tablistNamesRadius != 0)
-            fm.registerFeature("Tablist Names Radius",new TablistNamesRadius(TabFeature.ADDON_FEATURE_8));
+            fm.registerFeature(TAFeature.TABLIST_NAMES_RADIUS.toString(), new TablistNamesRadius());
         //Only You
         if (onlyyou)
-            fm.registerFeature("Only You",new OnlyYou(TabFeature.ADDON_FEATURE_9));
+            fm.registerFeature(TAFeature.ONLY_YOU.toString(), new OnlyYou());
         //Unlimited Item Lines
         if (TAB.getInstance().getFeatureManager().isFeatureEnabled("nametagx") && unlimitedItemLines)
-            fm.registerFeature("Unlimited Item Lines",new UnlimitedItemLines(TabFeature.ADDON_FEATURE_10));
+            fm.registerFeature(TAFeature.UNLIMITED_ITEM_LINES.toString(), new UnlimitedItemLines());
     }
 
     private void loadPlaceholders() {

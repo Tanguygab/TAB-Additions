@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.layouts;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.cpu.TabFeature;
@@ -17,7 +18,6 @@ import java.util.*;
 public class LayoutManager implements Loadable, JoinEventListener, CommandListener, QuitEventListener {
     private static LayoutManager instance;
 
-    private final TabFeature feature;
     private String togglecmd;
     private final Map<String, Layout> layouts = new HashMap<>();
     private final Map<TabPlayer,String> players = new HashMap<>();
@@ -25,9 +25,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     public final Map<TabPlayer,String> toRemove = new HashMap<>();
     public final List<TabPlayer> toggledOff = new ArrayList<>();
 
-    public LayoutManager(TabFeature feature) {
-        feature.setDisplayName("&aTAB+ Layout");
-        this.feature = feature;
+    public LayoutManager() {
         instance = this;
         load();
     }
@@ -65,7 +63,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     private void refresh() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(100,"handling TAB+ Layout",feature, UsageType.REPEATING_TASK,()->{
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(100,"handling TAB+ Layout",TAFeature.TA_LAYOUT, UsageType.REPEATING_TASK,()->{
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 if (!TABAdditions.getInstance().checkBedrock(p) && players.containsKey(p) && !players.get(p).equals(getLayout(p))) {
                     toRemove.put(p, players.get(p));
@@ -161,8 +159,8 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     @Override
-    public TabFeature getFeatureType() {
-        return feature;
+    public Object getFeatureType() {
+        return TAFeature.TA_LAYOUT;
     }
 
     @Override

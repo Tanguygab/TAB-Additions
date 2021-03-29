@@ -13,13 +13,6 @@ import java.util.Map;
 
 public class Title implements JoinEventListener {
 
-    private final TabFeature feature;
-
-    public Title(TabFeature feature) {
-        feature.setDisplayName("&aTitle");
-        this.feature = feature;
-    }
-
     @Override
     public void onJoin(TabPlayer p) {
         p.loadPropertyFromConfig("title");
@@ -40,7 +33,7 @@ public class Title implements JoinEventListener {
     }
 
     @Override
-    public TabFeature getFeatureType() {
-        return feature;
+    public Object getFeatureType() {
+        return TAFeature.TITLE;
     }
 }

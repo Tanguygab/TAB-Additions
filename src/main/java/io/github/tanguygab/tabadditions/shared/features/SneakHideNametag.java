@@ -10,14 +10,7 @@ import java.util.Map;
 
 public class SneakHideNametag implements SneakEventListener {
 
-    private final TabFeature feature;
-
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
-
-    public SneakHideNametag(TabFeature feature) {
-        feature.setDisplayName("&aSneak Hide Nametag");
-        this.feature = feature;
-    }
 
     @Override
     public void onSneak(TabPlayer p, boolean isSneaking) {
@@ -31,7 +24,7 @@ public class SneakHideNametag implements SneakEventListener {
     }
 
     @Override
-    public TabFeature getFeatureType() {
-        return feature;
+    public Object getFeatureType() {
+        return TAFeature.SNEAK_HIDE_NAMETAG;
     }
 }

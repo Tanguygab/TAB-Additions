@@ -76,7 +76,7 @@ public class BukkitItemLine extends BukkitArmorStand {
     @Override
     public void spawn(TabPlayer viewer) {
         for (Object packet : getSpawnPackets(viewer)) {
-            viewer.sendPacket(packet, TabFeature.ADDON_FEATURE_10);
+            viewer.sendPacket(packet);
         }
     }
 
@@ -86,7 +86,7 @@ public class BukkitItemLine extends BukkitArmorStand {
         try {
             Method method = BukkitArmorStand.class.getDeclaredMethod("getDestroyPacket");
             method.setAccessible(true);
-            viewer.sendPacket(method.invoke(this), TabFeature.ADDON_FEATURE_10);
+            viewer.sendPacket(method.invoke(this));
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -97,7 +97,7 @@ public class BukkitItemLine extends BukkitArmorStand {
         try {
             Method method = BukkitArmorStand.class.getDeclaredMethod("getTeleportPacket", TabPlayer.class);
             method.setAccessible(true);
-            viewer.sendPacket(method.invoke(this,viewer), TabFeature.ADDON_FEATURE_10);
+            viewer.sendPacket(method.invoke(this,viewer));
         } catch (Exception e) {
             e.printStackTrace();
         }

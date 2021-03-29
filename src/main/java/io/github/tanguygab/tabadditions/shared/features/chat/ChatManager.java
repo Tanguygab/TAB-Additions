@@ -4,11 +4,11 @@ import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.cpu.UsageType;
 import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.features.types.event.ChatEventListener;
@@ -29,7 +29,6 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
     private TABAdditions plinstance;
     private static ChatManager instance;
-    private final TabFeature feature;
     private final Map<String,ChatFormat> formats = new HashMap<>();
 
     public boolean mentionEnabled = true;
@@ -37,9 +36,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public String mentionInput = "@%player%";
     public String mentionOutput = "&b";
 
-    public ChatManager(TabFeature feature) {
-        feature.setDisplayName("&aChat");
-        this.feature = feature;
+    public ChatManager() {
         instance = this;
         load();
     }
@@ -73,7 +70,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         mentionInput = config.getString("mention.input","@%player%");
         mentionOutput = config.getString("mention.output","&b@%player%");
 
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props",feature, UsageType.REPEATING_TASK,() -> {
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props", TAFeature.CHAT, UsageType.REPEATING_TASK,() -> {
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 p.loadPropertyFromConfig("chatprefix");
                 p.loadPropertyFromConfig("customchatname",p.getName());
@@ -276,8 +273,8 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     }
 
     @Override
-    public TabFeature getFeatureType() {
-        return feature;
+    public Object getFeatureType() {
+        return TAFeature.CHAT;
     }
 
 }

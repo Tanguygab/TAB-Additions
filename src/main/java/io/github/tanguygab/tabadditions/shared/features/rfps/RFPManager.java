@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
@@ -16,12 +17,9 @@ import java.util.*;
 
 public class RFPManager implements JoinEventListener, Loadable {
 
-    private final TabFeature feature;
     private final Map<String, RFP> rfps = new HashMap<>();
 
-    public RFPManager(TabFeature feature) {
-        feature.setDisplayName("&aReal Fake Players");
-        this.feature = feature;
+    public RFPManager() {
         load();
     }
 
@@ -160,8 +158,8 @@ public class RFPManager implements JoinEventListener, Loadable {
     }
 
     @Override
-    public TabFeature getFeatureType() {
-        return feature;
+    public Object getFeatureType() {
+        return TAFeature.RFP;
     }
 
 
