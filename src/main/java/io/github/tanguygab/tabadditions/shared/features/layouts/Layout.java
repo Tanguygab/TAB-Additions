@@ -5,7 +5,9 @@ import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.features.AlignedSuffix;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
@@ -32,6 +34,7 @@ public class Layout {
     protected final Map<TabPlayer, Map<Integer, String>> skinss = new HashMap<>();
     protected final Map<TabPlayer, Map<Integer, String>> skinsl = new HashMap<>();
 
+    protected final Map<String,String> fpnames = new HashMap<>();
 
     public Layout(String name) {
         this.name = name;
@@ -184,8 +187,6 @@ public class Layout {
         skinsl.put(p,skins);
     }
 
-
-
     protected void refreshSets(TabPlayer p) {
         if(!created) return;
         Map<Object, List<Integer>> playersets = new HashMap<>(this.playersets);
@@ -309,7 +310,6 @@ public class Layout {
         return new ArrayList<>(Arrays.asList(input.split(separator)));
     }
 
-
     private List<TabPlayer> playerSet(Object slot, TabPlayer viewer) {
         Map<String,Object> section = (Map<String, Object>) slot;
 
@@ -386,7 +386,11 @@ public class Layout {
 
             String id2 = id+"";
             if (id < 10) id2="0"+id;
-            fp.name = id2+"FAKEPLAYER";
+            List<String> chars = LayoutManager.getInstance().chars;
+            if (chars.size() > id)
+                fp.name = chars.get(id);
+            else fp.name = chars.get(chars.size()-1)+id2;
+            fpnames.put(id2,fp.name);
             fp.displayName = IChatBaseComponent.fromColoredText(text);
             fakeplayers.put(id,fp);
 

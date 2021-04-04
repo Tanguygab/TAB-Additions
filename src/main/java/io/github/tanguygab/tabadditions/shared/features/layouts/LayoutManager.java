@@ -4,6 +4,7 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.cpu.UsageType;
@@ -24,6 +25,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     public final Map<TabPlayer,String> toAdd = new HashMap<>();
     public final Map<TabPlayer,String> toRemove = new HashMap<>();
     public final List<TabPlayer> toggledOff = new ArrayList<>();
+    public final List<String> chars = new ArrayList<>();
 
     public LayoutManager() {
         instance = this;
@@ -36,11 +38,21 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
 
     @Override
     public void load() {
+        List<String> defaultchars = Arrays.asList("\u2764","\u2B50","\u21EE","\u2740","\u2694","\u26CF","\u291C\u25BA","\u00BB","\u00AB","\u2660","\u25B6",
+                "\u25CF","\u2756","\u2589","\u25B2","\u25BC","\u272F","\u2726","\u2620","\u2622","\u2680","\u2681","\u2682","\u2683","\u2684","\u2685");
+        List<String> charsconfig = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getStringList("layout-characters",defaultchars);
+        if (charsconfig != null && charsconfig.size() != 0)
+            chars.addAll(charsconfig);
+        else chars.addAll(defaultchars);
+        Collections.sort(chars);
+
+
         for (Object layout : TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getConfigurationSection("layouts").keySet())
             layouts.put(layout+"",new Layout(layout.toString()));
         togglecmd = TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getString("toggle-cmd","layout");
         showLayoutAll();
         refresh();
+
     }
 
     @Override
@@ -92,6 +104,8 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
                 players.put(p, layout.getName());
                 layout.players.add(p);
                 toAdd.remove(p);
+                for (String fp : layout.fpnames.keySet())
+                    PacketAPI.registerScoreboardTeam(p,"!"+fp+"TAB+_Layout","","",true,false, Collections.singleton(layout.fpnames.get(fp)), null, TabFeature.NAMETAGS);
                 Map<Integer,String> mapSlots = new HashMap<>();
                 for (int i = 0; i < 80; i++)
                     mapSlots.put(i,"");
