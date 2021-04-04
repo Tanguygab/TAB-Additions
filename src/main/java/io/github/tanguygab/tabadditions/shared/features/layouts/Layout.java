@@ -22,7 +22,7 @@ public class Layout {
     private final Map<String,Object> config;
     private boolean created = false;
     protected final List<TabPlayer> players = new ArrayList<>();
-    protected final Map<TabPlayer,Map<Integer,String>> placeholdersToRefresh = new HashMap<>();
+    protected final Map<TabPlayer,Map<Integer,Map<String,String>>> placeholdersToRefresh = new HashMap<>();
 
     protected final Map<Integer,PacketPlayOutPlayerInfo.PlayerInfoData> fakeplayers = new HashMap<>();
     private final Map<Integer,Map<String,Object>> placeholders = new HashMap<>();
@@ -35,10 +35,12 @@ public class Layout {
     protected final Map<TabPlayer, Map<Integer, String>> skinsl = new HashMap<>();
 
     protected final Map<String,String> fpnames = new HashMap<>();
+    private final TABAdditions instance;
 
     public Layout(String name) {
+        instance = TABAdditions.getInstance();
         this.name = name;
-        config = TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getConfigurationSection("layouts."+name);
+        config = instance.getConfig(ConfigType.LAYOUT).getConfigurationSection("layouts."+name);
         create();
     }
 
@@ -52,7 +54,7 @@ public class Layout {
     }
     protected boolean isConditionMet(TabPlayer p) {
         if (!config.containsKey("condition")) return true;
-        return TABAdditions.getInstance().isConditionMet(config.get("condition")+"",p);
+        return instance.isConditionMet(config.get("condition")+"",p);
     }
 
     protected void refreshPlaceholders(TabPlayer p) {
@@ -62,7 +64,7 @@ public class Layout {
             PacketPlayOutPlayerInfo.PlayerInfoData fp = fakeplayers.get(i);
             Map<String, Object> slot = placeholders.get(i);
             String text = slot.get("text")+"";
-            text = TABAdditions.getInstance().parsePlaceholders(text, p);
+            text = instance.parsePlaceholders(text, p);
             if (text.contains("||")) {
                 String prefixName = text.split("\\|\\|")[0];
                 String suffix = "";
@@ -73,25 +75,31 @@ public class Layout {
                     text = alignedSuffix.formatName(prefixName,suffix);
             }
 
+            String latency = slot.get("latency")+"";
+            latency = instance.parsePlaceholders(latency,p);
+            int lat = 0;
+            try {lat = getLatency(Integer.parseInt(latency));}
+            catch (Exception ignored) {latency = "NaN";}
+
             Object skin = null;
             String icon = "";
             if (slot.containsKey("icon")) {
-                skin = TABAdditions.getInstance().getSkins().getIcon(slot.get("icon")+"", p);
-                icon = TABAdditions.getInstance().parsePlaceholders(slot.get("icon")+"",p);
+                skin = instance.getSkins().getIcon(slot.get("icon")+"", p);
+                icon = instance.parsePlaceholders(slot.get("icon")+"",p);
             }
 
-            if (!skinsp.containsKey(p) || (skin != null && !skinsp.get(p).get(i).equals(icon))) {
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
-            } else if (!placeholdersToRefresh.get(p).get(i).equals(text))
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(text))));
-            placeholdersToRefresh.get(p).put(i,text);
+            String yellownumber = "0";
+            if (slot.get("yellow-number") != null) {
+                yellownumber = instance.parsePlaceholders(slot.get("yellow-number")+"",p);
+                try {Integer.parseInt(yellownumber);}
+                catch (Exception ignored) {yellownumber = "0";}
+            }
+
+            sendPackets(skinsp,p,fp,skin,lat,text,i,icon,latency,yellownumber);
             skins.put(i, icon);
-            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.name, 0));
         }
         skinsp.put(p, skins);
     }
-
     protected void refreshLists(TabPlayer p) {
         if (!created) return;
         Map<Integer,String> skins = new HashMap<>();
@@ -117,17 +125,25 @@ public class Layout {
                     if (listConfig.containsKey("empty")) {
                         Map<String, String> empty = (Map<String, String>) listConfig.get("empty");
                         if (empty.containsKey("text"))
-                            format = TABAdditions.getInstance().parsePlaceholders(empty.get("text"), p);
+                            format = instance.parsePlaceholders(empty.get("text"), p);
                         if (empty.containsKey("icon")) {
-                            skin = TABAdditions.getInstance().getSkins().getIcon(empty.get("icon") + "", p);
-                            icon = TABAdditions.getInstance().parsePlaceholders(empty.get("icon"), p);
+                            skin = instance.getSkins().getIcon(empty.get("icon") + "", p);
+                            icon = instance.parsePlaceholders(empty.get("icon"), p);
                         }
-                        if (!skinsl.containsKey(p) || (!skinsl.get(p).get(i).equals(icon))) {
-                            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
-                            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(format))));
-                        } else if (!placeholdersToRefresh.get(p).get(i).equals(format))
-                            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(format))));
-                        placeholdersToRefresh.get(p).put(i,format);
+                        String latency = empty.get("latency");
+                        latency = instance.parsePlaceholders(latency,p);
+                        int lat = 0;
+                        try {lat = getLatency(Integer.parseInt(latency));}
+                        catch (Exception ignored) {latency = "NaN";}
+
+                        String yellownumber = "0";
+                        if (empty.get("yellow-number") != null) {
+                            yellownumber = instance.parsePlaceholders(empty.get("yellow-number"),p);
+                            try {Integer.parseInt(yellownumber);}
+                            catch (Exception ignored) {yellownumber = "0";}
+                        }
+
+                        sendPackets(skinsl,p,fp,skin,lat,format,i,icon,latency,yellownumber);
                         skins.put(i, icon);
                     }
                 } else if (intlist.size() == inList+1 && intlist.size() != strlist.size() && listConfig.containsKey("more")) {
@@ -137,23 +153,31 @@ public class Layout {
                     int num = strlist.size()-intlist.size()+1;
                     Map<String, String> more = (Map<String, String>) listConfig.get("more");
                     if (more.containsKey("text"))
-                        format = TABAdditions.getInstance().parsePlaceholders(more.get("text").replace("%num%",num+""), p);
+                        format = instance.parsePlaceholders(more.get("text").replace("%num%",num+""), p);
                     if (more.containsKey("icon")) {
-                        icon = TABAdditions.getInstance().parsePlaceholders(more.get("icon").replace("%num%",num+""), p);
-                        skin = TABAdditions.getInstance().getSkins().getIcon(icon, p);
+                        icon = instance.parsePlaceholders(more.get("icon").replace("%num%",num+""), p);
+                        skin = instance.getSkins().getIcon(icon, p);
                     }
-                    if (!skinsl.containsKey(p) || (!skinsl.get(p).get(i).equals(icon))) {
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(format))));
-                    } else if (!placeholdersToRefresh.get(p).get(i).equals(format))
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(format))));
-                    placeholdersToRefresh.get(p).put(i,format);
+                    String latency = more.get("latency");
+                    latency = instance.parsePlaceholders(latency.replace("%num%",num+""),p);
+                    int lat = 0;
+                    try {lat = getLatency(Integer.parseInt(latency));}
+                    catch (Exception ignored) {latency = "NaN";}
+
+                    String yellownumber = "0";
+                    if (more.get("yellow-number") != null) {
+                        yellownumber = instance.parsePlaceholders(more.get("yellow-number").replace("%num%",num+""),p);
+                        try {Integer.parseInt(yellownumber);}
+                        catch (Exception ignored) {yellownumber = "0";}
+                    }
+
+                    sendPackets(skinsl,p,fp,skin,lat,format,i,icon,latency,yellownumber);
                     skins.put(i, icon);
                 } else {
 
                     String format = "%name%";
                     if (listConfig.containsKey("text")) format = listConfig.get("text")+"";
-                    format = TABAdditions.getInstance().parsePlaceholders(format.replace("%name%",strInList).replace("%place%",inList+1+""), p);
+                    format = instance.parsePlaceholders(format.replace("%name%",strInList).replace("%place%",inList+1+""), p);
                     if (format.contains("||")) {
                         String prefixName = format.split("\\|\\|")[0];
                         String suffix = "";
@@ -164,20 +188,28 @@ public class Layout {
                             format = alignedSuffix.formatName(prefixName,suffix);
                     }
 
+                    String latency = listConfig.get("latency")+"";
+                    latency = instance.parsePlaceholders(latency.replace("%name%",strInList).replace("%place%",inList+1+""),p);
+                    int lat = 0;
+                    try {lat = getLatency(Integer.parseInt(latency));}
+                    catch (Exception ignored) {latency = "NaN";}
+
                     Object skin = null;
                     String icon = "";
                     if (listConfig.containsKey("icon")) {
                         icon = listConfig.get("icon")+"";
-                        icon = TABAdditions.getInstance().parsePlaceholders(icon.replace("%name%",strInList).replace("%place%",inList+1+""),p);
-                        skin = TABAdditions.getInstance().getSkins().getIcon(icon, p);
+                        icon = instance.parsePlaceholders(icon.replace("%name%",strInList).replace("%place%",inList+1+""),p);
+                        skin = instance.getSkins().getIcon(icon, p);
                     }
-                    if (!skinsl.containsKey(p) || (skin != null && !skinsl.get(p).get(i).equals(icon))) {
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(format))));
+
+                    String yellownumber = "0";
+                    if (listConfig.get("yellow-number") != null) {
+                        yellownumber = instance.parsePlaceholders(listConfig.get("yellow-number").toString().replace("%name%",strInList).replace("%place%",inList+1+""),p);
+                        try {Integer.parseInt(yellownumber);}
+                        catch (Exception ignored) {yellownumber = "0";}
                     }
-                    else if (!placeholdersToRefresh.get(p).get(i).equals(format))
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(format))));
-                    placeholdersToRefresh.get(p).put(i,format);
+
+                    sendPackets(skinsl,p,fp,skin,lat,format,i,icon,latency,yellownumber);
                     skins.put(i,icon);
 
                     inList = inList + 1;
@@ -186,7 +218,6 @@ public class Layout {
         }
         skinsl.put(p,skins);
     }
-
     protected void refreshSets(TabPlayer p) {
         if(!created) return;
         Map<Object, List<Integer>> playersets = new HashMap<>(this.playersets);
@@ -207,7 +238,7 @@ public class Layout {
                 boolean vanished = false;
                 if (pInSet != null) {
                     if (setConfig.get("vanished") != null && !(boolean) setConfig.get("vanished")) {
-                        if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
+                        if (instance.getPlatform().getType() == PlatformType.SPIGOT && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
                             vanished = true;
                         else vanished = p.isVanished();
                     }
@@ -220,19 +251,26 @@ public class Layout {
                     if (setConfig.containsKey("empty")) {
                         Map<String, String> empty = (Map<String, String>) setConfig.get("empty");
                         if (empty.containsKey("text"))
-                            format = TABAdditions.getInstance().parsePlaceholders(empty.get("text"), p);
+                            format = instance.parsePlaceholders(empty.get("text"), p);
                         if (empty.containsKey("icon")) {
-                            icon = TABAdditions.getInstance().parsePlaceholders(empty.get("icon"), p);
-                            skin = TABAdditions.getInstance().getSkins().getIcon(icon + "", p);
+                            icon = instance.parsePlaceholders(empty.get("icon"), p);
+                            skin = instance.getSkins().getIcon(icon + "", p);
                         }
-                        if (!skinss.containsKey(p) || (!skinss.get(p).get(i).equals(icon))) {
-                            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
-                            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(format))));
-                        } else if (!placeholdersToRefresh.get(p).get(i).equals(format))
-                            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(format))));
-                        placeholdersToRefresh.get(p).put(i,format);
+                        String latency = empty.get("latency")+"";
+                        latency = instance.parsePlaceholders(latency,p);
+                        int lat = 0;
+                        try {lat = getLatency(Integer.parseInt(latency));}
+                        catch (Exception ignored) {latency = "NaN";}
+
+                        String yellownumber = "0";
+                        if (empty.get("yellow-number") != null) {
+                            yellownumber = instance.parsePlaceholders(empty.get("yellow-number"),p);
+                            try {Integer.parseInt(yellownumber);}
+                            catch (Exception ignored) {yellownumber = "0";}
+                        }
+
+                        sendPackets(skinss,p,fp,skin,lat,format,i,icon,latency,yellownumber);
                         skins.put(i, icon);
-                        p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.name, 0));
                     }
                 } else if (intlist.size() == inList+1 && pset.size() != intlist.size() && setConfig.containsKey("more")) {
                     String format = "";
@@ -241,53 +279,73 @@ public class Layout {
                     int num = pset.size()-intlist.size()+1;
                     Map<String, String> more = (Map<String, String>) setConfig.get("more");
                     if (more.containsKey("text"))
-                        format = TABAdditions.getInstance().parsePlaceholders(more.get("text"), p);
+                        format = instance.parsePlaceholders(more.get("text").replace("%num%",num+""), p);
                     if (more.containsKey("icon")) {
-                        icon = TABAdditions.getInstance().parsePlaceholders(more.get("icon"), p);
-                        skin = TABAdditions.getInstance().getSkins().getIcon(icon, p);
+                        icon = instance.parsePlaceholders(more.get("icon").replace("%num%",num+""), p);
+                        skin = instance.getSkins().getIcon(icon, p);
                     }
-                    if (!skinsl.containsKey(p) || (!skinsl.get(p).get(i).equals(icon))) {
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(format))));
-                    } else if (!placeholdersToRefresh.get(p).get(i).equals(format))
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(format))));
-                    placeholdersToRefresh.get(p).put(i,format);
+                    String latency = setConfig.get("latency")+"";
+                    latency = instance.parsePlaceholders(latency.replace("%num%",num+""),p);
+                    int lat = 0;
+                    try {lat = getLatency(Integer.parseInt(latency));}
+                    catch (Exception ignored) {
+                        latency = "NaN";
+                    }
+
+                    String yellownumber = "0";
+                    if (more.get("yellow-number") != null) {
+                        yellownumber = instance.parsePlaceholders(more.get("yellow-number").replace("%num%",num+""),p);
+                        try {Integer.parseInt(yellownumber);}
+                        catch (Exception ignored) {yellownumber = "0";}
+                    }
+
+                    sendPackets(skinss,p,fp,skin,lat,format,i,icon,latency,yellownumber);
                     skins.put(i, icon);
                 } else {
                     String format = "%player%";
-                    if (setConfig.containsKey("text")) format = (setConfig.get("text")+"").replace("%place%",inList+1+"");
-                    format = TABAdditions.getInstance().parsePlaceholders(format, pInSet, p, pInSet);
+                    if (setConfig.containsKey("text"))
+                        format = (setConfig.get("text") + "").replace("%place%", inList + 1 + "");
+                    format = instance.parsePlaceholders(format, pInSet, p, pInSet);
                     if (format.contains("||")) {
                         String prefixName = format.split("\\|\\|")[0];
                         String suffix = "";
                         if (format.split("\\|\\|").length > 1)
                             suffix = format.split("\\|\\|")[1];
-                        AlignedSuffix alignedSuffix = (AlignedSuffix)TAB.getInstance().getFeatureManager().getFeature("alignedsuffix");
+                        AlignedSuffix alignedSuffix = (AlignedSuffix) TAB.getInstance().getFeatureManager().getFeature("alignedsuffix");
                         if (alignedSuffix != null)
-                            format = alignedSuffix.formatNameAndUpdateLeader(pInSet, prefixName,suffix);
+                            format = alignedSuffix.formatNameAndUpdateLeader(pInSet, prefixName, suffix);
                     }
 
-                    String yellownumber = TAB.getInstance().getConfiguration().config.getString("yellow-number-in-tablist", "");
-                    yellownumber = TABAdditions.getInstance().parsePlaceholders(yellownumber, pInSet, p, pInSet);
-                    int yellownumber2 = 0;
-                    try {yellownumber2 = Integer.parseInt(yellownumber);}
-                    catch (NumberFormatException ignored) {}
+                    String latency = setConfig.get("latency") + "";
+                    latency = instance.parsePlaceholders(latency.replace("%place%", inList + 1 + ""), pInSet, p, pInSet);
+                    int lat;
+                    try {
+                        lat = getLatency(Integer.parseInt(latency));
+                    } catch (Exception ignored) {
+                        latency = "NaN";
+                        lat = Math.toIntExact(pInSet.getPing());
+                    }
+
+                    String yellownumber;
+                    if (setConfig.containsKey("yellow-number")) {
+                        yellownumber = instance.parsePlaceholders(setConfig.get("yellow-number").toString().replace("%place%", inList+1+""), pInSet, p, pInSet);
+                        try {Integer.parseInt(yellownumber);}
+                        catch (Exception ignored) {yellownumber = "0";}
+                    } else {
+                        yellownumber = instance.parsePlaceholders(TAB.getInstance().getConfiguration().config.getString("yellow-number-in-tablist","").replace("%place%",inList+1+""), pInSet, p, pInSet);
+                        try {Integer.parseInt(yellownumber);}
+                        catch (Exception ignored) {yellownumber = "0";}
+                    }
 
                     Object skin = pInSet.getSkin();
                     String icon = "player-head:"+pInSet.getName();
                     if (setConfig.containsKey("icon")) {
-                        icon = TABAdditions.getInstance().parsePlaceholders((setConfig.get("icon")+"").replace("%place%",inList+1+""),pInSet,p,pInSet);
-                        skin = TABAdditions.getInstance().getSkins().getIcon(icon, pInSet);
+                        icon = instance.parsePlaceholders((setConfig.get("icon")+"").replace("%place%",inList+1+""),pInSet,p,pInSet);
+                        skin = instance.getSkins().getIcon(icon, pInSet);
                     }
-                    if (!skinss.containsKey(p) || (skin != null && !skinss.get(p).get(i).equals(icon))) {
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(format))));
-                    } else if (!placeholdersToRefresh.get(p).get(i).equals(format))
-                        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(format))));
-                    placeholdersToRefresh.get(p).put(i,format);
-                    skins.put(i,icon);
-                    p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.name, yellownumber2));
 
+                    sendPackets(skinss,p,fp,skin,lat,format,i,icon,latency,yellownumber);
+                    skins.put(i,icon);
 
                     inList = inList + 1;
                 }
@@ -305,18 +363,17 @@ public class Layout {
         String separator = " ";
         if (section.containsKey("separator"))
             separator = section.get("separator");
-        input = TABAdditions.getInstance().parsePlaceholders(input, p);
+        input = instance.parsePlaceholders(input, p);
 
         return new ArrayList<>(Arrays.asList(input.split(separator)));
     }
-
     private List<TabPlayer> playerSet(Object slot, TabPlayer viewer) {
         Map<String,Object> section = (Map<String, Object>) slot;
 
         List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
         if (section.get("condition") != null && !section.get("condition").toString().equals("")) {
             String cond = section.get("condition")+"";
-            list.removeIf(p -> !TABAdditions.getInstance().isConditionMet( TABAdditions.getInstance().parsePlaceholders(cond, p, viewer,p), p));
+            list.removeIf(p -> !instance.isConditionMet( instance.parsePlaceholders(cond, p, viewer,p), p));
         }
 
         if (!section.containsKey("sorting")) {
@@ -338,6 +395,35 @@ public class Layout {
                 pSorted.put(sort.getPosition(p) + p.getName(), p);
         sorting.put(slot,sort);
         return new ArrayList<>(pSorted.values());
+    }
+
+    public void sendPackets(Map<TabPlayer, Map<Integer, String>> skins, TabPlayer p, PacketPlayOutPlayerInfo.PlayerInfoData fp, Object skin, int lat, String text, int i, String icon, String latency, String yellownumber) {
+        if (!skins.containsKey(p) || (skin != null && !skins.get(p).get(i).equals(icon))) {
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, lat, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
+        } else if (!placeholdersToRefresh.get(p).get(i).get("text").equals("text"))
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(text))));
+        placeholdersToRefresh.get(p).get(i).put("text",text);
+
+        if (!placeholdersToRefresh.get(p).get(i).get("latency").equals(latency))
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId,lat)));
+        placeholdersToRefresh.get(p).get(i).put("latency",latency);
+
+        if (!placeholdersToRefresh.get(p).get(i).get("yellow-number").equals(yellownumber))
+            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.name, Integer.parseInt(yellownumber)));
+        placeholdersToRefresh.get(p).get(i).put("yellow-number",yellownumber);
+    }
+    private int getLatency(int lat) {
+        boolean realLat = false;
+        if (instance.getConfig(ConfigType.MAIN).hasConfigOption("real-latency"))
+            realLat = instance.getConfig(ConfigType.MAIN).getBoolean("real-latency");
+
+        if (realLat) return lat;
+        else if (lat <= 1) return 1000;
+        else if (lat == 2) return 600;
+        else if (lat == 3) return  300;
+        else if (lat == 4) return  200;
+        else return 100;
     }
 
     protected void create() {
@@ -379,8 +465,17 @@ public class Layout {
                         if (alignedSuffix != null)
                             text = alignedSuffix.formatName(prefixName, suffix);
                     }
+                    String latency = slot.get("latency")+"";
+
                     if (TAB.getInstance().getPlaceholderManager().detectAll(text).size() > 0 || slot.containsKey("icon"))
                         placeholders.put(id, slot);
+                    else if (TAB.getInstance().getPlaceholderManager().detectAll(latency).size() > 0)
+                        placeholders.put(id, slot);
+                    else {
+                        try {
+                            fp.latency = getLatency(Integer.parseInt(latency));
+                        } catch (Exception ignored) {}
+                    }
                 }
             }
 

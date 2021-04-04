@@ -86,11 +86,22 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
             }
             removeLayout();
             showLayout();
-            for (TabPlayer p : players.keySet()) {
-                layouts.get(players.get(p)).refreshPlaceholders(p);
-                layouts.get(players.get(p)).refreshLists(p);
-                layouts.get(players.get(p)).refreshSets(p);
-            }
+            List<TabPlayer> list = new ArrayList<>(players.keySet());
+            TAB.getInstance().getCPUManager().runTask("refreshing placeholders slots TAB+ Layout", () -> {
+                for (TabPlayer p : list) {
+                    layouts.get(players.get(p)).refreshPlaceholders(p);
+                }
+            });
+            TAB.getInstance().getCPUManager().runTask("refreshing lists slots TAB+ Layout", () -> {
+                for (TabPlayer p : list) {
+                    layouts.get(players.get(p)).refreshLists(p);
+                }
+            });
+            TAB.getInstance().getCPUManager().runTask("refreshing players sets slots TAB+ Layout", () -> {
+                for (TabPlayer p : list) {
+                    layouts.get(players.get(p)).refreshSets(p);
+                }
+            });
         });
     }
 
@@ -106,9 +117,14 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
                 toAdd.remove(p);
                 for (String fp : layout.fpnames.keySet())
                     PacketAPI.registerScoreboardTeam(p,"!"+fp+"TAB+_Layout","","",true,false, Collections.singleton(layout.fpnames.get(fp)), null, TabFeature.NAMETAGS);
-                Map<Integer,String> mapSlots = new HashMap<>();
-                for (int i = 0; i < 80; i++)
-                    mapSlots.put(i,"");
+                Map<Integer,Map<String,String>> mapSlots = new HashMap<>();
+                for (int i = 0; i < 80; i++) {
+                    Map<String,String> map2 = new HashMap<>();
+                    map2.put("text","");
+                    map2.put("latency","");
+                    map2.put("yellow-number","");
+                    mapSlots.put(i, map2);
+                }
                 layout.placeholdersToRefresh.put(p,mapSlots);
             }
         }
