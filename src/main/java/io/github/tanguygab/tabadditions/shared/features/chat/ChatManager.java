@@ -12,6 +12,7 @@ import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.cpu.UsageType;
 import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.features.types.event.ChatEventListener;
+import me.neznamy.tab.shared.features.types.event.CommandListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.rgb.RGBUtils;
@@ -25,7 +26,7 @@ import org.bukkit.inventory.ItemStack;
 
 import java.util.*;
 
-public class ChatManager implements ChatEventListener, Loadable, JoinEventListener {
+public class ChatManager implements ChatEventListener, Loadable, JoinEventListener, CommandListener {
 
     private TABAdditions plinstance;
     private static ChatManager instance;
@@ -35,6 +36,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public boolean mentionForEveryone = true;
     public String mentionInput = "@%player%";
     public String mentionOutput = "&b";
+    public final Map<TabPlayer,String> defformats = new HashMap<>();
 
     public ChatManager() {
         instance = this;
@@ -46,7 +48,10 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         return instance;
     }
     public ChatFormat getFormat(TabPlayer p) {
-        String format = plinstance.getConfig(ConfigType.CHAT).getString("default-format","default");
+        String format;
+        if (defformats.containsKey(p))
+            format = defformats.get(p);
+        else format = plinstance.getConfig(ConfigType.CHAT).getString("default-format","default");
         if (format.equalsIgnoreCase("")) return defFormat();
 
         ChatFormat f = formats.get(format);
@@ -232,7 +237,6 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         comp.setText("");
         return comp;
     }
-
     public IChatBaseComponent pingcheck(TabPlayer p, IChatBaseComponent msg) {
         if (msg.getExtra() != null && !msg.getExtra().isEmpty())
             for (IChatBaseComponent comp : msg.getExtra()) {
@@ -277,4 +281,28 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         return TAFeature.CHAT;
     }
 
+    @Override
+    public boolean onCommand(TabPlayer p, String msg) {
+        msg = msg.replaceFirst("/","");
+        YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
+        if (config.getConfigurationSection("commands") == null || !config.getConfigurationSection("commands").containsKey(msg))
+            return false;
+        Map<String,String> cmd = (Map<String, String>) config.getConfigurationSection("commands").get(msg);
+        String condition = cmd.get("condition")+"";
+        String format = cmd.get("format")+"";
+        String name = cmd.get("name")+"";
+        if (!plinstance.isConditionMet(condition,p))
+            p.sendMessage("&cYou can't do that!",true);
+        else {
+            if (defformats.containsKey(p)) {
+                defformats.remove(p);
+                p.sendMessage("&7You left " + name + "!", true);
+            }
+            else {
+                defformats.put(p, format);
+                p.sendMessage("&7You joined " + name + "!", true);
+            }
+        }
+        return true;
+    }
 }
