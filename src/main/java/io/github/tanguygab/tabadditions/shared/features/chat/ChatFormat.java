@@ -87,6 +87,10 @@ public class ChatFormat {
 
                 if (complist.containsKey("suggest"))
                     text.onClickSuggestCommand(complist.get("suggest")+"");
+                else if (complist.containsKey("command"))
+                    text.onClickRunCommand(complist.get("command")+"");
+                else if (complist.containsKey("url"))
+                    text.onClickOpenUrl(complist.get("url")+"");
 
                 list.add(text);
             }
