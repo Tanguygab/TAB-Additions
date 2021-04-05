@@ -108,7 +108,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (args.length == 1)
-            return new ArrayList<>(Arrays.asList("help","reload","actionbar","title","tags","fp"));
+            return new ArrayList<>(Arrays.asList("help","actionbar","title","tags","fp"));
         if (args.length >= 2) {
             switch (args[0]) {
                 case "actionbar":
