@@ -202,8 +202,9 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         String[] list = TABAdditions.getInstance().parsePlaceholders(comp.getText(),p).split("%msg%");
         msglist.add(new IChatBaseComponent(list[0]));
 
-
-        ItemStack item = ((Player) p.getPlayer()).getInventory().getItemInMainHand();
+        ItemStack item;
+        try {item = ((Player) p.getPlayer()).getInventory().getItemInMainHand();}
+        catch (NoSuchMethodError e) {item = ((Player) p.getPlayer()).getInventory().getItemInHand();}
 
         IChatBaseComponent itemmsg = new IChatBaseComponent("");
         List<String> ar = new ArrayList<>(Arrays.asList(msg.split("\\[item]")));
