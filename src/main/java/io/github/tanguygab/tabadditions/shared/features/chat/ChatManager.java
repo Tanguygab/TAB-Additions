@@ -36,7 +36,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
     public boolean itemEnabled = true;
     public String itemInput = "[item]";
-    public String itemPermssion = "tabadditions.item";
+    public boolean itemPermssion = false;
     public boolean mentionEnabled = true;
     public boolean mentionForEveryone = true;
     public String mentionInput = "@%player%";
@@ -78,7 +78,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
         itemEnabled = config.getBoolean("item.enabled",true);
         itemInput = config.getString("item.input","[item]");
-        itemPermssion = config.getString("item.permission","tabadditions.item");
+        itemPermssion = config.getBoolean("item.permission",false);
 
         mentionEnabled = config.getBoolean("mention.enabled",true);
         mentionForEveryone = config.getBoolean("mention.output-for-everyone",true);
@@ -162,7 +162,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
             List<IChatBaseComponent> list2 = new ArrayList<>();
             for (IChatBaseComponent txt : comp.getExtra()) {
-                if (txt.toRawText().contains("%msg%") && plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && p.hasPermission(itemPermssion) && msg.contains(itemInput)) {
+                if (txt.toRawText().contains("%msg%") && plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.item")) && msg.contains(itemInput)) {
                     txt = itemcheck(p, txt, msg);
                 } else {
                     String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p).replaceAll("%msg%", msg);
