@@ -16,6 +16,8 @@ import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.placeholders.Placeholder;
+import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
+import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -205,9 +207,9 @@ public class TABAdditions {
         }
         PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
         for (Object prop : props) {
-            pm.registerPlaceholder(new Placeholder("%prop-"+prop+"%", 100) {
+            pm.registerPlaceholder(new PlayerPlaceholder("%prop-"+prop+"%", 100) {
                 @Override
-                public String getLastValue(TabPlayer p) {
+                public String get(TabPlayer p) {
                     Property property = p.getProperty(prop+"");
                     if (property != null)
                         return property.updateAndGet();
@@ -215,18 +217,18 @@ public class TABAdditions {
                 }
             });
         }
-        pm.registerPlaceholder(new Placeholder("%onlinerfp%",1000) {
+        pm.registerPlaceholder(new ServerPlaceholder("%onlinerfp%",1000) {
             @Override
-            public String getLastValue(TabPlayer tabPlayer) {
+            public String get() {
                 int count = TAB.getInstance().getPlayers().size();
                 if (TAB.getInstance().getFeatureManager().isFeatureEnabled("Real Fake Players"))
                     count = count+((RFPManager)TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
                 return count+"";
             }
         });
-        pm.registerPlaceholder(new Placeholder("%canseeonlinerfp%",1000) {
+        pm.registerPlaceholder(new PlayerPlaceholder("%canseeonlinerfp%",1000) {
             @Override
-            public String getLastValue(TabPlayer p) {
+            public String get(TabPlayer p) {
                 int count = 0;
                 try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p));}
                 catch (NumberFormatException ignored) {}
@@ -236,9 +238,9 @@ public class TABAdditions {
             }
         });
         if (platform.getType()==PlatformType.SPIGOT) {
-            pm.registerPlaceholder(new Placeholder("%canseeworldonline%", 1000) {
+            pm.registerPlaceholder(new PlayerPlaceholder("%canseeworldonline%", 1000) {
                 @Override
-                public String getLastValue(TabPlayer p) {
+                public String get(TabPlayer p) {
                     int count = 0;
                     for (TabPlayer all : TAB.getInstance().getPlayers())
                         if (all.getWorldName().equals(p.getWorldName()) && ((Player) p.getPlayer()).canSee((Player) all.getPlayer()))
@@ -246,9 +248,9 @@ public class TABAdditions {
                     return count+"";
                 }
             });
-            pm.registerPlaceholder(new Placeholder("%canseeworldonlinerfp%",1000) {
+            pm.registerPlaceholder(new PlayerPlaceholder("%canseeworldonlinerfp%",1000) {
                 @Override
-                public String getLastValue(TabPlayer p) {
+                public String get(TabPlayer p) {
                     int count = 0;
                     try {count = Integer.parseInt(parsePlaceholders("%canseeworldonline%",p));}
                     catch (NumberFormatException ignored) {}
@@ -258,34 +260,34 @@ public class TABAdditions {
                 }
             });
         } else {
-            pm.registerPlaceholder(new Placeholder("%money%",1000) {
+            pm.registerPlaceholder(new PlayerPlaceholder("%money%",1000) {
                 @Override
-                public String getLastValue(TabPlayer p) {
-                    return parsePlaceholders("%vault_eco_balance%",p);
+                public String get(TabPlayer p) {
+                    return new Property(p,"%vault_eco_balance%").updateAndGet();
                 }
             });
-            pm.registerPlaceholder(new Placeholder("%deaths%",1000) {
+            pm.registerPlaceholder(new PlayerPlaceholder("%deaths%",1000) {
                 @Override
-                public String getLastValue(TabPlayer p) {
-                    return parsePlaceholders("%statistic_deaths%",p);
+                public String get(TabPlayer p) {
+                    return new Property(p,"%statistic_deaths%").updateAndGet();
                 }
             });
-            pm.registerPlaceholder(new Placeholder("%health%",100) {
+            pm.registerPlaceholder(new PlayerPlaceholder("%health%",100) {
                 @Override
-                public String getLastValue(TabPlayer p) {
-                    return parsePlaceholders("%player_health%",p);
+                public String get(TabPlayer p) {
+                    return new Property(p,"%player_health%").updateAndGet();
                 }
             });
-            pm.registerPlaceholder(new Placeholder("%tps%",1000) {
+            pm.registerPlaceholder(new ServerPlaceholder("%tps%",1000) {
                 @Override
-                public String getLastValue(TabPlayer p) {
-                    return parsePlaceholders("%server_tps_1%",p);
+                public String get() {
+                    return new Property(null,"%vault_eco_balance%").updateAndGet();
                 }
             });
-            pm.registerPlaceholder(new Placeholder("%afk%",500) {
+            pm.registerPlaceholder(new PlayerPlaceholder("%afk%",500) {
                 @Override
-                public String getLastValue(TabPlayer p) {
-                    String afk = parsePlaceholders("%essentials_afk%",p);
+                public String get(TabPlayer p) {
+                    String afk = new Property(p,"%essentials_afk%").updateAndGet();
                     String output;
                     if (afk.equals("yes")) output = TAB.getInstance().getConfiguration().config.getString("placeholders.afk-yes"," &4*&4&lAFK&4*&r");
                     else output = TAB.getInstance().getConfiguration().config.getString("placeholders.afk-no","");
