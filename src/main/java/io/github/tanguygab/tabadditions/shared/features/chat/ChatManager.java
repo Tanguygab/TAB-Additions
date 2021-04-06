@@ -41,6 +41,8 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public boolean mentionForEveryone = true;
     public String mentionInput = "@%player%";
     public String mentionOutput = "&b";
+    public Map<String,String> emojis = new HashMap<>();
+    public boolean emojiUntranslate = false;
     public final Map<TabPlayer,String> defformats = new HashMap<>();
 
     public ChatManager() {
@@ -85,6 +87,9 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         mentionInput = config.getString("mention.input","@%player%");
         mentionOutput = config.getString("mention.output","&b@%player%");
 
+        emojis = config.getConfigurationSection("emojis");
+        emojiUntranslate = config.getBoolean("emojis-untranslate-if-no-permission",false);
+
         TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props", TAFeature.CHAT, UsageType.REPEATING_TASK,() -> {
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 p.loadPropertyFromConfig("chatprefix");
@@ -116,6 +121,8 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     @Override
     public boolean onChat(TabPlayer p, String msg, boolean cancelled) {
         if (cancelled) return true;
+
+        msg = emojicheck(p,msg);
 
         ChatFormat format = getFormat(p);
         IChatBaseComponent format2 = createmsg(p,msg,format,null);
@@ -230,6 +237,15 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         return getFormat(sender).isViewConditionMet(sender, viewer);
     }
 
+    public String emojicheck(TabPlayer p, String msg) {
+        for (String emoji : emojis.keySet()) {
+            if (msg.contains(emoji) && p.hasPermission("tabadditions.chat.emoji."+emoji))
+                msg = msg.replace(emoji,emojis.get(emoji));
+            else if (emojiUntranslate && msg.contains(emojis.get(emoji)) && !p.hasPermission("tabadditions.chat.emoji."+emoji))
+                msg = msg.replace(emojis.get(emoji),emoji);
+        }
+        return msg;
+    }
     public IChatBaseComponent itemcheck(TabPlayer p, IChatBaseComponent comp, String msg, TabPlayer viewer) {
 
         List<IChatBaseComponent> msglist = new ArrayList<>();
@@ -251,7 +267,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
             if (itemcount != 0) {
                 IChatBaseComponent itemtxt = new IChatBaseComponent();
-                if (!item.getItemMeta().hasDisplayName()) {
+                if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) {
                     String type = item.getType().toString().replace("_", " ").toLowerCase();
                     String type2 = "";
                     List<String> typelist = new ArrayList<>(Arrays.asList(type.split(" ")));
@@ -261,6 +277,8 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                     }
                     itemtxt = itemtxt.setText(type2);
                 } else itemtxt.setText(item.getItemMeta().getDisplayName());
+                if (item.getAmount() > 1)
+                    itemtxt.setText(itemtxt.getText()+" x"+item.getAmount());
                 itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
                 msglist.add(itemtxt);
                 itemcount = itemcount-1;
