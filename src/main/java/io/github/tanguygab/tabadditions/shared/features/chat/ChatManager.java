@@ -21,6 +21,7 @@ import me.neznamy.tab.shared.rgb.TextColor;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Instrument;
+import org.bukkit.Material;
 import org.bukkit.Note;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -36,6 +37,9 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
     public boolean itemEnabled = true;
     public String itemInput = "[item]";
+    public String itemOutput = "%item% x%amount%";
+    public String itemOutputSingle = "%item%";
+    public String itemOutputAir = "No Item";
     public boolean itemPermssion = false;
     public boolean mentionEnabled = true;
     public boolean mentionForEveryone = true;
@@ -80,6 +84,9 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
         itemEnabled = config.getBoolean("item.enabled",true);
         itemInput = config.getString("item.input","[item]");
+        itemOutput = config.getString("item.output","%name% x%amount%");
+        itemOutputSingle = config.getString("item.output-single","%name%");
+        itemOutputAir = config.getString("item.output-air","No Item");
         itemPermssion = config.getBoolean("item.permission",false);
 
         mentionEnabled = config.getBoolean("mention.enabled",true);
@@ -88,7 +95,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         mentionOutput = config.getString("mention.output","&b@%player%");
 
         emojis = config.getConfigurationSection("emojis");
-        emojiUntranslate = config.getBoolean("emojis-untranslate-if-no-permission",false);
+        emojiUntranslate = config.getBoolean("block-emojis-without-permission",false);
 
         TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props", TAFeature.CHAT, UsageType.REPEATING_TASK,() -> {
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
@@ -267,18 +274,22 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
             if (itemcount != 0) {
                 IChatBaseComponent itemtxt = new IChatBaseComponent();
-                if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) {
-                    String type = item.getType().toString().replace("_", " ").toLowerCase();
-                    String type2 = "";
-                    List<String> typelist = new ArrayList<>(Arrays.asList(type.split(" ")));
-                    for (String str : typelist) {
-                        type2 = type2 + str.substring(0, 1).toUpperCase() + str.substring(1);
-                        if (typelist.indexOf(str) != typelist.size() - 1) type2 = type2 + " ";
-                    }
-                    itemtxt = itemtxt.setText(type2);
-                } else itemtxt.setText(item.getItemMeta().getDisplayName());
-                if (item.getAmount() > 1)
-                    itemtxt.setText(itemtxt.getText()+" x"+item.getAmount());
+                if (item.getType() != Material.AIR) {
+                    String name;
+                    if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) {
+                        String type = item.getType().toString().replace("_", " ").toLowerCase();
+                        String type2 = "";
+                        List<String> typelist = new ArrayList<>(Arrays.asList(type.split(" ")));
+                        for (String str : typelist) {
+                            type2 = type2 + str.substring(0, 1).toUpperCase() + str.substring(1);
+                            if (typelist.indexOf(str) != typelist.size() - 1) type2 = type2 + " ";
+                        }
+                        name = type2;
+                    } else name = item.getItemMeta().getDisplayName();
+                    if (item.getAmount() > 1)
+                        itemtxt.setText(itemOutputSingle.replace("%name%",name).replace("%amount%",item.getAmount()+""));
+                    else itemtxt = itemtxt.setText(itemOutput.replace("%name%",name));
+                } else itemtxt = itemtxt.setText(itemOutputAir);
                 itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
                 msglist.add(itemtxt);
                 itemcount = itemcount-1;
