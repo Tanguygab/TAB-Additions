@@ -302,9 +302,9 @@ public class TABAdditions {
 
         List<String> list = TAB.getInstance().getPlaceholderManager().detectAll(str);
         for (String pl : list) {
-            if (pl.startsWith("%sender:"))
+            if (pl.startsWith("%sender:") && sender != null)
                 str = str.replace(pl,parsePlaceholders(pl.replace("sender:",""),sender));
-            else if (pl.startsWith("%viewer:"))
+            else if (pl.startsWith("%viewer:") && viewer != null)
                 str = str.replace(pl,parsePlaceholders(pl.replace("viewer:",""),viewer));
         }
         str = parsePlaceholders(str,def);

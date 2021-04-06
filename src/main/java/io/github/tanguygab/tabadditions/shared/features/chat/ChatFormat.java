@@ -61,6 +61,11 @@ public class ChatFormat {
 
     }
 
+    public boolean hasRelationalPlaceholders() {
+        if (!config.containsKey("relational")) return false;
+        return (boolean) config.get("relational");
+    }
+
     public IChatBaseComponent getText() {
         IChatBaseComponent finalText = new IChatBaseComponent().setText("");
 

@@ -111,24 +111,33 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         return new ChatFormat("default", map);
     }
 
+
+
     @Override
     public boolean onChat(TabPlayer p, String msg, boolean cancelled) {
         if (cancelled) return true;
 
         ChatFormat format = getFormat(p);
-        IChatBaseComponent format2 = createmsg(p,msg,format);
+        IChatBaseComponent format2 = createmsg(p,msg,format,null);
 
         TAB.getInstance().getPlatform().sendConsoleMessage(format2.toLegacyText(), true);
 
         IChatBaseComponent pformat = format2;
-        if (mentionForEveryone && mentionEnabled)
+        if (mentionForEveryone && mentionEnabled && !format.hasRelationalPlaceholders())
             for (TabPlayer pl : TAB.getInstance().getPlayers())
                 if (pl != p)
-                    pformat = pingcheck(pl,pformat);
+                    pformat = pingcheck(pl,pformat,pl);
         for (TabPlayer pl : TAB.getInstance().getPlayers()) {
             if (canSee(p,pl)) {
                 IChatBaseComponent ppformat = pformat.clone();
-                if (!mentionForEveryone && mentionEnabled && pl != p) ppformat = pingcheck(pl, ppformat);
+                if (format.hasRelationalPlaceholders())
+                    ppformat = createmsg(p,msg,format,pl);
+                if (!mentionForEveryone && mentionEnabled && pl != p) ppformat = pingcheck(pl,ppformat,pl);
+                if (mentionEnabled && mentionForEveryone && format.hasRelationalPlaceholders()) {
+                        for (TabPlayer pl2 : TAB.getInstance().getPlayers())
+                            if (pl2 != p)
+                                pformat = pingcheck(pl2,pformat,pl);
+                }
                 pl.sendMessage(ppformat);
             }
         }
@@ -143,7 +152,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         return true;
     }
 
-    public IChatBaseComponent createmsg(TabPlayer p, String msg, ChatFormat format) {
+    public IChatBaseComponent createmsg(TabPlayer p, String msg, ChatFormat format, TabPlayer viewer) {
 
         List<String> codes = Arrays.asList("a", "b", "c", "d", "f", "k", "l", "m", "n", "o", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
         for (String code : codes) {
@@ -163,9 +172,9 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
             List<IChatBaseComponent> list2 = new ArrayList<>();
             for (IChatBaseComponent txt : comp.getExtra()) {
                 if (txt.toRawText().contains("%msg%") && plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.item")) && msg.contains(itemInput)) {
-                    txt = itemcheck(p, txt, msg);
+                    txt = itemcheck(p, txt, msg,viewer);
                 } else {
-                    String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p).replaceAll("%msg%", msg);
+                    String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p,viewer,p).replaceAll("%msg%", msg);
                     txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
                 }
 
@@ -190,21 +199,21 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
             }
             comp.setExtra(list2);
             if (comp.getHoverValue() != null) {
-                String txt = plinstance.parsePlaceholders(comp.getHoverValue() + "", p).replaceAll("%msg%", msg);
+                String txt = plinstance.parsePlaceholders(comp.getHoverValue()+"",p,viewer,p).replaceAll("%msg%", msg);
                 IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
                 comp.onHoverShowText(hover);
             }
             if (comp.getClickValue() != null) {
                 if (comp.getClickAction() == IChatBaseComponent.ClickAction.SUGGEST_COMMAND) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue() + "", p).replaceAll("%msg%", msg);
+                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replaceAll("%msg%", msg);
                     comp.onClickSuggestCommand(txt);
                 }
                 else if (comp.getClickAction() == IChatBaseComponent.ClickAction.RUN_COMMAND) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue() + "", p).replaceAll("%msg%", msg);
+                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replaceAll("%msg%", msg);
                     comp.onClickRunCommand(txt);
                 }
                 else if (comp.getClickAction() == IChatBaseComponent.ClickAction.OPEN_URL) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue() + "", p).replaceAll("%msg%", msg);
+                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replaceAll("%msg%", msg);
                     comp.onClickOpenUrl(txt);
                 }
             }
@@ -221,10 +230,10 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         return getFormat(sender).isViewConditionMet(sender, viewer);
     }
 
-    public IChatBaseComponent itemcheck(TabPlayer p, IChatBaseComponent comp, String msg) {
+    public IChatBaseComponent itemcheck(TabPlayer p, IChatBaseComponent comp, String msg, TabPlayer viewer) {
 
         List<IChatBaseComponent> msglist = new ArrayList<>();
-        String[] list = TABAdditions.getInstance().parsePlaceholders(comp.getText(),p).split("%msg%");
+        String[] list = TABAdditions.getInstance().parsePlaceholders(comp.getText(),p,viewer,p).split("%msg%");
         msglist.add(new IChatBaseComponent(list[0]));
 
         ItemStack item;
@@ -265,7 +274,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         comp.setText("");
         return comp;
     }
-    public IChatBaseComponent pingcheck(TabPlayer p, IChatBaseComponent msg) {
+    public IChatBaseComponent pingcheck(TabPlayer p, IChatBaseComponent msg, TabPlayer viewer) {
         if (msg.getExtra() != null && !msg.getExtra().isEmpty())
             for (IChatBaseComponent comp : msg.getExtra()) {
                 if (comp.getExtra() != null && !comp.getExtra().isEmpty()) {
@@ -274,8 +283,8 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                             for (IChatBaseComponent subcomp2 : comp.getExtra()) {
                                 if (subcomp2.getExtra() != null && !subcomp2.getExtra().isEmpty()) {
                                     for (IChatBaseComponent subcomp3 : subcomp2.getExtra()) {
-                                        if (subcomp3.getText().toLowerCase().contains(TABAdditions.getInstance().parsePlaceholders(mentionInput,p).toLowerCase())) {
-                                            subcomp3.setText(subcomp3.getText().replaceAll("(?i)"+TABAdditions.getInstance().parsePlaceholders(mentionInput,p), TABAdditions.getInstance().parsePlaceholders(mentionOutput, p)));
+                                        if (subcomp3.getText().toLowerCase().contains(TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p).toLowerCase())) {
+                                            subcomp3.setText(subcomp3.getText().replaceAll("(?i)"+TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p), TABAdditions.getInstance().parsePlaceholders(mentionOutput, p,viewer,p)));
                                             if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
                                                 Player player = (Player) p.getPlayer();
                                                 player.playNote(player.getLocation(), Instrument.PLING, Note.flat(1, Note.Tone.A));
@@ -363,9 +372,9 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
             else if (playerdata.getStringList("msg-ignore."+p2.getName(),new ArrayList<>()).contains(p.getName()))
                 p.sendMessage(translation.getString("tab+_ignores_you","&cThis player ignores you"),true);
             else {
-                p2.sendMessage(createmsg(p, msg2, formats.get("msg")));
+                p2.sendMessage(createmsg(p, msg2, formats.get("msg"),p2));
                 if (formats.containsKey("msgSender"))
-                    p.sendMessage(createmsg(p,msg2,formats.get("msgSender")));
+                    p.sendMessage(createmsg(p,msg2,formats.get("msgSender"),p2));
             }
             return true;
         }
