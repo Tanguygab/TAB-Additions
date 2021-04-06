@@ -287,8 +287,8 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                         name = type2;
                     } else name = item.getItemMeta().getDisplayName();
                     if (item.getAmount() > 1)
-                        itemtxt.setText(itemOutputSingle.replace("%name%",name).replace("%amount%",item.getAmount()+""));
-                    else itemtxt = itemtxt.setText(itemOutput.replace("%name%",name));
+                        itemtxt.setText(itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
+                    else itemtxt = itemtxt.setText(itemOutputSingle.replace("%name%",name));
                 } else itemtxt = itemtxt.setText(itemOutputAir);
                 itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
                 msglist.add(itemtxt);
