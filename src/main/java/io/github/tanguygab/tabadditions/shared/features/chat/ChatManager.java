@@ -290,6 +290,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                         itemtxt.setText(itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
                     else itemtxt = itemtxt.setText(itemOutputSingle.replace("%name%",name));
                 } else itemtxt = itemtxt.setText(itemOutputAir);
+                itemtxt.setText(TAB.getInstance().getPlaceholderManager().color(itemtxt.getText()));
                 itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
                 msglist.add(itemtxt);
                 itemcount = itemcount-1;
