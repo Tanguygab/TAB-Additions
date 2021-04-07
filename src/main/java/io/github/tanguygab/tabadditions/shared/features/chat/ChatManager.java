@@ -213,7 +213,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
             }
             comp.setExtra(list2);
             if (comp.getHoverValue() != null) {
-                String txt = plinstance.parsePlaceholders(comp.getHoverValue()+"",p,viewer,p).replaceAll("%msg%", msg);
+                String txt = plinstance.parsePlaceholders(((IChatBaseComponent)comp.getHoverValue()).toFlatText(),p,viewer,p).replaceAll("%msg%", msg);
                 IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
                 comp.onHoverShowText(hover);
             }
@@ -290,7 +290,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                         itemtxt.setText(itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
                     else itemtxt = itemtxt.setText(itemOutputSingle.replace("%name%",name));
                 } else itemtxt = itemtxt.setText(itemOutputAir);
-                itemtxt.setText(TAB.getInstance().getPlaceholderManager().color(itemtxt.getText()));
+                itemtxt.setText(plinstance.parsePlaceholders(itemtxt.getText(),p));
                 itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
                 msglist.add(itemtxt);
                 itemcount = itemcount-1;
