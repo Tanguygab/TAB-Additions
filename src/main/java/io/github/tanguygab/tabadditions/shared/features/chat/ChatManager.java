@@ -20,12 +20,11 @@ import me.neznamy.tab.shared.rgb.RGBUtils;
 import me.neznamy.tab.shared.rgb.TextColor;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.Instrument;
 import org.bukkit.Material;
-import org.bukkit.Note;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
+import java.io.File;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -45,6 +44,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public boolean mentionForEveryone = true;
     public String mentionInput = "@%player%";
     public String mentionOutput = "&b";
+    public String mentionSound = "BLOCK_NOTE_BLOCK_PLING";
     public Map<String,String> emojis = new HashMap<>();
     public boolean emojiUntranslate = false;
     public final Map<TabPlayer,String> defformats = new HashMap<>();
@@ -93,6 +93,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         mentionForEveryone = config.getBoolean("mention.output-for-everyone",true);
         mentionInput = config.getString("mention.input","@%player%");
         mentionOutput = config.getString("mention.output","&b@%player%");
+        mentionOutput = config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING");
 
         emojis = config.getConfigurationSection("emojis");
         emojiUntranslate = config.getBoolean("block-emojis-without-permission",false);
@@ -257,6 +258,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
         List<IChatBaseComponent> msglist = new ArrayList<>();
         String[] list = TABAdditions.getInstance().parsePlaceholders(comp.getText(),p,viewer,p).split("%msg%");
+        if (list.length < 1) return comp;
         msglist.add(new IChatBaseComponent(list[0]));
 
         ItemStack item;
@@ -317,7 +319,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                                             subcomp3.setText(subcomp3.getText().replaceAll("(?i)"+TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p), TABAdditions.getInstance().parsePlaceholders(mentionOutput, p,viewer,p)));
                                             if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
                                                 Player player = (Player) p.getPlayer();
-                                                player.playNote(player.getLocation(), Instrument.PLING, Note.flat(1, Note.Tone.A));
+                                                player.playSound(player.getLocation(), mentionSound,1,1);
                                             }
                                         }
                                     }
@@ -353,6 +355,16 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         msg = msg.replaceFirst("/","");
         YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         ConfigurationFile playerdata = TAB.getInstance().getConfiguration().playerdata;
+        if (playerdata == null) {
+            File file = new File(TAB.getInstance().getPlatform().getDataFolder(), "playerdata.yml");
+            try {
+                if (!file.exists())
+                    file.createNewFile();
+                playerdata = new YamlConfigurationFile(null, file);
+            } catch (Exception error) {
+                TAB.getInstance().getErrorManager().criticalError("Failed to load playerdata.yml", error);
+            }
+        }
         ConfigurationFile translation = TAB.getInstance().getConfiguration().translation;
 
         if (msg.equals("togglemsg")) {
