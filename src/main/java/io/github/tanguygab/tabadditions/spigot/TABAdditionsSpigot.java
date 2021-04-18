@@ -112,8 +112,9 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
         if (args.length >= 2) {
             switch (args[0]) {
                 case "actionbar":
-                    if (args.length == 2 && TABAdditions.getInstance().actionbarsEnabled)
-                        return ((ActionBar)TAB.getInstance().getFeatureManager().getFeature("ActionBar")).getLists();
+                    ActionBar actionbar = (ActionBar) TAB.getInstance().getFeatureManager().getFeature("ActionBar");
+                    if (args.length == 2 && actionbar != null)
+                        return actionbar.getLists();
                     break;
                 case "tags": {
                     if (args.length == 2)
@@ -121,12 +122,13 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "fp": {
-                    if (!TABAdditions.getInstance().rfpEnabled)
+                    RFPManager rfpm = (RFPManager) TAB.getInstance().getFeatureManager().getFeature("Real Fake Players");
+                    if (rfpm == null)
                         return null;
                     if (args.length == 2)
                         return new ArrayList<>(Arrays.asList("add","remove","edit","list","info"));
                     if (!args[1].equalsIgnoreCase("list") && args.length == 3) {
-                        List<RFP> rfps = ((RFPManager) TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS();
+                        List<RFP> rfps = rfpm.getRFPS();
                         List<String> rfpnames = new ArrayList<>();
                         for (RFP rfp : rfps)
                             rfpnames.add(rfp.getConfigName());
@@ -139,8 +141,9 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                     break;
                 }
                 case "title": {
-                    if (args.length == 2 && TABAdditions.getInstance().titlesEnabled)
-                        return ((Title)TAB.getInstance().getFeatureManager().getFeature("Title")).getLists();
+                    Title title = (Title) TAB.getInstance().getFeatureManager().getFeature("Title");
+                    if (args.length == 2 && title != null)
+                        return title.getLists();
                     break;
                 }
             }
