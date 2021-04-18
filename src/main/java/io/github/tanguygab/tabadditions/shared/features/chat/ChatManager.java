@@ -174,7 +174,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
             if (!p.hasPermission("tabadditions.chat.color.&" + code))
                 msg = msg.replaceAll("&" + code, "");
         }
-        msg = new RGBUtils().applyFormats(msg);
+        msg = new RGBUtils().applyFormats(msg, true);
         if (!p.hasPermission("tabadditions.chat.color.rgb"))
             msg = msg.replaceAll("#[0-9a-fA-F]{6}","");
 
