@@ -396,6 +396,8 @@ public class Layout {
     }
 
     public void sendPackets(Map<TabPlayer, Map<Integer, String>> skins, TabPlayer p, PacketPlayOutPlayerInfo.PlayerInfoData fp, Object skin, int lat, String text, int i, String icon, String latency, String yellownumber) {
+        if (!placeholdersToRefresh.containsKey(p) || !placeholdersToRefresh.get(p).containsKey(i))
+            return;
         if (!skins.containsKey(p) || (skin != null && !skins.get(p).get(i).equals(icon))) {
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, lat, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));

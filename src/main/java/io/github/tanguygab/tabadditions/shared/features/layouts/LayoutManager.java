@@ -114,9 +114,6 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
                 p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
                 players.put(p, layout.getName());
                 layout.players.add(p);
-                toAdd.remove(p);
-                for (String fp : layout.fpnames.keySet())
-                    PacketAPI.registerScoreboardTeam(p,"!"+fp+"TAB+_Layout","","",true,false, Collections.singleton(layout.fpnames.get(fp)), null, TabFeature.NAMETAGS);
                 Map<Integer,Map<String,String>> mapSlots = new HashMap<>();
                 for (int i = 0; i < 80; i++) {
                     Map<String,String> map2 = new HashMap<>();
@@ -126,6 +123,10 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
                     mapSlots.put(i, map2);
                 }
                 layout.placeholdersToRefresh.put(p,mapSlots);
+                toAdd.remove(p);
+                for (String fp : layout.fpnames.keySet())
+                    PacketAPI.registerScoreboardTeam(p,"!"+fp+"TAB+_Layout","","",true,false, Collections.singleton(layout.fpnames.get(fp)), null, TabFeature.NAMETAGS);
+
             }
         }
     }
