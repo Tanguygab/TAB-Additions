@@ -12,6 +12,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Skins {
 
@@ -45,7 +46,7 @@ public class Skins {
             String signature = skin.get("signature").getAsString();
 
             String[] finalskin = new String[]{value,signature};
-            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set("player-head:"+name, finalskin);
+            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set("player-head:"+name, new ArrayList<>(Arrays.asList(finalskin)));
             return finalskin;
         } catch (Exception e) {
             return null;
@@ -66,7 +67,7 @@ public class Skins {
             String signature = skin.get("signature").getAsString();
 
             String[] finalskin = new String[]{value,signature};
-            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set("mineskin:"+id, finalskin);
+            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set("mineskin:"+id, new ArrayList<>(Arrays.asList(finalskin)));
             return finalskin;
         } catch (Exception e) {
             return null;
@@ -98,7 +99,7 @@ public class Skins {
             String signature = skin.get("signature").getAsString();
 
             String[] finalskin = new String[]{value,signature};
-            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set("texture:"+texture, finalskin);
+            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set("texture:"+texture, new ArrayList<>(Arrays.asList(finalskin)));
             return finalskin;
         } catch (Exception e) {
             return null;
