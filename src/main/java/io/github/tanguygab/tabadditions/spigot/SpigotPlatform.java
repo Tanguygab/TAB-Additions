@@ -32,6 +32,11 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
+	public boolean isPluginEnabled(String plugin) {
+		return Bukkit.getPluginManager().isPluginEnabled(plugin);
+	}
+
+	@Override
 	public void reload() {
 		TABAdditions.getInstance().reload();
 

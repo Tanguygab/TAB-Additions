@@ -129,6 +129,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     @Override
     public boolean onChat(TabPlayer p, String msg, boolean cancelled) {
         if (cancelled) return true;
+        if (plinstance.isMuted(p)) return true;
 
         msg = emojicheck(p,msg);
 
@@ -172,7 +173,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         List<String> codes = Arrays.asList("a", "b", "c", "d", "f", "k", "l", "m", "n", "o", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
         for (String code : codes) {
             if (!p.hasPermission("tabadditions.chat.color.&" + code))
-                msg = msg.replaceAll("&" + code, "");
+                msg = msg.replace("&" + code, "");
         }
         msg = new RGBUtils().applyFormats(msg, true);
         if (!p.hasPermission("tabadditions.chat.color.rgb"))
@@ -189,7 +190,7 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
                 if (txt.toRawText().contains("%msg%") && plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.item")) && msg.contains(itemInput)) {
                     txt = itemcheck(p, txt, msg,viewer);
                 } else {
-                    String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p,viewer,p).replaceAll("%msg%", msg);
+                    String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p,viewer,p).replace("%msg%", msg);
                     txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
                 }
 
@@ -214,21 +215,21 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
             }
             comp.setExtra(list2);
             if (comp.getHoverValue() != null) {
-                String txt = plinstance.parsePlaceholders(((IChatBaseComponent)comp.getHoverValue()).toFlatText(),p,viewer,p).replaceAll("%msg%", msg);
+                String txt = plinstance.parsePlaceholders(((IChatBaseComponent)comp.getHoverValue()).toFlatText(),p,viewer,p).replace("%msg%", msg);
                 IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
                 comp.onHoverShowText(hover);
             }
             if (comp.getClickValue() != null) {
                 if (comp.getClickAction() == IChatBaseComponent.ClickAction.SUGGEST_COMMAND) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replaceAll("%msg%", msg);
+                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replace("%msg%", msg);
                     comp.onClickSuggestCommand(txt);
                 }
                 else if (comp.getClickAction() == IChatBaseComponent.ClickAction.RUN_COMMAND) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replaceAll("%msg%", msg);
+                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replace("%msg%", msg);
                     comp.onClickRunCommand(txt);
                 }
                 else if (comp.getClickAction() == IChatBaseComponent.ClickAction.OPEN_URL) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replaceAll("%msg%", msg);
+                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replace("%msg%", msg);
                     comp.onClickOpenUrl(txt);
                 }
             }

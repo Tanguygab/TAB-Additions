@@ -8,6 +8,8 @@ import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
+import me.leoko.advancedban.manager.PunishmentManager;
+import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.Property;
@@ -15,7 +17,6 @@ import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.features.types.Loadable;
-import me.neznamy.tab.shared.placeholders.Placeholder;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
@@ -371,5 +372,16 @@ public class TABAdditions {
     public boolean checkBedrock(TabPlayer p) {
         if (!floodgate) return false;
         return FloodgateAPI.isBedrockPlayer(p.getUniqueId());
+    }
+
+    public boolean isMuted(TabPlayer p) {
+        if (platform.isPluginEnabled("AdvancedBan")) {
+            PunishmentManager punish = PunishmentManager.get();
+
+            if (UUIDManager.get().getMode() != UUIDManager.FetcherMode.DISABLED)
+                return punish.isMuted(p.getUniqueId().toString().replace("-", ""));
+            return punish.isMuted(p.getName().toLowerCase());
+        }
+        return false;
     }
 }

@@ -5,6 +5,7 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import net.md_5.bungee.api.plugin.Plugin;
+import org.bukkit.Bukkit;
 
 public class BungeePlatform extends Platform {
 
@@ -26,6 +27,11 @@ public class BungeePlatform extends Platform {
 		properties[0][1] = props[0];
 		properties[0][2] = props[1];
 		return properties;
+	}
+
+	@Override
+	public boolean isPluginEnabled(String plugin) {
+		return this.plugin.getProxy().getPluginManager().getPlugin(plugin) != null;
 	}
 
 	@Override

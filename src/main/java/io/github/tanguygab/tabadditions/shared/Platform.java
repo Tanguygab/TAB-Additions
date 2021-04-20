@@ -6,6 +6,8 @@ public abstract class Platform {
 
 	public abstract Object getSkin(String[] props);
 
+	public abstract boolean isPluginEnabled(String plugin);
+
 	public abstract void reload();
 
 	public abstract void disable();
