@@ -1,9 +1,9 @@
 name: TAB-Additions
-version: 1.5.9
+version: 1.5.10
 main: io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot
 api-version: 1.13
 depend: [TAB]
-softdepend: [PlaceholderAPI,SuperSkinAPI,floodgate-bukkit,DiscordSRV]
+softdepend: [PlaceholderAPI,floodgate-bukkit,DiscordSRV,AdvancedBan]
 author: Tanguygab
 description: More features for the plugin TAB !
 commands:
