@@ -310,13 +310,13 @@ public class TABAdditions {
                 str = str.replace(pl, new Property(def, pl).getFormat(def2));
             }
             if (pl.startsWith("%sender:") && sender != null) {
-                String pl2 = pl.replace("%sender:", "");
+                String pl2 = pl.replace("%sender:", "%");
                 if (pl2.startsWith("%rel_"))
                     str = str.replace(pl,new Property(sender, pl2).getFormat(viewer));
                 else str = str.replace(pl, parsePlaceholders(pl2, sender));
             }
             else if (pl.startsWith("%viewer:") && viewer != null) {
-                String pl2 = pl.replace("%viewer:", "");
+                String pl2 = pl.replace("%viewer:", "%");
                 if (pl2.startsWith("%rel_"))
                     str = str.replace(pl,new Property(viewer, pl2).getFormat(sender));
                 else str = str.replace(pl, parsePlaceholders(pl2, viewer));
@@ -332,17 +332,18 @@ public class TABAdditions {
         if (p == null) return str;
         PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
         List<String> placeholders = pm.detectAll(str);
-        for (String placeholder : placeholders)
-            pm.categorizeUsedPlaceholder(placeholder);
         try {
-            str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str, p);
-            str = TAB.getInstance().getPlatform().replaceAllPlaceholders(str, p);
+            for (String pl : placeholders) {
+                pm.categorizeUsedPlaceholder(pl);
+                str = str.replace(pl, TAB.getInstance().getPlatform().replaceAllPlaceholders(pl, p));
+            }
             str = pm.color(str);
         } catch (Exception e) {
             if (attempts == 3) return "";
             attempts=attempts+1;
             return parsePlaceholders(str,p,attempts);
         }
+
         return str;
     }
 
