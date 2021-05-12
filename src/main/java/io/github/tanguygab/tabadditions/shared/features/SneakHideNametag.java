@@ -4,6 +4,8 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.types.Loadable;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -23,8 +25,8 @@ public class SneakHideNametag implements Loadable, Listener {
 
     @Override
     public void load() {
-        Plugin plugin = (Plugin)TABAdditions.getInstance().getPlugin();
-        plugin.getServer().getPluginManager().registerEvents(this,plugin);
+        Plugin plugin = (Plugin) TABAdditions.getInstance().getPlugin();
+        plugin.getServer().getScheduler().runTask(plugin,()->plugin.getServer().getPluginManager().registerEvents(this,plugin));
     }
 
     @EventHandler
@@ -32,13 +34,11 @@ public class SneakHideNametag implements Loadable, Listener {
         TabPlayer p = TAB.getInstance().getPlayer(e.getPlayer().getUniqueId());
         boolean isSneaking = e.isSneaking();
 
-        if (TABAdditions.getInstance().sneakhideEnabled) {
-            if (isSneaking) {
-                tag.put(p, p.hasHiddenNametag());
-                p.hideNametag();
-            } else if (!tag.get(p))
-                p.showNametag();
-        }
+        if (isSneaking) {
+            tag.put(p, p.hasHiddenNametag());
+            p.hideNametag();
+        } else if (!tag.get(p))
+            p.showNametag();
     }
 
     @Override
