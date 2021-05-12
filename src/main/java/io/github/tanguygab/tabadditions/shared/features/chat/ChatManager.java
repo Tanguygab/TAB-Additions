@@ -25,6 +25,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
 import java.io.File;
+import java.sql.Time;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -33,6 +36,8 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     private TABAdditions plinstance;
     private static ChatManager instance;
     private final Map<String,ChatFormat> formats = new HashMap<>();
+    public final Map<TabPlayer,String> defformats = new HashMap<>();
+
 
     public boolean itemEnabled = true;
     public String itemInput = "[item]";
@@ -40,14 +45,18 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public String itemOutputSingle = "%item%";
     public String itemOutputAir = "No Item";
     public boolean itemPermssion = false;
+
     public boolean mentionEnabled = true;
     public boolean mentionForEveryone = true;
     public String mentionInput = "@%player%";
     public String mentionOutput = "&b";
     public String mentionSound = "BLOCK_NOTE_BLOCK_PLING";
+
     public Map<String,String> emojis = new HashMap<>();
     public boolean emojiUntranslate = false;
-    public final Map<TabPlayer,String> defformats = new HashMap<>();
+
+    public long cooldownTime = 0;
+    public Map<TabPlayer,LocalDateTime> cooldown = new HashMap<>();
 
     public ChatManager() {
         instance = this;
@@ -98,6 +107,8 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         emojis = config.getConfigurationSection("emojis");
         emojiUntranslate = config.getBoolean("block-emojis-without-permission",false);
 
+        cooldownTime = Long.parseLong(config.getInt("message-cooldown",0)+"");
+
         TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props", TAFeature.CHAT, UsageType.REPEATING_TASK,() -> {
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 p.loadPropertyFromConfig("chatprefix");
@@ -128,9 +139,19 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
 
     @Override
     public boolean onChat(TabPlayer p, String msg, boolean cancelled) {
-        if (cancelled) return true;
-        if (plinstance.isMuted(p)) return true;
-
+        if (cancelled || plinstance.isMuted(p)) return true;
+        if (cooldown.containsKey(p)) {
+            long time = ChronoUnit.SECONDS.between(cooldown.get(p),LocalDateTime.now());
+            if (time < cooldownTime) {
+                p.sendMessage(TAB.getInstance().getConfiguration().translation
+                        .getString("tab+_message_cooldown", "&cYou have to wait %seconds% more seconds!")
+                        .replace("%seconds%", cooldownTime-time+""), true);
+                return true;
+            }
+            cooldown.remove(p);
+        }
+        if (cooldownTime != 0 && !p.hasPermission("tabadditions.chat.cooldown.bypass"))
+            cooldown.put(p,LocalDateTime.now());
         msg = emojicheck(p,msg);
 
         ChatFormat format = getFormat(p);
