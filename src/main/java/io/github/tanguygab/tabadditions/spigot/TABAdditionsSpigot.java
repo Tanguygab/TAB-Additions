@@ -1,15 +1,8 @@
 package io.github.tanguygab.tabadditions.spigot;
 
-import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.*;
-import io.github.tanguygab.tabadditions.shared.features.ActionBar;
-import io.github.tanguygab.tabadditions.shared.features.TAFeature;
-import io.github.tanguygab.tabadditions.shared.features.Title;
-import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
-import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.neznamy.tab.api.event.BukkitTABLoadEvent;
-import me.neznamy.tab.shared.TAB;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -44,72 +37,15 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         String name = "~Console~";
-        TABAdditions instance = TABAdditions.getInstance();
         if (sender instanceof Player) name = sender.getName();
-
-        if (args.length < 1 || args[0].equalsIgnoreCase("help"))
-            new HelpCmd(name,getDescription().getVersion());
-        else switch (args[0].toLowerCase()) {
-            case "actionbar": {
-                if (!instance.actionbarsEnabled)
-                    instance.sendMessage(name, "&cActionbar feature is not enabled, therefore this command cannot be used");
-                else if (args.length < 2)
-                    instance.sendMessage(name, "&cYou have to provide an actionbar!");
-                else {
-                    Map<String, String> section = instance.getConfig(ConfigType.ACTIONBAR).getConfigurationSection("bars.");
-                    if (!section.containsKey(args[1]))
-                        instance.sendMessage(name, "&cThis actionbar doesn't exist!");
-                    else
-                        new ActionBarCmd(name, args, section.get(args[1]));
-                }
-                break;
-            }
-            case "title": {
-                if (!instance.titlesEnabled)
-                    instance.sendMessage(name,"&cTitle feature is not enabled, therefore this command cannot be used");
-                else if (args.length < 2)
-                    instance.sendMessage(name,"&cYou have to provide a title!");
-                else {
-                    Map<String, String> titleSection = instance.getConfig(ConfigType.TITLE).getConfigurationSection("titles." + args[1]);
-                    if (titleSection.isEmpty()) {
-                        instance.sendMessage(name,"&cThis title doesn't exist!");
-                    } else {
-                        List<Object> titleProperties = new ArrayList<>();
-                        for (Object property : titleSection.keySet())
-                            titleProperties.add(titleSection.get(property));
-                        new TitleCmd(name, args, titleProperties);
-                    }
-                }
-                break;
-            }
-            case "fp": {
-                if (instance.rfpEnabled) {
-                    if (args.length < 2)
-                        instance.sendMessage(name,"You have to provide add, remove, edit, info or list.");
-                    else if (!args[1].equalsIgnoreCase("list") && args.length < 3)
-                        instance.sendMessage(name,"You have to provide a fake player name.");
-                    else if (args[1].equalsIgnoreCase("edit") && args.length < 4)
-                        instance.sendMessage(name,"You have to provide an action.");
-                    else new RealFakePlayerCmd(name, args);
-                }
-                break;
-            }
-            case "tags": {
-                new TagsCmd(name, args);
-                break;
-            }
-            case "test": {
-                instance.sendMessage(name,"&7Nothing to see here :D");
-                break;
-            }
-        }
+        Cmd.getMain(name,args);
         return true;
     }
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         if (sender.hasPermission("tabadditions.admin"))
-            return TabComplete.get(args);
+            return Cmd.getTabComplete(args);
         return null;
     }
 
