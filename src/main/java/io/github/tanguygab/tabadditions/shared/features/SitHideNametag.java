@@ -4,6 +4,7 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.types.Loadable;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -30,6 +31,7 @@ public class SitHideNametag implements Loadable, Listener {
 
     @EventHandler
     public void onMount(EntityMountEvent e) {
+        if (!(e.getEntity() instanceof Player)) return;
         TabPlayer p = TAB.getInstance().getPlayer(e.getEntity().getUniqueId());
         tag.put(p, p.hasHiddenNametag());
         p.hideNametag();
@@ -37,6 +39,7 @@ public class SitHideNametag implements Loadable, Listener {
 
     @EventHandler
     public void onDismount(EntityDismountEvent e) {
+        if (!(e.getEntity() instanceof Player)) return;
         TabPlayer p = TAB.getInstance().getPlayer(e.getEntity().getUniqueId());
         if (!tag.get(p))
             p.showNametag();
