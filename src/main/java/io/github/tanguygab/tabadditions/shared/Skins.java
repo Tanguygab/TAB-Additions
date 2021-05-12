@@ -13,10 +13,13 @@ import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Skins {
 
     public static Skins instance;
+    public static Map<String,String[]> map = new HashMap<>();
 
     public Skins() {
         instance = this;
@@ -27,13 +30,8 @@ public class Skins {
     }
 
     public String[] getPropPlayer(String name) {
-        if (TABAdditions.getInstance().getConfig(ConfigType.SKINS).hasConfigOption("player-head:"+name)) {
-            Object output = TABAdditions.getInstance().getConfig(ConfigType.SKINS).getObject("player-head:"+name);
-            if (output instanceof String[])
-                return (String[]) output;
-            if (output instanceof ArrayList)
-                return ((ArrayList<String>)output).toArray(new String[0]);
-        }
+        if (containsConfig("player-head:"+name))
+            return getConfig("player-head:"+name);
         try {
             URL url_0 = new URL("https://api.ashcon.app/mojang/v2/user/" + name);
             InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());
@@ -46,7 +44,7 @@ public class Skins {
             String signature = skin.get("signature").getAsString();
 
             String[] finalskin = new String[]{value,signature};
-            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set("player-head:"+name, new ArrayList<>(Arrays.asList(finalskin)));
+            setConfig("player-head:"+name,finalskin);
             return finalskin;
         } catch (Exception e) {
             return null;
@@ -54,8 +52,8 @@ public class Skins {
     }
 
     public String[] getPropSkin(int id) {
-        if (TABAdditions.getInstance().getConfig(ConfigType.SKINS).hasConfigOption("mineskin:"+id))
-            return TABAdditions.getInstance().getConfig(ConfigType.SKINS).getStringList("mineskin:"+id).toArray(new String[0]);
+        if (containsConfig("mineskin:"+id))
+            return getConfig("mineskin:"+id);
         try {
             URL url_0 = new URL("https://api.mineskin.org/get/id/" + id);
             InputStreamReader reader_0 = new InputStreamReader(url_0.openStream());
@@ -67,7 +65,7 @@ public class Skins {
             String signature = skin.get("signature").getAsString();
 
             String[] finalskin = new String[]{value,signature};
-            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set("mineskin:"+id, new ArrayList<>(Arrays.asList(finalskin)));
+            setConfig("mineskin:"+id,finalskin);
             return finalskin;
         } catch (Exception e) {
             return null;
@@ -75,8 +73,8 @@ public class Skins {
     }
 
     public String[] generateFromTexture(String texture) {
-        if (TABAdditions.getInstance().getConfig(ConfigType.SKINS).hasConfigOption("texture:"+texture))
-            return TABAdditions.getInstance().getConfig(ConfigType.SKINS).getStringList("texture:"+texture).toArray(new String[0]);
+        if (containsConfig("texture:"+texture))
+            return getConfig("texture:"+texture);
         try {
             URL url = new URL("https://api.mineskin.org/generate/url/");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
@@ -99,7 +97,7 @@ public class Skins {
             String signature = skin.get("signature").getAsString();
 
             String[] finalskin = new String[]{value,signature};
-            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set("texture:"+texture, new ArrayList<>(Arrays.asList(finalskin)));
+            setConfig("texture:"+texture,finalskin);
             return finalskin;
         } catch (Exception e) {
             return null;
@@ -134,5 +132,32 @@ public class Skins {
             skin = TABAdditions.getInstance().getPlatform().getSkin(props);
         }
         return skin;
+    }
+
+    public boolean containsConfig(String key) {
+        return map.containsKey(key) || TABAdditions.getInstance().getConfig(ConfigType.SKINS).hasConfigOption(key);
+    }
+
+    public String[] getConfig(String key) {
+        if (map.containsKey(key))
+            return map.get(key);
+
+        if (containsConfig(key)) {
+            Object output = TABAdditions.getInstance().getConfig(ConfigType.SKINS).getObject(key);
+            if (output instanceof String[])
+                return (String[]) output;
+            if (output instanceof ArrayList)
+                return ((ArrayList<String>) output).toArray(new String[0]);
+        }
+        return null;
+    }
+
+    public void setConfig(String key, String[] value) {
+        map.put(key,value);
+    }
+
+    public void unload() {
+        for (String key : map.keySet())
+            TABAdditions.getInstance().getConfig(ConfigType.SKINS).set(key, new ArrayList<>(Arrays.asList(map.get(key))));
     }
 }

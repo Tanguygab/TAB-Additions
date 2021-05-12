@@ -148,6 +148,7 @@ public class TABAdditions {
                 ((Loadable) fm.getFeature(feature.toString())).unload();
             fm.unregisterFeature(feature.toString());
         }
+        skins.unload();
 
         enabled = false;
         TAB.getInstance().unload();
