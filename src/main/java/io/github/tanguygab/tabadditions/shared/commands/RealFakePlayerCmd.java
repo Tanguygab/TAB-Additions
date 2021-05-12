@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.Skins;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.neznamy.tab.api.TabPlayer;
@@ -10,7 +11,7 @@ import me.neznamy.tab.shared.TAB;
 public class RealFakePlayerCmd {
     public RealFakePlayerCmd(String nameS, String[] args) {
         TABAdditions instance = TABAdditions.getInstance();
-        RFPManager rfpm = (RFPManager) TAB.getInstance().getFeatureManager().getFeature("Real Fake Players");
+        RFPManager rfpm = (RFPManager) TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString());
         String output = "";
 
         if (args[1].equalsIgnoreCase("list")) {
