@@ -8,8 +8,9 @@ public abstract class Platform {
 
 	public abstract boolean isPluginEnabled(String plugin);
 
+	public abstract String getVersion();
+
 	public abstract void reload();
 
 	public abstract void disable();
-
 }

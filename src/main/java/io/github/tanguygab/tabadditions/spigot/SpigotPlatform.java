@@ -37,6 +37,11 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
+	public String getVersion() {
+		return plugin.getDescription().getVersion();
+	}
+
+	@Override
 	public void reload() {
 		TABAdditions.getInstance().reload();
 

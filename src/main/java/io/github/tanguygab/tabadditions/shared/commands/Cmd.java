@@ -22,7 +22,7 @@ public class Cmd {
         TABAdditions instance = TABAdditions.getInstance();
 
         if (args.length < 1 || args[0].equalsIgnoreCase("help"))
-            new HelpCmd(name, ProxyServer.getInstance().getPluginManager().getPlugin("TAB-Additions").getDescription().getVersion());
+            new HelpCmd(name, TABAdditions.getInstance().getPlatform().getVersion());
         else
             switch (args[0].toLowerCase()) {
 
