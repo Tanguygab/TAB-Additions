@@ -3,3 +3,5 @@ features:
   actionbars: false
   chat: false
   layout: false
+  real-fake-players: false
+  only-you: false

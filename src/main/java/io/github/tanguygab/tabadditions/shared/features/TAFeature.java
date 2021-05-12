@@ -7,6 +7,7 @@ public enum TAFeature {
     CHAT("Chat"),
     TA_LAYOUT("TAB+ Layout"),
     RFP("Real Fake Players"),
+    SIT_HIDE_NAMETAG("Sit Hide Nametag"),
     SNEAK_HIDE_NAMETAG("Sneak Hide Nametag"),
     NAMETAG_IN_RANGE("Nametag in Range"),
     TABLIST_NAMES_RADIUS("Tablist Names Radius"),

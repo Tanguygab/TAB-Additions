@@ -1,10 +1,11 @@
 features:
-  sneak-hide-nametags: false
   titles: false
   actionbars: false
   chat: false
   layout: false
-  nametag-in-range: 0
   real-fake-players: false
   only-you: false
-
+  nametag-in-range: 0
+  sit-hide-nametag: false
+  sneak-hide-nametags: false
+  tablist-names-radius: false

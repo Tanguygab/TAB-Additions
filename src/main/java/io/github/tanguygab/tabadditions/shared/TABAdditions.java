@@ -44,6 +44,7 @@ public class TABAdditions {
     public boolean actionbarsEnabled;
     public boolean chatEnabled;
     public boolean layoutEnabled;
+    public boolean sithideEnabled = false;
     public boolean sneakhideEnabled = false;
     public int nametagInRange = 0;
     public int tablistNamesRadius = 0;
@@ -116,6 +117,7 @@ public class TABAdditions {
             rfpEnabled = config.getBoolean("features.real-fake-players",false);
             chatEnabled = config.getBoolean("features.chat",false);
             if (platform.getType() == PlatformType.SPIGOT) {
+                sithideEnabled = config.getBoolean("features.sit-hide-nametags", false);
                 sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
@@ -184,6 +186,9 @@ public class TABAdditions {
         //Sneak Hide Nametag
         if (sneakhideEnabled)
             fm.registerFeature(TAFeature.SNEAK_HIDE_NAMETAG.toString(), new SneakHideNametag());
+        //Sneak Hide Nametag
+        if (sithideEnabled)
+            fm.registerFeature(TAFeature.SIT_HIDE_NAMETAG.toString(), new SitHideNametag());
         //Nametag in Range
         if (nametagInRange != 0)
             fm.registerFeature(TAFeature.NAMETAG_IN_RANGE.toString(), new NametagInRange());
