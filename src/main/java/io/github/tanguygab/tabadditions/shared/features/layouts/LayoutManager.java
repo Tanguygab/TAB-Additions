@@ -8,11 +8,13 @@ import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.cpu.UsageType;
+import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.features.types.event.CommandListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.features.types.event.QuitEventListener;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
+import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 
 import java.util.*;
 
@@ -52,7 +54,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
         togglecmd = TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getString("toggle-cmd","layout");
         showLayoutAll();
         refresh();
-
+        loadPlaceholders();
     }
 
     @Override
@@ -206,5 +208,27 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
         toggledOff.remove(p);
         toRemove.remove(p);
         players.remove(p);
+    }
+
+    public void loadPlaceholders() {
+        PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
+        for (Layout layout : layouts.values()) {
+            for (String set : layout.setsnames.keySet())
+                pm.registerPlaceholder(new PlayerPlaceholder("%layout-playerset:" + set + "%", 100) {
+                    @Override
+                    public String get(TabPlayer p) {
+                        Layout l = layouts.get(getLayout(p));
+                        if (l == null || !l.setsnames.containsKey(set)) return "0";
+                        return l.playerSet(l.setsnames.get(set),p).size()+"";
+                    }});
+            for (String list : layout.listsnames.keySet())
+                pm.registerPlaceholder(new PlayerPlaceholder("%layout-list:" + list + "%", 100) {
+                    @Override
+                    public String get(TabPlayer p) {
+                        Layout l = layouts.get(getLayout(p));
+                        if (l == null || !l.listsnames.containsKey(list)) return "0";
+                        return l.lists(l.listsnames.get(list),p).size()+"";
+                    }});
+        }
     }
 }

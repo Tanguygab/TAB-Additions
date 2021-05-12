@@ -7,9 +7,11 @@ import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.AlignedSuffix;
+import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardScore;
+import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -31,6 +33,8 @@ public class Layout {
     protected final Map<TabPlayer, Map<Integer, String>> skinsp = new HashMap<>();
     protected final Map<TabPlayer, Map<Integer, String>> skinss = new HashMap<>();
     protected final Map<TabPlayer, Map<Integer, String>> skinsl = new HashMap<>();
+    protected final Map<String,Object> setsnames = new HashMap<>();
+    protected final Map<String,Object> listsnames = new HashMap<>();
 
     protected final Map<String,String> fpnames = new HashMap<>();
     private final TABAdditions instance;
@@ -40,6 +44,7 @@ public class Layout {
         this.name = name;
         config = instance.getConfig(ConfigType.LAYOUT).getConfigurationSection("layouts."+name);
         create();
+        loadPlaceholders();
     }
 
     protected String getName() {
@@ -53,6 +58,16 @@ public class Layout {
     protected boolean isConditionMet(TabPlayer p) {
         if (!config.containsKey("condition")) return true;
         return instance.isConditionMet(config.get("condition")+"",p);
+    }
+
+    protected void loadPlaceholders() {
+        Map<String,Map<String,String>> slots = ((Map<String,Map<String,String>>)config.get("slots"));
+        for (String slot : slots.keySet()) {
+            if (slots.get(slot).get("type").equalsIgnoreCase("PLAYERS"))
+                setsnames.put(slot,slots.get(slot));
+            if (slots.get(slot).get("type").equalsIgnoreCase("LIST"))
+                listsnames.put(slot,slots.get(slot));
+        }
     }
 
     protected void refreshPlaceholders(TabPlayer p) {
@@ -352,7 +367,7 @@ public class Layout {
         skinss.put(p,skins);
     }
 
-    private List<String> lists(Object slot, TabPlayer p) {
+    protected List<String> lists(Object slot, TabPlayer p) {
         Map<String,String> section = (Map<String, String>) slot;
 
         String input = "";
@@ -365,7 +380,7 @@ public class Layout {
 
         return new ArrayList<>(Arrays.asList(input.split(separator)));
     }
-    private List<TabPlayer> playerSet(Object slot, TabPlayer viewer) {
+    protected List<TabPlayer> playerSet(Object slot, TabPlayer viewer) {
         Map<String,Object> section = (Map<String, Object>) slot;
 
         List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
