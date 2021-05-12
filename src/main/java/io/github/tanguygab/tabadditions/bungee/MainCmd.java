@@ -3,19 +3,27 @@ package io.github.tanguygab.tabadditions.bungee;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.*;
+import io.github.tanguygab.tabadditions.shared.features.ActionBar;
+import io.github.tanguygab.tabadditions.shared.features.TAFeature;
+import io.github.tanguygab.tabadditions.shared.features.Title;
+import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
+import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
+import me.neznamy.tab.shared.TAB;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
+import net.md_5.bungee.api.plugin.TabExecutor;
 
 import java.util.*;
 
-public class MainCmd extends Command {
+public class MainCmd extends Command implements TabExecutor {
 
     public MainCmd(String name, String permission, String... aliases) {
         super(name,permission,aliases);
     }
 
+    @Override
     public void execute(CommandSender sender, String[] args) {
         String name = "~Console~";
         TABAdditions instance = TABAdditions.getInstance();
@@ -79,5 +87,13 @@ public class MainCmd extends Command {
                     instance.sendMessage(name,"&7Nothing to see here :D");
                 }
             }
+    }
+
+
+    @Override
+    public Iterable<String> onTabComplete(CommandSender sender, String[] args) {
+        if (sender.hasPermission("tabadditions.admin"))
+            return TabComplete.get(args);
+        return null;
     }
 }

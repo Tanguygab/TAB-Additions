@@ -4,6 +4,7 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.*;
 import io.github.tanguygab.tabadditions.shared.features.ActionBar;
+import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.shared.features.Title;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
@@ -107,47 +108,8 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
-        if (args.length == 1)
-            return new ArrayList<>(Arrays.asList("help","actionbar","title","tags","fp"));
-        if (args.length >= 2) {
-            switch (args[0]) {
-                case "actionbar":
-                    ActionBar actionbar = (ActionBar) TAB.getInstance().getFeatureManager().getFeature("ActionBar");
-                    if (args.length == 2 && actionbar != null)
-                        return actionbar.getLists();
-                    break;
-                case "tags": {
-                    if (args.length == 2)
-                        return new ArrayList<>(Arrays.asList("hide","show","toggle"));
-                    break;
-                }
-                case "fp": {
-                    RFPManager rfpm = (RFPManager) TAB.getInstance().getFeatureManager().getFeature("Real Fake Players");
-                    if (rfpm == null)
-                        return null;
-                    if (args.length == 2)
-                        return new ArrayList<>(Arrays.asList("add","remove","edit","list","info"));
-                    if (!args[1].equalsIgnoreCase("list") && args.length == 3) {
-                        List<RFP> rfps = rfpm.getRFPS();
-                        List<String> rfpnames = new ArrayList<>();
-                        for (RFP rfp : rfps)
-                            rfpnames.add(rfp.getConfigName());
-                        if (args[1].equalsIgnoreCase("remove"))
-                            rfpnames.add("_ALL_");
-                        return rfpnames;
-                    }
-                    if (args[1].equalsIgnoreCase("edit") && args.length == 4)
-                        return new ArrayList<>(Arrays.asList("name","skin","latency","group","prefix","suffix"));
-                    break;
-                }
-                case "title": {
-                    Title title = (Title) TAB.getInstance().getFeatureManager().getFeature("Title");
-                    if (args.length == 2 && title != null)
-                        return title.getLists();
-                    break;
-                }
-            }
-        }
+        if (sender.hasPermission("tabadditions.admin"))
+            return TabComplete.get(args);
         return null;
     }
 
