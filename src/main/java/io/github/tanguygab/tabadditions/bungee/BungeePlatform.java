@@ -6,7 +6,6 @@ import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.plugin.Plugin;
-import org.bukkit.Bukkit;
 
 public class BungeePlatform extends Platform {
 

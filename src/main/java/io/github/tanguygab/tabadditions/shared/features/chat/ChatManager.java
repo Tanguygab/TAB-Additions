@@ -31,10 +31,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class ChatManager implements ChatEventListener, Loadable, JoinEventListener, CommandListener {
+public class ChatManager implements Loadable, JoinEventListener, CommandListener {
 
     private TABAdditions plinstance;
-    private static ChatManager instance;
     private final Map<String,ChatFormat> formats = new HashMap<>();
     public final Map<TabPlayer,String> defformats = new HashMap<>();
 
@@ -59,14 +58,9 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
     public Map<TabPlayer,LocalDateTime> cooldown = new HashMap<>();
 
     public ChatManager() {
-        instance = this;
         load();
     }
 
-
-    public static ChatManager getInstance() {
-        return instance;
-    }
     public ChatFormat getFormat(TabPlayer p) {
         String format;
         if (defformats.containsKey(p))
@@ -118,12 +112,6 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         });
     }
 
-    public boolean isInRange(TabPlayer sender,TabPlayer viewer,int range) {
-        if (plinstance.getPlatform().getType() == PlatformType.BUNGEE) return true;
-        int zone = (int) Math.pow(range, 2);
-        return sender.getWorldName().equals(viewer.getWorldName()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
-    }
-
     public ChatFormat defFormat() {
         Map<String,Object> map = new HashMap<>();
         Map<String,Object> components = new HashMap<>();
@@ -135,11 +123,8 @@ public class ChatManager implements ChatEventListener, Loadable, JoinEventListen
         return new ChatFormat("default", map);
     }
 
-
-
-    @Override
-    public boolean onChat(TabPlayer p, String msg, boolean cancelled) {
-        if (cancelled || plinstance.isMuted(p)) return true;
+    public boolean onChat(TabPlayer p, String msg) {
+        if (plinstance.isMuted(p)) return true;
         if (cooldown.containsKey(p)) {
             long time = ChronoUnit.SECONDS.between(cooldown.get(p),LocalDateTime.now());
             if (time < cooldownTime) {

@@ -4,16 +4,19 @@ import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.TAFeature;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.event.BungeeTABLoadEvent;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.Placeholder;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
-import net.md_5.bungee.api.event.ServerSwitchEvent;
 import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
+import net.md_5.bungee.event.EventPriority;
 
 import java.util.Map;
 
@@ -23,6 +26,14 @@ public class BungeeEvents implements Listener {
     @EventHandler
     public void onTABLoad(BungeeTABLoadEvent e) {
         TABAdditions.getInstance().getPlatform().reload();
+    }
+
+    @EventHandler(priority = EventPriority.HIGHEST)
+    public void onChat(ChatEvent e) {
+        if (e.isCommand() || e.isCancelled()) return;
+        TAB tab = TAB.getInstance();
+        if (!tab.getFeatureManager().isFeatureEnabled(TAFeature.CHAT.toString())) return;
+        e.setCancelled(((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(tab.getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()),e.getMessage()));
     }
 
     @EventHandler

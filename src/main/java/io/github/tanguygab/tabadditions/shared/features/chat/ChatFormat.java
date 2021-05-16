@@ -1,9 +1,12 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
+import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import org.bukkit.entity.Player;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +48,7 @@ public class ChatFormat {
             if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
                 try {
                     int range = Integer.parseInt(cond.replace("!", "").replace("inRange:", ""));
-                    boolean result = ChatManager.getInstance().isInRange(sender, viewer, range);
+                    boolean result = isInRange(sender, viewer, range);
                     if (cond.startsWith("!") && result) return false;
                     if (!cond.startsWith("!") && !result) return false;
                 } catch (NumberFormatException ignored) {}
@@ -59,6 +62,12 @@ public class ChatFormat {
         }
         return true;
 
+    }
+
+    public boolean isInRange(TabPlayer sender,TabPlayer viewer,int range) {
+        if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE) return true;
+        int zone = (int) Math.pow(range, 2);
+        return sender.getWorldName().equals(viewer.getWorldName()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
     }
 
     public boolean hasRelationalPlaceholders() {
