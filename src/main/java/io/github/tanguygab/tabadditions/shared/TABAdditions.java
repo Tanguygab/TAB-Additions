@@ -228,45 +228,45 @@ public class TABAdditions {
             @Override
             public String get() {
                 int count = TAB.getInstance().getPlayers().size();
-                if (TAB.getInstance().getFeatureManager().isFeatureEnabled("Real Fake Players"))
-                    count = count+((RFPManager)TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
+                if (TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.RFP.toString()))
+                    count = count+((RFPManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString())).getRFPS().size();
                 return count+"";
             }
         });
         pm.registerPlaceholder(new PlayerPlaceholder("%canseeonlinerfp%",1000) {
             @Override
             public String get(TabPlayer p) {
-                int count = 0;
+                int count = TAB.getInstance().getPlayers().size();
                 try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p));}
                 catch (NumberFormatException ignored) {}
-                if (TAB.getInstance().getFeatureManager().isFeatureEnabled("Real Fake Players"))
-                    count = count + ((RFPManager) TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
+                if (TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.RFP.toString()))
+                    count = count + ((RFPManager) TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString())).getRFPS().size();
                 return count+"";
             }
         });
-        if (platform.getType()==PlatformType.SPIGOT) {
-            pm.registerPlaceholder(new PlayerPlaceholder("%canseeworldonline%", 1000) {
-                @Override
-                public String get(TabPlayer p) {
-                    int count = 0;
-                    for (TabPlayer all : TAB.getInstance().getPlayers())
-                        if (all.getWorldName().equals(p.getWorldName()) && ((Player) p.getPlayer()).canSee((Player) all.getPlayer()))
-                            count++;
-                    return count+"";
-                }
-            });
-            pm.registerPlaceholder(new PlayerPlaceholder("%canseeworldonlinerfp%",1000) {
-                @Override
-                public String get(TabPlayer p) {
-                    int count = 0;
-                    try {count = Integer.parseInt(parsePlaceholders("%canseeworldonline%",p));}
-                    catch (NumberFormatException ignored) {}
-                    if (TAB.getInstance().getFeatureManager().isFeatureEnabled("Real Fake Players"))
-                        count = count + ((RFPManager) TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
-                    return count+"";
-                }
-            });
-        } else {
+
+        pm.registerPlaceholder(new PlayerPlaceholder("%canseeworldonline%", 1000) {
+            @Override
+            public String get(TabPlayer p) {
+                int count = 0;
+                for (TabPlayer all : TAB.getInstance().getPlayers())
+                    if (all.getWorldName().equals(p.getWorldName()) && ((Player) p.getPlayer()).canSee((Player) all.getPlayer()))
+                        count++;
+                return count+"";
+            }
+        });
+        pm.registerPlaceholder(new PlayerPlaceholder("%canseeworldonlinerfp%",1000) {
+            @Override
+            public String get(TabPlayer p) {
+                int count = 0;
+                try {count = Integer.parseInt(parsePlaceholders("%canseeworldonline%",p));}
+                catch (NumberFormatException ignored) {}
+                if (TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.RFP.toString()))
+                    count = count + ((RFPManager) TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString())).getRFPS().size();
+                return count+"";
+            }
+        });
+        if (platform.getType()==PlatformType.BUNGEE) {
             pm.registerPlaceholder(new PlayerPlaceholder("%money%",1000) {
                 @Override
                 public String get(TabPlayer p) {
