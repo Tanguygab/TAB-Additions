@@ -38,7 +38,8 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     public void onChat(AsyncPlayerChatEvent e) {
         TAB tab = TAB.getInstance();
         if (!tab.getFeatureManager().isFeatureEnabled(TAFeature.CHAT.toString())) return;
-        e.setCancelled(((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(tab.getPlayer(e.getPlayer().getUniqueId()),e.getMessage()));
+        e.setCancelled(true);
+        ((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(tab.getPlayer(e.getPlayer().getUniqueId()),e.getMessage());
     }
 
     @Override

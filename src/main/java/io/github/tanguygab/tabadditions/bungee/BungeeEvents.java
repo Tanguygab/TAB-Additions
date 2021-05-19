@@ -33,7 +33,8 @@ public class BungeeEvents implements Listener {
         if (e.isCommand() || e.isCancelled()) return;
         TAB tab = TAB.getInstance();
         if (!tab.getFeatureManager().isFeatureEnabled(TAFeature.CHAT.toString())) return;
-        e.setCancelled(((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(tab.getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()),e.getMessage()));
+        e.setCancelled(true);
+        ((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(tab.getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()),e.getMessage());
     }
 
     @EventHandler

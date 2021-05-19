@@ -123,15 +123,15 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         return new ChatFormat("default", map);
     }
 
-    public boolean onChat(TabPlayer p, String msg) {
-        if (plinstance.isMuted(p)) return true;
+    public void onChat(TabPlayer p, String msg) {
+        if (plinstance.isMuted(p)) return;
         if (cooldown.containsKey(p)) {
             long time = ChronoUnit.SECONDS.between(cooldown.get(p),LocalDateTime.now());
             if (time < cooldownTime) {
                 p.sendMessage(TAB.getInstance().getConfiguration().translation
                         .getString("tab+_message_cooldown", "&cYou have to wait %seconds% more seconds!")
                         .replace("%seconds%", cooldownTime-time+""), true);
-                return true;
+                return;
             }
             cooldown.remove(p);
         }
@@ -171,7 +171,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                 else if (getFormat(p).isViewConditionMet(p,null) && !discord.getOptionalChannel(format.getChannel()).equals(discord.getMainChatChannel())) discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()),msg, discord.getOptionalChannel(format.getChannel()),false);
             }
 
-        return true;
+        return;
     }
 
     public IChatBaseComponent createmsg(TabPlayer p, String msg, ChatFormat format, TabPlayer viewer) {
