@@ -3,6 +3,7 @@ package io.github.tanguygab.tabadditions.bungee;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
@@ -33,6 +34,8 @@ public class BungeeEvents implements Listener {
         if (e.isCommand() || e.isCancelled()) return;
         TAB tab = TAB.getInstance();
         if (!tab.getFeatureManager().isFeatureEnabled(TAFeature.CHAT.toString())) return;
+        if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("chat-from-bukkit-bridge",false))
+            return;
         e.setCancelled(true);
         ((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(tab.getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()),e.getMessage());
     }
@@ -42,10 +45,16 @@ public class BungeeEvents implements Listener {
         if (!e.getTag().equalsIgnoreCase("tabadditions:channel")) return;
         ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
         String subChannel = in.readUTF();
+        TAB tab = TAB.getInstance();
+        TabPlayer p = tab.getPlayer(((ProxiedPlayer) e.getReceiver()).getUniqueId());
+        if (subChannel.equalsIgnoreCase("Chat")) {
+            String msg = in.readUTF();
+            ((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(p,msg);
+            return;
+        }
         if (subChannel.equalsIgnoreCase("PlaceholderAPI")) {
             String type = in.readUTF().toLowerCase();
             String value = "";
-            TabPlayer p = TAB.getInstance().getPlayer(((ProxiedPlayer) e.getReceiver()).getUniqueId());
             String result = "";
             switch (type) {
                 case "scoreboard_visible":
@@ -58,9 +67,9 @@ public class BungeeEvents implements Listener {
                     result = ""+p.isPreviewingNametag();
                     break;
                 case "replace":
-                    if (TAB.getInstance().getConfiguration().premiumconfig != null) {
-                        String output = TAB.getInstance().getPlatform().replaceAllPlaceholders(value,p);
-                        Map<Object, String> replacements = TAB.getInstance().getConfiguration().premiumconfig.getConfigurationSection("placeholder-output-replacements." + value);
+                    if (tab.getConfiguration().premiumconfig != null) {
+                        String output = tab.getPlatform().replaceAllPlaceholders(value,p);
+                        Map<Object, String> replacements = tab.getConfiguration().premiumconfig.getConfigurationSection("placeholder-output-replacements." + value);
                         result =  Placeholder.findReplacement(replacements, output).replace("%value%", output);
                     }
                     break;
