@@ -21,6 +21,7 @@ import me.neznamy.tab.shared.rgb.TextColor;
 import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -96,7 +97,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         mentionForEveryone = config.getBoolean("mention.output-for-everyone",true);
         mentionInput = config.getString("mention.input","@%player%");
         mentionOutput = config.getString("mention.output","&b@%player%");
-        mentionOutput = config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING");
+        mentionSound = config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING");
 
         emojis = config.getConfigurationSection("emojis");
         emojiUntranslate = config.getBoolean("block-emojis-without-permission",false);
@@ -326,7 +327,9 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                                             subcomp3.setText(subcomp3.getText().replaceAll("(?i)"+TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p), TABAdditions.getInstance().parsePlaceholders(mentionOutput, p,viewer,p)));
                                             if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
                                                 Player player = (Player) p.getPlayer();
-                                                player.playSound(player.getLocation(), mentionSound,1,1);
+                                                try {
+                                                    player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);
+                                                } catch (Exception ignored) {}
                                             }
                                         }
                                     }
