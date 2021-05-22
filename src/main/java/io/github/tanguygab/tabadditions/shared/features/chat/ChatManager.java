@@ -265,9 +265,9 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public IChatBaseComponent itemcheck(TabPlayer p, IChatBaseComponent comp, String msg, TabPlayer viewer) {
 
         List<IChatBaseComponent> msglist = new ArrayList<>();
-        String[] list = TABAdditions.getInstance().parsePlaceholders(comp.getText(),p,viewer,p).split("%msg%");
-        if (list.length < 1) return comp;
-        msglist.add(new IChatBaseComponent(list[0]));
+        List<String> list = new ArrayList<>(Arrays.asList(TABAdditions.getInstance().parsePlaceholders(comp.getText(),p,viewer,p).split("%msg%")));
+        if (list.size() < 1) list.add("");
+        msglist.add(new IChatBaseComponent(list.get(0)));
 
         ItemStack item;
         try {item = ((Player) p.getPlayer()).getInventory().getItemInMainHand();}
@@ -308,7 +308,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
 
         }
 
-        if (list.length > 1) msglist.add(new IChatBaseComponent(list[1]));
+        if (list.size() > 1) msglist.add(new IChatBaseComponent(list.get(1)));
         itemmsg.setExtra(msglist);
         comp.setExtra(msglist);
         comp.setText("");
