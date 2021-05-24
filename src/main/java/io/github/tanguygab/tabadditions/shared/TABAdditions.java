@@ -22,7 +22,7 @@ import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
-import org.geysermc.floodgate.FloodgateAPI;
+import org.geysermc.floodgate.api.FloodgateApi;
 
 public class TABAdditions {
 
@@ -51,8 +51,6 @@ public class TABAdditions {
     public boolean rfpEnabled;
     public boolean onlyyou = false;
     public boolean unlimitedItemLines = false;
-
-    public boolean floodgate = false;
 
     public TABAdditions(Platform platform, Object plugin,File dataFolder) {
         this.dataFolder = dataFolder;
@@ -377,8 +375,8 @@ public class TABAdditions {
     }
 
     public boolean checkBedrock(TabPlayer p) {
-        if (!floodgate) return false;
-        return FloodgateAPI.isBedrockPlayer(p.getUniqueId());
+        if (!platform.isPluginEnabled("Floodgate")) return false;
+        return FloodgateApi.getInstance().isFloodgatePlayer(p.getUniqueId());
     }
 
     public boolean isMuted(TabPlayer p) {

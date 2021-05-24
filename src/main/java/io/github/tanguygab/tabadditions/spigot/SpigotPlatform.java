@@ -50,7 +50,6 @@ public class SpigotPlatform extends Platform {
 
 		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
 			new TABAdditionsExpansion(plugin).register();
-		TABAdditions.getInstance().floodgate = Bukkit.getPluginManager().getPlugin("Floodgate") != null;
 	}
 
 	@Override

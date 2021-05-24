@@ -29,6 +29,7 @@ repositories {
     }
     maven { url 'https://nexus.scarsz.me/content/groups/public/' }
     maven { url 'https://nexus.vankka.dev/repository/maven-public/'}
+    maven { url 'https://repo.nukkitx.com/maven-snapshots'}
 
 }
 
@@ -40,7 +41,7 @@ dependencies {
     compileOnly 'com.discordsrv:discordsrv:1.21.1'
     compileOnly files('../TAB.jar')
     compile 'org.apache.commons:commons-lang3:3.5'
-    compileOnly files('../FloodgateBungee.jar')
+    compileOnly 'org.geysermc.floodgate:api:2.0-SNAPSHOT'
     compileOnly files('../AdvancedBan.jar')
 
 }

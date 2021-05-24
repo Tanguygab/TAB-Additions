@@ -44,7 +44,6 @@ public class BungeePlatform extends Platform {
 		TABAdditions.getInstance().reload();
 		plugin.getProxy().getPluginManager().unregisterListeners(plugin);
 		plugin.getProxy().getPluginManager().registerListener(plugin, new BungeeEvents());
-		TABAdditions.getInstance().floodgate = plugin.getProxy().getPluginManager().getPlugin("Floodgate") != null;
 	}
 
 	@Override
