@@ -42,6 +42,9 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
+	public void registerPlaceholders() {}
+
+	@Override
 	public void reload() {
 		TABAdditions.getInstance().reload();
 

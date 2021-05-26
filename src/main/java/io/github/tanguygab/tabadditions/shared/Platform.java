@@ -10,6 +10,8 @@ public abstract class Platform {
 
 	public abstract String getVersion();
 
+	public abstract void registerPlaceholders();
+
 	public abstract void reload();
 
 	public abstract void disable();

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import io.github.tanguygab.tabadditions.bungee.TABAdditionsBungeeCord;
 import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
@@ -20,6 +21,10 @@ import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import net.md_5.bungee.api.Callback;
+import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.ServerPing;
+import net.md_5.bungee.api.config.ServerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -242,8 +247,8 @@ public class TABAdditions {
                 return count+"";
             }
         });
-
-        pm.registerPlaceholder(new PlayerPlaceholder("%canseeworldonline%", 1000) {
+        String world = platform.getType() == PlatformType.SPIGOT ? "world" : "server";
+        pm.registerPlaceholder(new PlayerPlaceholder("%cansee"+world+"online%", 1000) {
             @Override
             public String get(TabPlayer p) {
                 int count = 0;
@@ -253,53 +258,18 @@ public class TABAdditions {
                 return count+"";
             }
         });
-        pm.registerPlaceholder(new PlayerPlaceholder("%canseeworldonlinerfp%",1000) {
+        pm.registerPlaceholder(new PlayerPlaceholder("%cansee"+world+"onlinerfp%",1000) {
             @Override
             public String get(TabPlayer p) {
                 int count = 0;
-                try {count = Integer.parseInt(parsePlaceholders("%canseeworldonline%",p));}
+                try {count = Integer.parseInt(parsePlaceholders("%cansee"+world+"online%",p));}
                 catch (NumberFormatException ignored) {}
                 if (TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.RFP.toString()))
                     count = count + ((RFPManager) TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString())).getRFPS().size();
                 return count+"";
             }
         });
-        if (platform.getType()==PlatformType.BUNGEE) {
-            pm.registerPlaceholder(new PlayerPlaceholder("%money%",1000) {
-                @Override
-                public String get(TabPlayer p) {
-                    return new Property(p,"%vault_eco_balance%").updateAndGet();
-                }
-            });
-            pm.registerPlaceholder(new PlayerPlaceholder("%deaths%",1000) {
-                @Override
-                public String get(TabPlayer p) {
-                    return new Property(p,"%statistic_deaths%").updateAndGet();
-                }
-            });
-            pm.registerPlaceholder(new PlayerPlaceholder("%health%",100) {
-                @Override
-                public String get(TabPlayer p) {
-                    return new Property(p,"%player_health%").updateAndGet();
-                }
-            });
-            pm.registerPlaceholder(new ServerPlaceholder("%tps%",1000) {
-                @Override
-                public String get() {
-                    return new Property(null,"%vault_eco_balance%").updateAndGet();
-                }
-            });
-            pm.registerPlaceholder(new PlayerPlaceholder("%afk%",500) {
-                @Override
-                public String get(TabPlayer p) {
-                    String afk = new Property(p,"%essentials_afk%").updateAndGet();
-                    String output;
-                    if (afk.equals("yes")) output = TAB.getInstance().getConfiguration().config.getString("placeholders.afk-yes"," &4*&4&lAFK&4*&r");
-                    else output = TAB.getInstance().getConfiguration().config.getString("placeholders.afk-no","");
-                    return output;
-                }
-            });
-        }
+        platform.registerPlaceholders();
     }
 
     public String parsePlaceholders(String str, TabPlayer p) {
