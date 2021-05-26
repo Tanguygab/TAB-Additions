@@ -41,7 +41,7 @@ public class SitHideNametag implements Loadable, Listener {
     public void onDismount(EntityDismountEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
         TabPlayer p = TAB.getInstance().getPlayer(e.getEntity().getUniqueId());
-        if (!tag.get(p))
+        if (tag.containsKey(p) && !tag.get(p))
             p.showNametag();
     }
 
