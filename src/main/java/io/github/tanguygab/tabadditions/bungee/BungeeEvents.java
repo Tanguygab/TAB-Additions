@@ -49,7 +49,8 @@ public class BungeeEvents implements Listener {
         TabPlayer p = tab.getPlayer(((ProxiedPlayer) e.getReceiver()).getUniqueId());
         if (subChannel.equalsIgnoreCase("Chat")) {
             String msg = in.readUTF();
-            ((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(p,msg);
+            if (tab.getFeatureManager().isFeatureEnabled(TAFeature.CHAT.toString()))
+                ((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(p,msg);
             return;
         }
         if (subChannel.equalsIgnoreCase("PlaceholderAPI")) {
