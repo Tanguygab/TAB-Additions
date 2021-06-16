@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
-import io.github.tanguygab.tabadditions.bungee.TABAdditionsBungeeCord;
 import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
@@ -21,10 +20,6 @@ import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
-import net.md_5.bungee.api.Callback;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.ServerPing;
-import net.md_5.bungee.api.config.ServerInfo;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.api.FloodgateApi;
@@ -313,7 +308,10 @@ public class TABAdditions {
             }
             str = pm.color(str);
         } catch (Exception e) {
-            if (attempts == 3) return "";
+            if (attempts == 10) {
+                e.printStackTrace();
+                return "";
+            }
             attempts=attempts+1;
             return parsePlaceholders(str,p,attempts);
         }
