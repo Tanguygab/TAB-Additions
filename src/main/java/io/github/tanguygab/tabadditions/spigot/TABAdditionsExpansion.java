@@ -1,6 +1,8 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.TAFeature;
+import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.neznamy.tab.api.TABAPI;
@@ -11,7 +13,6 @@ import org.bukkit.plugin.Plugin;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 public class TABAdditionsExpansion extends PlaceholderExpansion {
@@ -29,7 +30,7 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
 
     @Override
     public List<String> getPlaceholders() {
-        return new ArrayList<>(Arrays.asList("%tabadditions_tag_visible%", "%tabadditions_fakeplayers_amount%"));
+        return new ArrayList<>(Arrays.asList("%tabadditions_tag_visible%", "%tabadditions_fakeplayers_amount%","%tabadditions_layout_activated%"));
     }
 
     @Override
@@ -51,13 +52,15 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, String identifier){
 
         if (identifier.equals("fakeplayers_amount") && TABAdditions.getInstance().rfpEnabled)
-            return ((RFPManager)TAB.getInstance().getFeatureManager().getFeature("Real Fake Players")).getRFPS().size()+"";
+            return ((RFPManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString())).getRFPS().size()+"";
 
         if (player == null) return "";
         TabPlayer p = TABAPI.getPlayer(player.getUniqueId());
         if (p == null) return "";
 
         if (identifier.equals("tag_visible")) return !p.hasHiddenNametag()+"";
+        if (identifier.equals("layout_activated") && TABAdditions.getInstance().layoutEnabled)
+            return !((LayoutManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.TA_LAYOUT.toString())).toggledOff.contains(p)+"";
 
 
 
