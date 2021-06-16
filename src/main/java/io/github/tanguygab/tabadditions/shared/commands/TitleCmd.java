@@ -1,9 +1,12 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
+import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.packets.PacketPlayOutTitle;
+import net.md_5.bungee.api.Title;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import org.bukkit.entity.Player;
 
 import java.util.List;
 
@@ -30,9 +33,8 @@ public class TitleCmd {
         }
         title = instance.parsePlaceholders(title,p);
         subtitle = instance.parsePlaceholders(subtitle,p);
-        p.sendCustomPacket(PacketPlayOutTitle.title(title));
-        p.sendCustomPacket(PacketPlayOutTitle.subtitle(subtitle));
-        p.sendCustomPacket(PacketPlayOutTitle.times(fadeIn,stay,fadeOut));
+
+        instance.getPlatform().sendTitle(p,title,subtitle,fadeIn,stay,fadeOut);
     }
 
 }

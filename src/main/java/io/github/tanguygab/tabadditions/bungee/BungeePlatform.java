@@ -11,6 +11,9 @@ import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
 import net.md_5.bungee.api.ProxyServer;
+import net.md_5.bungee.api.Title;
+import net.md_5.bungee.api.chat.TextComponent;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
 public class BungeePlatform extends Platform {
@@ -90,6 +93,17 @@ public class BungeePlatform extends Platform {
 				}
 			});
 		}
+	}
+
+	@Override
+	public void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout) {
+		Title t = plugin.getProxy().createTitle()
+				.title(new TextComponent(title))
+				.subTitle(new TextComponent(subtitle))
+				.fadeIn(fadein)
+				.stay(stay)
+				.fadeOut(fadeout);
+		((ProxiedPlayer)p.getPlayer()).sendTitle(t);
 	}
 
 	@Override
