@@ -35,8 +35,8 @@ repositories {
 
 dependencies {
     compileOnly files('../nms.jar')
-    compileOnly 'net.md-5:bungeecord-proxy:1.16-R0.5-SNAPSHOT'
-    compileOnly 'org.spigotmc:spigot-api:1.16.5-R0.1-SNAPSHOT'
+    compileOnly 'net.md-5:bungeecord-proxy:1.17-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.17-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.10.9'
     compileOnly 'com.discordsrv:discordsrv:1.21.1'
     compileOnly files('../TAB.jar')
