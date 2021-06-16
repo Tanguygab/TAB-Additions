@@ -115,8 +115,6 @@ public class Skins {
         }
         if (icon.startsWith("player-head:")) {
             icon = icon.replace("player-head:", "");
-            if (TAB.getInstance().getPlayer(icon) != null)
-                skin = TAB.getInstance().getPlayer(icon).getSkin();
             props = getPropPlayer(icon);
 
         }
