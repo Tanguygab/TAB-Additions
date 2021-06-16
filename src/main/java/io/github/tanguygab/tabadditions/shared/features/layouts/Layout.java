@@ -7,11 +7,9 @@ import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.AlignedSuffix;
-import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardScore;
-import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -250,7 +248,7 @@ public class Layout {
                     pInSet = pset.get(inList);
                 boolean vanished = false;
                 if (pInSet != null) {
-                    if (setConfig.get("vanished") != null && !(boolean) setConfig.get("vanished")) {
+                    if (setConfig.get("vanished") == null || !(boolean) setConfig.get("vanished")) {
                         if (instance.getPlatform().getType() == PlatformType.SPIGOT && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
                             vanished = true;
                         else vanished = p.isVanished();
@@ -326,7 +324,7 @@ public class Layout {
                             suffix = format.split("\\|\\|")[1];
                         AlignedSuffix alignedSuffix = (AlignedSuffix) TAB.getInstance().getFeatureManager().getFeature("alignedsuffix");
                         if (alignedSuffix != null)
-                            format = alignedSuffix.formatNameAndUpdateLeader(pInSet, prefixName, suffix);
+                            format = alignedSuffix.formatName(prefixName, suffix);
                     }
 
                     String latency = setConfig.get("latency") + "";
