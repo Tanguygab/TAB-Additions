@@ -19,6 +19,7 @@ import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 import java.util.*;
 
 public class LayoutManager implements Loadable, JoinEventListener, CommandListener, QuitEventListener {
+
     private static LayoutManager instance;
 
     private String togglecmd;
@@ -230,5 +231,10 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
                         return l.lists(l.listsnames.get(list),p).size()+"";
                     }});
         }
+        pm.registerPlaceholder(new PlayerPlaceholder("%layout-activated%", 100) {
+            @Override
+            public String get(TabPlayer p) {
+                return !toggledOff.contains(p)+"";
+            }});
     }
 }
