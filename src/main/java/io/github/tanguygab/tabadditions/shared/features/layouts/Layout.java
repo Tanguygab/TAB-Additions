@@ -411,7 +411,7 @@ public class Layout {
     public void sendPackets(Map<TabPlayer, Map<Integer, String>> skins, TabPlayer p, PacketPlayOutPlayerInfo.PlayerInfoData fp, Object skin, int lat, String text, int i, String icon, String latency, String yellownumber) {
         if (!placeholdersToRefresh.containsKey(p) || !placeholdersToRefresh.get(p).containsKey(i))
             return;
-        if (!skins.containsKey(p) || (skin != null && !skins.get(p).get(i).equals(icon))) {
+        if (!skins.containsKey(p) || (skin != null && !icon.equals(skins.get(p).get(i)))) {
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, lat, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
         } else if (!placeholdersToRefresh.get(p).get(i).get("text").equals("text"))
@@ -456,7 +456,7 @@ public class Layout {
             Map<String,Object> slot = (Map<String, Object>) slots.get(shape3[i]);
             String text = "";
 
-            if (!slot.isEmpty()) {
+            if (slot != null && !slot.isEmpty()) {
                 if ("players".equalsIgnoreCase(slot.get("type") + "")) {
                     List<Integer> ids = new ArrayList<>();
                     if (playersets.containsKey(slot))
