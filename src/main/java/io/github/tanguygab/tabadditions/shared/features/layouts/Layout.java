@@ -246,16 +246,8 @@ public class Layout {
                 TabPlayer pInSet = null;
                 if (pset.size() > inList)
                     pInSet = pset.get(inList);
-                boolean vanished = false;
-                if (pInSet != null) {
-                    if (setConfig.get("vanished") == null || !(boolean) setConfig.get("vanished")) {
-                        if (instance.getPlatform().getType() == PlatformType.SPIGOT && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
-                            vanished = true;
-                        else vanished = pInSet.isVanished();
-                    }
-                }
 
-                if (pset.size() <= inList || vanished || pInSet == null) {
+                if (pset.size() <= inList || pInSet == null) {
                     String format = "";
                     Object skin = null;
                     String icon = "";
@@ -385,6 +377,11 @@ public class Layout {
         if (section.get("condition") != null && !section.get("condition").toString().equals("")) {
             String cond = section.get("condition")+"";
             list.removeIf(p -> !instance.isConditionMet( instance.parsePlaceholders(cond, p, viewer,p), p));
+        }
+        if (section.get("vanished") == null || !Boolean.parseBoolean(""+section.get("vanished"))) {
+            if (instance.getPlatform().getType() == PlatformType.SPIGOT)
+                list.removeIf(p -> !viewer.hasPermission("tab.seevanished") && !((Player) viewer.getPlayer()).canSee(((Player) p.getPlayer())));
+            else list.removeIf(p -> !viewer.hasPermission("tab.seevanished") && p.isVanished());
         }
 
         if (!section.containsKey("sorting")) {
