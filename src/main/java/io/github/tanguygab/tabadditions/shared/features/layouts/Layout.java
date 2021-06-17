@@ -251,7 +251,7 @@ public class Layout {
                     if (setConfig.get("vanished") == null || !(boolean) setConfig.get("vanished")) {
                         if (instance.getPlatform().getType() == PlatformType.SPIGOT && !((Player) p.getPlayer()).canSee(((Player) pInSet.getPlayer())))
                             vanished = true;
-                        else vanished = p.isVanished();
+                        else vanished = pInSet.isVanished();
                     }
                 }
 
