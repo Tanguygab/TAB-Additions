@@ -17,7 +17,6 @@ import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.rgb.RGBUtils;
 import me.neznamy.tab.shared.rgb.TextColor;
-import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -273,7 +272,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
 
         IChatBaseComponent itemmsg = new IChatBaseComponent("");
         List<String> ar = new ArrayList<>(Arrays.asList(msg.split(Pattern.quote(itemInput))));
-        int itemcount = StringUtils.countMatches(msg,itemInput);
+        int itemcount = countMatches(msg,itemInput);
 
         if (ar.isEmpty()) ar.add("");
         for (String txt2 : ar) {
@@ -338,6 +337,21 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                 }
             }
         return msg;
+    }
+
+    public int countMatches(CharSequence str, CharSequence sub) {
+        if (str != null &&  str.length() != 0 && sub != null && sub.length() != 0) {
+            int count = 0;
+
+            for(int idx = 0; (idx = str.toString().indexOf(sub.toString(),idx)) != -1; idx += sub.length()) {
+                ++count;
+            }
+
+
+            return count;
+        } else {
+            return 0;
+        }
     }
 
 
