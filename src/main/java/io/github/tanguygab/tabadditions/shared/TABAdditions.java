@@ -325,8 +325,35 @@ public class TABAdditions {
                 if (!cond.startsWith("!") && !condition.isMet(p)) return false;
             }
         }
-
         return true;
+    }
+
+    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer) {
+        if (sender == null || viewer == null) return false;
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,viewer);
+        for (String cond : conditionname.split(";")) {
+            if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
+                try {
+                    int range = Integer.parseInt(cond.replace("!", "").replace("inRange:", ""));
+                    boolean result = isInRange(sender, viewer, range);
+                    if (cond.startsWith("!") && result) return false;
+                    if (!cond.startsWith("!") && !result) return false;
+                } catch (NumberFormatException ignored) {}
+            } else {
+                Condition condition = Condition.getCondition(cond.replace("!",""));
+                if (condition != null) {
+                    if (cond.startsWith("!") && condition.isMet(viewer)) return false;
+                    if (!cond.startsWith("!") && !condition.isMet(viewer)) return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    public boolean isInRange(TabPlayer sender,TabPlayer viewer,int range) {
+        if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE) return true;
+        int zone = (int) Math.pow(range, 2);
+        return sender.getWorldName().equals(viewer.getWorldName()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
     }
 
     public void sendMessage(String name,String msg) {

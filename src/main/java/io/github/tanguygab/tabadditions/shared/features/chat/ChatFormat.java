@@ -1,11 +1,9 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
-import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
-import org.bukkit.entity.Player;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,32 +40,8 @@ public class ChatFormat {
 
     public boolean isViewConditionMet(TabPlayer sender, TabPlayer viewer) {
         if (!config.containsKey("view-condition") || config.get("view-condition").equals("")) return true;
-        if (sender == null || viewer == null) return false;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(config.get("view-condition")+"",sender,viewer,viewer);
-        for (String cond : conditionname.split(";")) {
-            if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
-                try {
-                    int range = Integer.parseInt(cond.replace("!", "").replace("inRange:", ""));
-                    boolean result = isInRange(sender, viewer, range);
-                    if (cond.startsWith("!") && result) return false;
-                    if (!cond.startsWith("!") && !result) return false;
-                } catch (NumberFormatException ignored) {}
-            } else {
-                Condition condition = Condition.getCondition(cond.replace("!",""));
-                if (condition != null) {
-                    if (cond.startsWith("!") && condition.isMet(viewer)) return false;
-                    if (!cond.startsWith("!") && !condition.isMet(viewer)) return false;
-                }
-            }
-        }
-        return true;
+        return TABAdditions.getInstance().isConditionMet(config.get("view-condition")+"",sender,viewer);
 
-    }
-
-    public boolean isInRange(TabPlayer sender,TabPlayer viewer,int range) {
-        if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE) return true;
-        int zone = (int) Math.pow(range, 2);
-        return sender.getWorldName().equals(viewer.getWorldName()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
     }
 
     public boolean hasRelationalPlaceholders() {
