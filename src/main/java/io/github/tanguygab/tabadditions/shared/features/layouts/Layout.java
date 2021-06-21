@@ -368,7 +368,9 @@ public class Layout {
             separator = section.get("separator");
         input = instance.parsePlaceholders(input, p);
 
-        return new ArrayList<>(Arrays.asList(input.split(separator)));
+        List<String> list = new ArrayList<>(Arrays.asList(input.split(separator)));
+        if (list.size() == 1 && list.get(0).equals("")) list.clear();
+        return list;
     }
     protected List<TabPlayer> playerSet(Object slot, TabPlayer viewer) {
         Map<String,Object> section = (Map<String, Object>) slot;
@@ -376,7 +378,7 @@ public class Layout {
         List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
         if (section.get("condition") != null && !section.get("condition").toString().equals("")) {
             String cond = section.get("condition")+"";
-            list.removeIf(p -> !instance.isConditionMet( instance.parsePlaceholders(cond, p, viewer,p), p));
+            list.removeIf(p -> !instance.isConditionMet(cond,p, viewer));
         }
         if (section.get("vanished") == null || !Boolean.parseBoolean(""+section.get("vanished"))) {
             if (instance.getPlatform().getType() == PlatformType.SPIGOT)
