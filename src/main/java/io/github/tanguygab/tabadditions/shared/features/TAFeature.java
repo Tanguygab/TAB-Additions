@@ -2,7 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 public enum TAFeature {
 
-    ACTIONBAR("ActionBar&r"),
+    ACTIONBAR("ActionBar"),
     TITLE("Title"),
     CHAT("Chat"),
     TA_LAYOUT("TAB+ Layout"),
