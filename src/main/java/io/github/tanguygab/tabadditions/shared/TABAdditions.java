@@ -120,7 +120,7 @@ public class TABAdditions {
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
                 onlyyou = config.getBoolean("features.only-you",false);
-                if (config.hasConfigOption("features.unlimited-item-lines") && Bukkit.getServer().getClass().getPackage().getName().split("\\.")[3].equals("v1_16_R3"))
+                if (config.hasConfigOption("features.unlimited-item-lines") && Bukkit.getServer().getVersion().split(" ")[2].equals("1.17)"))
                     unlimitedItemLines = config.getBoolean("features.unlimited-item-lines");
 
             }
@@ -199,6 +199,13 @@ public class TABAdditions {
         //Unlimited Item Lines
         if (TAB.getInstance().getFeatureManager().isFeatureEnabled("nametagx") && unlimitedItemLines)
             fm.registerFeature(TAFeature.UNLIMITED_ITEM_LINES.toString(), new UnlimitedItemLines());
+
+        PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
+        for (ConfigType cfg : ConfigType.values())
+            if (cfg != ConfigType.SKINS)
+                pm.findAllUsed(TABAdditions.getInstance().getConfig(cfg).getValues());
+        pm.registerPlaceholders();
+        pm.refreshPlaceholderUsage();
     }
 
     private void loadPlaceholders() {
@@ -267,9 +274,6 @@ public class TABAdditions {
         platform.registerPlaceholders();
     }
 
-    public String parsePlaceholders(String str, TabPlayer p) {
-        return parsePlaceholders(str, p, 0);
-    }
     public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabPlayer def) {
 
         List<String> list = TAB.getInstance().getPlaceholderManager().detectAll(str);
@@ -296,26 +300,15 @@ public class TABAdditions {
         return str;
     }
 
-    public String parsePlaceholders(String str, TabPlayer p, int attempts) {
+    public String parsePlaceholders(String str, TabPlayer p) {
         if (str == null) return "";
         if (p == null) return str;
         PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
         List<String> placeholders = pm.detectAll(str);
-        try {
             for (String pl : placeholders) {
-                pm.categorizeUsedPlaceholder(pl);
-                str = str.replace(pl, TAB.getInstance().getPlatform().replaceAllPlaceholders(pl, p));
+                str = str.replace(pl, new Property(p,pl).getFormat(p));
             }
             str = pm.color(str);
-        } catch (Exception e) {
-            if (attempts == 10) {
-                e.printStackTrace();
-                return "";
-            }
-            attempts=attempts+1;
-            return parsePlaceholders(str,p,attempts);
-        }
-
         return str;
     }
 
