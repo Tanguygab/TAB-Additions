@@ -4,12 +4,18 @@ import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.platforms.bukkit.features.unlimitedtags.BukkitArmorStand;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.cpu.TabFeature;
-import net.minecraft.server.v1_16_R3.*;
+import net.minecraft.network.protocol.game.PacketPlayOutEntityMetadata;
+import net.minecraft.network.protocol.game.PacketPlayOutEntityVelocity;
+import net.minecraft.network.protocol.game.PacketPlayOutSpawnEntity;
+import net.minecraft.network.syncher.DataWatcher;
+import net.minecraft.network.syncher.DataWatcherObject;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.EntityItem;
+import net.minecraft.world.phys.Vec3D;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.craftbukkit.v1_16_R3.CraftWorld;
-import org.bukkit.craftbukkit.v1_16_R3.inventory.CraftItemStack;
+import org.bukkit.craftbukkit.v1_17_R1.CraftWorld;
+import org.bukkit.craftbukkit.v1_17_R1.inventory.CraftItemStack;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -46,17 +52,11 @@ public class BukkitItemLine extends BukkitArmorStand {
             EntityItem item = new EntityItem(((CraftWorld) p.getWorld()).getHandle(), loc.getX(), loc.getY(), loc.getZ(), CraftItemStack.asNMSCopy(itemStack));
             item.e(getEntityId());
             item.setMot(new Vec3D(0, 0, 0));
-            item.velocityChanged = true;
+            item.setNoGravity(true);
 
 
             PacketPlayOutSpawnEntity spawnItem = new PacketPlayOutSpawnEntity(item);
-
-            DataWatcher dataWatcher = item.getDataWatcher();
-            Field gravity = Entity.class.getDeclaredField("at");
-            gravity.setAccessible(true);
-            dataWatcher.set((DataWatcherObject<Boolean>) gravity.get(null), true);
-            PacketPlayOutEntityMetadata data = new PacketPlayOutEntityMetadata(item.getId(), dataWatcher, true);
-
+            PacketPlayOutEntityMetadata data = new PacketPlayOutEntityMetadata(item.getId(), item.getDataWatcher(), true);
             PacketPlayOutEntityVelocity velocity = new PacketPlayOutEntityVelocity(item);
 
             return new Object[]{spawnItem,data,velocity};
