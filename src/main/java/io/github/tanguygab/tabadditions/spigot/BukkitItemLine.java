@@ -30,7 +30,7 @@ public class BukkitItemLine extends BukkitArmorStand {
     public boolean glow;
 
     public BukkitItemLine(int entityId, TabPlayer owner, Property property, double yOffset, boolean staticOffset, boolean glow) {
-        super(entityId, owner, property, yOffset, staticOffset);
+        super(entityId, owner, property, yOffset, staticOffset, false);
         this.entityId = entityId;
         prop = property;
         this.glow = glow;

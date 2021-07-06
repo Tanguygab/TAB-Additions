@@ -126,7 +126,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         if (cooldown.containsKey(p)) {
             long time = ChronoUnit.SECONDS.between(cooldown.get(p),LocalDateTime.now());
             if (time < cooldownTime) {
-                p.sendMessage(TAB.getInstance().getConfiguration().translation
+                p.sendMessage(TAB.getInstance().getConfiguration().getTranslation()
                         .getString("tab+_message_cooldown", "&cYou have to wait %seconds% more seconds!")
                         .replace("%seconds%", cooldownTime-time+""), true);
                 return;
@@ -376,7 +376,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public boolean onCommand(TabPlayer p, String msg) {
         msg = msg.replaceFirst("/","");
         YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
-        ConfigurationFile playerdata = TAB.getInstance().getConfiguration().playerdata;
+        ConfigurationFile playerdata = TAB.getInstance().getConfiguration().getPlayerDataFile();
         if (playerdata == null) {
             File file = new File(TAB.getInstance().getPlatform().getDataFolder(), "playerdata.yml");
             try {
@@ -387,7 +387,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                 TAB.getInstance().getErrorManager().criticalError("Failed to load playerdata.yml", error);
             }
         }
-        ConfigurationFile translation = TAB.getInstance().getConfiguration().translation;
+        ConfigurationFile translation = TAB.getInstance().getConfiguration().getTranslation();
 
         if (msg.equals("togglemsg")) {
             List<String> list = TAB.getInstance().getConfiguration().getPlayerData("togglemsg");

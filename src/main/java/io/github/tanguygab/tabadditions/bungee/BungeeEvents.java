@@ -68,9 +68,9 @@ public class BungeeEvents implements Listener {
                     result = ""+p.isPreviewingNametag();
                     break;
                 case "replace":
-                    if (tab.getConfiguration().premiumconfig != null) {
+                    if (tab.getConfiguration().getPremiumConfig() != null) {
                         String output = tab.getPlatform().replaceAllPlaceholders(value,p);
-                        Map<Object, String> replacements = tab.getConfiguration().premiumconfig.getConfigurationSection("placeholder-output-replacements." + value);
+                        Map<Object, String> replacements = tab.getConfiguration().getPremiumConfig().getConfigurationSection("placeholder-output-replacements." + value);
                         result =  Placeholder.findReplacement(replacements, output).replace("%value%", output);
                     }
                     break;
@@ -86,7 +86,7 @@ public class BungeeEvents implements Listener {
                     if (prop != null) {
                         if (value.endsWith("_raw"))
                             result = prop.getCurrentRawValue();
-                        else result = prop.lastReplacedValue;
+                        else result = prop.get();
                     }
                     type = value;
                     break;

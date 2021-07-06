@@ -335,7 +335,7 @@ public class Layout {
                         try {Integer.parseInt(yellownumber);}
                         catch (Exception ignored) {yellownumber = "0";}
                     } else {
-                        yellownumber = instance.parsePlaceholders(TAB.getInstance().getConfiguration().config.getString("yellow-number-in-tablist","").replace("%place%",inList+1+""), pInSet, p, pInSet);
+                        yellownumber = instance.parsePlaceholders(TAB.getInstance().getConfiguration().getConfig().getString("yellow-number-in-tablist","").replace("%place%",inList+1+""), pInSet, p, pInSet);
                         try {Integer.parseInt(yellownumber);}
                         catch (Exception ignored) {yellownumber = "0";}
                     }
@@ -412,18 +412,18 @@ public class Layout {
             return;
 
         if (!skins.containsKey(p) || (skin != null && !icon.equals(skins.get(p).get(i)))) {
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId)));
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.name, fp.uniqueId, skin, lat, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId())));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getName(), fp.getUniqueId(), skin, lat, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
         } else if (!placeholdersToRefresh.get(p).get(i).get("text").equals(text))
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId, IChatBaseComponent.fromColoredText(text))));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId(), IChatBaseComponent.fromColoredText(text))));
         placeholdersToRefresh.get(p).get(i).put("text",text);
 
         if (!placeholdersToRefresh.get(p).get(i).get("latency").equals(latency))
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.uniqueId,lat)));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId(),lat)));
         placeholdersToRefresh.get(p).get(i).put("latency",latency);
 
         if (!placeholdersToRefresh.get(p).get(i).get("yellow-number").equals(yellownumber))
-            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.name, Integer.parseInt(yellownumber)));
+            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.getName(), Integer.parseInt(yellownumber)));
         placeholdersToRefresh.get(p).get(i).put("yellow-number",yellownumber);
     }
     private int getLatency(int lat) {
@@ -486,7 +486,7 @@ public class Layout {
                         placeholders.put(id, slot);
                     else {
                         try {
-                            fp.latency = getLatency(Integer.parseInt(latency));
+                            fp.setLatency(getLatency(Integer.parseInt(latency)));
                         } catch (Exception ignored) {}
                     }
                 }
@@ -496,10 +496,10 @@ public class Layout {
             if (id < 10) id2="0"+id;
             List<String> chars = LayoutManager.getInstance().chars;
             if (chars.size() > id)
-                fp.name = chars.get(id);
-            else fp.name = chars.get(chars.size()-1)+id2;
-            fpnames.put(id2,fp.name);
-            fp.displayName = IChatBaseComponent.fromColoredText(text);
+                fp.setName(chars.get(id));
+            else fp.setName(chars.get(chars.size()-1)+id2);
+            fpnames.put(id2,fp.getName());
+            fp.setDisplayName(IChatBaseComponent.fromColoredText(text));
             fakeplayers.put(id,fp);
 
             id = id + 20;

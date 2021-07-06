@@ -80,14 +80,14 @@ public class TABAdditions {
     }
 
     public YamlConfigurationFile getConfig(ConfigType cfg) {
-        switch (cfg) {
-            case LAYOUT: return layoutConfig;
-            case TITLE: return titleConfig;
-            case ACTIONBAR: return actionbarConfig;
-            case CHAT: return chatConfig;
-            case SKINS: return skinsFile;
-            default: return config;
-        }
+        return switch (cfg) {
+            case LAYOUT -> layoutConfig;
+            case TITLE -> titleConfig;
+            case ACTIONBAR -> actionbarConfig;
+            case CHAT -> chatConfig;
+            case SKINS -> skinsFile;
+            default -> config;
+        };
     }
 
     public void load() {
@@ -214,8 +214,8 @@ public class TABAdditions {
                 "chatprefix","chatsuffix","customchatname",
                 "abovename","belowname","title","actionbar"));
         if (TAB.getInstance().isPremium()) {
-            props.addAll(TAB.getInstance().getConfiguration().premiumconfig.getStringList("unlimited-nametag-mode-dynamic-lines"));
-            props.addAll(TAB.getInstance().getConfiguration().premiumconfig.getConfigurationSection("unlimited-nametag-mode-static-lines").keySet());
+            props.addAll(TAB.getInstance().getConfiguration().getPremiumConfig().getStringList("unlimited-nametag-mode-dynamic-lines"));
+            props.addAll(TAB.getInstance().getConfiguration().getPremiumConfig().getConfigurationSection("unlimited-nametag-mode-static-lines").keySet());
         }
         PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
         for (Object prop : props) {

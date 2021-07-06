@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'io.github.tanguygab'
-version = '1.5.12'
+version = '1.5.13'
 
 
 repositories {

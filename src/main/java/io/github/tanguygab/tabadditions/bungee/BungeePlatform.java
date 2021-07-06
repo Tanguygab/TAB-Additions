@@ -80,8 +80,8 @@ public class BungeePlatform extends Platform {
 			public String get(TabPlayer p) {
 				String afk = new Property(p,"%essentials_afk%").updateAndGet();
 				String output;
-				if (afk.equals("yes")) output = TAB.getInstance().getConfiguration().config.getString("placeholders.afk-yes"," &4*&4&lAFK&4*&r");
-				else output = TAB.getInstance().getConfiguration().config.getString("placeholders.afk-no","");
+				if (afk.equals("yes")) output = TAB.getInstance().getConfiguration().getConfig().getString("placeholders.afk-yes"," &4*&4&lAFK&4*&r");
+				else output = TAB.getInstance().getConfiguration().getConfig().getString("placeholders.afk-no","");
 				return output;
 			}
 		});
