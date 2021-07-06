@@ -23,7 +23,8 @@ public class RFP {
     private final UUID uuid;
     private int latency;
     public String skin;
-    private String group;
+    protected String group;
+    public String lastskin;
 
     public RFP(String configname,Map<String,Object> config) {
         configfile = TABAdditions.getInstance().getConfig(ConfigType.MAIN);
@@ -77,7 +78,7 @@ public class RFP {
         String suffix = "";
 
         Map<String,Object> config = configfile.getConfigurationSection("fakeplayers."+configname);
-        Map<String,Object> tabConfig = TAB.getInstance().getConfiguration().config.getConfigurationSection("Groups");
+        Map<String,Object> tabConfig = TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("Groups");
 
         String configGroup = "";
         for (String g : tabConfig.keySet()) {
@@ -106,25 +107,25 @@ public class RFP {
 
     public PacketPlayOutPlayerInfo.PlayerInfoData get(TabPlayer p) {
         PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(uuid);
-        rfp.name = getName();
+        rfp.setName(getName());
         String[] props = getProps();
         props[0] = TABAdditions.getInstance().parsePlaceholders(props[0],p);
         props[1] = TABAdditions.getInstance().parsePlaceholders(props[1],p);
 
 
-        rfp.displayName = IChatBaseComponent.fromColoredText(props[0]+getName()+props[1]);
-        rfp.uniqueId = uuid;
+        rfp.setDisplayName(IChatBaseComponent.fromColoredText(props[0]+getName()+props[1]));
+        rfp.setUniqueId(uuid);
         if (configfile.getBoolean("real-latency") != null && configfile.getBoolean("real-latency"))
-            rfp.latency = latency;
+            rfp.setLatency(latency);
         else if (latency <= 1)
-            rfp.latency = 1000;
+            rfp.setLatency(1000);
         else if (latency == 2)
-            rfp.latency = 600;
+            rfp.setLatency(600);
         else if (latency == 3)
-            rfp.latency = 300;
+            rfp.setLatency(300);
         else if (latency == 4)
-            rfp.latency = 200;
-        else rfp.latency = 100;
+            rfp.setLatency(200);
+        else rfp.setLatency(100);
         return rfp;
     }
     public String getSortingTeam() {
@@ -148,16 +149,23 @@ public class RFP {
         return potentialTeamName;
     }
 
-    public void forceUpdate(TabPlayer p, Object skin) {
+    public void update(TabPlayer p, Object skin) {
         PacketPlayOutPlayerInfo.PlayerInfoData fp = get(p);
-        if (skin != null) fp.skin = skin;
-        p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()).setTeamOptions(69));
-        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp));
+        p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()));
         String[] props = getProps();
         String prefix = TABAdditions.getInstance().parsePlaceholders(props[0],p);
         String suffix = TABAdditions.getInstance().parsePlaceholders(props[1],p);
+        String icon = TABAdditions.getInstance().parsePlaceholders(this.skin,p);
+        if (skin != null && !icon.equals(lastskin)) {
+            fp.setSkin(skin);
+            lastskin = icon;
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp));
+        } else {
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, fp));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY , fp));
+        }
         PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabFeature.NAMETAGS);
-        p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp));
     }
 
     public String setName(String value) {
