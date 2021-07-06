@@ -80,14 +80,14 @@ public class TABAdditions {
     }
 
     public YamlConfigurationFile getConfig(ConfigType cfg) {
-        return switch (cfg) {
-            case LAYOUT -> layoutConfig;
-            case TITLE -> titleConfig;
-            case ACTIONBAR -> actionbarConfig;
-            case CHAT -> chatConfig;
-            case SKINS -> skinsFile;
-            default -> config;
-        };
+        switch (cfg) {
+            case LAYOUT: return layoutConfig;
+            case TITLE: return titleConfig;
+            case ACTIONBAR: return actionbarConfig;
+            case CHAT: return chatConfig;
+            case SKINS: return skinsFile;
+            default: return config;
+        }
     }
 
     public void load() {
