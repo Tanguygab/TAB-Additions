@@ -28,21 +28,20 @@ public class UnlimitedItemLines implements Loadable,WorldChangeListener, JoinEve
 
     public void load(TabPlayer p) {
         ArmorStandManager asm = p.getArmorStandManager();
-        Field armorstands;
-        Map<String,ArmorStand> map = new HashMap<>();
         try {
-            armorstands = ArmorStandManager.class.getDeclaredField("armorStands");
+            Field armorstands = ArmorStandManager.class.getDeclaredField("armorStands");
             armorstands.setAccessible(true);
-            map = (Map<String,ArmorStand>) armorstands.get(asm);
-        } catch (Exception e) {e.printStackTrace();}
-        for (String str : map.keySet()) {
-            ArmorStand as = map.get(str);
-            if (as.getProperty().get().startsWith("ITEM:")) {
-                BukkitItemLine itemLine = createItemLine(p,as);
-                if (itemLine != null)
-                    map.replace(str,itemLine);
+            Map<String, ArmorStand> map = new HashMap<>((Map<String, ArmorStand>) armorstands.get(asm));
+            for (String str : map.keySet()) {
+                ArmorStand as = map.get(str);
+                if (as.getProperty().get().startsWith("ITEM:")) {
+                    BukkitItemLine itemLine = createItemLine(p, as);
+                    if (itemLine != null) {
+                        asm.addArmorStand(str, itemLine);
+                    }
+                }
             }
-        }
+        } catch (Exception e) {e.printStackTrace();}
     }
 
     @Override
