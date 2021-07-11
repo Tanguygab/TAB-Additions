@@ -378,12 +378,12 @@ public class Layout {
         List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
         if (section.get("condition") != null && !section.get("condition").toString().equals("")) {
             String cond = section.get("condition")+"";
-            list.removeIf(p -> !instance.isConditionMet(cond,p, viewer));
+            list.removeIf(p -> !instance.isConditionMet(cond,p, viewer,p));
         }
         if (section.get("vanished") == null || !Boolean.parseBoolean(""+section.get("vanished"))) {
             if (instance.getPlatform().getType() == PlatformType.SPIGOT)
                 list.removeIf(p -> !viewer.hasPermission("tab.seevanished") && !((Player) viewer.getPlayer()).canSee(((Player) p.getPlayer())));
-            else list.removeIf(p -> !viewer.hasPermission("tab.seevanished") && p.isVanished());
+            list.removeIf(p -> !viewer.hasPermission("tab.seevanished") && p.isVanished());
         }
 
         if (!section.containsKey("sorting")) {

@@ -328,7 +328,7 @@ public class TABAdditions {
         return true;
     }
 
-    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer) {
+    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, TabPlayer conditionPlayer) {
         if (sender == null || viewer == null) return false;
         String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,viewer);
         for (String cond : conditionname.split(";")) {
@@ -342,8 +342,8 @@ public class TABAdditions {
             } else {
                 Condition condition = Condition.getCondition(cond.replace("!",""));
                 if (condition != null) {
-                    if (cond.startsWith("!") && condition.isMet(viewer)) return false;
-                    if (!cond.startsWith("!") && !condition.isMet(viewer)) return false;
+                    if (cond.startsWith("!") && condition.isMet(conditionPlayer)) return false;
+                    if (!cond.startsWith("!") && !condition.isMet(conditionPlayer)) return false;
                 }
             }
         }
