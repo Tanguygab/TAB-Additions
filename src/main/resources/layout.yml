@@ -65,7 +65,7 @@ layouts:
         # text also supports aligned-tabsuffix feature, you just have to put the "suffix" after ||
         # when a player set' text contains placeholders, they will be parsed for the displayed player instead of viewer
         # you can also use %place% to show the place of the player in the list, could be useful if you want to make a top/leaderboard
-        text: "%prop-tabprefixprop-customtabname%||%prop-tabsuffix%"
+        text: "%prop-tabprefix%%prop-customtabname%||%prop-tabsuffix%"
         # the condition for players to be shown in this player set. if prefixed by a !, will list players who don't meet the condition.
         # set to "" or remove the line for no condition
         condition: "!permission:tab.staff"
@@ -200,4 +200,4 @@ layouts:
           icon: player-head:MHF_Question
         more:
           icon: player-head:MHF_Cow
-          text: "&6and %num% staff more!"
+          text: "&6and %num% staff more
