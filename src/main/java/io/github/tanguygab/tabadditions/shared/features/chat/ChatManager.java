@@ -182,7 +182,10 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         msg = new RGBUtils().applyFormats(msg, true);
 
         if (!p.hasPermission("tabadditions.chat.color.rgb")) {
-            msg = Pattern.quote(msg).replaceAll("#[0-9a-fA-F]{6}","");
+            msg = Pattern.quote(msg)
+                    .replaceAll("#[0-9a-fA-F]{6}","")
+                    .replace("\\Q","")
+                    .replace("\\E","");
         }
 
         IChatBaseComponent format2 = format.getText();
