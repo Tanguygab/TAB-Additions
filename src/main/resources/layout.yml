@@ -200,4 +200,4 @@ layouts:
           icon: player-head:MHF_Question
         more:
           icon: player-head:MHF_Cow
-          text: "&6and %num% staff more
+          text: "&6and %num% staff more"
