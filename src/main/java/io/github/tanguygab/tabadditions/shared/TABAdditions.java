@@ -202,9 +202,13 @@ public class TABAdditions {
             fm.registerFeature(TAFeature.UNLIMITED_ITEM_LINES.toString(), new UnlimitedItemLines());
 
         PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
-        for (ConfigType cfg : ConfigType.values())
-            if (cfg != ConfigType.SKINS)
-                pm.findAllUsed(TABAdditions.getInstance().getConfig(cfg).getValues());
+        for (ConfigType cfg : ConfigType.values()) {
+            if (cfg != ConfigType.SKINS) {
+                YamlConfigurationFile config = TABAdditions.getInstance().getConfig(cfg);
+                if (config.getValues() == null) loadFiles();
+                if (config.getValues() != null) pm.findAllUsed(config.getValues());
+            }
+        }
         pm.registerPlaceholders();
         pm.refreshPlaceholderUsage();
     }
