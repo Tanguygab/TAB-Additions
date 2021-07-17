@@ -17,6 +17,7 @@ import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.features.types.Loadable;
+import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
@@ -360,6 +361,11 @@ public class TABAdditions {
         if (name.equals("~Console~"))
             TAB.getInstance().getPlatform().sendConsoleMessage(msg,true);
         else TAB.getInstance().getPlayer(name).sendMessage(msg,true);
+    }
+    public void sendMessage(String name, IChatBaseComponent msg) {
+        if (name.equals("~Console~"))
+            TAB.getInstance().getPlatform().sendConsoleMessage(msg.getText(),true);
+        else TAB.getInstance().getPlayer(name).sendMessage(msg);
     }
 
     public boolean checkBedrock(TabPlayer p) {
