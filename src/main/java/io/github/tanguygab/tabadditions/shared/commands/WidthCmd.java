@@ -3,22 +3,29 @@ package io.github.tanguygab.tabadditions.shared.commands;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.config.ConfigurationFile;
+import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class WidthCmd {
 
     public WidthCmd(String name, String[] args) {
         TABAdditions instance = TABAdditions.getInstance();
-        if (args.length < 1) {
+        if (args.length < 2) {
             instance.sendMessage(name, "/"+ (TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE ? "b" : "") + "tab+ width chars <char>");
             instance.sendMessage(name, "/"+ (TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE ? "b" : "") + "tab+ width set <charID> [amount]");
             return;
         }
         if (args[1].equalsIgnoreCase("chars")) {
+            if (args.length < 3) {
+                instance.sendMessage(name, "You have to provide a character!");
+                return;
+            }
             instance.sendMessage(name,"Chars:" + args[2]);
             String arg = args[2];
             int[] ints = new int[arg.length()];
@@ -29,6 +36,10 @@ public class WidthCmd {
             instance.sendMessage(name,Arrays.toString(arg.toCharArray()));
             instance.sendMessage(name,Arrays.toString(ints));
         } else if (args[1].equalsIgnoreCase("set")) {
+            if (args.length < 3) {
+                instance.sendMessage(name, "You have to provide a character ID!");
+                return;
+            }
             int id = Integer.parseInt(args[2]);
             List<IChatBaseComponent> messages = new ArrayList<>();
             IChatBaseComponent charMessage = new IChatBaseComponent("\u00a72" + (char)id + " \u00a7d|");
@@ -42,12 +53,16 @@ public class WidthCmd {
                 instance.sendMessage(name,message);
             }
         }
-        else if (args[1].equalsIgnoreCase("put")) {
+        else if (args[1].equalsIgnoreCase("confirm")) {
             try {
                 int c = Integer.parseInt(args[2]);
                 try {
                     int i = Integer.parseInt(args[3]);
-                    TAB.getInstance().getConfiguration().getPremiumConfig().set("character-width-overrides." + c, i);
+                    ConfigurationFile cfg = TAB.getInstance().getConfiguration().getPremiumConfig();
+                    Map<Integer,Integer> map = cfg.getConfigurationSection("character-width-overrides");
+                    map.put(c,i);
+                    cfg.set("character-width-overrides",map);
+                    instance.sendMessage(name, "Added character" + (char)c + " ("+c+") with width " + i);
                 } catch (Exception e) {
                     instance.sendMessage(name, "You have to provide a width!");
                 }
@@ -69,7 +84,7 @@ public class WidthCmd {
             text += "i";
         }
         return new IChatBaseComponent(("&b&k" + text + " &e|&b (" + width + " pixels) &7&l[Click to copy]").replace('&', '\u00a7'))
-                .onClickRunCommand(TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE ? "b" : "" + "tab+ width confirm "+c+" "+width)
+                .onClickRunCommand("/"+(TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE ? "b" : "") + "tab+ width confirm "+c+" "+width)
                 .onHoverShowText("Click to copy with " + width + " pixels");
     }
 }

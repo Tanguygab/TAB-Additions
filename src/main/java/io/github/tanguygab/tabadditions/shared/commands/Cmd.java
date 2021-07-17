@@ -8,13 +8,8 @@ import io.github.tanguygab.tabadditions.shared.features.Title;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.neznamy.tab.shared.TAB;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class Cmd {
 
@@ -77,6 +72,7 @@ public class Cmd {
                 }
                 case "width": {
                     new WidthCmd(name, args);
+                    break;
                 }
                 case "test": {
                     instance.sendMessage(name,"&7Nothing to see here :D");
@@ -123,6 +119,16 @@ public class Cmd {
                     if (args.length == 2 && title != null)
                         return title.getLists();
                     break;
+                }
+                case "width": {
+                    if (args.length == 2)
+                        return Arrays.asList("chars","set");
+                    if (args.length == 3 && args[2].equalsIgnoreCase("chars"))
+                        return Collections.singletonList("<character>");
+                    if (args.length == 3 && args[2].equalsIgnoreCase("set"))
+                        return Collections.singletonList("<char ID>");
+                    if (args.length == 4 && args[2].equalsIgnoreCase("set"))
+                        return Collections.singletonList("<amount>");
                 }
             }
         }
