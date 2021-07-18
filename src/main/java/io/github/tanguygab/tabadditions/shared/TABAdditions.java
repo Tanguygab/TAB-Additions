@@ -335,7 +335,7 @@ public class TABAdditions {
 
     public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, TabPlayer conditionPlayer) {
         if (sender == null || viewer == null) return false;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,viewer);
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,conditionPlayer);
         for (String cond : conditionname.split(";")) {
             if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
                 try {
