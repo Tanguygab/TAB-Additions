@@ -33,6 +33,7 @@ public class SitHideNametag implements Loadable, Listener {
     public void onMount(EntityMountEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
         TabPlayer p = TAB.getInstance().getPlayer(e.getEntity().getUniqueId());
+        if (p == null) return;
         tag.put(p, p.hasHiddenNametag());
         p.hideNametag();
     }
@@ -41,6 +42,7 @@ public class SitHideNametag implements Loadable, Listener {
     public void onDismount(EntityDismountEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
         TabPlayer p = TAB.getInstance().getPlayer(e.getEntity().getUniqueId());
+        if (p == null) return;
         if (tag.containsKey(p) && !tag.get(p))
             p.showNametag();
     }
