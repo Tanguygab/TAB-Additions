@@ -1,9 +1,10 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.features.types.Loadable;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.team.ScoreboardTeamManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -15,11 +16,12 @@ import org.spigotmc.event.entity.EntityMountEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SitHideNametag implements Loadable, Listener {
+public class SitHideNametag extends TabFeature implements Listener {
 
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
 
     public SitHideNametag() {
+        super("&aSit Hide Nametag&r");
         load();
     }
 
@@ -32,28 +34,24 @@ public class SitHideNametag implements Loadable, Listener {
     @EventHandler
     public void onMount(EntityMountEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
-        TabPlayer p = TAB.getInstance().getPlayer(e.getEntity().getUniqueId());
+        TabPlayer p = TabAPI.getInstance().getPlayer(e.getEntity().getUniqueId());
         if (p == null) return;
-        tag.put(p, p.hasHiddenNametag());
-        p.hideNametag();
+        ScoreboardTeamManager tm = TabAPI.getInstance().getScoreboardTeamManager();
+        tag.put(p, tm.hasHiddenNametag(p));
+        tm.hideNametag(p);
     }
 
     @EventHandler
     public void onDismount(EntityDismountEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
-        TabPlayer p = TAB.getInstance().getPlayer(e.getEntity().getUniqueId());
+        TabPlayer p = TabAPI.getInstance().getPlayer(e.getEntity().getUniqueId());
         if (p == null) return;
         if (tag.containsKey(p) && !tag.get(p))
-            p.showNametag();
+            TabAPI.getInstance().getScoreboardTeamManager().showNametag(p);
     }
 
     @Override
     public void unload() {
         HandlerList.unregisterAll(this);
-    }
-
-    @Override
-    public Object getFeatureType() {
-        return TAFeature.SIT_HIDE_NAMETAG;
     }
 }

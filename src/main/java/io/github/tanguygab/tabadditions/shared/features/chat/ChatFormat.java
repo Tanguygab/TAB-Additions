@@ -1,9 +1,9 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
-import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,10 +13,12 @@ public class ChatFormat {
 
     private final String name;
     private final Map<String,Object> config;
+    private final TabFeature feature;
 
-    public ChatFormat(String name,Map<String,Object> config) {
+    public ChatFormat(String name, Map<String,Object> config, TabFeature feature) {
         this.name = name;
         this.config = config;
+        this.feature = feature;
     }
 
     public String getName() {
@@ -30,7 +32,7 @@ public class ChatFormat {
     }
     public boolean isConditionMet(TabPlayer p) {
         if (!config.containsKey("condition")) return true;
-        return TABAdditions.getInstance().isConditionMet(config.get("condition")+"",p);
+        return TABAdditions.getInstance().isConditionMet(config.get("condition")+"",p,feature);
     }
 
     public String getChannel() {
@@ -40,7 +42,7 @@ public class ChatFormat {
 
     public boolean isViewConditionMet(TabPlayer sender, TabPlayer viewer) {
         if (!config.containsKey("view-condition") || config.get("view-condition").equals("")) return true;
-        return TABAdditions.getInstance().isConditionMet(config.get("view-condition")+"",sender,viewer,viewer);
+        return TABAdditions.getInstance().isConditionMet(config.get("view-condition")+"",sender,viewer,viewer,feature);
 
     }
 

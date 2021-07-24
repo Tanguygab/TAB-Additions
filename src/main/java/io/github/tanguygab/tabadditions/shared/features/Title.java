@@ -3,19 +3,22 @@ package io.github.tanguygab.tabadditions.shared.features;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.TitleCmd;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Title implements JoinEventListener {
+public class Title extends TabFeature {
+
+    public Title() {
+        super("&aTitle&r");
+    }
 
     @Override
     public void onJoin(TabPlayer p) {
-        p.loadPropertyFromConfig("title");
+        p.loadPropertyFromConfig(this,"title");
         Map<String,Object> tSection = TABAdditions.getInstance().getConfig(ConfigType.TITLE).getConfigurationSection("titles." + p.getProperty("title").get());
         if (tSection != null && tSection.size() >= 5) {
             List<Object> titleProperties = new ArrayList<>();
@@ -30,10 +33,5 @@ public class Title implements JoinEventListener {
         for (Object key : TABAdditions.getInstance().getConfig(ConfigType.TITLE).getConfigurationSection("titles").keySet())
             list.add(key.toString());
         return list;
-    }
-
-    @Override
-    public Object getFeatureType() {
-        return TAFeature.TITLE;
     }
 }

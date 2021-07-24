@@ -1,10 +1,12 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
-import me.neznamy.tab.shared.packets.PacketPlayOutChat;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
+import me.neznamy.tab.api.protocol.PacketPlayOutChat;
 
 public class ActionBarCmd {
 
@@ -21,7 +23,8 @@ public class ActionBarCmd {
             instance.sendMessage(name,"&cThis player isn't connected");
             return;
         }
-        actionbar = instance.parsePlaceholders(actionbar,p);
-        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.fromColoredText(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO));
+        TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aActionBar&r");
+        actionbar = instance.parsePlaceholders(actionbar,p,feature);
+        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.fromColoredText(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
     }
 }

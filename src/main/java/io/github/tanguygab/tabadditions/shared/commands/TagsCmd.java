@@ -2,7 +2,8 @@ package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.team.ScoreboardTeamManager;
 
 public class TagsCmd {
     public TagsCmd(String name, String[] args) {
@@ -18,25 +19,26 @@ public class TagsCmd {
             return;
         }
 
-        TabPlayer p = TAB.getInstance().getPlayer(args[2]);
+        TabPlayer p = TabAPI.getInstance().getPlayer(args[2]);
 
         if (p == null) {
             instance.sendMessage(name,"&cThis player isn't connected");
             return;
         }
 
+        ScoreboardTeamManager tm = TabAPI.getInstance().getScoreboardTeamManager();
         switch (args[1]) {
             case "show": {
-                p.showNametag();
+                tm.showNametag(p);
                 break;
             }
             case "hide": {
-                p.hideNametag();
+                tm.hideNametag(p);
                 break;
             }
             case "toggle": {
-                if (p.hasHiddenNametag()) p.showNametag();
-                else p.hideNametag();
+                if (tm.hasHiddenNametag(p)) tm.showNametag(p);
+                else tm.hideNametag(p);
                 break;
             }
         }

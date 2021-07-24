@@ -10,18 +10,14 @@ import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.FeatureManager;
-import me.neznamy.tab.shared.Property;
-import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.features.PlaceholderManager;
-import me.neznamy.tab.shared.features.types.Loadable;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
-import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
-import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
+import me.neznamy.tab.api.*;
+import me.neznamy.tab.shared.PropertyImpl;
+import me.neznamy.tab.api.config.YamlConfigurationFile;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
+import me.neznamy.tab.api.placeholder.PlayerPlaceholder;
+import me.neznamy.tab.api.placeholder.ServerPlaceholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
-import org.bukkit.Bukkit;
+import me.neznamy.tab.shared.TAB;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.api.FloodgateApi;
 
@@ -32,6 +28,8 @@ public class TABAdditions {
     private final Platform platform;
     public final File dataFolder;
     private final Skins skins;
+    private final TabAPI tab;
+    public final Map<String, TabFeature> features = new HashMap<>();
     public boolean enabled;
 
     private YamlConfigurationFile config;
@@ -51,12 +49,12 @@ public class TABAdditions {
     public int tablistNamesRadius = 0;
     public boolean rfpEnabled;
     public boolean onlyyou = false;
-    public boolean unlimitedItemLines = false;
 
     public TABAdditions(Platform platform, Object plugin,File dataFolder) {
         this.dataFolder = dataFolder;
     	this.platform = platform;
     	this.plugin = plugin;
+    	tab = TabAPI.getInstance();
     	skins = new Skins();
     }
     
@@ -107,8 +105,7 @@ public class TABAdditions {
             actionbarConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("actionbars.yml"), new File(dataFolder, "actionbars.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
             skinsFile = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("skins.yml"), new File(dataFolder, "skins.yml"));
-            if (TAB.getInstance().isPremium())
-                layoutConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("layout.yml"), new File(dataFolder, "layout.yml"));
+            layoutConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("layout.yml"), new File(dataFolder, "layout.yml"));
 
             titlesEnabled = config.getBoolean("features.titles",false);
             actionbarsEnabled = config.getBoolean("features.actionbars",false);
@@ -121,8 +118,6 @@ public class TABAdditions {
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
                 onlyyou = config.getBoolean("features.only-you",false);
-                if (config.hasConfigOption("features.unlimited-item-lines") && Bukkit.getServer().getVersion().split(" ")[2].equals("1.17)"))
-                    unlimitedItemLines = config.getBoolean("features.unlimited-item-lines");
 
             }
         } catch (IOException e) {
@@ -134,81 +129,58 @@ public class TABAdditions {
     public void reload() {
         loadFiles();
         loadFeatures();
-        for (TabPlayer p : TAB.getInstance().getPlayers()) {
-            loadProps(p);
-        }
-
         loadPlaceholders();
     }
 
     public void disable() {
-        FeatureManager fm = TAB.getInstance().getFeatureManager();
+        FeatureManager fm = tab.getFeatureManager();
 
-        for (TAFeature feature : TAFeature.values()) {
-            if (fm.isFeatureEnabled(feature.toString()) && fm.getFeature(feature.toString()) instanceof Loadable)
-                ((Loadable) fm.getFeature(feature.toString())).unload();
-            fm.unregisterFeature(feature.toString());
+        for (String feature : features.keySet()) {
+            if (fm.isFeatureEnabled(feature))
+                fm.getFeature(feature).unload();
+            fm.unregisterFeature(feature);
         }
         skins.unload();
 
         enabled = false;
     }
 
-    protected void loadProps(TabPlayer p) {
-        p.loadPropertyFromConfig("title");
-        p.loadPropertyFromConfig("actionbar");
-        p.loadPropertyFromConfig("chatprefix");
-        p.loadPropertyFromConfig("customchatname", p.getName());
-        p.loadPropertyFromConfig("chatsuffix");
-
+    private void registerFeature(TabFeature feature) {
+        FeatureManager fm = tab.getFeatureManager();
+        fm.registerFeature(feature.getFeatureName(),feature);
     }
 
     private void loadFeatures() {
-        FeatureManager fm = TAB.getInstance().getFeatureManager();
         //ActionBar
         if (actionbarsEnabled)
-            fm.registerFeature(TAFeature.ACTIONBAR.toString(), new ActionBar());
+            registerFeature(new ActionBar());
         //Title
         if (titlesEnabled)
-            fm.registerFeature(TAFeature.TITLE.toString(), new Title());
+            registerFeature(new Title());
         //Chat
         if (chatEnabled)
-            fm.registerFeature(TAFeature.CHAT.toString(), new ChatManager());
+            registerFeature(new ChatManager());
         //Layout
-        if (layoutEnabled && TAB.getInstance().isPremium())
-            fm.registerFeature(TAFeature.TA_LAYOUT.toString(), new LayoutManager());
+        if (layoutEnabled)
+            registerFeature(new LayoutManager());
         //RFP
         if (rfpEnabled)
-            fm.registerFeature(TAFeature.RFP.toString(), new RFPManager());
+            registerFeature(new RFPManager());
         //Sneak Hide Nametag
         if (sneakhideEnabled)
-            fm.registerFeature(TAFeature.SNEAK_HIDE_NAMETAG.toString(), new SneakHideNametag());
+            registerFeature(new SneakHideNametag());
         //Sneak Hide Nametag
         if (sithideEnabled)
-            fm.registerFeature(TAFeature.SIT_HIDE_NAMETAG.toString(), new SitHideNametag());
+            registerFeature(new SitHideNametag());
         //Nametag in Range
         if (nametagInRange != 0)
-            fm.registerFeature(TAFeature.NAMETAG_IN_RANGE.toString(), new NametagInRange());
+            registerFeature(new NametagInRange());
         //Tablist Names Radius
         if (tablistNamesRadius != 0)
-            fm.registerFeature(TAFeature.TABLIST_NAMES_RADIUS.toString(), new TablistNamesRadius());
+            registerFeature(new TablistNamesRadius());
         //Only You
         if (onlyyou)
-            fm.registerFeature(TAFeature.ONLY_YOU.toString(), new OnlyYou());
-        //Unlimited Item Lines
-        if (TAB.getInstance().getFeatureManager().isFeatureEnabled("nametagx") && unlimitedItemLines)
-            fm.registerFeature(TAFeature.UNLIMITED_ITEM_LINES.toString(), new UnlimitedItemLines());
-
-        PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
-        for (ConfigType cfg : ConfigType.values()) {
-            if (cfg != ConfigType.SKINS) {
-                YamlConfigurationFile config = TABAdditions.getInstance().getConfig(cfg);
-                if (config == null) loadFiles();
-                if (config != null) pm.findAllUsed(config.getValues());
-            }
-        }
-        pm.registerPlaceholders();
-        pm.refreshPlaceholderUsage();
+            registerFeature(new OnlyYou());
     }
 
     private void loadPlaceholders() {
@@ -216,13 +188,11 @@ public class TABAdditions {
                 "tagprefix","tagsuffix","customtagname",
                 "chatprefix","chatsuffix","customchatname",
                 "abovename","belowname","title","actionbar"));
-        if (TAB.getInstance().isPremium()) {
-            props.addAll(TAB.getInstance().getConfiguration().getPremiumConfig().getStringList("unlimited-nametag-mode-dynamic-lines"));
-            props.addAll(TAB.getInstance().getConfiguration().getPremiumConfig().getConfigurationSection("unlimited-nametag-mode-static-lines").keySet());
-        }
-        PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
+        props.addAll(TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines"));
+        props.addAll(TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines").keySet());
+        PlaceholderManager pm = tab.getPlaceholderManager();
         for (Object prop : props) {
-            pm.registerPlaceholder(new PlayerPlaceholder("%prop-"+prop+"%", 100) {
+            pm.registerPlayerPlaceholder(new PlayerPlaceholder("%prop-"+prop+"%", 100) {
                 @Override
                 public String get(TabPlayer p) {
                     Property property = p.getProperty(prop+"");
@@ -232,81 +202,81 @@ public class TABAdditions {
                 }
             });
         }
-        pm.registerPlaceholder(new ServerPlaceholder("%onlinerfp%",1000) {
+        pm.registerServerPlaceholder(new ServerPlaceholder("%onlinerfp%",1000) {
             @Override
             public String get() {
-                int count = TAB.getInstance().getPlayers().size();
-                if (TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.RFP.toString()))
-                    count = count+((RFPManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString())).getRFPS().size();
+                int count = tab.getOnlinePlayers().size();
+                if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
+                    count = count+((RFPManager)tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size();
                 return count+"";
             }
         });
-        pm.registerPlaceholder(new PlayerPlaceholder("%canseeonlinerfp%",1000) {
+        pm.registerPlayerPlaceholder(new PlayerPlaceholder("%canseeonlinerfp%",1000) {
             @Override
             public String get(TabPlayer p) {
-                int count = TAB.getInstance().getPlayers().size();
-                try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p));}
+                int count = tab.getOnlinePlayers().size();
+                try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p,null));}
                 catch (NumberFormatException ignored) {}
-                if (TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.RFP.toString()))
-                    count = count + ((RFPManager) TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString())).getRFPS().size();
+                if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
+                    count = count + ((RFPManager) tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size();
                 return count+"";
             }
         });
         String world = platform.getType() == PlatformType.SPIGOT ? "world" : "server";
-        pm.registerPlaceholder(new PlayerPlaceholder("%cansee"+world+"online%", 1000) {
+        pm.registerPlayerPlaceholder(new PlayerPlaceholder("%cansee"+world+"online%", 1000) {
             @Override
             public String get(TabPlayer p) {
                 int count = 0;
-                for (TabPlayer all : TAB.getInstance().getPlayers())
-                    if (all.getWorldName().equals(p.getWorldName()) && ((Player) p.getPlayer()).canSee((Player) all.getPlayer()))
+                for (TabPlayer all : tab.getOnlinePlayers())
+                    if (all.getWorld().equals(p.getWorld()) && ((Player) p.getPlayer()).canSee((Player) all.getPlayer()))
                         count++;
                 return count+"";
             }
         });
-        pm.registerPlaceholder(new PlayerPlaceholder("%cansee"+world+"onlinerfp%",1000) {
+        pm.registerPlayerPlaceholder(new PlayerPlaceholder("%cansee"+world+"onlinerfp%",1000) {
             @Override
             public String get(TabPlayer p) {
                 int count = 0;
-                try {count = Integer.parseInt(parsePlaceholders("%cansee"+world+"online%",p));}
+                try {count = Integer.parseInt(parsePlaceholders("%cansee"+world+"online%",p,null));}
                 catch (NumberFormatException ignored) {}
-                if (TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.RFP.toString()))
-                    count = count + ((RFPManager) TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString())).getRFPS().size();
+                if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
+                    count = count + ((RFPManager) tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size();
                 return count+"";
             }
         });
         platform.registerPlaceholders();
     }
 
-    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabPlayer def) {
-
-        List<String> list = TAB.getInstance().getPlaceholderManager().detectAll(str);
+    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabPlayer def, TabFeature feature) {
+        List<String> list = tab.getPlaceholderManager().detectPlaceholders(str);
         for (String pl : list) {
             if (pl.startsWith("%sender:") && sender != null) {
                 String pl2 = pl.replace("%sender:", "%");
-                str = str.replace(pl,new Property(sender, pl2).getFormat(viewer));
+
+                str = str.replace(pl,new PropertyImpl(feature,sender, pl2).getFormat(viewer));
             }
             else if (pl.startsWith("%viewer:") && viewer != null) {
                 String pl2 = pl.replace("%viewer:", "%");
-                str = str.replace(pl,new Property(viewer, pl2).getFormat(sender));
+                str = str.replace(pl,new PropertyImpl(feature,viewer, pl2).getFormat(sender));
             }
         }
 
         TabPlayer def2 = def == viewer ? sender : viewer;
-        str = new Property(def,str).getFormat(def2);
+        str = new PropertyImpl(feature,def,str).getFormat(def2);
 
         return str;
     }
 
-    public String parsePlaceholders(String str, TabPlayer p) {
+    public String parsePlaceholders(String str, TabPlayer p, TabFeature feature) {
         if (str == null) return "";
-        if (p == null) return str;
+        //if (p == null) return str;
         if (!str.contains("%")) return str;
-        return new Property(p,str).get();
+        return new PropertyImpl(feature,p,str).get();
     }
 
-    public boolean isConditionMet(String str, TabPlayer p) {
+    public boolean isConditionMet(String str, TabPlayer p, TabFeature feature) {
         if (str == null || str.equals("null")) return true;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,p);
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,p,feature);
         for (String cond : conditionname.split(";")) {
             String fcond = cond;
             if (fcond.startsWith("!"))
@@ -320,9 +290,9 @@ public class TABAdditions {
         return true;
     }
 
-    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, TabPlayer conditionPlayer) {
+    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, TabPlayer conditionPlayer, TabFeature feature) {
         if (sender == null || viewer == null) return false;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,conditionPlayer);
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,conditionPlayer, feature);
         for (String cond : conditionname.split(";")) {
             if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
                 try {
@@ -345,18 +315,18 @@ public class TABAdditions {
     public boolean isInRange(TabPlayer sender,TabPlayer viewer,int range) {
         if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE) return true;
         int zone = (int) Math.pow(range, 2);
-        return sender.getWorldName().equals(viewer.getWorldName()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
+        return sender.getWorld().equals(viewer.getWorld()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
     }
 
     public void sendMessage(String name,String msg) {
         if (name.equals("~Console~"))
-            TAB.getInstance().getPlatform().sendConsoleMessage(msg,true);
-        else TAB.getInstance().getPlayer(name).sendMessage(msg,true);
+            tab.getPlatform().sendConsoleMessage(msg,true);
+        else tab.getPlayer(name).sendMessage(msg,true);
     }
     public void sendMessage(String name, IChatBaseComponent msg) {
         if (name.equals("~Console~"))
-            TAB.getInstance().getPlatform().sendConsoleMessage(msg.getText(),true);
-        else TAB.getInstance().getPlayer(name).sendMessage(msg);
+            tab.getPlatform().sendConsoleMessage(msg.getText(),true);
+        else tab.getPlayer(name).sendMessage(msg);
     }
 
     public boolean checkBedrock(TabPlayer p) {

@@ -3,11 +3,10 @@ package io.github.tanguygab.tabadditions.shared.commands;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.ActionBar;
-import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.shared.features.Title;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
-import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.api.TabAPI;
 
 import java.util.*;
 
@@ -86,7 +85,7 @@ public class Cmd {
         if (args.length >= 2) {
             switch (args[0]) {
                 case "actionbar":
-                    ActionBar actionbar = (ActionBar) TAB.getInstance().getFeatureManager().getFeature(TAFeature.ACTIONBAR.toString());
+                    ActionBar actionbar = (ActionBar) TabAPI.getInstance().getFeatureManager().getFeature("&aActionBar&r");
                     if (args.length == 2 && actionbar != null)
                         return actionbar.getLists();
                     break;
@@ -96,7 +95,7 @@ public class Cmd {
                     break;
                 }
                 case "fp": {
-                    RFPManager rfpm = (RFPManager) TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString());
+                    RFPManager rfpm = (RFPManager) TabAPI.getInstance().getFeatureManager().getFeature("&aReal Fake Players&r");
                     if (rfpm == null)
                         return null;
                     if (args.length == 2)
@@ -115,7 +114,7 @@ public class Cmd {
                     break;
                 }
                 case "title": {
-                    Title title = (Title) TAB.getInstance().getFeatureManager().getFeature(TAFeature.TITLE.toString());
+                    Title title = (Title) TabAPI.getInstance().getFeatureManager().getFeature("&aTitle&r");
                     if (args.length == 2 && title != null)
                         return title.getLists();
                     break;

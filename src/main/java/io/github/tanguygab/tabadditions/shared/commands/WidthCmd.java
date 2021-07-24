@@ -2,10 +2,10 @@ package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.config.ConfigurationFile;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.config.ConfigurationFile;
-import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,8 +58,8 @@ public class WidthCmd {
                 int c = Integer.parseInt(args[2]);
                 try {
                     int i = Integer.parseInt(args[3]);
-                    ConfigurationFile cfg = TAB.getInstance().getConfiguration().getPremiumConfig();
-                    Map<Integer,Integer> map = cfg.getConfigurationSection("character-width-overrides");
+                    ConfigurationFile cfg = TAB.getInstance().getConfiguration().getConfig();
+                    Map<Integer,Integer> map = cfg.getConfigurationSection("tablist-name-formatting.character-width-overrides");
                     map.put(c,i);
                     cfg.set("character-width-overrides",map);
                     instance.sendMessage(name, "Added character" + (char)c + " ("+c+") with width " + i);

@@ -1,21 +1,20 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.features.types.Loadable;
-import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class TablistNamesRadius implements Loadable, JoinEventListener {
+public class TablistNamesRadius extends TabFeature {
 
     private final Plugin plugin;
     private int task = -1;
     private boolean enabled = true;
 
     public TablistNamesRadius() {
+        super("&aTablist Names Radius&r");
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
@@ -67,10 +66,5 @@ public class TablistNamesRadius implements Loadable, JoinEventListener {
                 p2.hidePlayer(plugin,p);
             }
         });
-    }
-
-    @Override
-    public Object getFeatureType() {
-        return TAFeature.TABLIST_NAMES_RADIUS;
     }
 }

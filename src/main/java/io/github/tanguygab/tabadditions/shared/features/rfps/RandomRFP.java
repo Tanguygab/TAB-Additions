@@ -2,12 +2,12 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.PacketAPI;
-import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
-import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
+import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
 
 import java.util.*;
 
@@ -22,8 +22,8 @@ public class RandomRFP extends RFP{
     public Map<String,Object> lastskins = new HashMap<>();
     public int currentAmount = 0;
 
-    public RandomRFP(String configname, Map<String, Object> config) {
-        super(configname, config);
+    public RandomRFP(String configname, Map<String, Object> config, TabFeature feature) {
+        super(configname, config,feature);
         names.addAll((ArrayList<String>) config.get("names"));
         min = (int) config.get("min");
         max = (int) config.get("max");
@@ -69,21 +69,21 @@ public class RandomRFP extends RFP{
         for (String name : getCurrentNames()) {
 
             PacketPlayOutPlayerInfo.PlayerInfoData fp = get(p);
-            p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam(name)));
+            p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam(name)),feature);
             String[] props = getProps();
-            String prefix = TABAdditions.getInstance().parsePlaceholders(props[0].replace("%name%",name), p);
-            String suffix = TABAdditions.getInstance().parsePlaceholders(props[1].replace("%name%",name), p);
-            String icon = TABAdditions.getInstance().parsePlaceholders(this.skin.replace("%name%",name),p);
+            String prefix = TABAdditions.getInstance().parsePlaceholders(props[0].replace("%name%",name), p,feature);
+            String suffix = TABAdditions.getInstance().parsePlaceholders(props[1].replace("%name%",name), p,feature);
+            String icon = TABAdditions.getInstance().parsePlaceholders(this.skin.replace("%name%",name),p,feature);
             if (skin != null && !icon.equals(lastskins.get(name))) {
                 fp.setSkin(skin);
                 lastskins.put(name,icon);
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp));
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp));
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp),feature);
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp),feature);
             } else {
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, fp));
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, fp));
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, fp),feature);
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, fp),feature);
             }
-            PacketAPI.registerScoreboardTeam(p, getSortingTeam(name), prefix, suffix, true, false, Collections.singletonList(getName()), null, TabFeature.NAMETAGS);
+            PacketAPI.registerScoreboardTeam(p, getSortingTeam(name), prefix, suffix, true, false, Collections.singletonList(getName()), null, TabAPI.getInstance().getFeatureManager().getFeature("&aReal Fake Players&r"));
         }
     }
     public String getSortingTeam(String name) {
@@ -97,7 +97,7 @@ public class RandomRFP extends RFP{
             potentialTeamName = potentialTeamName.substring(0, 15);
         potentialTeamName += (char) id;
         while (!done) {
-            for (TabPlayer all : TAB.getInstance().getPlayers()) {
+            for (TabPlayer all : TabAPI.getInstance().getOnlinePlayers()) {
                 if (all.getTeamName() != null && all.getTeamName().equals(potentialTeamName)) {
                     id = id + 1;
                 }

@@ -2,25 +2,21 @@ package io.github.tanguygab.tabadditions.shared.features.layouts;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.TAFeature;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.cpu.UsageType;
-import me.neznamy.tab.shared.features.PlaceholderManager;
-import me.neznamy.tab.shared.features.types.Loadable;
-import me.neznamy.tab.shared.features.types.event.CommandListener;
-import me.neznamy.tab.shared.features.types.event.JoinEventListener;
-import me.neznamy.tab.shared.features.types.event.QuitEventListener;
-import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
-import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
+import me.neznamy.tab.api.PlaceholderManager;
+import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
+import me.neznamy.tab.api.placeholder.PlayerPlaceholder;
 
 import java.util.*;
 
-public class LayoutManager implements Loadable, JoinEventListener, CommandListener, QuitEventListener {
+public class LayoutManager extends TabFeature {
 
-    private static LayoutManager instance;
+    private final TabAPI tab;
 
     private String togglecmd;
     private final Map<String, Layout> layouts = new HashMap<>();
@@ -31,12 +27,9 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     public final List<String> chars = new ArrayList<>();
 
     public LayoutManager() {
-        instance = this;
+        super("&aTAB+ Layout&r");
+        tab = TabAPI.getInstance();
         load();
-    }
-
-    public static LayoutManager getInstance() {
-        return instance;
     }
 
     @Override
@@ -51,7 +44,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
 
 
         for (Object layout : TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getConfigurationSection("layouts").keySet())
-            layouts.put(layout+"",new Layout(layout.toString()));
+            layouts.put(layout+"",new Layout(layout.toString(),this));
         togglecmd = TABAdditions.getInstance().getConfig(ConfigType.LAYOUT).getString("toggle-cmd","layout");
         showLayoutAll();
         refresh();
@@ -78,9 +71,9 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     private void refresh() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling TAB+ Layout",getFeatureType(), UsageType.REPEATING_TASK,()->{
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling TAB+ Layout",this, UsageType.REPEATING_TASK,()->{
 
-            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+            for (TabPlayer p : tab.getOnlinePlayers()) {
                 if (!TABAdditions.getInstance().checkBedrock(p) && players.containsKey(p) && !players.get(p).equals(getLayout(p))) {
 
                     toRemove.put(p, players.get(p));
@@ -109,7 +102,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
             Layout layout = layouts.get(toAdd.get(p));
             if (layout != null && !toggledOff.contains(p)) {
                 List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps),this);
                 players.put(p, layout.getName());
                 layout.players.add(p);
                 Map<Integer,Map<String,String>> mapSlots = new HashMap<>();
@@ -123,7 +116,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
                 layout.placeholdersToRefresh.put(p,mapSlots);
                 toAdd.remove(p);
                 for (String fp : layout.fpnames.keySet())
-                    PacketAPI.registerScoreboardTeam(p,"!"+fp+"TAB+_Layout","","",true,false, Collections.singleton(layout.fpnames.get(fp)), null, TabFeature.NAMETAGS);
+                    PacketAPI.registerScoreboardTeam(p,"!"+fp+"TAB+_Layout","","",true,false, Collections.singleton(layout.fpnames.get(fp)), null, this);
 
             }
         }
@@ -134,7 +127,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
             Layout layout = layouts.get(toRemove.get(p));
             if (layout != null) {
                 List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>(layout.fakeplayers.values());
-                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
+                p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps),this);
                 players.remove(p);
                 layout.players.remove(p);
                 layout.placeholdersToRefresh.remove(p);
@@ -147,12 +140,12 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     public void showLayoutAll() {
-        for (TabPlayer p : TAB.getInstance().getPlayers())
+        for (TabPlayer p : tab.getOnlinePlayers())
             if (!TABAdditions.getInstance().checkBedrock(p) && !toggledOff.contains(p))
                 toAdd.put(p,getLayout(p));
     }
     public void removeLayoutAll() {
-        for (TabPlayer p : TAB.getInstance().getPlayers())
+        for (TabPlayer p : tab.getOnlinePlayers())
             if (!TABAdditions.getInstance().checkBedrock(p)  && !toggledOff.contains(p))
                 toRemove.put(p,getLayout(p));
     }
@@ -188,11 +181,6 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     @Override
-    public Object getFeatureType() {
-        return TAFeature.TA_LAYOUT;
-    }
-
-    @Override
     public void onJoin(TabPlayer p) {
         if (TABAdditions.getInstance().checkBedrock(p)) return;
         toAdd.put(p,getLayout(p));
@@ -207,10 +195,10 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     public void loadPlaceholders() {
-        PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
+        PlaceholderManager pm = tab.getPlaceholderManager();
         for (Layout layout : layouts.values()) {
             for (String set : layout.setsnames.keySet())
-                pm.registerPlaceholder(new PlayerPlaceholder("%layout-playerset:" + set + "%", 100) {
+                pm.registerPlayerPlaceholder(new PlayerPlaceholder("%layout-playerset:" + set + "%", 100) {
                     @Override
                     public String get(TabPlayer p) {
                         Layout l = layouts.get(getLayout(p));
@@ -218,7 +206,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
                         return l.playerSet(l.setsnames.get(set),p).size()+"";
                     }});
             for (String list : layout.listsnames.keySet())
-                pm.registerPlaceholder(new PlayerPlaceholder("%layout-list:" + list + "%", 100) {
+                pm.registerPlayerPlaceholder(new PlayerPlaceholder("%layout-list:" + list + "%", 100) {
                     @Override
                     public String get(TabPlayer p) {
                         Layout l = layouts.get(getLayout(p));
@@ -226,7 +214,7 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
                         return l.lists(l.listsnames.get(list),p).size()+"";
                     }});
         }
-        pm.registerPlaceholder(new PlayerPlaceholder("%layout-activated%", 100) {
+        pm.registerPlayerPlaceholder(new PlayerPlaceholder("%layout-activated%", 100) {
             @Override
             public String get(TabPlayer p) {
                 return !toggledOff.contains(p)+"";

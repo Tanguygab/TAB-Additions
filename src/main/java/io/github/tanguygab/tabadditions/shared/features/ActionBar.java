@@ -3,25 +3,28 @@ package io.github.tanguygab.tabadditions.shared.features;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.features.types.event.JoinEventListener;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
-import me.neznamy.tab.shared.packets.PacketPlayOutChat;
+import me.neznamy.tab.api.TabFeature;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
+import me.neznamy.tab.api.protocol.PacketPlayOutChat;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class ActionBar implements JoinEventListener {
+public class ActionBar extends TabFeature {
+
+    public ActionBar() {
+        super("&aActionBar&r");
+    }
 
     @Override
     public void onJoin(TabPlayer p) {
-        p.loadPropertyFromConfig("actionbar");
+        p.loadPropertyFromConfig(this,"actionbar");
         String prop = p.getProperty("actionbar").updateAndGet();
         if (prop.equals("")) return;
         String actionbar = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getString("bars." + prop,"");
         if (actionbar.equals("")) return;
-        actionbar = TABAdditions.getInstance().parsePlaceholders(actionbar,p);
-        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.fromColoredText(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO));
+        actionbar = TABAdditions.getInstance().parsePlaceholders(actionbar,p,this);
+        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.fromColoredText(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),this);
     }
 
     public List<String> getLists() {
@@ -29,10 +32,5 @@ public class ActionBar implements JoinEventListener {
         for (Object key : TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getConfigurationSection("bars").keySet())
             list.add(key.toString());
         return list;
-    }
-
-    @Override
-    public Object getFeatureType() {
-        return TAFeature.ACTIONBAR;
     }
 }

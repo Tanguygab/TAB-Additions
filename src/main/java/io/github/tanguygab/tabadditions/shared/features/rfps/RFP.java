@@ -3,20 +3,22 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.PacketAPI;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.config.YamlConfigurationFile;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
+import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
+import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
-import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
-import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
 
 import java.util.*;
 
 public class RFP {
 
     private final YamlConfigurationFile configfile;
+    protected final TabFeature feature;
 
     private final String configname;
     private String name;
@@ -26,7 +28,8 @@ public class RFP {
     protected String group;
     public String lastskin;
 
-    public RFP(String configname,Map<String,Object> config) {
+    public RFP(String configname,Map<String,Object> config, TabFeature feature) {
+        this.feature = feature;
         configfile = TABAdditions.getInstance().getConfig(ConfigType.MAIN);
         this.configname = configname;
         if (config.containsKey("name"))
@@ -109,8 +112,8 @@ public class RFP {
         PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(uuid);
         rfp.setName(getName());
         String[] props = getProps();
-        props[0] = TABAdditions.getInstance().parsePlaceholders(props[0],p);
-        props[1] = TABAdditions.getInstance().parsePlaceholders(props[1],p);
+        props[0] = TABAdditions.getInstance().parsePlaceholders(props[0],p,feature);
+        props[1] = TABAdditions.getInstance().parsePlaceholders(props[1],p,feature);
 
 
         rfp.setDisplayName(IChatBaseComponent.fromColoredText(props[0]+getName()+props[1]));
@@ -139,7 +142,7 @@ public class RFP {
             potentialTeamName = potentialTeamName.substring(0, 15);
         potentialTeamName += (char) id;
         while (!done) {
-            for (TabPlayer all : TAB.getInstance().getPlayers()) {
+            for (TabPlayer all : TabAPI.getInstance().getOnlinePlayers()) {
                 if (all.getTeamName() != null && all.getTeamName().equals(potentialTeamName)) {
                     id = id + 1;
                 }
@@ -151,21 +154,21 @@ public class RFP {
 
     public void update(TabPlayer p, Object skin) {
         PacketPlayOutPlayerInfo.PlayerInfoData fp = get(p);
-        p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()));
+        p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()),feature);
         String[] props = getProps();
-        String prefix = TABAdditions.getInstance().parsePlaceholders(props[0],p);
-        String suffix = TABAdditions.getInstance().parsePlaceholders(props[1],p);
-        String icon = TABAdditions.getInstance().parsePlaceholders(this.skin,p);
+        String prefix = TABAdditions.getInstance().parsePlaceholders(props[0],p,feature);
+        String suffix = TABAdditions.getInstance().parsePlaceholders(props[1],p,feature);
+        String icon = TABAdditions.getInstance().parsePlaceholders(this.skin,p,feature);
         if (skin != null && !icon.equals(lastskin)) {
             fp.setSkin(skin);
             lastskin = icon;
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp));
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fp),feature);
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fp),feature);
         } else {
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, fp));
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY , fp));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, fp),feature);
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY , fp),feature);
         }
-        PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabFeature.NAMETAGS);
+        PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabAPI.getInstance().getFeatureManager().getFeature("Nametags"));
     }
 
     public String setName(String value) {

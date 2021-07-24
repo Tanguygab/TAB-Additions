@@ -5,11 +5,12 @@ import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.AlignedSuffix;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
-import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
-import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardScore;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
+import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
+import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardScore;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -36,10 +37,16 @@ public class Layout {
 
     protected final Map<String,String> fpnames = new HashMap<>();
     private final TABAdditions instance;
+    private final TabAPI tab;
+    private final LayoutManager feature;
+    private final AlignedSuffix alignedSuffix;
 
-    public Layout(String name) {
+    public Layout(String name, LayoutManager feature) {
         instance = TABAdditions.getInstance();
         this.name = name;
+        this.feature = feature;
+        tab = TabAPI.getInstance();
+        alignedSuffix = (AlignedSuffix) tab.getFeatureManager().getFeature("alignedsuffix");
         config = instance.getConfig(ConfigType.LAYOUT).getConfigurationSection("layouts."+name);
         create();
         loadPlaceholders();
@@ -55,7 +62,7 @@ public class Layout {
     }
     protected boolean isConditionMet(TabPlayer p) {
         if (!config.containsKey("condition")) return true;
-        return instance.isConditionMet(config.get("condition")+"",p);
+        return instance.isConditionMet(config.get("condition")+"",p,feature);
     }
 
     protected void loadPlaceholders() {
@@ -75,13 +82,12 @@ public class Layout {
             PacketPlayOutPlayerInfo.PlayerInfoData fp = fakeplayers.get(i);
             Map<String, Object> slot = placeholders.get(i);
             String text = slot.get("text")+"";
-            text = instance.parsePlaceholders(text, p);
+            text = instance.parsePlaceholders(text, p,feature);
             if (text.contains("||")) {
                 String prefixName = text.split("\\|\\|")[0];
                 String suffix = "";
                 if (text.split("\\|\\|").length > 1)
                     suffix = text.split("\\|\\|")[1];
-                AlignedSuffix alignedSuffix = ((AlignedSuffix)TAB.getInstance().getFeatureManager().getFeature("alignedsuffix"));
                 if (alignedSuffix != null)
                     text = alignedSuffix.formatName(prefixName,suffix);
             }
@@ -89,17 +95,17 @@ public class Layout {
             String latency = "0";
             if (slot.get("latency") != null) {
                 latency = slot.get("latency") + "";
-                latency = instance.parsePlaceholders(latency, p);
+                latency = instance.parsePlaceholders(latency, p,feature);
             }
             Object skin = null;
             String icon = "";
             if (slot.containsKey("icon")) {
-                skin = instance.getSkins().getIcon(slot.get("icon")+"", p);
-                icon = instance.parsePlaceholders(slot.get("icon")+"",p);
+                skin = instance.getSkins().getIcon(slot.get("icon")+"", p,feature);
+                icon = instance.parsePlaceholders(slot.get("icon")+"",p,feature);
             }
             String yellownumber = "0";
             if (slot.get("yellow-number") != null) {
-                yellownumber = instance.parsePlaceholders(slot.get("yellow-number")+"",p);
+                yellownumber = instance.parsePlaceholders(slot.get("yellow-number")+"",p,feature);
             }
 
             sendPackets(skinsp,p,fp,skin,text,i,icon,latency,yellownumber);
@@ -132,17 +138,17 @@ public class Layout {
                     if (listConfig.containsKey("empty")) {
                         Map<String, String> empty = (Map<String, String>) listConfig.get("empty");
                         if (empty.containsKey("text"))
-                            format = instance.parsePlaceholders(empty.get("text"), p);
+                            format = instance.parsePlaceholders(empty.get("text"), p,feature);
                         if (empty.containsKey("icon")) {
-                            skin = instance.getSkins().getIcon(empty.get("icon") + "", p);
-                            icon = instance.parsePlaceholders(empty.get("icon"), p);
+                            skin = instance.getSkins().getIcon(empty.get("icon") + "", p,feature);
+                            icon = instance.parsePlaceholders(empty.get("icon"), p,feature);
                         }
                         String latency = empty.get("latency");
-                        latency = instance.parsePlaceholders(latency,p);
+                        latency = instance.parsePlaceholders(latency,p,feature);
 
                         String yellownumber = "0";
                         if (empty.get("yellow-number") != null) {
-                            yellownumber = instance.parsePlaceholders(empty.get("yellow-number"),p);
+                            yellownumber = instance.parsePlaceholders(empty.get("yellow-number"),p,feature);
                         }
 
                         sendPackets(skinsl,p,fp,skin,format,i,icon,latency,yellownumber);
@@ -155,17 +161,17 @@ public class Layout {
                     int num = strlist.size()-intlist.size()+1;
                     Map<String, String> more = (Map<String, String>) listConfig.get("more");
                     if (more.containsKey("text"))
-                        format = instance.parsePlaceholders(more.get("text").replace("%num%",num+""), p);
+                        format = instance.parsePlaceholders(more.get("text").replace("%num%",num+""), p,feature);
                     if (more.containsKey("icon")) {
-                        icon = instance.parsePlaceholders(more.get("icon").replace("%num%",num+""), p);
-                        skin = instance.getSkins().getIcon(icon, p);
+                        icon = instance.parsePlaceholders(more.get("icon").replace("%num%",num+""), p,feature);
+                        skin = instance.getSkins().getIcon(icon, p,feature);
                     }
                     String latency = more.get("latency");
-                    latency = instance.parsePlaceholders(latency.replace("%num%",num+""),p);
+                    latency = instance.parsePlaceholders(latency.replace("%num%",num+""),p,feature);
 
                     String yellownumber = "0";
                     if (more.get("yellow-number") != null) {
-                        yellownumber = instance.parsePlaceholders(more.get("yellow-number").replace("%num%",num+""),p);
+                        yellownumber = instance.parsePlaceholders(more.get("yellow-number").replace("%num%",num+""),p,feature);
                     }
 
                     sendPackets(skinsl,p,fp,skin,format,i,icon,latency,yellownumber);
@@ -174,31 +180,30 @@ public class Layout {
 
                     String format = "%name%";
                     if (listConfig.containsKey("text")) format = listConfig.get("text")+"";
-                    format = instance.parsePlaceholders(format.replace("%name%",strInList).replace("%place%",inList+1+""), p);
+                    format = instance.parsePlaceholders(format.replace("%name%",strInList).replace("%place%",inList+1+""), p,feature);
                     if (format.contains("||")) {
                         String prefixName = format.split("\\|\\|")[0];
                         String suffix = "";
                         if (format.split("\\|\\|").length > 1)
                             suffix = format.split("\\|\\|")[1];
-                        AlignedSuffix alignedSuffix = ((AlignedSuffix)TAB.getInstance().getFeatureManager().getFeature("alignedsuffix"));
                         if (alignedSuffix != null)
                             format = alignedSuffix.formatName(prefixName,suffix);
                     }
 
                     String latency = listConfig.get("latency")+"";
-                    latency = instance.parsePlaceholders(latency.replace("%name%",strInList).replace("%place%",inList+1+""),p);
+                    latency = instance.parsePlaceholders(latency.replace("%name%",strInList).replace("%place%",inList+1+""),p,feature);
 
                     Object skin = null;
                     String icon = "";
                     if (listConfig.containsKey("icon")) {
                         icon = listConfig.get("icon")+"";
-                        icon = instance.parsePlaceholders(icon.replace("%name%",strInList).replace("%place%",inList+1+""),p);
-                        skin = instance.getSkins().getIcon(icon, p);
+                        icon = instance.parsePlaceholders(icon.replace("%name%",strInList).replace("%place%",inList+1+""),p,feature);
+                        skin = instance.getSkins().getIcon(icon, p,feature);
                     }
 
                     String yellownumber = "0";
                     if (listConfig.get("yellow-number") != null) {
-                        yellownumber = instance.parsePlaceholders(listConfig.get("yellow-number").toString().replace("%name%",strInList).replace("%place%",inList+1+""),p);
+                        yellownumber = instance.parsePlaceholders(listConfig.get("yellow-number").toString().replace("%name%",strInList).replace("%place%",inList+1+""),p,feature);
                     }
 
                     sendPackets(skinsl,p,fp,skin,format,i,icon,latency,yellownumber);
@@ -235,17 +240,17 @@ public class Layout {
                     if (setConfig.containsKey("empty")) {
                         Map<String, String> empty = (Map<String, String>) setConfig.get("empty");
                         if (empty.containsKey("text"))
-                            format = instance.parsePlaceholders(empty.get("text"), p);
+                            format = instance.parsePlaceholders(empty.get("text"), p,feature);
                         if (empty.containsKey("icon")) {
-                            icon = instance.parsePlaceholders(empty.get("icon"), p);
-                            skin = instance.getSkins().getIcon(icon + "", p);
+                            icon = instance.parsePlaceholders(empty.get("icon"), p,feature);
+                            skin = instance.getSkins().getIcon(icon + "", p,feature);
                         }
                         String latency = empty.get("latency")+"";
-                        latency = instance.parsePlaceholders(latency,p);
+                        latency = instance.parsePlaceholders(latency,p,feature);
 
                         String yellownumber = "0";
                         if (empty.get("yellow-number") != null) {
-                            yellownumber = instance.parsePlaceholders(empty.get("yellow-number"),p);
+                            yellownumber = instance.parsePlaceholders(empty.get("yellow-number"),p,feature);
                         }
 
                         sendPackets(skinss,p,fp,skin,format,i,icon,latency,yellownumber);
@@ -258,17 +263,17 @@ public class Layout {
                     int num = pset.size()-intlist.size()+1;
                     Map<String, String> more = (Map<String, String>) setConfig.get("more");
                     if (more.containsKey("text"))
-                        format = instance.parsePlaceholders(more.get("text").replace("%num%",num+""), p);
+                        format = instance.parsePlaceholders(more.get("text").replace("%num%",num+""), p,feature);
                     if (more.containsKey("icon")) {
-                        icon = instance.parsePlaceholders(more.get("icon").replace("%num%",num+""), p);
-                        skin = instance.getSkins().getIcon(icon, p);
+                        icon = instance.parsePlaceholders(more.get("icon").replace("%num%",num+""), p,feature);
+                        skin = instance.getSkins().getIcon(icon, p,feature);
                     }
                     String latency = setConfig.get("latency")+"";
-                    latency = instance.parsePlaceholders(latency.replace("%num%",num+""),p);
+                    latency = instance.parsePlaceholders(latency.replace("%num%",num+""),p,feature);
 
                     String yellownumber = "0";
                     if (more.get("yellow-number") != null) {
-                        yellownumber = instance.parsePlaceholders(more.get("yellow-number").replace("%num%",num+""),p);
+                        yellownumber = instance.parsePlaceholders(more.get("yellow-number").replace("%num%",num+""),p,feature);
                     }
 
                     sendPackets(skinss,p,fp,skin,format,i,icon,latency,yellownumber);
@@ -277,32 +282,31 @@ public class Layout {
                     String format = "%player%";
                     if (setConfig.containsKey("text"))
                         format = (setConfig.get("text") + "").replace("%place%", inList + 1 + "");
-                    format = instance.parsePlaceholders(format, pInSet, p, pInSet);
+                    format = instance.parsePlaceholders(format, pInSet, p, pInSet,feature);
                     if (format.contains("||")) {
                         String prefixName = format.split("\\|\\|").length > 0 ? format.split("\\|\\|")[0] : format;
                         String suffix = "";
                         if (format.split("\\|\\|").length > 1)
                             suffix = format.split("\\|\\|")[1];
-                        AlignedSuffix alignedSuffix = (AlignedSuffix) TAB.getInstance().getFeatureManager().getFeature("alignedsuffix");
                         if (alignedSuffix != null)
                             format = alignedSuffix.formatName(prefixName, suffix);
                     }
 
                     String latency = setConfig.get("latency") + "";
-                    latency = instance.parsePlaceholders(latency.replace("%place%", inList + 1 + ""), pInSet, p, pInSet);
+                    latency = instance.parsePlaceholders(latency.replace("%place%", inList + 1 + ""), pInSet, p, pInSet,feature);
 
                     String yellownumber;
                     if (setConfig.containsKey("yellow-number")) {
-                        yellownumber = instance.parsePlaceholders(setConfig.get("yellow-number").toString().replace("%place%", inList+1+""), pInSet, p, pInSet);
+                        yellownumber = instance.parsePlaceholders(setConfig.get("yellow-number").toString().replace("%place%", inList+1+""), pInSet, p, pInSet,feature);
                     } else {
-                        yellownumber = instance.parsePlaceholders(TAB.getInstance().getConfiguration().getConfig().getString("yellow-number-in-tablist","").replace("%place%",inList+1+""), pInSet, p, pInSet);
+                        yellownumber = instance.parsePlaceholders(TAB.getInstance().getConfiguration().getConfig().getString("yellow-number-in-tablist","").replace("%place%",inList+1+""), pInSet, p, pInSet,feature);
                     }
 
                     Object skin = pInSet.getSkin();
                     String icon = "player-head:"+pInSet.getName();
                     if (setConfig.containsKey("icon")) {
-                        icon = instance.parsePlaceholders((setConfig.get("icon")+"").replace("%place%",inList+1+""),pInSet,p,pInSet);
-                        skin = instance.getSkins().getIcon(icon, pInSet);
+                        icon = instance.parsePlaceholders((setConfig.get("icon")+"").replace("%place%",inList+1+""),pInSet,p,pInSet,feature);
+                        skin = instance.getSkins().getIcon(icon, pInSet,feature);
                     }
 
                     sendPackets(skinss,p,fp,skin,format,i,icon,latency,yellownumber);
@@ -324,7 +328,7 @@ public class Layout {
         String separator = " ";
         if (section.containsKey("separator"))
             separator = section.get("separator");
-        input = instance.parsePlaceholders(input, p);
+        input = instance.parsePlaceholders(input, p,feature);
 
         List<String> list = new ArrayList<>(Arrays.asList(input.split(separator)));
         if (list.size() == 1 && list.get(0).equals("")) list.clear();
@@ -333,10 +337,10 @@ public class Layout {
     protected List<TabPlayer> playerSet(Object slot, TabPlayer viewer) {
         Map<String,Object> section = (Map<String, Object>) slot;
 
-        List<TabPlayer> list = new ArrayList<>(TAB.getInstance().getPlayers());
+        List<TabPlayer> list = new ArrayList<>(tab.getOnlinePlayers());
         if (section.get("condition") != null && !section.get("condition").toString().equals("")) {
             String cond = section.get("condition")+"";
-            list.removeIf(p -> !instance.isConditionMet(cond,p, viewer,p));
+            list.removeIf(p -> !instance.isConditionMet(cond,p, viewer,p,feature));
         }
         if (section.get("vanished") == null || !Boolean.parseBoolean(""+section.get("vanished"))) {
             if (instance.getPlatform().getType() == PlatformType.SPIGOT)
@@ -370,20 +374,20 @@ public class Layout {
             return;
 
         if (!skins.containsKey(p) || (skin != null && !icon.equals(skins.get(p).get(i)))) {
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId())));
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getName(), fp.getUniqueId(), skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId())),feature);
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getName(), fp.getUniqueId(), skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))),feature);
         } else if (!placeholdersToRefresh.get(p).get(i).get("text").equals(text))
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId(), IChatBaseComponent.fromColoredText(text))));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId(), IChatBaseComponent.fromColoredText(text))),feature);
         placeholdersToRefresh.get(p).get(i).put("text",text);
 
         if (!placeholdersToRefresh.get(p).get(i).get("latency").equals(latency)) {
             int lat = getLatency(latency);
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId(), lat)));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId(), lat)),feature);
         }
         placeholdersToRefresh.get(p).get(i).put("latency",latency);
 
         if (!placeholdersToRefresh.get(p).get(i).get("yellow-number").equals(yellownumber))
-            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.getName(), TAB.getInstance().getErrorManager().parseInteger(yellownumber,0,"layout")));
+            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.getName(), tab.getErrorManager().parseInteger(yellownumber,0,"layout")),feature);
         placeholdersToRefresh.get(p).get(i).put("yellow-number",yellownumber);
     }
     private int getLatency(String lat) {
@@ -391,7 +395,7 @@ public class Layout {
         if (instance.getConfig(ConfigType.MAIN).hasConfigOption("real-latency"))
             realLat = instance.getConfig(ConfigType.MAIN).getBoolean("real-latency");
 
-        int i = TAB.getInstance().getErrorManager().parseInteger(lat,realLat ? 0 : 5,"layout");
+        int i = tab.getErrorManager().parseInteger(lat,realLat ? 0 : 5,"layout");
 
         if (realLat) return i;
         else if (i <= 1) return 1000;
@@ -436,15 +440,14 @@ public class Layout {
                     if (text.contains("||")) {
                         String prefixName = text.split("\\|\\|")[0];
                         String suffix = text.split("\\|\\|")[1];
-                        AlignedSuffix alignedSuffix = ((AlignedSuffix) TAB.getInstance().getFeatureManager().getFeature("alignedsuffix"));
                         if (alignedSuffix != null)
                             text = alignedSuffix.formatName(prefixName, suffix);
                     }
                     String latency = slot.get("latency")+"";
 
-                    if (TAB.getInstance().getPlaceholderManager().detectAll(text).size() > 0 || slot.containsKey("icon"))
+                    if (tab.getPlaceholderManager().detectPlaceholders(text).size() > 0 || slot.containsKey("icon"))
                         placeholders.put(id, slot);
-                    else if (TAB.getInstance().getPlaceholderManager().detectAll(latency).size() > 0)
+                    else if (tab.getPlaceholderManager().detectPlaceholders(latency).size() > 0)
                         placeholders.put(id, slot);
                     else fp.setLatency(getLatency(latency));
                 }
@@ -452,7 +455,7 @@ public class Layout {
 
             String id2 = id+"";
             if (id < 10) id2="0"+id;
-            List<String> chars = LayoutManager.getInstance().chars;
+            List<String> chars = feature.chars;
             if (chars.size() > id)
                 fp.setName(chars.get(id));
             else fp.setName(chars.get(chars.size()-1)+id2);

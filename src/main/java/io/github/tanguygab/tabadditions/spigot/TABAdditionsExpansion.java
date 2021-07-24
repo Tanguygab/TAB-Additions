@@ -1,13 +1,11 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
-import me.neznamy.tab.api.TABAPI;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.TAB;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -18,9 +16,11 @@ import java.util.List;
 public class TABAdditionsExpansion extends PlaceholderExpansion {
 
     private final Plugin plugin;
+    private final TabAPI tab;
 
-    public TABAdditionsExpansion(Plugin plugin){
+    public TABAdditionsExpansion(Plugin plugin) {
         this.plugin = plugin;
+        tab = TabAPI.getInstance();
     }
 
     @Override
@@ -52,15 +52,15 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, String identifier){
 
         if (identifier.equals("fakeplayers_amount") && TABAdditions.getInstance().rfpEnabled)
-            return ((RFPManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString())).getRFPS().size()+"";
+            return ((RFPManager)tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size()+"";
 
         if (player == null) return "";
-        TabPlayer p = TABAPI.getPlayer(player.getUniqueId());
+        TabPlayer p = tab.getPlayer(player.getUniqueId());
         if (p == null) return "";
 
-        if (identifier.equals("tag_visible")) return !p.hasHiddenNametag()+"";
+        if (identifier.equals("tag_visible")) return !TabAPI.getInstance().getScoreboardTeamManager().hasHiddenNametag(p)+"";
         if (identifier.equals("layout_activated") && TABAdditions.getInstance().layoutEnabled)
-            return !((LayoutManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.TA_LAYOUT.toString())).toggledOff.contains(p)+"";
+            return !((LayoutManager)tab.getFeatureManager().getFeature("&aTAB+ Layout&r")).toggledOff.contains(p)+"";
 
 
 

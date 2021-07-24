@@ -2,26 +2,28 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.TAFeature;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.cpu.UsageType;
-import me.neznamy.tab.shared.features.types.Loadable;
-import me.neznamy.tab.shared.features.types.event.JoinEventListener;
-import me.neznamy.tab.shared.packets.PacketPlayOutPlayerInfo;
-import me.neznamy.tab.shared.packets.PacketPlayOutScoreboardTeam;
+import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
+import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
 
 import java.util.*;
 
-public class RFPManager implements JoinEventListener, Loadable {
+public class RFPManager extends TabFeature {
 
     private final Map<String, RFP> rfps = new HashMap<>();
     public RandomRFP randomRFP;
 
+    private final TabAPI tab;
+
     public RFPManager() {
+        super("&aReal Fake Players&r");
+        tab = TabAPI.getInstance();
         load();
     }
 
@@ -45,14 +47,14 @@ public class RFPManager implements JoinEventListener, Loadable {
         config.set("fakeplayers."+name+".uuid", uuid+"");
         config.save();
 
-        RFP rfp = new RFP(name,config.getConfigurationSection("fakeplayers."+name));
+        RFP rfp = new RFP(name,config.getConfigurationSection("fakeplayers."+name),this);
         rfps.put(name,rfp);
-        for (TabPlayer p : TAB.getInstance().getPlayers()) {
-            p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()));
-            String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p);
-            String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p);
-            PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(rfp.getName()),null, TabFeature.NAMETAGS);
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, rfp.get(p)));
+        for (TabPlayer p : tab.getOnlinePlayers()) {
+            p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()),this);
+            String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p,this);
+            String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p,this);
+            PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(rfp.getName()),null, this);
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, rfp.get(p)),this);
 
         }
         return "&aAdded FakePlayer";
@@ -63,8 +65,8 @@ public class RFPManager implements JoinEventListener, Loadable {
         RFP rfp = rfps.get(name);
         rfps.remove(name);
         TABAdditions.getInstance().getConfig(ConfigType.MAIN).set("fakeplayers."+name,null);
-        for (TabPlayer p : TAB.getInstance().getPlayers())
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, rfp.get(p)));
+        for (TabPlayer p : tab.getOnlinePlayers())
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, rfp.get(p)),this);
 
         return "&aRemoved FakePlayer.";
     }
@@ -82,29 +84,29 @@ public class RFPManager implements JoinEventListener, Loadable {
             List<RFP> rfps = new ArrayList<>(this.rfps.values());
             for (RFP rfp : rfps) {
                 fps.add(rfp.get(p));
-                p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()));
-                String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p);
-                String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p);
-                PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(rfp.getName()),null, TabFeature.NAMETAGS);
+                p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()),this);
+                String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p,this);
+                String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p,this);
+                PacketAPI.registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(rfp.getName()),null, this);
             }
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps),this);
     }
     public void removeRFP(TabPlayer p) {
             List<PacketPlayOutPlayerInfo.PlayerInfoData> fps = new ArrayList<>();
             List<RFP> rfps = new ArrayList<>(this.rfps.values());
             for (RFP rfp : rfps) {
                 fps.add(new PacketPlayOutPlayerInfo.PlayerInfoData(rfp.getUUID()));
-                p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()));
+                p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()),this);
             }
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, fps),this);
     }
 
     public void showRFPAll() {
-        for (TabPlayer p : TAB.getInstance().getPlayers())
+        for (TabPlayer p : tab.getOnlinePlayers())
             showRFP(p);
     }
     public void removeRFPAll() {
-        for (TabPlayer p : TAB.getInstance().getPlayers())
+        for (TabPlayer p : tab.getOnlinePlayers())
             removeRFP(p);
     }
 
@@ -113,9 +115,9 @@ public class RFPManager implements JoinEventListener, Loadable {
         Map<String,Object> config = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getConfigurationSection("fakeplayers");
         for (Object rfp : config.keySet()) {
             if (!rfp.equals("random"))
-                rfps.put(rfp + "", new RFP(rfp + "", (Map<String, Object>) config.get(rfp + "")));
+                rfps.put(rfp + "", new RFP(rfp + "", (Map<String, Object>) config.get(rfp + ""),this));
             else {
-                randomRFP = new RandomRFP(rfp + "", (Map<String, Object>) config.get(rfp+""));
+                randomRFP = new RandomRFP(rfp + "", (Map<String, Object>) config.get(rfp+""),this);
             }
         }
         showRFPAll();
@@ -123,8 +125,8 @@ public class RFPManager implements JoinEventListener, Loadable {
     }
 
     public void refresh() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing RFPs",TAFeature.RFP, UsageType.REFRESHING,() -> {
-            for (TabPlayer p : TAB.getInstance().getPlayers()) {
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing RFPs", this, UsageType.REFRESHING,() -> {
+            for (TabPlayer p : tab.getOnlinePlayers()) {
                 updateRFPs(p);
             }
         });
@@ -133,7 +135,7 @@ public class RFPManager implements JoinEventListener, Loadable {
     public void updateRFPs(TabPlayer p) {
         List<RFP> rfps = new ArrayList<>(this.rfps.values());
         for (RFP rfp : rfps) {
-            Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p);
+            Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p, this);
             if (skin != null) {
                 if (!TABAdditions.getInstance().enabled) return;
                 rfp.update(p, skin);
@@ -152,11 +154,4 @@ public class RFPManager implements JoinEventListener, Loadable {
         showRFP(p);
         updateRFPs(p);
     }
-
-    @Override
-    public Object getFeatureType() {
-        return TAFeature.RFP;
-    }
-
-
 }

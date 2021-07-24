@@ -2,20 +2,25 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.cpu.UsageType;
-import me.neznamy.tab.shared.features.types.Loadable;
-import me.neznamy.tab.shared.features.types.event.JoinEventListener;
+import me.neznamy.tab.shared.features.NameTag;
+import me.neznamy.tab.api.TabFeature;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-public class NametagInRange implements Loadable, JoinEventListener {
+public class NametagInRange extends TabFeature {
+
+    private final TabAPI tab;
 
     public NametagInRange() {
-        for (TabPlayer p : TAB.getInstance().getPlayers()) {
-            for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
+        super("&aNametag in Range&r");
+        tab = TabAPI.getInstance();
+        for (TabPlayer p : tab.getOnlinePlayers()) {
+            for (TabPlayer p2 : tab.getOnlinePlayers()) {
                 if (p != p2)
-                    p.hideNametag(p2.getUniqueId());
+                    tab.getScoreboardTeamManager().hideNametag(p,p2);
             }
         }
         load();
@@ -23,25 +28,26 @@ public class NametagInRange implements Loadable, JoinEventListener {
 
     @Override
     public void onJoin(TabPlayer p) {
-        for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
-            p.hideNametag(p2.getUniqueId());
-            p2.hideNametag(p.getUniqueId());
+        for (TabPlayer p2 : tab.getOnlinePlayers()) {
+            tab.getScoreboardTeamManager().hideNametag(p,p2);
+            tab.getScoreboardTeamManager().hideNametag(p2,p);
         }
     }
 
     @Override
     public void load() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling Nametag In Range", TAFeature.NAMETAG_IN_RANGE, UsageType.REPEATING_TASK,()->{
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling Nametag In Range", this, UsageType.REPEATING_TASK,()->{
             int zone = (int) Math.pow(TABAdditions.getInstance().nametagInRange, 2);
-            for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                    TabPlayer p2 = TAB.getInstance().getPlayer(player.getUniqueId());
+            for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                TabPlayer p = tab.getPlayer(player.getUniqueId());
+                for (Player player2 : Bukkit.getServer().getOnlinePlayers()) {
+                    TabPlayer p2 = tab.getPlayer(player2.getUniqueId());
 
-                    if (p != player && p.getWorld().equals(player.getWorld()) && player.getLocation().distanceSquared(p.getLocation()) < zone) {
-                        p2.showNametag(p.getUniqueId());
+                    if (player != player2 && player.getWorld().equals(player2.getWorld()) && player2.getLocation().distanceSquared(player.getLocation()) < zone) {
+                        tab.getScoreboardTeamManager().showNametag(p2,p);
                     }
-                    else if (TAB.getInstance().getPlayer(player.getUniqueId()) != null) {
-                        p2.hideNametag(p.getUniqueId());
+                    else if (tab.getPlayer(player2.getUniqueId()) != null) {
+                        tab.getScoreboardTeamManager().hideNametag(p2,p);
                     }
                 }
             }
@@ -50,16 +56,12 @@ public class NametagInRange implements Loadable, JoinEventListener {
 
     @Override
     public void unload() {
-        for (TabPlayer p : TAB.getInstance().getPlayers()) {
-            for (TabPlayer p2 : TAB.getInstance().getPlayers()) {
+        for (TabPlayer p : tab.getOnlinePlayers()) {
+            for (TabPlayer p2 : tab.getOnlinePlayers()) {
                 if (p != p2)
-                    p.showNametag(p2.getUniqueId());
+                    tab.getScoreboardTeamManager().showNametag(p,p2);
             }
         }
     }
 
-    @Override
-    public Object getFeatureType() {
-        return TAFeature.NAMETAG_IN_RANGE;
-    }
 }

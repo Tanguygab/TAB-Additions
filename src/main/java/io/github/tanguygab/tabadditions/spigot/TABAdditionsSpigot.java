@@ -2,10 +2,9 @@ package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.*;
-import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.event.BukkitTABLoadEvent;
-import me.neznamy.tab.shared.TAB;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -36,10 +35,10 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
-        TAB tab = TAB.getInstance();
-        if (!tab.getFeatureManager().isFeatureEnabled(TAFeature.CHAT.toString())) return;
+        TabAPI tab = TabAPI.getInstance();
+        if (!tab.getFeatureManager().isFeatureEnabled("&aChat&r")) return;
         e.setCancelled(true);
-        ((ChatManager)tab.getFeatureManager().getFeature(TAFeature.CHAT.toString())).onChat(tab.getPlayer(e.getPlayer().getUniqueId()),e.getMessage());
+        ((ChatManager)tab.getFeatureManager().getFeature("&aChat&r")).onChat(tab.getPlayer(e.getPlayer().getUniqueId()),e.getMessage());
     }
 
     @Override

@@ -5,11 +5,11 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.Property;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.PlaceholderManager;
+import me.neznamy.tab.api.placeholder.PlayerPlaceholder;
+import me.neznamy.tab.api.placeholder.ServerPlaceholder;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.features.PlaceholderManager;
-import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
-import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -50,35 +50,36 @@ public class BungeePlatform extends Platform {
 
 	@Override
 	public void registerPlaceholders() {
-		PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
-		pm.registerPlaceholder(new PlayerPlaceholder("%money%",1000) {
+		PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
+		TABAdditions taba = TABAdditions.getInstance();
+		pm.registerPlayerPlaceholder(new PlayerPlaceholder("%money%",1000) {
 			@Override
 			public String get(TabPlayer p) {
-				return new Property(p,"%vault_eco_balance%").updateAndGet();
+				return taba.parsePlaceholders("%vault_eco_balance%",p,null);
 			}
 		});
-		pm.registerPlaceholder(new PlayerPlaceholder("%deaths%",1000) {
+		pm.registerPlayerPlaceholder(new PlayerPlaceholder("%deaths%",1000) {
 			@Override
 			public String get(TabPlayer p) {
-				return new Property(p,"%statistic_deaths%").updateAndGet();
+				return taba.parsePlaceholders("%statistic_deaths%",p,null);
 			}
 		});
-		pm.registerPlaceholder(new PlayerPlaceholder("%health%",100) {
+		pm.registerPlayerPlaceholder(new PlayerPlaceholder("%health%",100) {
 			@Override
 			public String get(TabPlayer p) {
-				return new Property(p,"%player_health%").updateAndGet();
+				return taba.parsePlaceholders("%player_health_rounded%",p,null);
 			}
 		});
-		pm.registerPlaceholder(new ServerPlaceholder("%tps%",1000) {
+		pm.registerServerPlaceholder(new ServerPlaceholder("%tps%",1000) {
 			@Override
 			public String get() {
-				return new Property(null,"%vault_eco_balance%").updateAndGet();
+				return taba.parsePlaceholders("%server_tps_1%",null,null);
 			}
 		});
-		pm.registerPlaceholder(new PlayerPlaceholder("%afk%",500) {
+		pm.registerPlayerPlaceholder(new PlayerPlaceholder("%afk%",500) {
 			@Override
 			public String get(TabPlayer p) {
-				String afk = new Property(p,"%essentials_afk%").updateAndGet();
+				String afk = taba.parsePlaceholders("%essentials_afk%",p,null);
 				String output;
 				if (afk.equals("yes")) output = TAB.getInstance().getConfiguration().getConfig().getString("placeholders.afk-yes"," &4*&4&lAFK&4*&r");
 				else output = TAB.getInstance().getConfiguration().getConfig().getString("placeholders.afk-no","");
@@ -86,7 +87,7 @@ public class BungeePlatform extends Platform {
 			}
 		});
 		for (String server : ProxyServer.getInstance().getServers().keySet()) {
-			pm.registerPlaceholder(new PlayerPlaceholder("%server-online:" + server + "%",10000) {
+			pm.registerPlayerPlaceholder(new PlayerPlaceholder("%server-online:" + server + "%",10000) {
 				@Override
 				public String get(TabPlayer tabPlayer) {
 					return ((TABAdditionsBungeeCord)plugin).getServerStatus(server);

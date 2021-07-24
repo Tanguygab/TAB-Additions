@@ -2,16 +2,16 @@ package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.Skins;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
 
 public class RealFakePlayerCmd {
     public RealFakePlayerCmd(String nameS, String[] args) {
         TABAdditions instance = TABAdditions.getInstance();
-        RFPManager rfpm = (RFPManager) TAB.getInstance().getFeatureManager().getFeature(TAFeature.RFP.toString());
+        RFPManager rfpm = (RFPManager) TabAPI.getInstance().getFeatureManager().getFeature("&aReal Fake Players&r");
         String output = "";
 
         if (args[1].equalsIgnoreCase("list")) {
@@ -75,10 +75,10 @@ public class RealFakePlayerCmd {
                 if (prop.equalsIgnoreCase("suffix"))
                     output = rfp.setSuffix(value);
 
-                for (TabPlayer p : TAB.getInstance().getPlayers()) {
+                for (TabPlayer p : TabAPI.getInstance().getOnlinePlayers()) {
                     Object skin = null;
                     if (prop.equalsIgnoreCase("skin"))
-                        skin = Skins.getInstance().getIcon(value, p);
+                        skin = Skins.getInstance().getIcon(value, p,rfpm);
                     rfp.update(p, skin);
                 }
             }

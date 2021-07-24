@@ -4,34 +4,30 @@ import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.config.ConfigurationFile;
-import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.cpu.UsageType;
-import me.neznamy.tab.shared.features.types.Loadable;
-import me.neznamy.tab.shared.features.types.event.CommandListener;
-import me.neznamy.tab.shared.features.types.event.JoinEventListener;
-import me.neznamy.tab.shared.packets.IChatBaseComponent;
-import me.neznamy.tab.shared.rgb.RGBUtils;
-import me.neznamy.tab.shared.rgb.TextColor;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
+import me.neznamy.tab.api.chat.rgb.RGBUtils;
+import me.neznamy.tab.api.chat.TextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.regex.Pattern;
 
-public class ChatManager implements Loadable, JoinEventListener, CommandListener {
+public class ChatManager extends TabFeature {
 
     private TABAdditions plinstance;
+    private TabAPI tab;
     private final Map<String,ChatFormat> formats = new HashMap<>();
     public final Map<TabPlayer,String> defformats = new HashMap<>();
 
@@ -56,6 +52,8 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public Map<TabPlayer,LocalDateTime> cooldown = new HashMap<>();
 
     public ChatManager() {
+        super("&aChat&r");
+        tab = TabAPI.getInstance();
         load();
     }
 
@@ -79,9 +77,9 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     @Override
     public void load() {
         plinstance = TABAdditions.getInstance();
-        YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
+        ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         for (Object format : config.getConfigurationSection("chat-formats").keySet())
-            formats.put(format+"",new ChatFormat(format+"", config.getConfigurationSection("chat-formats."+format)));
+            formats.put(format+"",new ChatFormat(format+"", config.getConfigurationSection("chat-formats."+format),this));
 
         itemEnabled = config.getBoolean("item.enabled",true);
         itemInput = config.getString("item.input","[item]");
@@ -101,13 +99,11 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
 
         cooldownTime = Long.parseLong(config.getInt("message-cooldown",0)+"");
 
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props", TAFeature.CHAT, UsageType.REPEATING_TASK,() -> {
-            for (TabPlayer p : TAB.getInstance().getPlayers()) {
-                p.loadPropertyFromConfig("chatprefix");
-                p.loadPropertyFromConfig("customchatname",p.getName());
-                p.loadPropertyFromConfig("chatsuffix");
-            }
-        });
+        for (TabPlayer p : tab.getOnlinePlayers()) {
+            p.loadPropertyFromConfig(this,"chatprefix");
+            p.loadPropertyFromConfig(this,"customchatname",p.getName());
+            p.loadPropertyFromConfig(this,"chatsuffix");
+        }
     }
 
     public ChatFormat defFormat() {
@@ -118,7 +114,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         text.put("text","%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%&7\u00bb &r%msg%");
         components.put("text",text);
         map.put("components",components);
-        return new ChatFormat("default", map);
+        return new ChatFormat("default", map,this);
     }
 
     public void onChat(TabPlayer p, String msg) {
@@ -140,21 +136,21 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         ChatFormat format = getFormat(p);
         IChatBaseComponent format2 = createmsg(p,msg,format,null);
 
-        TAB.getInstance().getPlatform().sendConsoleMessage(format2.toLegacyText(), true);
+        tab.getPlatform().sendConsoleMessage(format2.toLegacyText(), true);
 
         IChatBaseComponent pformat = format2;
         if (mentionForEveryone && mentionEnabled && !format.hasRelationalPlaceholders())
-            for (TabPlayer pl : TAB.getInstance().getPlayers())
+            for (TabPlayer pl : tab.getOnlinePlayers())
                 if (pl != p)
                     pformat = pingcheck(pl,pformat,pl);
-        for (TabPlayer pl : TAB.getInstance().getPlayers()) {
+        for (TabPlayer pl : tab.getOnlinePlayers()) {
             if (canSee(p,pl)) {
                 IChatBaseComponent ppformat = pformat.clone();
                 if (format.hasRelationalPlaceholders())
                     ppformat = createmsg(p,msg,format,pl);
                 if (!mentionForEveryone && mentionEnabled && pl != p) ppformat = pingcheck(pl,ppformat,pl);
                 if (mentionEnabled && mentionForEveryone && format.hasRelationalPlaceholders()) {
-                        for (TabPlayer pl2 : TAB.getInstance().getPlayers())
+                        for (TabPlayer pl2 : tab.getOnlinePlayers())
                             if (pl2 != p)
                                 pformat = pingcheck(pl2,pformat,pl);
                 }
@@ -199,7 +195,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                 if (txt.toRawText().contains("%msg%") && plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.item")) && msg.contains(itemInput)) {
                     txt = itemcheck(p, txt, msg,viewer);
                 } else {
-                    String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p,viewer,p).replace("%msg%", msg);
+                    String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p,viewer,p,this).replace("%msg%", msg);
                     txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
                 }
 
@@ -224,21 +220,21 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
             }
             comp.setExtra(list2);
             if (comp.getHoverValue() != null) {
-                String txt = plinstance.parsePlaceholders(((IChatBaseComponent)comp.getHoverValue()).toFlatText(),p,viewer,p).replace("%msg%", msg);
+                String txt = plinstance.parsePlaceholders(((IChatBaseComponent)comp.getHoverValue()).toFlatText(),p,viewer,p,this).replace("%msg%", msg);
                 IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
                 comp.onHoverShowText(hover);
             }
             if (comp.getClickValue() != null) {
                 if (comp.getClickAction() == IChatBaseComponent.ClickAction.SUGGEST_COMMAND) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replace("%msg%", msg);
+                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p,this).replace("%msg%", msg);
                     comp.onClickSuggestCommand(txt);
                 }
                 else if (comp.getClickAction() == IChatBaseComponent.ClickAction.RUN_COMMAND) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replace("%msg%", msg);
+                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p,this).replace("%msg%", msg);
                     comp.onClickRunCommand(txt);
                 }
                 else if (comp.getClickAction() == IChatBaseComponent.ClickAction.OPEN_URL) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replace("%msg%", msg);
+                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p,this).replace("%msg%", msg);
                     comp.onClickOpenUrl(txt);
                 }
             }
@@ -267,7 +263,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public IChatBaseComponent itemcheck(TabPlayer p, IChatBaseComponent comp, String msg, TabPlayer viewer) {
 
         List<IChatBaseComponent> msglist = new ArrayList<>();
-        List<String> list = new ArrayList<>(Arrays.asList(TABAdditions.getInstance().parsePlaceholders(comp.getText(),p,viewer,p).split("%msg%")));
+        List<String> list = new ArrayList<>(Arrays.asList(TABAdditions.getInstance().parsePlaceholders(comp.getText(),p,viewer,p,this).split("%msg%")));
         if (list.size() < 1) list.add("");
         msglist.add(new IChatBaseComponent(list.get(0)));
 
@@ -302,7 +298,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                         itemtxt.setText(itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
                     else itemtxt = itemtxt.setText(itemOutputSingle.replace("%name%",name));
                 } else itemtxt = itemtxt.setText(itemOutputAir);
-                itemtxt.setText(plinstance.parsePlaceholders(itemtxt.getText(),p));
+                itemtxt.setText(plinstance.parsePlaceholders(itemtxt.getText(),p,this));
                 itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
                 msglist.add(itemtxt);
                 itemcount = itemcount-1;
@@ -325,8 +321,8 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                             for (IChatBaseComponent subcomp2 : comp.getExtra()) {
                                 if (subcomp2.getExtra() != null && !subcomp2.getExtra().isEmpty()) {
                                     for (IChatBaseComponent subcomp3 : subcomp2.getExtra()) {
-                                        if (subcomp3.getText().toLowerCase().contains(TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p).toLowerCase())) {
-                                            subcomp3.setText(subcomp3.getText().replaceAll("(?i)"+TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p), TABAdditions.getInstance().parsePlaceholders(mentionOutput, p,viewer,p)));
+                                        if (subcomp3.getText().toLowerCase().contains(TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p,this).toLowerCase())) {
+                                            subcomp3.setText(subcomp3.getText().replaceAll("(?i)"+TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p,this), TABAdditions.getInstance().parsePlaceholders(mentionOutput, p,viewer,p,this)));
                                             if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
                                                 Player player = (Player) p.getPlayer();
                                                 try {
@@ -367,31 +363,16 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
 
     @Override
     public void onJoin(TabPlayer p) {
-        p.loadPropertyFromConfig("chatprefix");
-        p.loadPropertyFromConfig("customchatname",p.getName());
-        p.loadPropertyFromConfig("chatsuffix");
-    }
-
-    @Override
-    public Object getFeatureType() {
-        return TAFeature.CHAT;
+        p.loadPropertyFromConfig(this,"chatprefix");
+        p.loadPropertyFromConfig(this,"customchatname",p.getName());
+        p.loadPropertyFromConfig(this,"chatsuffix");
     }
 
     @Override
     public boolean onCommand(TabPlayer p, String msg) {
         msg = msg.replaceFirst("/","");
-        YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
+        ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         ConfigurationFile playerdata = TAB.getInstance().getConfiguration().getPlayerDataFile();
-        if (playerdata == null) {
-            File file = new File(TAB.getInstance().getPlatform().getDataFolder(), "playerdata.yml");
-            try {
-                if (!file.exists())
-                    file.createNewFile();
-                playerdata = new YamlConfigurationFile(null, file);
-            } catch (Exception error) {
-                TAB.getInstance().getErrorManager().criticalError("Failed to load playerdata.yml", error);
-            }
-        }
         ConfigurationFile translation = TAB.getInstance().getConfiguration().getTranslation();
 
         if (msg.equals("togglemsg")) {
@@ -433,7 +414,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         if (formats.containsKey("msg") && msg.startsWith("msg ") && msg.split(" ").length >= 3) {
             String player = msg.split(" ")[1];
             String msg2 = msg.replace(msg.split(" ")[0]+" "+player+" ","");
-            TabPlayer p2 = TAB.getInstance().getPlayer(player);
+            TabPlayer p2 = tab.getPlayer(player);
             if (p2 == null)
                 p.sendMessage(translation.getString("player_not_found","&4[TAB] Player not found!"),true);
             else if (TAB.getInstance().getConfiguration().getPlayerData("togglemsg").contains(p2.getName()))
@@ -453,7 +434,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         String condition = cmd.get("condition")+"";
         String format = cmd.get("format")+"";
         String name = cmd.get("name")+"";
-        if (!plinstance.isConditionMet(condition,p))
+        if (!plinstance.isConditionMet(condition,p,this))
             p.sendMessage(translation.getString("no_permission","&cI'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error."),true);
         else {
             if (defformats.containsKey(p)) {

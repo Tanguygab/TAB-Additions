@@ -1,11 +1,14 @@
 package io.github.tanguygab.tabadditions.shared.features.layouts.sorting;
 
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.cpu.TabFeature;
 import me.neznamy.tab.shared.cpu.UsageType;
 
 import java.util.*;
+
+// will probably need to be updated
 
 // (Almost) Everything related to sorting was made by NEZNAMY, I litteraly copy pasted it while editing things and I feel bad ;-;
 // https://github.com/NEZNAMY/TAB/blob/master/src/main/java/me/neznamy/tab/shared/features/sorting/Sorting.java
@@ -16,10 +19,12 @@ public class Sorting {
     private final String layoutname;
     public List<SortingType> types = new ArrayList<>();
     private boolean caseSensitiveSorting = true;
+    private final TabFeature feature;
 
     public Sorting(Map<String,Object> slot,List<TabPlayer> players, String layoutname) {
         this.players = players;
         this.layoutname = layoutname;
+        feature = TabAPI.getInstance().getFeatureManager().getFeature("&aTAB+ Layout&r");
 
         if (slot.get("case-sentitive") != null) caseSensitiveSorting = (boolean) slot.get("case-sensitive");
 
@@ -29,12 +34,12 @@ public class Sorting {
         }
         else types.add(new Groups(""));
 
-        TAB.getInstance().getCPUManager().runTaskLater(1000,"handling TAB+ Layout Sorting", TabFeature.SORTING, UsageType.REFRESHING,()->{
+        TAB.getInstance().getCPUManager().runTaskLater(1000,"handling TAB+ Layout Sorting", feature, UsageType.REFRESHING,()->{
             List<TabPlayer> players1 = new ArrayList<>(players);
             for (TabPlayer p : players1) {
                 if (!p.isLoaded()) continue;
                 String newPos = getPosition(p);
-                p.setProperty("Layout-Sorting-"+layoutname,newPos);
+                p.setProperty(feature,"TAB+-Layout-Sorting-"+layoutname,newPos);
             }
         });
     }

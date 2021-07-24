@@ -2,18 +2,17 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.cpu.TabFeature;
-import me.neznamy.tab.shared.features.types.Loadable;
-import me.neznamy.tab.shared.features.types.event.JoinEventListener;
+import me.neznamy.tab.api.TabFeature;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class OnlyYou implements JoinEventListener, Loadable {
+public class OnlyYou extends TabFeature {
 
     private final Plugin plugin;
 
     public OnlyYou() {
+        super("&aOnly You&r");
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
         load();
     }
@@ -50,8 +49,4 @@ public class OnlyYou implements JoinEventListener, Loadable {
         });
     }
 
-    @Override
-    public Object getFeatureType() {
-        return TAFeature.ONLY_YOU;
-    }
 }

@@ -3,8 +3,8 @@ package io.github.tanguygab.tabadditions.shared;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.TAB;
 
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -104,8 +104,8 @@ public class Skins {
         }
     }
 
-    public Object getIcon(String icon, TabPlayer p) {
-        icon = TABAdditions.getInstance().parsePlaceholders(icon, p);
+    public Object getIcon(String icon, TabPlayer p, TabFeature feature) {
+        icon = TABAdditions.getInstance().parsePlaceholders(icon, p,feature);
         Object skin = null;
         String[] props = null;
         if (icon == null || icon.equals("")) return null;

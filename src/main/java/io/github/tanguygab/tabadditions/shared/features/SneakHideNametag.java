@@ -1,11 +1,10 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.features.types.Loadable;
-import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import me.neznamy.tab.api.team.ScoreboardTeamManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -15,11 +14,12 @@ import org.bukkit.plugin.Plugin;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SneakHideNametag implements Loadable, Listener {
+public class SneakHideNametag extends TabFeature implements Listener {
 
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
 
     public SneakHideNametag() {
+        super("&aSneak Hide Nametag&r");
         load();
     }
 
@@ -31,23 +31,19 @@ public class SneakHideNametag implements Loadable, Listener {
 
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent e) {
-        TabPlayer p = TAB.getInstance().getPlayer(e.getPlayer().getUniqueId());
+        TabPlayer p = TabAPI.getInstance().getPlayer(e.getPlayer().getUniqueId());
         boolean isSneaking = e.isSneaking();
+        ScoreboardTeamManager tm = TabAPI.getInstance().getScoreboardTeamManager();
 
         if (isSneaking) {
-            tag.put(p, p.hasHiddenNametag());
-            p.hideNametag();
+            tag.put(p, tm.hasHiddenNametag(p));
+            tm.hideNametag(p);
         } else if (!tag.get(p))
-            p.showNametag();
+            tm.showNametag(p);
     }
 
     @Override
     public void unload() {
         HandlerList.unregisterAll(this);
-    }
-
-    @Override
-    public Object getFeatureType() {
-        return TAFeature.SNEAK_HIDE_NAMETAG;
     }
 }

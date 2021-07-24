@@ -1,15 +1,10 @@
 package io.github.tanguygab.tabadditions.bungee;
 
-import io.github.tanguygab.tabadditions.shared.ConfigType;
-import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.*;
 import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
-
-import java.util.*;
 
 public class MainCmd extends Command implements TabExecutor {
 
