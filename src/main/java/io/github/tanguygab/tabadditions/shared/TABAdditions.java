@@ -152,8 +152,6 @@ public class TABAdditions {
         skins.unload();
 
         enabled = false;
-        TAB.getInstance().unload();
-        TAB.getInstance().load();
     }
 
     protected void loadProps(TabPlayer p) {
@@ -283,24 +281,18 @@ public class TABAdditions {
 
         List<String> list = TAB.getInstance().getPlaceholderManager().detectAll(str);
         for (String pl : list) {
-            if (pl.startsWith("%rel_")) {
-                TabPlayer def2 = def == viewer ? sender : viewer;
-                str = str.replace(pl, new Property(def, pl).getFormat(def2));
-            }
             if (pl.startsWith("%sender:") && sender != null) {
                 String pl2 = pl.replace("%sender:", "%");
-                if (pl2.startsWith("%rel_"))
-                    str = str.replace(pl,new Property(sender, pl2).getFormat(viewer));
-                else str = str.replace(pl, parsePlaceholders(pl2, sender));
+                str = str.replace(pl,new Property(sender, pl2).getFormat(viewer));
             }
             else if (pl.startsWith("%viewer:") && viewer != null) {
                 String pl2 = pl.replace("%viewer:", "%");
-                if (pl2.startsWith("%rel_"))
-                    str = str.replace(pl,new Property(viewer, pl2).getFormat(sender));
-                else str = str.replace(pl, parsePlaceholders(pl2, viewer));
+                str = str.replace(pl,new Property(viewer, pl2).getFormat(sender));
             }
         }
-        str = parsePlaceholders(str,def);
+
+        TabPlayer def2 = def == viewer ? sender : viewer;
+        str = new Property(def,str).getFormat(def2);
 
         return str;
     }
@@ -308,13 +300,8 @@ public class TABAdditions {
     public String parsePlaceholders(String str, TabPlayer p) {
         if (str == null) return "";
         if (p == null) return str;
-        PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
-        List<String> placeholders = pm.detectAll(str);
-            for (String pl : placeholders) {
-                str = str.replace(pl, new Property(p,pl).getFormat(p));
-            }
-            str = pm.color(str);
-        return str;
+        if (!str.contains("%")) return str;
+        return new Property(p,str).get();
     }
 
     public boolean isConditionMet(String str, TabPlayer p) {

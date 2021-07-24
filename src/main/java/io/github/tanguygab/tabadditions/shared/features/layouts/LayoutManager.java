@@ -78,33 +78,28 @@ public class LayoutManager implements Loadable, JoinEventListener, CommandListen
     }
 
     private void refresh() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(100,"handling TAB+ Layout",TAFeature.TA_LAYOUT, UsageType.REPEATING_TASK,()->{
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling TAB+ Layout",getFeatureType(), UsageType.REPEATING_TASK,()->{
+
             for (TabPlayer p : TAB.getInstance().getPlayers()) {
                 if (!TABAdditions.getInstance().checkBedrock(p) && players.containsKey(p) && !players.get(p).equals(getLayout(p))) {
+
                     toRemove.put(p, players.get(p));
                     toAdd.put(p,getLayout(p));
                 }
                 if (!players.containsKey(p) && !getLayout(p).equals("null"))
                     toAdd.put(p,getLayout(p));
             }
+
             removeLayout();
             showLayout();
+
             List<TabPlayer> list = new ArrayList<>(players.keySet());
-            TAB.getInstance().getCPUManager().runTask("refreshing placeholders slots TAB+ Layout", () -> {
-                for (TabPlayer p : list) {
-                    layouts.get(players.get(p)).refreshPlaceholders(p);
-                }
-            });
-            TAB.getInstance().getCPUManager().runTask("refreshing lists slots TAB+ Layout", () -> {
-                for (TabPlayer p : list) {
-                    layouts.get(players.get(p)).refreshLists(p);
-                }
-            });
-            TAB.getInstance().getCPUManager().runTask("refreshing players sets slots TAB+ Layout", () -> {
-                for (TabPlayer p : list) {
-                    layouts.get(players.get(p)).refreshSets(p);
-                }
-            });
+            for (TabPlayer p : list) {
+                if (p == null || !players.containsKey(p)) continue;
+                layouts.get(players.get(p)).refreshPlaceholders(p);
+                layouts.get(players.get(p)).refreshLists(p);
+                layouts.get(players.get(p)).refreshSets(p);
+            }
         });
     }
 

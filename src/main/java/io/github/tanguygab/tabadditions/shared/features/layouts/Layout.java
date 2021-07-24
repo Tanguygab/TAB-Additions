@@ -86,27 +86,23 @@ public class Layout {
                     text = alignedSuffix.formatName(prefixName,suffix);
             }
 
-            String latency = slot.get("latency")+"";
-            latency = instance.parsePlaceholders(latency,p);
-            int lat = 0;
-            try {lat = getLatency(Integer.parseInt(latency));}
-            catch (Exception ignored) {latency = "NaN";}
-
+            String latency = "0";
+            if (slot.get("latency") != null) {
+                latency = slot.get("latency") + "";
+                latency = instance.parsePlaceholders(latency, p);
+            }
             Object skin = null;
             String icon = "";
             if (slot.containsKey("icon")) {
                 skin = instance.getSkins().getIcon(slot.get("icon")+"", p);
                 icon = instance.parsePlaceholders(slot.get("icon")+"",p);
             }
-
             String yellownumber = "0";
             if (slot.get("yellow-number") != null) {
                 yellownumber = instance.parsePlaceholders(slot.get("yellow-number")+"",p);
-                try {Integer.parseInt(yellownumber);}
-                catch (Exception ignored) {yellownumber = "0";}
             }
 
-            sendPackets(skinsp,p,fp,skin,lat,text,i,icon,latency,yellownumber);
+            sendPackets(skinsp,p,fp,skin,text,i,icon,latency,yellownumber);
             skins.put(i, icon);
         }
         skinsp.put(p, skins);
@@ -143,18 +139,13 @@ public class Layout {
                         }
                         String latency = empty.get("latency");
                         latency = instance.parsePlaceholders(latency,p);
-                        int lat = 0;
-                        try {lat = getLatency(Integer.parseInt(latency));}
-                        catch (Exception ignored) {latency = "NaN";}
 
                         String yellownumber = "0";
                         if (empty.get("yellow-number") != null) {
                             yellownumber = instance.parsePlaceholders(empty.get("yellow-number"),p);
-                            try {Integer.parseInt(yellownumber);}
-                            catch (Exception ignored) {yellownumber = "0";}
                         }
 
-                        sendPackets(skinsl,p,fp,skin,lat,format,i,icon,latency,yellownumber);
+                        sendPackets(skinsl,p,fp,skin,format,i,icon,latency,yellownumber);
                         skins.put(i, icon);
                     }
                 } else if (intlist.size() == inList+1 && intlist.size() != strlist.size() && listConfig.containsKey("more")) {
@@ -171,18 +162,13 @@ public class Layout {
                     }
                     String latency = more.get("latency");
                     latency = instance.parsePlaceholders(latency.replace("%num%",num+""),p);
-                    int lat = 0;
-                    try {lat = getLatency(Integer.parseInt(latency));}
-                    catch (Exception ignored) {latency = "NaN";}
 
                     String yellownumber = "0";
                     if (more.get("yellow-number") != null) {
                         yellownumber = instance.parsePlaceholders(more.get("yellow-number").replace("%num%",num+""),p);
-                        try {Integer.parseInt(yellownumber);}
-                        catch (Exception ignored) {yellownumber = "0";}
                     }
 
-                    sendPackets(skinsl,p,fp,skin,lat,format,i,icon,latency,yellownumber);
+                    sendPackets(skinsl,p,fp,skin,format,i,icon,latency,yellownumber);
                     skins.put(i, icon);
                 } else {
 
@@ -201,9 +187,6 @@ public class Layout {
 
                     String latency = listConfig.get("latency")+"";
                     latency = instance.parsePlaceholders(latency.replace("%name%",strInList).replace("%place%",inList+1+""),p);
-                    int lat = 0;
-                    try {lat = getLatency(Integer.parseInt(latency));}
-                    catch (Exception ignored) {latency = "NaN";}
 
                     Object skin = null;
                     String icon = "";
@@ -216,11 +199,9 @@ public class Layout {
                     String yellownumber = "0";
                     if (listConfig.get("yellow-number") != null) {
                         yellownumber = instance.parsePlaceholders(listConfig.get("yellow-number").toString().replace("%name%",strInList).replace("%place%",inList+1+""),p);
-                        try {Integer.parseInt(yellownumber);}
-                        catch (Exception ignored) {yellownumber = "0";}
                     }
 
-                    sendPackets(skinsl,p,fp,skin,lat,format,i,icon,latency,yellownumber);
+                    sendPackets(skinsl,p,fp,skin,format,i,icon,latency,yellownumber);
                     skins.put(i,icon);
 
                     inList = inList + 1;
@@ -261,18 +242,13 @@ public class Layout {
                         }
                         String latency = empty.get("latency")+"";
                         latency = instance.parsePlaceholders(latency,p);
-                        int lat = 0;
-                        try {lat = getLatency(Integer.parseInt(latency));}
-                        catch (Exception ignored) {latency = "NaN";}
 
                         String yellownumber = "0";
                         if (empty.get("yellow-number") != null) {
                             yellownumber = instance.parsePlaceholders(empty.get("yellow-number"),p);
-                            try {Integer.parseInt(yellownumber);}
-                            catch (Exception ignored) {yellownumber = "0";}
                         }
 
-                        sendPackets(skinss,p,fp,skin,lat,format,i,icon,latency,yellownumber);
+                        sendPackets(skinss,p,fp,skin,format,i,icon,latency,yellownumber);
                         skins.put(i, icon);
                     }
                 } else if (intlist.size() == inList+1 && pset.size() != intlist.size() && setConfig.containsKey("more")) {
@@ -289,20 +265,13 @@ public class Layout {
                     }
                     String latency = setConfig.get("latency")+"";
                     latency = instance.parsePlaceholders(latency.replace("%num%",num+""),p);
-                    int lat = 0;
-                    try {lat = getLatency(Integer.parseInt(latency));}
-                    catch (Exception ignored) {
-                        latency = "NaN";
-                    }
 
                     String yellownumber = "0";
                     if (more.get("yellow-number") != null) {
                         yellownumber = instance.parsePlaceholders(more.get("yellow-number").replace("%num%",num+""),p);
-                        try {Integer.parseInt(yellownumber);}
-                        catch (Exception ignored) {yellownumber = "0";}
                     }
 
-                    sendPackets(skinss,p,fp,skin,lat,format,i,icon,latency,yellownumber);
+                    sendPackets(skinss,p,fp,skin,format,i,icon,latency,yellownumber);
                     skins.put(i, icon);
                 } else {
                     String format = "%player%";
@@ -310,7 +279,7 @@ public class Layout {
                         format = (setConfig.get("text") + "").replace("%place%", inList + 1 + "");
                     format = instance.parsePlaceholders(format, pInSet, p, pInSet);
                     if (format.contains("||")) {
-                        String prefixName = format.split("\\|\\|")[0];
+                        String prefixName = format.split("\\|\\|").length > 0 ? format.split("\\|\\|")[0] : format;
                         String suffix = "";
                         if (format.split("\\|\\|").length > 1)
                             suffix = format.split("\\|\\|")[1];
@@ -321,23 +290,12 @@ public class Layout {
 
                     String latency = setConfig.get("latency") + "";
                     latency = instance.parsePlaceholders(latency.replace("%place%", inList + 1 + ""), pInSet, p, pInSet);
-                    int lat;
-                    try {
-                        lat = getLatency(Integer.parseInt(latency));
-                    } catch (Exception ignored) {
-                        latency = "NaN";
-                        lat = Math.toIntExact(pInSet.getPing());
-                    }
 
                     String yellownumber;
                     if (setConfig.containsKey("yellow-number")) {
                         yellownumber = instance.parsePlaceholders(setConfig.get("yellow-number").toString().replace("%place%", inList+1+""), pInSet, p, pInSet);
-                        try {Integer.parseInt(yellownumber);}
-                        catch (Exception ignored) {yellownumber = "0";}
                     } else {
                         yellownumber = instance.parsePlaceholders(TAB.getInstance().getConfiguration().getConfig().getString("yellow-number-in-tablist","").replace("%place%",inList+1+""), pInSet, p, pInSet);
-                        try {Integer.parseInt(yellownumber);}
-                        catch (Exception ignored) {yellownumber = "0";}
                     }
 
                     Object skin = pInSet.getSkin();
@@ -347,7 +305,7 @@ public class Layout {
                         skin = instance.getSkins().getIcon(icon, pInSet);
                     }
 
-                    sendPackets(skinss,p,fp,skin,lat,format,i,icon,latency,yellownumber);
+                    sendPackets(skinss,p,fp,skin,format,i,icon,latency,yellownumber);
                     skins.put(i,icon);
 
                     inList = inList + 1;
@@ -407,35 +365,39 @@ public class Layout {
         return new ArrayList<>(pSorted.values());
     }
 
-    public void sendPackets(Map<TabPlayer, Map<Integer, String>> skins, TabPlayer p, PacketPlayOutPlayerInfo.PlayerInfoData fp, Object skin, int lat, String text, int i, String icon, String latency, String yellownumber) {
+    public void sendPackets(Map<TabPlayer, Map<Integer, String>> skins, TabPlayer p, PacketPlayOutPlayerInfo.PlayerInfoData fp, Object skin, String text, int i, String icon, String latency, String yellownumber) {
         if (!placeholdersToRefresh.containsKey(p) || !placeholdersToRefresh.get(p).containsKey(i))
             return;
 
         if (!skins.containsKey(p) || (skin != null && !icon.equals(skins.get(p).get(i)))) {
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.REMOVE_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId())));
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getName(), fp.getUniqueId(), skin, lat, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getName(), fp.getUniqueId(), skin, 0, PacketPlayOutPlayerInfo.EnumGamemode.CREATIVE, IChatBaseComponent.fromColoredText(text))));
         } else if (!placeholdersToRefresh.get(p).get(i).get("text").equals(text))
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId(), IChatBaseComponent.fromColoredText(text))));
         placeholdersToRefresh.get(p).get(i).put("text",text);
 
-        if (!placeholdersToRefresh.get(p).get(i).get("latency").equals(latency))
-            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId(),lat)));
+        if (!placeholdersToRefresh.get(p).get(i).get("latency").equals(latency)) {
+            int lat = getLatency(latency);
+            p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY, new PacketPlayOutPlayerInfo.PlayerInfoData(fp.getUniqueId(), lat)));
+        }
         placeholdersToRefresh.get(p).get(i).put("latency",latency);
 
         if (!placeholdersToRefresh.get(p).get(i).get("yellow-number").equals(yellownumber))
-            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.getName(), Integer.parseInt(yellownumber)));
+            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.getName(), TAB.getInstance().getErrorManager().parseInteger(yellownumber,0,"layout")));
         placeholdersToRefresh.get(p).get(i).put("yellow-number",yellownumber);
     }
-    private int getLatency(int lat) {
+    private int getLatency(String lat) {
         boolean realLat = false;
         if (instance.getConfig(ConfigType.MAIN).hasConfigOption("real-latency"))
             realLat = instance.getConfig(ConfigType.MAIN).getBoolean("real-latency");
 
-        if (realLat) return lat;
-        else if (lat <= 1) return 1000;
-        else if (lat == 2) return 600;
-        else if (lat == 3) return  300;
-        else if (lat == 4) return  200;
+        int i = TAB.getInstance().getErrorManager().parseInteger(lat,realLat ? 0 : 5,"layout");
+
+        if (realLat) return i;
+        else if (i <= 1) return 1000;
+        else if (i == 2) return 600;
+        else if (i == 3) return  300;
+        else if (i == 4) return  200;
         else return 100;
     }
 
@@ -484,11 +446,7 @@ public class Layout {
                         placeholders.put(id, slot);
                     else if (TAB.getInstance().getPlaceholderManager().detectAll(latency).size() > 0)
                         placeholders.put(id, slot);
-                    else {
-                        try {
-                            fp.setLatency(getLatency(Integer.parseInt(latency)));
-                        } catch (Exception ignored) {}
-                    }
+                    else fp.setLatency(getLatency(latency));
                 }
             }
 
