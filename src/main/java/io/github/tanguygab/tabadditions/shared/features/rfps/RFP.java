@@ -2,7 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
+import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.SortingType;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.PacketAPI;
@@ -116,7 +116,7 @@ public class RFP {
         props[1] = TABAdditions.getInstance().parsePlaceholders(props[1],p,feature);
 
 
-        rfp.setDisplayName(IChatBaseComponent.fromColoredText(props[0]+getName()+props[1]));
+        rfp.setDisplayName(IChatBaseComponent.optimizedComponent(props[0]+getName()+props[1]));
         rfp.setUniqueId(uuid);
         if (configfile.getBoolean("real-latency") != null && configfile.getBoolean("real-latency"))
             rfp.setLatency(latency);
@@ -132,8 +132,18 @@ public class RFP {
         return rfp;
     }
     public String getSortingTeam() {
-        String chars = Sorting.loadSortingList().get(group);
-        if (chars == null) chars = "9";
+        String groups = null;
+        for (String str : TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.sorting-types", new ArrayList<>())) {
+            if (str.startsWith("GROUPS:")) {
+                groups = str.replace("GROUPS:","");
+                break;
+            }
+        }
+        String chars;
+        if (groups != null) {
+            chars = SortingType.convertSortingElements(groups.split(",")).get(group);
+            if (chars == null) chars = "9";
+        } else chars = "9";
 
         int id = 65;
         boolean done = false;

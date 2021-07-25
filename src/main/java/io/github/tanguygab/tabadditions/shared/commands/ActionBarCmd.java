@@ -25,6 +25,6 @@ public class ActionBarCmd {
         }
         TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aActionBar&r");
         actionbar = instance.parsePlaceholders(actionbar,p,feature);
-        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.fromColoredText(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
+        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
     }
 }

@@ -62,7 +62,7 @@ public class ChatFormat {
                 Map<String,Object> complist = components.get(component);
 
                 if (complist.containsKey("text"))
-                    text = IChatBaseComponent.fromColoredText(complist.get("text")+"");
+                    text = IChatBaseComponent.optimizedComponent(complist.get("text")+"");
 
                 List<String> hover = (List<String>) complist.get("hover");
                 String hoverTxt = "";

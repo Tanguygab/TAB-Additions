@@ -196,7 +196,7 @@ public class ChatManager extends TabFeature {
                     txt = itemcheck(p, txt, msg,viewer);
                 } else {
                     String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p,viewer,p,this).replace("%msg%", msg);
-                    txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
+                    txt = IChatBaseComponent.optimizedComponent(msg2).setColor(txt.getColor());
                 }
 
                 TextColor color = null;
@@ -221,7 +221,7 @@ public class ChatManager extends TabFeature {
             comp.setExtra(list2);
             if (comp.getHoverValue() != null) {
                 String txt = plinstance.parsePlaceholders(((IChatBaseComponent)comp.getHoverValue()).toFlatText(),p,viewer,p,this).replace("%msg%", msg);
-                IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
+                IChatBaseComponent hover = IChatBaseComponent.optimizedComponent(txt);
                 comp.onHoverShowText(hover);
             }
             if (comp.getClickValue() != null) {
@@ -277,7 +277,7 @@ public class ChatManager extends TabFeature {
 
         if (ar.isEmpty()) ar.add("");
         for (String txt2 : ar) {
-            IChatBaseComponent txt3 = IChatBaseComponent.fromColoredText(txt2);
+            IChatBaseComponent txt3 = IChatBaseComponent.optimizedComponent(txt2);
             msglist.add(txt3);
 
             if (itemcount != 0) {

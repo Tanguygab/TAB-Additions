@@ -23,8 +23,7 @@ public class ActionBar extends TabFeature {
         if (prop.equals("")) return;
         String actionbar = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getString("bars." + prop,"");
         if (actionbar.equals("")) return;
-        actionbar = TABAdditions.getInstance().parsePlaceholders(actionbar,p,this);
-        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.fromColoredText(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),this);
+        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),this);
     }
 
     public List<String> getLists() {
