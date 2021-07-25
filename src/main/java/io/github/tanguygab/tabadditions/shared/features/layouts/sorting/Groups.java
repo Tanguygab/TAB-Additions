@@ -7,16 +7,15 @@ public class Groups extends SortingType {
 
     private final LinkedHashMap<String, String> sortedGroups;
 
-    public Groups(String sortingPlaceholder) {
-        super(sortingPlaceholder);
-        sortedGroups = Sorting.loadSortingList();
+    public Groups(String options) {
+        sortedGroups = convertSortingElements(options.split(","));
     }
 
     @Override
     public String getChars(TabPlayer p) {
         String group = p.getGroup();
         String chars = sortedGroups.get(group.toLowerCase());
-        if (chars == null) chars = "9";
+        if (chars == null) chars = String.valueOf(sortedGroups.size()+1);
         return chars;
     }
 

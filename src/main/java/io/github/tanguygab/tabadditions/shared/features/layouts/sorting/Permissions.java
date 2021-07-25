@@ -3,13 +3,16 @@ package io.github.tanguygab.tabadditions.shared.features.layouts.sorting;
 import me.neznamy.tab.api.TabPlayer;
 import java.util.LinkedHashMap;
 
-public class GroupPermission extends SortingType {
+public class Permissions extends SortingType {
 
+    //map of sorted groups in config
     private final LinkedHashMap<String, String> sortedGroups;
 
-    public GroupPermission(String sortingPlaceholder) {
-        super(sortingPlaceholder);
-        sortedGroups = Sorting.loadSortingList();
+    /**
+     * Constructs new instance
+     */
+    public Permissions(String options) {
+        sortedGroups = convertSortingElements(options.split(","));
     }
 
     @Override

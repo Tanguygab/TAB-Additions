@@ -7,18 +7,24 @@ import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.cpu.UsageType;
 
 import java.util.*;
-
-// will probably need to be updated
+import java.util.function.Function;
 
 // (Almost) Everything related to sorting was made by NEZNAMY, I litteraly copy pasted it while editing things and I feel bad ;-;
-// https://github.com/NEZNAMY/TAB/blob/master/src/main/java/me/neznamy/tab/shared/features/sorting/Sorting.java
+// https://github.com/NEZNAMY/TAB/tree/v3/src/main/java/me/neznamy/tab/shared/features/sorting/Sorting.java
 
 public class Sorting {
 
+    //map of all registered sorting types
+    private final Map<String, Function<String, SortingType>> types = new HashMap<>();
+
+    //if sorting is case senstitive or not
+    private boolean caseSensitiveSorting = true;
+
+    //active sorting types
+    private List<SortingType> usedSortingTypes;
+
     private final List<TabPlayer> players;
     private final String layoutname;
-    public List<SortingType> types = new ArrayList<>();
-    private boolean caseSensitiveSorting = true;
     private final TabFeature feature;
 
     public Sorting(Map<String,Object> slot,List<TabPlayer> players, String layoutname) {
@@ -26,13 +32,19 @@ public class Sorting {
         this.layoutname = layoutname;
         feature = TabAPI.getInstance().getFeatureManager().getFeature("&aTAB+ Layout&r");
 
-        if (slot.get("case-sentitive") != null) caseSensitiveSorting = (boolean) slot.get("case-sensitive");
+        caseSensitiveSorting = Boolean.parseBoolean(slot.get("case-sentitive")+"");
+        types.put("GROUPS", Groups::new);
+        types.put("PERMISSIONS", Permissions::new);
+        types.put("PLACEHOLDER",  Placeholder::new);
+        types.put("PLACEHOLDER_A_TO_Z", (options) -> new PlaceholderAtoZ(options));
+        types.put("PLACEHOLDER_Z_TO_A", (options) -> new PlaceholderZtoA(options));
+        types.put("PLACEHOLDER_LOW_TO_HIGH", (options) -> new PlaceholderLowToHigh(options));
+        types.put("PLACEHOLDER_HIGH_TO_LOW", (options) -> new PlaceholderHighToLow(options));
 
-        if (slot.containsKey("types")) {
-            List<String> slottypes = (List<String>) slot.get("types");
-            compile(slottypes);
-        }
-        else types.add(new Groups(""));
+        if (slot.get("types") instanceof List)
+            usedSortingTypes = compile((List<String>) slot.get("types"));
+        else usedSortingTypes = compile(TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.sorting-types", new ArrayList<>()));
+
 
         TAB.getInstance().getCPUManager().runTaskLater(1000,"handling TAB+ Layout Sorting", feature, UsageType.REFRESHING,()->{
             List<TabPlayer> players1 = new ArrayList<>(players);
@@ -44,44 +56,26 @@ public class Sorting {
         });
     }
 
-    private void compile(List<String> slottypes){
-        if (slottypes.isEmpty()) {
-            types.add(new Groups(""));
-            return;
+    private List<SortingType> compile(List<String> options){
+        List<SortingType> list = new ArrayList<>();
+        for (String element : options) {
+            String[] arr = element.split(":");
+            if (types.containsKey(arr[0].toUpperCase())) {
+                SortingType type = types.get(arr[0].toUpperCase()).apply(arr.length == 1 ? "" : arr[1]);
+                list.add(type);
+            }
         }
-        for (String type : slottypes) {
-            if (type.equals("GROUPS")) types.add(new Groups(""));
-            if (type.equals("GROUP_PERMISSIONS")) types.add(new GroupPermission(""));
-            if (type.startsWith("PLACEHOLDER_A_TO_Z_")) types.add(new PlaceholderAtoZ(type.replace("PLACEHOLDER_A_TO_Z_","")));
-            if (type.startsWith("PLACEHOLDER_Z_TO_A_")) types.add(new PlaceholderZtoA(type.replace("PLACEHOLDER_Z_TO_A_","")));
-            if (type.startsWith("PLACEHOLDER_LOW_TO_HIGH_")) types.add(new PlaceholderLowToHigh(type.replace("PLACEHOLDER_LOW_TO_HIGH_","")));
-            if (type.startsWith("PLACEHOLDER_HIGH_TO_LOW_")) types.add(new PlaceholderHighToLow(type.replace("PLACEHOLDER_HIGH_TO_LOW_","")));
-        }
+        return list;
     }
-
 
     public String getPosition(TabPlayer p) {
         String position = "";
-        for (SortingType type : types)
+        for (SortingType type : getSorting())
             position = position + type.getChars(p);
         return position;
     }
 
-    public static LinkedHashMap<String, String> loadSortingList() {
-        LinkedHashMap<String, String> sortedGroups = new LinkedHashMap<>();
-        int index = 1;
-        List<String> configList = TAB.getInstance().getConfiguration().getConfig().getStringList("group-sorting-priority-list", Arrays.asList("Owner", "Admin", "Mod", "Helper", "Builder", "Premium", "Player", "default"));
-        int charCount = String.valueOf(configList.size()).length(); //1 char for <10 groups, 2 chars for <100 etc
-        for (Object group : configList){
-            String sort = index+"";
-            while (sort.length() < charCount) {
-                sort = "0" + sort;
-            }
-            for (String group0 : String.valueOf(group).toLowerCase().split(" ")) {
-                sortedGroups.put(group0, sort);
-            }
-            index++;
-        }
-        return sortedGroups;
+    public List<SortingType> getSorting() {
+        return usedSortingTypes;
     }
 }
