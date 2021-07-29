@@ -11,6 +11,7 @@ import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.api.*;
+import me.neznamy.tab.api.chat.EnumChatFormat;
 import me.neznamy.tab.shared.PropertyImpl;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
@@ -184,11 +185,13 @@ public class TABAdditions {
     }
 
     private void loadPlaceholders() {
-        List<Object> props = new ArrayList<>(Arrays.asList("tabprefix","tabsuffix","customtabname",
+        Set<Object> props = new HashSet<>(Arrays.asList("tabprefix","tabsuffix","customtabname",
                 "tagprefix","tagsuffix","customtagname",
                 "chatprefix","chatsuffix","customchatname",
                 "abovename","belowname","title","actionbar"));
-        props.addAll(TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines"));
+        if (TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines") != null)
+            props.addAll(TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines"));
+        if (TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines") != null)
         props.addAll(TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines").keySet());
         PlaceholderManager pm = tab.getPlaceholderManager();
         for (Object prop : props) {
@@ -270,7 +273,7 @@ public class TABAdditions {
     public String parsePlaceholders(String str, TabPlayer p, TabFeature feature) {
         if (str == null) return "";
         //if (p == null) return str;
-        if (!str.contains("%")) return str;
+        if (!str.contains("%")) return EnumChatFormat.color(str);
         return new PropertyImpl(feature,p,str).get();
     }
 
