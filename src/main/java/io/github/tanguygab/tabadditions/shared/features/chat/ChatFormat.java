@@ -51,41 +51,8 @@ public class ChatFormat {
         return (boolean) config.get("relational");
     }
 
-    public IChatBaseComponent getText() {
-        IChatBaseComponent finalText = new IChatBaseComponent().setText("");
-
-        Map<String,Map<String,Object>> components = ((Map<String,Map<String,Object>>) config.get("components"));
-        List<IChatBaseComponent> list = new ArrayList<>();
-        if (components != null)
-            for (String component : components.keySet()) {
-                IChatBaseComponent text = new IChatBaseComponent("");
-                Map<String,Object> complist = components.get(component);
-
-                if (complist.containsKey("text"))
-                    text = IChatBaseComponent.optimizedComponent(complist.get("text")+"");
-
-                List<String> hover = (List<String>) complist.get("hover");
-                String hoverTxt = "";
-                if (hover != null) {
-                    for (String str : hover) {
-                        hoverTxt = hoverTxt + str;
-                        if (hover.indexOf(str) < hover.size()-1)
-                            hoverTxt = hoverTxt + "\n";
-                    }
-                }
-                text.onHoverShowText(hoverTxt);
-
-                if (complist.containsKey("suggest"))
-                    text.onClickSuggestCommand(complist.get("suggest")+"");
-                else if (complist.containsKey("command"))
-                    text.onClickRunCommand(complist.get("command")+"");
-                else if (complist.containsKey("url"))
-                    text.onClickOpenUrl(complist.get("url")+"");
-
-                list.add(text);
-            }
-        finalText.setExtra(list);
-        return finalText;
+    public Map<String,Map<String,Object>> getText() {
+        return ((Map<String,Map<String,Object>>) config.get("components"));
     }
 
 
