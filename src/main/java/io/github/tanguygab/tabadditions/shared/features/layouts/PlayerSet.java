@@ -75,7 +75,7 @@ public class PlayerSet {
 
         IChatBaseComponent displayName = IChatBaseComponent.optimizedComponent(getProp(viewer,uuid2,"name"));
         Object skin = Skins.getInstance().getIcon(getProp(viewer,uuid2,"icon"));
-        int lat = TabAPI.getInstance().getErrorManager().parseInteger(getProp(viewer,uuid2,"latency"),0,"TAB+ Layout's latency");
+        int lat = TAB.getInstance().getErrorManager().parseInteger(getProp(viewer,uuid2,"latency"),0,"TAB+ Layout's latency");
 
 
         return Arrays.asList(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, new PacketPlayOutPlayerInfo.PlayerInfoData(
@@ -83,7 +83,7 @@ public class PlayerSet {
                 new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE,
                         "TAB-YellowNumber",
                         fp.getName(),
-                        TabAPI.getInstance().getErrorManager().parseInteger(getProp(viewer,uuid2,"yellownumber"),0,"layout"))
+                        TAB.getInstance().getErrorManager().parseInteger(getProp(viewer,uuid2,"yellownumber"),0,"layout"))
                 );
     }
 

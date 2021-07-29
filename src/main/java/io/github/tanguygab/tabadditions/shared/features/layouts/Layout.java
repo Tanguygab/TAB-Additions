@@ -408,7 +408,7 @@ public class Layout {
         placeholdersToRefresh.get(p).get(i).put("latency",latency);
 
         if (!placeholdersToRefresh.get(p).get(i).get("yellow-number").equals(yellownumber))
-            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.getName(), tab.getErrorManager().parseInteger(yellownumber,0,"layout")),feature);
+            p.sendCustomPacket(new PacketPlayOutScoreboardScore(PacketPlayOutScoreboardScore.Action.CHANGE, "TAB-YellowNumber", fp.getName(), TAB.getInstance().getErrorManager().parseInteger(yellownumber,0,"layout")),feature);
         placeholdersToRefresh.get(p).get(i).put("yellow-number",yellownumber);
     }
     private int getLatency(String lat) {
@@ -416,7 +416,7 @@ public class Layout {
         if (instance.getConfig(ConfigType.MAIN).hasConfigOption("real-latency"))
             realLat = instance.getConfig(ConfigType.MAIN).getBoolean("real-latency",false);
 
-        int i = tab.getErrorManager().parseInteger(lat,realLat ? 0 : 5,"layout");
+        int i = TAB.getInstance().getErrorManager().parseInteger(lat,realLat ? 0 : 5,"layout");
 
         if (realLat) return i;
         else if (i <= 1) return 1000;

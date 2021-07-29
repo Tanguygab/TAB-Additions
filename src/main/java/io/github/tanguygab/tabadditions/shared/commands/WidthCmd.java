@@ -83,8 +83,9 @@ public class WidthCmd {
             pixelsRemaining -= 2;
             text += "i";
         }
-        return new IChatBaseComponent(("&b&k" + text + " &e|&b (" + width + " pixels) &7&l[Click to copy]").replace('&', '\u00a7'))
-                .onClickRunCommand("/"+(TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE ? "b" : "") + "tab+ width confirm "+c+" "+width)
-                .onHoverShowText("Click to copy with " + width + " pixels");
+        IChatBaseComponent comp = new IChatBaseComponent(("&b&k" + text + " &e|&b (" + width + " pixels) &7&l[Click to copy]").replace('&', '\u00a7'));
+        comp.getModifier().onClickRunCommand("/"+(TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE ? "b" : "") + "tab+ width confirm "+c+" "+width);
+        comp.getModifier().onHoverShowText("Click to copy with " + width + " pixels");
+        return comp;
     }
 }
