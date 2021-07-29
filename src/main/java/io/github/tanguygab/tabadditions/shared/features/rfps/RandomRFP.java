@@ -2,12 +2,14 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.Sorting;
+import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.SortingType;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
+import me.neznamy.tab.shared.TAB;
 
 import java.util.*;
 
@@ -87,8 +89,18 @@ public class RandomRFP extends RFP{
         }
     }
     public String getSortingTeam(String name) {
-        String chars = Sorting.loadSortingList().get(super.group);
-        if (chars == null) chars = "9";
+        String groups = null;
+        for (String str : TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.sorting-types", new ArrayList<>())) {
+            if (str.startsWith("GROUPS:")) {
+                groups = str.replace("GROUPS:","");
+                break;
+            }
+        }
+        String chars;
+        if (groups != null) {
+            chars = SortingType.convertSortingElements(groups.split(",")).get(group);
+            if (chars == null) chars = "9";
+        } else chars = "9";
 
         int id = 65;
         boolean done = false;

@@ -105,7 +105,10 @@ public class Skins {
     }
 
     public Object getIcon(String icon, TabPlayer p, TabFeature feature) {
-        icon = TABAdditions.getInstance().parsePlaceholders(icon, p,feature);
+        return getIcon(icon);
+    }
+
+    public Object getIcon(String icon) {
         Object skin = null;
         String[] props = null;
         if (icon == null || icon.equals("")) return null;
@@ -126,7 +129,7 @@ public class Skins {
             }
             catch (NumberFormatException ignored) {}
         }
-        if (skin == null && props != null && props.length >= 2 && !props[0].equals("") && !props[1].equals("")) {
+        if (props != null && props.length >= 2 && !props[0].equals("") && !props[1].equals("")) {
             skin = TABAdditions.getInstance().getPlatform().getSkin(props);
         }
         return skin;

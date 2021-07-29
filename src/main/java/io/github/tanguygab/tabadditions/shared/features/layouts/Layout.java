@@ -379,8 +379,6 @@ public class Layout {
             return new ArrayList<>(pSorted.values());
         }
 
-
-
         Sorting sort;
         if (sorting.containsKey(slot)) sort = sorting.get(slot);
         else sort = new Sorting((Map<String, Object>) section.get("sorting"), list, getName());
@@ -416,7 +414,7 @@ public class Layout {
     private int getLatency(String lat) {
         boolean realLat = false;
         if (instance.getConfig(ConfigType.MAIN).hasConfigOption("real-latency"))
-            realLat = instance.getConfig(ConfigType.MAIN).getBoolean("real-latency");
+            realLat = instance.getConfig(ConfigType.MAIN).getBoolean("real-latency",false);
 
         int i = tab.getErrorManager().parseInteger(lat,realLat ? 0 : 5,"layout");
 

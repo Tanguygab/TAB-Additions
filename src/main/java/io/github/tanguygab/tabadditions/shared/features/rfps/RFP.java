@@ -118,7 +118,7 @@ public class RFP {
 
         rfp.setDisplayName(IChatBaseComponent.optimizedComponent(props[0]+getName()+props[1]));
         rfp.setUniqueId(uuid);
-        if (configfile.getBoolean("real-latency") != null && configfile.getBoolean("real-latency"))
+        if (configfile.getBoolean("real-latency",false))
             rfp.setLatency(latency);
         else if (latency <= 1)
             rfp.setLatency(1000);
@@ -201,7 +201,7 @@ public class RFP {
         int old = latency;
         try {
             int num = Integer.parseInt(value);
-            if (configfile.getBoolean("real-latency") != null && configfile.getBoolean("real-latency"))
+            if (configfile.getBoolean("real-latency",false))
                 latency = num;
             else if (num < 1) num = 1;
             else if (num > 5) num = 5;

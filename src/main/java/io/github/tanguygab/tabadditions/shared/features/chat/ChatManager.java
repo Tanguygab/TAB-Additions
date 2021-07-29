@@ -145,7 +145,7 @@ public class ChatManager extends TabFeature {
                     pformat = pingcheck(pl,pformat,pl);
         for (TabPlayer pl : tab.getOnlinePlayers()) {
             if (canSee(p,pl)) {
-                IChatBaseComponent ppformat = pformat.clone();
+                IChatBaseComponent ppformat = new IChatBaseComponent(pformat);
                 if (format.hasRelationalPlaceholders())
                     ppformat = createmsg(p,msg,format,pl);
                 if (!mentionForEveryone && mentionEnabled && pl != p) ppformat = pingcheck(pl,ppformat,pl);

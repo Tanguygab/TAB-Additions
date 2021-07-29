@@ -4,7 +4,7 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.*;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.event.BukkitTABLoadEvent;
+import me.neznamy.tab.platforms.bukkit.BukkitTABLoadEvent;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;

@@ -21,7 +21,7 @@ public class Cmd {
             switch (args[0].toLowerCase()) {
 
                 case "actionbar": {
-                    if (!TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("features.actionbars"))
+                    if (!TABAdditions.getInstance().actionbarsEnabled)
                         instance.sendMessage(name,"&cActionbar feature is not enabled, therefore this command cannot be used");
                     else if (args.length < 2)
                         instance.sendMessage(name,"&cYou have to provide an actionbar!");
@@ -35,7 +35,7 @@ public class Cmd {
                     break;
                 }
                 case "title": {
-                    if (!TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("features.titles"))
+                    if (!TABAdditions.getInstance().titlesEnabled)
                         instance.sendMessage(name,"&cTitle feature is not enabled, therefore this command cannot be used");
                     else if (args.length < 2)
                         instance.sendMessage(name,"&cYou have to provide a title!");
