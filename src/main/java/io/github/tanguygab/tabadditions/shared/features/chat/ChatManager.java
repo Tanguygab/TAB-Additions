@@ -4,16 +4,14 @@ import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.TAFeature;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
+import me.neznamy.tab.shared.config.ConfigurationFile;
+import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.config.ConfigurationFile;
-import me.neznamy.tab.shared.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.cpu.UsageType;
-import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.shared.features.types.event.CommandListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
+import me.neznamy.tab.shared.packets.EnumChatFormat;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.rgb.RGBUtils;
 import me.neznamy.tab.shared.rgb.TextColor;
@@ -23,7 +21,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -32,6 +29,7 @@ import java.util.regex.Pattern;
 public class ChatManager implements Loadable, JoinEventListener, CommandListener {
 
     private TABAdditions plinstance;
+    private final TAB tab;
     private final Map<String,ChatFormat> formats = new HashMap<>();
     public final Map<TabPlayer,String> defformats = new HashMap<>();
 
@@ -44,7 +42,6 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public boolean itemPermssion = false;
 
     public boolean mentionEnabled = true;
-    public boolean mentionForEveryone = true;
     public String mentionInput = "@%player%";
     public String mentionOutput = "&b";
     public String mentionSound = "BLOCK_NOTE_BLOCK_PLING";
@@ -56,6 +53,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public Map<TabPlayer,LocalDateTime> cooldown = new HashMap<>();
 
     public ChatManager() {
+        tab = TAB.getInstance();
         load();
     }
 
@@ -77,9 +75,12 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     }
 
     @Override
+    public void unload() {}
+
+    @Override
     public void load() {
         plinstance = TABAdditions.getInstance();
-        YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
+        ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         for (Object format : config.getConfigurationSection("chat-formats").keySet())
             formats.put(format+"",new ChatFormat(format+"", config.getConfigurationSection("chat-formats."+format)));
 
@@ -91,7 +92,6 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         itemPermssion = config.getBoolean("item.permission",false);
 
         mentionEnabled = config.getBoolean("mention.enabled",true);
-        mentionForEveryone = config.getBoolean("mention.output-for-everyone",true);
         mentionInput = config.getString("mention.input","@%player%");
         mentionOutput = config.getString("mention.output","&b@%player%");
         mentionSound = config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING");
@@ -101,13 +101,11 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
 
         cooldownTime = Long.parseLong(config.getInt("message-cooldown",0)+"");
 
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing Chat props", TAFeature.CHAT, UsageType.REPEATING_TASK,() -> {
-            for (TabPlayer p : TAB.getInstance().getPlayers()) {
-                p.loadPropertyFromConfig("chatprefix");
-                p.loadPropertyFromConfig("customchatname",p.getName());
-                p.loadPropertyFromConfig("chatsuffix");
-            }
-        });
+        for (TabPlayer p : tab.getPlayers()) {
+            p.loadPropertyFromConfig("chatprefix");
+            p.loadPropertyFromConfig("customchatname",p.getName());
+            p.loadPropertyFromConfig("chatsuffix");
+        }
     }
 
     public ChatFormat defFormat() {
@@ -135,29 +133,19 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         }
         if (cooldownTime != 0 && !p.hasPermission("tabadditions.chat.cooldown.bypass"))
             cooldown.put(p,LocalDateTime.now());
+
         msg = emojicheck(p,msg);
 
-        ChatFormat format = getFormat(p);
-        IChatBaseComponent format2 = createmsg(p,msg,format,null);
+        ChatFormat chatFormat = getFormat(p);
+        IChatBaseComponent format = createmsg(p,msg,chatFormat,null);
 
-        TAB.getInstance().getPlatform().sendConsoleMessage(format2.toLegacyText(), true);
+        tab.getPlatform().sendConsoleMessage(format.toLegacyText(), true);
 
-        IChatBaseComponent pformat = format2;
-        if (mentionForEveryone && mentionEnabled && !format.hasRelationalPlaceholders())
-            for (TabPlayer pl : TAB.getInstance().getPlayers())
-                if (pl != p)
-                    pformat = pingcheck(pl,pformat,pl);
-        for (TabPlayer pl : TAB.getInstance().getPlayers()) {
+        for (TabPlayer pl : tab.getPlayers()) {
             if (canSee(p,pl)) {
-                IChatBaseComponent ppformat = pformat.clone();
-                if (format.hasRelationalPlaceholders())
-                    ppformat = createmsg(p,msg,format,pl);
-                if (!mentionForEveryone && mentionEnabled && pl != p) ppformat = pingcheck(pl,ppformat,pl);
-                if (mentionEnabled && mentionForEveryone && format.hasRelationalPlaceholders()) {
-                        for (TabPlayer pl2 : TAB.getInstance().getPlayers())
-                            if (pl2 != p)
-                                pformat = pingcheck(pl2,pformat,pl);
-                }
+                IChatBaseComponent ppformat = format.clone();
+                if (chatFormat.hasRelationalPlaceholders())
+                    ppformat = createmsg(p,msg,chatFormat,pl);
                 pl.sendMessage(ppformat);
             }
         }
@@ -166,86 +154,92 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                 DiscordSRV discord = DiscordSRV.getPlugin();
                 if (canSee(p, null))
                     discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()), msg, discord.getMainChatChannel(), false);
-                else if (getFormat(p).isViewConditionMet(p,null) && !discord.getOptionalChannel(format.getChannel()).equals(discord.getMainChatChannel())) discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()),msg, discord.getOptionalChannel(format.getChannel()),false);
+                else if (getFormat(p).isViewConditionMet(p,null) && !discord.getOptionalChannel(chatFormat.getChannel()).equals(discord.getMainChatChannel())) discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()),msg, discord.getOptionalChannel(chatFormat.getChannel()),false);
             }
 
         return;
     }
 
-    public IChatBaseComponent createmsg(TabPlayer p, String msg, ChatFormat format, TabPlayer viewer) {
+    public IChatBaseComponent createmsg(TabPlayer p, String msg, ChatFormat chatFormat, TabPlayer viewer) {
 
         List<String> codes = Arrays.asList("a", "b", "c", "d", "f", "k", "l", "m", "n", "o", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
         for (String code : codes) {
             if (!p.hasPermission("tabadditions.chat.color.&" + code))
                 msg = msg.replace("&" + code, "");
         }
+        msg = pingcheck(p, msg, viewer);
         msg = new RGBUtils().applyFormats(msg, true);
-
+        msg = tab.getPlaceholderManager().color(msg);
         if (!p.hasPermission("tabadditions.chat.color.rgb")) {
             msg = Pattern.quote(msg)
-                    .replaceAll("#[0-9a-fA-F]{6}","")
-                    .replace("\\Q","")
-                    .replace("\\E","");
+                    .replaceAll("#[0-9a-fA-F]{6}", "")
+                    .replace("\\Q", "")
+                    .replace("\\E", "");
         }
 
-        IChatBaseComponent format2 = format.getText();
+        Map<String, Map<String, Object>> format = chatFormat.getText();
+        IChatBaseComponent messsage = new IChatBaseComponent("");
         TextColor oldColor = null;
-        List<IChatBaseComponent> list = new ArrayList<>();
-
-        for (IChatBaseComponent comp : format2.getExtra()) {
-
-            List<IChatBaseComponent> list2 = new ArrayList<>();
-            for (IChatBaseComponent txt : comp.getExtra()) {
-                if (txt.toRawText().contains("%msg%") && plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.item")) && msg.contains(itemInput)) {
-                    txt = itemcheck(p, txt, msg,viewer);
-                } else {
-                    String msg2 = plinstance.parsePlaceholders(txt.toRawText(), p,viewer,p).replace("%msg%", msg);
-                    txt = IChatBaseComponent.fromColoredText(msg2).setColor(txt.getColor());
-                }
-
-                TextColor color = null;
-                for (IChatBaseComponent c : txt.getExtra()) {
-                    if (c.getColor() != null) {
-                        color = c.getColor();
-                        break;
-                    }
-                    if (txt.getColor() != null) {
-                        color = txt.getColor();
-                        break;
-                    }
-                }
-                if (oldColor != null && txt.getColor() == null) {
-                    txt.setColor(oldColor);
-                }
-                if (color != null)
-                    oldColor = color;
-
-                list2.add(txt);
-            }
-            comp.setExtra(list2);
-            if (comp.getHoverValue() != null) {
-                String txt = plinstance.parsePlaceholders(((IChatBaseComponent)comp.getHoverValue()).toFlatText(),p,viewer,p).replace("%msg%", msg);
-                IChatBaseComponent hover = IChatBaseComponent.fromColoredText(txt);
-                comp.onHoverShowText(hover);
-            }
-            if (comp.getClickValue() != null) {
-                if (comp.getClickAction() == IChatBaseComponent.ClickAction.SUGGEST_COMMAND) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replace("%msg%", msg);
-                    comp.onClickSuggestCommand(txt);
-                }
-                else if (comp.getClickAction() == IChatBaseComponent.ClickAction.RUN_COMMAND) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replace("%msg%", msg);
-                    comp.onClickRunCommand(txt);
-                }
-                else if (comp.getClickAction() == IChatBaseComponent.ClickAction.OPEN_URL) {
-                    String txt = plinstance.parsePlaceholders(comp.getClickValue()+"",p,viewer,p).replace("%msg%", msg);
-                    comp.onClickOpenUrl(txt);
-                }
-            }
-            list.add(comp);
+        for (Map<String, Object> component : format.values()) {
+            IChatBaseComponent comp = checkText(p, viewer, msg, component,oldColor);
+            checkHoverAndClick(comp, p, viewer, msg, component);
+            messsage.addExtra(comp);
+            oldColor = getLastColor(comp);
         }
-        format2.setExtra(list);
-        return format2;
+        return messsage;
+    }
+    public TextColor getLastColor(IChatBaseComponent component) {
+        if (component.getExtra() == null) return component.getColor();
+        List<IChatBaseComponent> list = new ArrayList<>(component.getExtra());
+        Collections.reverse(list);
+        for (IChatBaseComponent comp : list) {
+            if (comp.getColor() != null)
+                return comp.getColor();
+        }
+        if (component.getColor() != null) return component.getColor();
+        if (component.getText().contains("\u00A7")) {
+            int i = component.getText().lastIndexOf("\u00A7");
+            if (component.getText().chars().toArray().length == i+2) return null;
+            char c = component.getText().charAt(i+1);
+            return new TextColor(EnumChatFormat.getByChar(c));
+        }
+        return null;
+    }
+
+    public IChatBaseComponent checkText(TabPlayer p, TabPlayer viewer, String msg, Map<String,Object> config, TextColor lastcolor) {
+        if (!config.containsKey("text")) return new IChatBaseComponent("");
+        if (plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.item")) && msg.contains(itemInput) && config.get("text").toString().contains("%msg%"))
+            return itemcheck(config.get("text")+"",p,msg,viewer, lastcolor);
+        return IChatBaseComponent.optimizedComponent((lastcolor != null ? lastcolor.getHexCode() : "")+plinstance
+                .parsePlaceholders(config.get("text")+"", p,viewer,p)
+                .replace("%msg%", msg));
+    }
+
+    public IChatBaseComponent checkHoverAndClick(IChatBaseComponent comp,TabPlayer p, TabPlayer viewer, String msg, Map<String,Object> config) {
+        if (config.containsKey("hover") && config.get("hover") instanceof List) {
+            List<String> list = (List<String>) config.get("hover");
+            String txt = "";
+            for (String str : list) {
+                if (list.indexOf(str) > 0) txt += "\n";
+                txt += str;
+            }
+            txt = plinstance.parsePlaceholders(txt,p,viewer,p).replace("%msg%", msg);
+            IChatBaseComponent hover = IChatBaseComponent.optimizedComponent(txt);
+            comp.onHoverShowText(hover);
+        }
+        if (config.containsKey("suggest")) {
+            String txt = plinstance.parsePlaceholders(config.get("suggest")+"",p,viewer,p).replace("%msg%", msg);
+            comp.onClickSuggestCommand(txt);
+        }
+        else if (config.containsKey("command")) {
+            String txt = plinstance.parsePlaceholders(config.get("command")+"",p,viewer,p).replace("%msg%", msg);
+            comp.onClickRunCommand(txt);
+        }
+        else if (config.containsKey("url")) {
+            String txt = plinstance.parsePlaceholders(config.get("url")+"",p,viewer,p).replace("%msg%", msg);
+            comp.onClickOpenUrl(txt);
+        }
+        return comp;
     }
 
     public boolean canSee(TabPlayer sender, TabPlayer viewer) {
@@ -257,35 +251,59 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
 
     public String emojicheck(TabPlayer p, String msg) {
         for (String emoji : emojis.keySet()) {
-            if (msg.contains(emoji) && p.hasPermission("tabadditions.chat.emoji."+emoji))
-                msg = msg.replace(emoji,emojis.get(emoji));
-            else if (emojiUntranslate && msg.contains(emojis.get(emoji)) && !p.hasPermission("tabadditions.chat.emoji."+emoji))
-                msg = msg.replace(emojis.get(emoji),emoji);
+            int count = countMatches(msg,emoji);
+
+            if (count == 0) continue;
+            if (!p.hasPermission("tabadditions.chat.emoji."+emoji)) {
+                if (emojiUntranslate && msg.contains(emojis.get(emoji)))
+                    msg = msg.replace(emojis.get(emoji), emoji);
+                continue;
+            }
+
+            List<String> list = Arrays.asList(msg.split(Pattern.quote(emoji)));
+            msg = "";
+            for (String part : list) {
+                if (list.indexOf(part)+1 == list.size() && count != 1)
+                    msg += part;
+                else if (part.contains("&")) {
+                    int i = part.lastIndexOf("&");
+                    if (part.chars().toArray().length == i+2) return null;
+                    char c = part.charAt(i+1);
+                    EnumChatFormat color = EnumChatFormat.getByChar(c);
+                    msg += part + emojis.get(emoji).replace("%lastcolor%",color == null ? "&r" : (color.getHexCode()));
+                } else
+                    msg += part + emojis.get(emoji).replace("%lastcolor%","&r");
+            }
         }
         return msg;
     }
-    public IChatBaseComponent itemcheck(TabPlayer p, IChatBaseComponent comp, String msg, TabPlayer viewer) {
 
-        List<IChatBaseComponent> msglist = new ArrayList<>();
-        List<String> list = new ArrayList<>(Arrays.asList(TABAdditions.getInstance().parsePlaceholders(comp.getText(),p,viewer,p).split("%msg%")));
+    public IChatBaseComponent itemcheck(String text, TabPlayer p, String msg, TabPlayer viewer, TextColor lastcolor) {
+
+        IChatBaseComponent comp = new IChatBaseComponent("");
+        if (lastcolor != null)
+            comp.setColor(lastcolor);
+
+        List<String> list = new ArrayList<>(Arrays.asList(TABAdditions.getInstance().parsePlaceholders(text,p,viewer,p).split("%msg%")));
         if (list.size() < 1) list.add("");
-        msglist.add(new IChatBaseComponent(list.get(0)));
+        comp.addExtra(IChatBaseComponent.optimizedComponent(list.get(0)));
 
         ItemStack item;
         try {item = ((Player) p.getPlayer()).getInventory().getItemInMainHand();}
         catch (NoSuchMethodError e) {item = ((Player) p.getPlayer()).getInventory().getItemInHand();}
 
-        IChatBaseComponent itemmsg = new IChatBaseComponent("");
         List<String> ar = new ArrayList<>(Arrays.asList(msg.split(Pattern.quote(itemInput))));
         int itemcount = countMatches(msg,itemInput);
 
         if (ar.isEmpty()) ar.add("");
+        TextColor color = null;
         for (String txt2 : ar) {
-            IChatBaseComponent txt3 = IChatBaseComponent.fromColoredText(txt2);
-            msglist.add(txt3);
+            IChatBaseComponent txt3 = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+txt2);
+            color = getLastColor(txt3);
+            comp.addExtra(txt3);
 
             if (itemcount != 0) {
-                IChatBaseComponent itemtxt = new IChatBaseComponent();
+                IChatBaseComponent itemtxt;
                 if (item.getType() != Material.AIR) {
                     String name;
                     if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) {
@@ -299,48 +317,34 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                         name = type2;
                     } else name = item.getItemMeta().getDisplayName();
                     if (item.getAmount() > 1)
-                        itemtxt.setText(itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
-                    else itemtxt = itemtxt.setText(itemOutputSingle.replace("%name%",name));
-                } else itemtxt = itemtxt.setText(itemOutputAir);
-                itemtxt.setText(plinstance.parsePlaceholders(itemtxt.getText(),p));
-                itemtxt = itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
-                msglist.add(itemtxt);
+                        itemtxt = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
+                    else itemtxt = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+itemOutputSingle.replace("%name%",name));
+                } else itemtxt = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+itemOutputAir);
+                itemtxt.setText(plinstance.parsePlaceholders(itemtxt.getText(),p,viewer,p));
+                itemtxt.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
+                color = getLastColor(itemtxt);
+                comp.addExtra(itemtxt);
                 itemcount = itemcount-1;
             }
 
         }
 
-        if (list.size() > 1) msglist.add(new IChatBaseComponent(list.get(1)));
-        itemmsg.setExtra(msglist);
-        comp.setExtra(msglist);
+        if (list.size() > 1) comp.addExtra(IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+list.get(1)));
         comp.setText("");
         return comp;
     }
-    public IChatBaseComponent pingcheck(TabPlayer p, IChatBaseComponent msg, TabPlayer viewer) {
-        if (msg.getExtra() != null && !msg.getExtra().isEmpty())
-            for (IChatBaseComponent comp : msg.getExtra()) {
-                if (comp.getExtra() != null && !comp.getExtra().isEmpty()) {
-                    for (IChatBaseComponent subcomp : comp.getExtra()) {
-                        if (subcomp.getExtra() != null && !subcomp.getExtra().isEmpty()) {
-                            for (IChatBaseComponent subcomp2 : comp.getExtra()) {
-                                if (subcomp2.getExtra() != null && !subcomp2.getExtra().isEmpty()) {
-                                    for (IChatBaseComponent subcomp3 : subcomp2.getExtra()) {
-                                        if (subcomp3.getText().toLowerCase().contains(TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p).toLowerCase())) {
-                                            subcomp3.setText(subcomp3.getText().replaceAll("(?i)"+TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p), TABAdditions.getInstance().parsePlaceholders(mentionOutput, p,viewer,p)));
-                                            if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
-                                                Player player = (Player) p.getPlayer();
-                                                try {
-                                                    player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);
-                                                } catch (Exception ignored) {}
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+    public String pingcheck(TabPlayer p, String msg, TabPlayer viewer) {
+
+        String input = TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p);
+        if (msg.toLowerCase().contains(input.toLowerCase())) {
+            msg = (msg.replaceAll("(?i)" + input, TABAdditions.getInstance().parsePlaceholders(mentionOutput, p, viewer, p)));
+            if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
+                Player player = (Player) p.getPlayer();
+                try {player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);}
+                catch (Exception ignored) {}
             }
+        }
+
         return msg;
     }
 
@@ -359,12 +363,6 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         }
     }
 
-
-    @Override
-    public void unload() {
-
-    }
-
     @Override
     public void onJoin(TabPlayer p) {
         p.loadPropertyFromConfig("chatprefix");
@@ -373,25 +371,10 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     }
 
     @Override
-    public Object getFeatureType() {
-        return TAFeature.CHAT;
-    }
-
-    @Override
     public boolean onCommand(TabPlayer p, String msg) {
         msg = msg.replaceFirst("/","");
-        YamlConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
+        ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         ConfigurationFile playerdata = TAB.getInstance().getConfiguration().getPlayerDataFile();
-        if (playerdata == null) {
-            File file = new File(TAB.getInstance().getPlatform().getDataFolder(), "playerdata.yml");
-            try {
-                if (!file.exists())
-                    file.createNewFile();
-                playerdata = new YamlConfigurationFile(null, file);
-            } catch (Exception error) {
-                TAB.getInstance().getErrorManager().criticalError("Failed to load playerdata.yml", error);
-            }
-        }
         ConfigurationFile translation = TAB.getInstance().getConfiguration().getTranslation();
 
         if (msg.equals("togglemsg")) {
@@ -433,7 +416,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         if (formats.containsKey("msg") && msg.startsWith("msg ") && msg.split(" ").length >= 3) {
             String player = msg.split(" ")[1];
             String msg2 = msg.replace(msg.split(" ")[0]+" "+player+" ","");
-            TabPlayer p2 = TAB.getInstance().getPlayer(player);
+            TabPlayer p2 = tab.getPlayer(player);
             if (p2 == null)
                 p.sendMessage(translation.getString("player_not_found","&4[TAB] Player not found!"),true);
             else if (TAB.getInstance().getConfiguration().getPlayerData("togglemsg").contains(p2.getName()))
