@@ -249,13 +249,33 @@ public class ChatManager extends TabFeature {
 
     public String emojicheck(TabPlayer p, String msg) {
         for (String emoji : emojis.keySet()) {
-            if (msg.contains(emoji) && p.hasPermission("tabadditions.chat.emoji."+emoji))
-                msg = msg.replace(emoji,emojis.get(emoji));
-            else if (emojiUntranslate && msg.contains(emojis.get(emoji)) && !p.hasPermission("tabadditions.chat.emoji."+emoji))
-                msg = msg.replace(emojis.get(emoji),emoji);
+            int count = countMatches(msg,emoji);
+
+            if (count == 0) continue;
+            if (!p.hasPermission("tabadditions.chat.emoji."+emoji)) {
+                if (emojiUntranslate && msg.contains(emojis.get(emoji)))
+                    msg = msg.replace(emojis.get(emoji), emoji);
+                continue;
+            }
+
+            List<String> list = Arrays.asList(msg.split(Pattern.quote(emoji)));
+            msg = "";
+            for (String part : list) {
+                if (list.indexOf(part)+1 == list.size() && count != 1)
+                    msg += part;
+                else if (part.contains("&")) {
+                    int i = part.lastIndexOf("&");
+                    if (part.chars().toArray().length == i+2) return null;
+                    char c = part.charAt(i+1);
+                    EnumChatFormat color = EnumChatFormat.getByChar(c);
+                    msg += part + emojis.get(emoji).replace("%lastcolor%",color == null ? "&r" : (color.getHexCode()));
+                } else
+                    msg += part + emojis.get(emoji).replace("%lastcolor%","&r");
+            }
         }
         return msg;
     }
+
     public IChatBaseComponent itemcheck(String text, TabPlayer p, String msg, TabPlayer viewer, TextColor lastcolor) {
 
         IChatBaseComponent comp = new IChatBaseComponent("");
