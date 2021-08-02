@@ -6,7 +6,6 @@ import java.util.*;
 
 import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
-import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
@@ -34,7 +33,6 @@ public class TABAdditions {
     public boolean enabled;
 
     private YamlConfigurationFile config;
-    private YamlConfigurationFile layoutConfig;
     private YamlConfigurationFile titleConfig;
     private YamlConfigurationFile actionbarConfig;
     private YamlConfigurationFile chatConfig;
@@ -43,7 +41,6 @@ public class TABAdditions {
     public boolean titlesEnabled;
     public boolean actionbarsEnabled;
     public boolean chatEnabled;
-    public boolean layoutEnabled;
     public boolean sithideEnabled = false;
     public boolean sneakhideEnabled = false;
     public int nametagInRange = 0;
@@ -81,7 +78,6 @@ public class TABAdditions {
 
     public YamlConfigurationFile getConfig(ConfigType cfg) {
         switch (cfg) {
-            case LAYOUT: return layoutConfig;
             case TITLE: return titleConfig;
             case ACTIONBAR: return actionbarConfig;
             case CHAT: return chatConfig;
@@ -106,11 +102,9 @@ public class TABAdditions {
             actionbarConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("actionbars.yml"), new File(dataFolder, "actionbars.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
             skinsFile = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("skins.yml"), new File(dataFolder, "skins.yml"));
-            layoutConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("layout.yml"), new File(dataFolder, "layout.yml"));
 
             titlesEnabled = config.getBoolean("features.titles",false);
             actionbarsEnabled = config.getBoolean("features.actionbars",false);
-            layoutEnabled = config.getBoolean("features.layout",false);
             rfpEnabled = config.getBoolean("features.real-fake-players",false);
             chatEnabled = config.getBoolean("features.chat",false);
             if (platform.getType() == PlatformType.SPIGOT) {
@@ -161,9 +155,6 @@ public class TABAdditions {
         //Chat
         if (chatEnabled)
             registerFeature(new ChatManager());
-        //Layout
-        if (layoutEnabled)
-            registerFeature(new LayoutManager());
         //RFP
         if (rfpEnabled)
             registerFeature(new RFPManager());
