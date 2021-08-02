@@ -57,6 +57,11 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         load();
     }
 
+    @Override
+    public Object getFeatureType() {
+        return "&aChat&r";
+    }
+
     public ChatFormat getFormat(TabPlayer p) {
         String format;
         if (defformats.containsKey(p))
