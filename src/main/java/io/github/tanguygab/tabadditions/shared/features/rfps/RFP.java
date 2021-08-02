@@ -2,7 +2,6 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.layouts.sorting.SortingType;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.PacketAPI;
@@ -141,7 +140,7 @@ public class RFP {
         }
         String chars;
         if (groups != null) {
-            chars = SortingType.convertSortingElements(groups.split(",")).get(group);
+            chars = convertSortingElements(groups.split(",")).get(group);
             if (chars == null) chars = "9";
         } else chars = "9";
 
@@ -160,6 +159,42 @@ public class RFP {
             done = true;
         }
         return potentialTeamName;
+    }
+    protected LinkedHashMap<String, String> convertSortingElements(String[] elements) {
+        LinkedHashMap<String, String> sortedGroups = new LinkedHashMap();
+        int index = 1;
+        int charCount = String.valueOf(elements.length).length();
+        String[] var5 = elements;
+        int var6 = elements.length;
+
+        for(int var7 = 0; var7 < var6; ++var7) {
+            String group;
+            for(group = var5[var7]; group.startsWith(" "); group = group.substring(1)) {
+            }
+
+            while(group.endsWith(" ")) {
+                group = group.substring(0, group.length() - 1);
+            }
+
+            StringBuilder sb = new StringBuilder();
+            sb.append(index);
+
+            while(sb.length() < charCount) {
+                sb.insert(0, "0");
+            }
+
+            String[] var10 = group.toLowerCase().split(" ");
+            int var11 = var10.length;
+
+            for(int var12 = 0; var12 < var11; ++var12) {
+                String group0 = var10[var12];
+                sortedGroups.put(group0, sb.toString());
+            }
+
+            ++index;
+        }
+
+        return sortedGroups;
     }
 
     public void update(TabPlayer p, Object skin) {

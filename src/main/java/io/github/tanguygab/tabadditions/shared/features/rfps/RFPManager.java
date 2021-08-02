@@ -17,7 +17,6 @@ import java.util.*;
 public class RFPManager extends TabFeature {
 
     private final Map<String, RFP> rfps = new HashMap<>();
-    public RandomRFP randomRFP;
 
     private final TabAPI tab;
 
@@ -113,13 +112,8 @@ public class RFPManager extends TabFeature {
     @Override
     public void load() {
         Map<String,Object> config = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getConfigurationSection("fakeplayers");
-        for (Object rfp : config.keySet()) {
-            if (!rfp.equals("random"))
-                rfps.put(rfp + "", new RFP(rfp + "", (Map<String, Object>) config.get(rfp + ""),this));
-            else {
-                randomRFP = new RandomRFP(rfp + "", (Map<String, Object>) config.get(rfp+""),this);
-            }
-        }
+        for (Object rfp : config.keySet())
+            rfps.put(rfp + "", new RFP(rfp + "", (Map<String, Object>) config.get(rfp + ""),this));
         showRFPAll();
         refresh();
     }
@@ -141,7 +135,6 @@ public class RFPManager extends TabFeature {
                 rfp.update(p, skin);
             }
         }
-        //if (randomRFP != null) randomRFP.update(p);
     }
 
     @Override
