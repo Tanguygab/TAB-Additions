@@ -46,6 +46,8 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public String mentionOutput = "&b";
     public String mentionSound = "BLOCK_NOTE_BLOCK_PLING";
 
+    public boolean msgEnabled = true;
+
     public Map<String,String> emojis = new HashMap<>();
     public boolean emojiUntranslate = false;
 
@@ -100,6 +102,8 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         mentionInput = config.getString("mention.input","@%player%");
         mentionOutput = config.getString("mention.output","&b@%player%");
         mentionSound = config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING");
+
+        msgEnabled = config.getBoolean("msg",true);
 
         emojis = config.getConfigurationSection("emojis");
         emojiUntranslate = config.getBoolean("block-emojis-without-permission",false);
@@ -382,7 +386,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         ConfigurationFile playerdata = TAB.getInstance().getConfiguration().getPlayerDataFile();
         ConfigurationFile translation = TAB.getInstance().getConfiguration().getTranslation();
 
-        if (msg.equals("togglemsg")) {
+        if (msg.equals("togglemsg") && msgEnabled) {
             List<String> list = TAB.getInstance().getConfiguration().getPlayerData("togglemsg");
             if (list.contains(p.getName())) {
                 list.remove(p.getName());
@@ -395,22 +399,22 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
             playerdata.set("togglemsg",list);
             return true;
         }
-        if (msg.startsWith("ignore ")) {
+        if (msg.startsWith("ignore ") && msgEnabled) {
             if (msg.split(" ").length < 2) {
                 p.sendMessage(translation.getString("player_not_found","&4[TAB] Player not found!"),true);
                 return true;
             }
-            String p2 = msg.split(" ")[1];
+            String p2 = msg.split(" ")[1].toLowerCase();
             TAB.getInstance().getConfiguration().getPlayerData("togglemsg");
             Map<String, List<String>> map = playerdata.getConfigurationSection("msg-ignore");
             if (map.containsKey(p.getName())) {
                 if (map.get(p.getName()).contains(p2)) {
-                    map.get(p.getName()).remove(p2);
-                    p.sendMessage(translation.getString("tab+_ignore_off","&aYou will now receive new private messages from "+p2+"!"),true);
+                    map.get(p.getName().toLowerCase()).remove(p2);
+                    p.sendMessage(translation.getString("tab+_ignore_off","&aYou will now receive new private messages from %name%!").replace("%name%",p2),true);
                 }
                 else {
-                    map.get(p.getName()).add(p2);
-                    p.sendMessage(translation.getString("tab+_ignore_on","&cYou won't receive any new private messages from "+p2+"!"),true);
+                    map.get(p.getName().toLowerCase()).add(p2);
+                    p.sendMessage(translation.getString("tab+_ignore_on","&cYou won't receive any new private messages from %name%!").replace("%name%",p2),true);
                 }
             }
             else map.put(p.getName(), new ArrayList<>(Collections.singletonList(p2)));
@@ -418,15 +422,15 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
             return true;
         }
 
-        if (formats.containsKey("msg") && msg.startsWith("msg ") && msg.split(" ").length >= 3) {
+        if (formats.containsKey("msg") && msg.startsWith("msg ") && msg.split(" ").length >= 3 && msgEnabled) {
             String player = msg.split(" ")[1];
             String msg2 = msg.replace(msg.split(" ")[0]+" "+player+" ","");
-            TabPlayer p2 = tab.getPlayer(player);
+            TabPlayer p2 = plinstance.getPlayer(player);
             if (p2 == null)
                 p.sendMessage(translation.getString("player_not_found","&4[TAB] Player not found!"),true);
             else if (TAB.getInstance().getConfiguration().getPlayerData("togglemsg").contains(p2.getName()))
                 p.sendMessage(translation.getString("tab+_has_pm_off","&cThis player doesn't accept private messages"),true);
-            else if (playerdata.getStringList("msg-ignore."+p2.getName(),new ArrayList<>()).contains(p.getName()))
+            else if (playerdata.getStringList("msg-ignore."+p2.getName().toLowerCase(),new ArrayList<>()).contains(p.getName().toLowerCase()))
                 p.sendMessage(translation.getString("tab+_ignores_you","&cThis player ignores you"),true);
             else {
                 p2.sendMessage(createmsg(p, msg2, formats.get("msg"),p2));

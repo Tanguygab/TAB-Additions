@@ -374,4 +374,12 @@ public class TABAdditions {
         }
         return false;
     }
+
+    public TabPlayer getPlayer(String name) {
+        for (TabPlayer p : TAB.getInstance().getPlayers()) {
+            if (p.getName().equalsIgnoreCase(name))
+                return p;
+        }
+        return null;
+    }
 }
