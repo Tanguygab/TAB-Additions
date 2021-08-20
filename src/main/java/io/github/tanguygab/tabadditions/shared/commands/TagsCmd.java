@@ -3,7 +3,7 @@ package io.github.tanguygab.tabadditions.shared.commands;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.team.ScoreboardTeamManager;
+import me.neznamy.tab.api.team.TeamManager;
 
 public class TagsCmd {
     public TagsCmd(String name, String[] args) {
@@ -26,7 +26,7 @@ public class TagsCmd {
             return;
         }
 
-        ScoreboardTeamManager tm = TabAPI.getInstance().getScoreboardTeamManager();
+        TeamManager tm = TabAPI.getInstance().getTeamManager();
         switch (args[1]) {
             case "show": {
                 tm.showNametag(p);

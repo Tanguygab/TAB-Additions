@@ -20,7 +20,7 @@ public class NametagInRange extends TabFeature {
         for (TabPlayer p : tab.getOnlinePlayers()) {
             for (TabPlayer p2 : tab.getOnlinePlayers()) {
                 if (p != p2)
-                    tab.getScoreboardTeamManager().hideNametag(p,p2);
+                    tab.getTeamManager().hideNametag(p,p2);
             }
         }
         load();
@@ -29,8 +29,8 @@ public class NametagInRange extends TabFeature {
     @Override
     public void onJoin(TabPlayer p) {
         for (TabPlayer p2 : tab.getOnlinePlayers()) {
-            tab.getScoreboardTeamManager().hideNametag(p,p2);
-            tab.getScoreboardTeamManager().hideNametag(p2,p);
+            tab.getTeamManager().hideNametag(p,p2);
+            tab.getTeamManager().hideNametag(p2,p);
         }
     }
 
@@ -44,10 +44,10 @@ public class NametagInRange extends TabFeature {
                     TabPlayer p2 = tab.getPlayer(player2.getUniqueId());
 
                     if (player != player2 && player.getWorld().equals(player2.getWorld()) && player2.getLocation().distanceSquared(player.getLocation()) < zone) {
-                        tab.getScoreboardTeamManager().showNametag(p2,p);
+                        tab.getTeamManager().showNametag(p2,p);
                     }
                     else if (tab.getPlayer(player2.getUniqueId()) != null) {
-                        tab.getScoreboardTeamManager().hideNametag(p2,p);
+                        tab.getTeamManager().hideNametag(p2,p);
                     }
                 }
             }
@@ -59,7 +59,7 @@ public class NametagInRange extends TabFeature {
         for (TabPlayer p : tab.getOnlinePlayers()) {
             for (TabPlayer p2 : tab.getOnlinePlayers()) {
                 if (p != p2)
-                    tab.getScoreboardTeamManager().showNametag(p,p2);
+                    tab.getTeamManager().showNametag(p,p2);
             }
         }
     }

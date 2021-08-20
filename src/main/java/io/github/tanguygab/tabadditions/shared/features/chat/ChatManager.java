@@ -136,7 +136,7 @@ public class ChatManager extends TabFeature {
         ChatFormat chatFormat = getFormat(p);
         IChatBaseComponent format = createmsg(p,msg,chatFormat,null);
 
-        tab.getPlatform().sendConsoleMessage(format.toLegacyText(), true);
+        tab.sendConsoleMessage(format.toLegacyText(), true);
 
         for (TabPlayer pl : tab.getOnlinePlayers()) {
             if (canSee(p,pl)) {

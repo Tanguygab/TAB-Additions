@@ -4,7 +4,7 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.team.ScoreboardTeamManager;
+import me.neznamy.tab.api.team.TeamManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -36,7 +36,7 @@ public class SitHideNametag extends TabFeature implements Listener {
         if (!(e.getEntity() instanceof Player)) return;
         TabPlayer p = TabAPI.getInstance().getPlayer(e.getEntity().getUniqueId());
         if (p == null) return;
-        ScoreboardTeamManager tm = TabAPI.getInstance().getScoreboardTeamManager();
+        TeamManager tm = TabAPI.getInstance().getTeamManager();
         tag.put(p, tm.hasHiddenNametag(p));
         tm.hideNametag(p);
     }
@@ -47,7 +47,7 @@ public class SitHideNametag extends TabFeature implements Listener {
         TabPlayer p = TabAPI.getInstance().getPlayer(e.getEntity().getUniqueId());
         if (p == null) return;
         if (tag.containsKey(p) && !tag.get(p))
-            TabAPI.getInstance().getScoreboardTeamManager().showNametag(p);
+            TabAPI.getInstance().getTeamManager().showNametag(p);
     }
 
     @Override

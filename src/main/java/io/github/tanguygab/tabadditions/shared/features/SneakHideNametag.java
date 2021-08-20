@@ -4,7 +4,7 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.team.ScoreboardTeamManager;
+import me.neznamy.tab.api.team.TeamManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
@@ -33,7 +33,7 @@ public class SneakHideNametag extends TabFeature implements Listener {
     public void onSneak(PlayerToggleSneakEvent e) {
         TabPlayer p = TabAPI.getInstance().getPlayer(e.getPlayer().getUniqueId());
         boolean isSneaking = e.isSneaking();
-        ScoreboardTeamManager tm = TabAPI.getInstance().getScoreboardTeamManager();
+        TeamManager tm = TabAPI.getInstance().getTeamManager();
 
         if (isSneaking) {
             tag.put(p, tm.hasHiddenNametag(p));

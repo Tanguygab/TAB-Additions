@@ -57,7 +57,7 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
         TabPlayer p = tab.getPlayer(player.getUniqueId());
         if (p == null) return "";
 
-        if (identifier.equals("tag_visible")) return !TabAPI.getInstance().getScoreboardTeamManager().hasHiddenNametag(p)+"";
+        if (identifier.equals("tag_visible")) return !TabAPI.getInstance().getTeamManager().hasHiddenNametag(p)+"";
 
         return "";
     }

@@ -199,7 +199,7 @@ public class TABAdditions {
         pm.registerServerPlaceholder(new ServerPlaceholder("%onlinerfp%",1000) {
             @Override
             public String get() {
-                int count = tab.getOnlinePlayers().size();
+                int count = tab.getOnlinePlayers().length;
                 if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
                     count = count+((RFPManager)tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size();
                 return count+"";
@@ -208,7 +208,7 @@ public class TABAdditions {
         pm.registerPlayerPlaceholder(new PlayerPlaceholder("%canseeonlinerfp%",1000) {
             @Override
             public String get(TabPlayer p) {
-                int count = tab.getOnlinePlayers().size();
+                int count = tab.getOnlinePlayers().length;
                 try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p,null));}
                 catch (NumberFormatException ignored) {}
                 if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
@@ -314,12 +314,12 @@ public class TABAdditions {
 
     public void sendMessage(String name,String msg) {
         if (name.equals("~Console~"))
-            tab.getPlatform().sendConsoleMessage(msg,true);
+            tab.sendConsoleMessage(msg,true);
         else tab.getPlayer(name).sendMessage(msg,true);
     }
     public void sendMessage(String name, IChatBaseComponent msg) {
         if (name.equals("~Console~"))
-            tab.getPlatform().sendConsoleMessage(msg.getText(),true);
+            tab.sendConsoleMessage(msg.getText(),true);
         else tab.getPlayer(name).sendMessage(msg);
     }
 

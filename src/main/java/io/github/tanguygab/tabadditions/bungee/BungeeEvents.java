@@ -8,9 +8,8 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.platforms.bungeecord.BungeeTABLoadEvent;
+import me.neznamy.tab.platforms.bungeecord.event.TabLoadEvent;
 import me.neznamy.tab.api.Property;
-import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.TAB;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
@@ -25,7 +24,7 @@ import java.util.Map;
 public class BungeeEvents implements Listener {
 
     @EventHandler
-    public void onTABLoad(BungeeTABLoadEvent e) {
+    public void onTABLoad(TabLoadEvent e) {
         TABAdditions.getInstance().getPlatform().reload();
     }
 
