@@ -24,7 +24,7 @@ public class ActionBarCmd {
             return;
         }
         TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aActionBar&r");
-        actionbar = instance.parsePlaceholders(actionbar,p,feature);
+        actionbar = instance.parsePlaceholders(actionbar,p);
         p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
     }
 }

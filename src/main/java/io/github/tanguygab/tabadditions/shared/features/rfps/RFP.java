@@ -111,8 +111,8 @@ public class RFP {
         PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(uuid);
         rfp.setName(getName());
         String[] props = getProps();
-        props[0] = TABAdditions.getInstance().parsePlaceholders(props[0],p,feature);
-        props[1] = TABAdditions.getInstance().parsePlaceholders(props[1],p,feature);
+        props[0] = TABAdditions.getInstance().parsePlaceholders(props[0],p);
+        props[1] = TABAdditions.getInstance().parsePlaceholders(props[1],p);
 
 
         rfp.setDisplayName(IChatBaseComponent.optimizedComponent(props[0]+getName()+props[1]));
@@ -201,9 +201,9 @@ public class RFP {
         PacketPlayOutPlayerInfo.PlayerInfoData fp = get(p);
         p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()),feature);
         String[] props = getProps();
-        String prefix = TABAdditions.getInstance().parsePlaceholders(props[0],p,feature);
-        String suffix = TABAdditions.getInstance().parsePlaceholders(props[1],p,feature);
-        String icon = TABAdditions.getInstance().parsePlaceholders(this.skin,p,feature);
+        String prefix = TABAdditions.getInstance().parsePlaceholders(props[0],p);
+        String suffix = TABAdditions.getInstance().parsePlaceholders(props[1],p);
+        String icon = TABAdditions.getInstance().parsePlaceholders(this.skin,p);
         if (skin != null && !icon.equals(lastskin)) {
             fp.setSkin(skin);
             lastskin = icon;

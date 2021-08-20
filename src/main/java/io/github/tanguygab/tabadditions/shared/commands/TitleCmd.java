@@ -29,8 +29,8 @@ public class TitleCmd {
             return;
         }
         TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aTitle&r");
-        title = instance.parsePlaceholders(title,p,feature);
-        subtitle = instance.parsePlaceholders(subtitle,p,feature);
+        title = instance.parsePlaceholders(title,p);
+        subtitle = instance.parsePlaceholders(subtitle,p);
 
         instance.getPlatform().sendTitle(p,title,subtitle,fadeIn,stay,fadeOut);
     }

@@ -67,13 +67,13 @@ public class BungeeEvents implements Listener {
                     result = ""+p.isPreviewingNametag();
                     break;
                 case "replace":
-                    String output = TABAdditions.getInstance().parsePlaceholders(value,p,null);
+                    String output = TABAdditions.getInstance().parsePlaceholders(value,p);
                     Map<Object, String> replacements = TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("placeholder-output-replacements." + value);
-                    result =  tab.getPlaceholderManager().findReplacement(replacements, output).toString().replace("%value%", output);
+                    result =  tab.getPlaceholderManager().findReplacement(replacements, output).replace("%value%", output);
                     break;
                 case "placeholder":
                     value = in.readUTF();
-                    result = TABAdditions.getInstance().parsePlaceholders(value,p,null);
+                    result = TABAdditions.getInstance().parsePlaceholders(value,p);
                     type = value;
                     break;
                 case "property":

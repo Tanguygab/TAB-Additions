@@ -55,31 +55,31 @@ public class BungeePlatform extends Platform {
 		pm.registerPlayerPlaceholder(new PlayerPlaceholder("%money%",1000) {
 			@Override
 			public String get(TabPlayer p) {
-				return taba.parsePlaceholders("%vault_eco_balance%",p,null);
+				return taba.parsePlaceholders("%vault_eco_balance%",p);
 			}
 		});
 		pm.registerPlayerPlaceholder(new PlayerPlaceholder("%deaths%",1000) {
 			@Override
 			public String get(TabPlayer p) {
-				return taba.parsePlaceholders("%statistic_deaths%",p,null);
+				return taba.parsePlaceholders("%statistic_deaths%",p);
 			}
 		});
 		pm.registerPlayerPlaceholder(new PlayerPlaceholder("%health%",100) {
 			@Override
 			public String get(TabPlayer p) {
-				return taba.parsePlaceholders("%player_health_rounded%",p,null);
+				return taba.parsePlaceholders("%player_health_rounded%",p);
 			}
 		});
 		pm.registerServerPlaceholder(new ServerPlaceholder("%tps%",1000) {
 			@Override
 			public String get() {
-				return taba.parsePlaceholders("%server_tps_1%",null,null);
+				return taba.parsePlaceholders("%server_tps_1%",null);
 			}
 		});
 		pm.registerPlayerPlaceholder(new PlayerPlaceholder("%afk%",500) {
 			@Override
 			public String get(TabPlayer p) {
-				String afk = taba.parsePlaceholders("%essentials_afk%",p,null);
+				String afk = taba.parsePlaceholders("%essentials_afk%",p);
 				String output;
 				if (afk.equals("yes")) output = TAB.getInstance().getConfiguration().getConfig().getString("placeholders.afk-yes"," &4*&4&lAFK&4*&r");
 				else output = TAB.getInstance().getConfiguration().getConfig().getString("placeholders.afk-no","");

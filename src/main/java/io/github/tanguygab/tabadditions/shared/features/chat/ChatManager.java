@@ -134,17 +134,12 @@ public class ChatManager extends TabFeature {
         msg = emojicheck(p,msg);
 
         ChatFormat chatFormat = getFormat(p);
-        IChatBaseComponent format = createmsg(p,msg,chatFormat,null);
 
-        tab.sendConsoleMessage(format.toLegacyText(), true);
+        tab.sendConsoleMessage(createmsg(p,msg,chatFormat,null).toLegacyText(), true);
 
         for (TabPlayer pl : tab.getOnlinePlayers()) {
-            if (canSee(p,pl)) {
-                IChatBaseComponent ppformat = new IChatBaseComponent(format);
-                if (chatFormat.hasRelationalPlaceholders())
-                    ppformat = createmsg(p,msg,chatFormat,pl);
-                pl.sendMessage(ppformat);
-            }
+            if (canSee(p,pl))
+                pl.sendMessage(createmsg(p,msg,chatFormat,pl));
         }
         if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT && Bukkit.getServer().getPluginManager().isPluginEnabled("DiscordSRV"))
             if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true)) {
@@ -208,7 +203,7 @@ public class ChatManager extends TabFeature {
         if (plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.item")) && msg.contains(itemInput) && config.get("text").toString().contains("%msg%"))
             return itemcheck(config.get("text")+"",p,msg,viewer, lastcolor);
         return IChatBaseComponent.optimizedComponent((lastcolor != null ? lastcolor.getHexCode() : "")+plinstance
-                .parsePlaceholders(config.get("text")+"", p,viewer,p, this)
+                .parsePlaceholders(config.get("text")+"", p,viewer,p)
                 .replace("%msg%", msg));
     }
 
@@ -220,20 +215,20 @@ public class ChatManager extends TabFeature {
                 if (list.indexOf(str) > 0) txt += "\n";
                 txt += str;
             }
-            txt = plinstance.parsePlaceholders(txt,p,viewer,p,this).replace("%msg%", msg);
+            txt = plinstance.parsePlaceholders(txt,p,viewer,p).replace("%msg%", msg);
             IChatBaseComponent hover = IChatBaseComponent.optimizedComponent(txt);
             comp.getModifier().onHoverShowText(hover);
         }
         if (config.containsKey("suggest")) {
-            String txt = plinstance.parsePlaceholders(config.get("suggest")+"",p,viewer,p,this).replace("%msg%", msg);
+            String txt = plinstance.parsePlaceholders(config.get("suggest")+"",p,viewer,p).replace("%msg%", msg);
             comp.getModifier().onClickSuggestCommand(txt);
         }
         else if (config.containsKey("command")) {
-            String txt = plinstance.parsePlaceholders(config.get("command")+"",p,viewer,p,this).replace("%msg%", msg);
+            String txt = plinstance.parsePlaceholders(config.get("command")+"",p,viewer,p).replace("%msg%", msg);
             comp.getModifier().onClickRunCommand(txt);
         }
         else if (config.containsKey("url")) {
-            String txt = plinstance.parsePlaceholders(config.get("url")+"",p,viewer,p,this).replace("%msg%", msg);
+            String txt = plinstance.parsePlaceholders(config.get("url")+"",p,viewer,p).replace("%msg%", msg);
             comp.getModifier().onClickOpenUrl(txt);
         }
         return comp;
@@ -281,7 +276,7 @@ public class ChatManager extends TabFeature {
         if (lastcolor != null)
             comp.getModifier().setColor(lastcolor);
 
-        List<String> list = new ArrayList<>(Arrays.asList(TABAdditions.getInstance().parsePlaceholders(text,p,viewer,p,this).split("%msg%")));
+        List<String> list = new ArrayList<>(Arrays.asList(TABAdditions.getInstance().parsePlaceholders(text,p,viewer,p).split("%msg%")));
         if (list.size() < 1) list.add("");
         comp.addExtra(IChatBaseComponent.optimizedComponent(list.get(0)));
 
@@ -317,7 +312,7 @@ public class ChatManager extends TabFeature {
                         itemtxt = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
                     else itemtxt = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+itemOutputSingle.replace("%name%",name));
                 } else itemtxt = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+itemOutputAir);
-                itemtxt.setText(plinstance.parsePlaceholders(itemtxt.getText(),p,viewer,p,this));
+                itemtxt.setText(plinstance.parsePlaceholders(itemtxt.getText(),p,viewer,p));
                 itemtxt.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
                 color = getLastColor(itemtxt);
                 comp.addExtra(itemtxt);
@@ -332,9 +327,9 @@ public class ChatManager extends TabFeature {
     }
     public String pingcheck(TabPlayer p, String msg, TabPlayer viewer) {
 
-        String input = TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,p,this);
+        String input = TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,viewer);
         if (msg.toLowerCase().contains(input.toLowerCase())) {
-            msg = (msg.replaceAll("(?i)" + input, TABAdditions.getInstance().parsePlaceholders(mentionOutput, p, viewer, p, this)));
+            msg = (msg.replaceAll("(?i)" + input, TABAdditions.getInstance().parsePlaceholders(mentionOutput, p, viewer, viewer)));
             if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
                 Player player = (Player) p.getPlayer();
                 try {player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);}
@@ -433,7 +428,7 @@ public class ChatManager extends TabFeature {
         String condition = cmd.get("condition")+"";
         String format = cmd.get("format")+"";
         String name = cmd.get("name")+"";
-        if (!plinstance.isConditionMet(condition,p,this))
+        if (!plinstance.isConditionMet(condition,p))
             p.sendMessage(translation.getString("no_permission","&cI'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error."),true);
         else {
             if (defformats.containsKey(p)) {

@@ -11,6 +11,8 @@ import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.api.*;
 import me.neznamy.tab.api.chat.EnumChatFormat;
+import me.neznamy.tab.api.placeholder.Placeholder;
+import me.neznamy.tab.api.placeholder.RelationalPlaceholder;
 import me.neznamy.tab.shared.PropertyImpl;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
@@ -209,7 +211,7 @@ public class TABAdditions {
             @Override
             public String get(TabPlayer p) {
                 int count = tab.getOnlinePlayers().length;
-                try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p,null));}
+                try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p));}
                 catch (NumberFormatException ignored) {}
                 if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
                     count = count + ((RFPManager) tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size();
@@ -231,7 +233,7 @@ public class TABAdditions {
             @Override
             public String get(TabPlayer p) {
                 int count = 0;
-                try {count = Integer.parseInt(parsePlaceholders("%cansee"+world+"online%",p,null));}
+                try {count = Integer.parseInt(parsePlaceholders("%cansee"+world+"online%",p));}
                 catch (NumberFormatException ignored) {}
                 if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
                     count = count + ((RFPManager) tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size();
@@ -241,36 +243,48 @@ public class TABAdditions {
         platform.registerPlaceholders();
     }
 
-    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabPlayer def, TabFeature feature) {
+    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabPlayer def) {
         List<String> list = tab.getPlaceholderManager().detectPlaceholders(str);
+        TabPlayer def2 = def == viewer ? sender : viewer;
         for (String pl : list) {
             if (pl.startsWith("%sender:") && sender != null) {
                 String pl2 = pl.replace("%sender:", "%");
-
-                str = str.replace(pl,new PropertyImpl(feature,sender, pl2).getFormat(viewer));
+                str = str.replace(pl,getLastPlaceholderValue(pl2,sender,viewer));
+                continue;
             }
             else if (pl.startsWith("%viewer:") && viewer != null) {
                 String pl2 = pl.replace("%viewer:", "%");
-                str = str.replace(pl,new PropertyImpl(feature,viewer, pl2).getFormat(sender));
+                str = str.replace(pl,getLastPlaceholderValue(pl2,viewer,sender));
+                continue;
             }
+            str = str.replace(pl,getLastPlaceholderValue(pl,def,def2));
         }
 
-        TabPlayer def2 = def == viewer ? sender : viewer;
-        str = new PropertyImpl(feature,def,str).getFormat(def2);
 
         return str;
     }
 
-    public String parsePlaceholders(String str, TabPlayer p, TabFeature feature) {
+    public String getLastPlaceholderValue(String str, TabPlayer p, TabPlayer viewer) {
+        Placeholder pl = tab.getPlaceholderManager().getPlaceholder(str);
+        if (pl instanceof RelationalPlaceholder) {
+            if (p == null || viewer == null) return str;
+            return ((RelationalPlaceholder) pl).getLastValue(p, viewer);
+        }
+        return pl.getLastValue(p);
+    }
+
+    public String parsePlaceholders(String str, TabPlayer p) {
         if (str == null) return "";
         //if (p == null) return str;
         if (!str.contains("%")) return EnumChatFormat.color(str);
-        return new PropertyImpl(feature,p,str).get();
+        for (String pl : tab.getPlaceholderManager().detectPlaceholders(str))
+            str = str.replace(pl,getLastPlaceholderValue(pl,p,null));
+        return str;
     }
 
-    public boolean isConditionMet(String str, TabPlayer p, TabFeature feature) {
+    public boolean isConditionMet(String str, TabPlayer p) {
         if (str == null || str.equals("null")) return true;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,p,feature);
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,p);
         for (String cond : conditionname.split(";")) {
             String fcond = cond;
             if (fcond.startsWith("!"))
@@ -284,9 +298,9 @@ public class TABAdditions {
         return true;
     }
 
-    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, TabPlayer conditionPlayer, TabFeature feature) {
+    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, TabPlayer conditionPlayer) {
         if (sender == null || viewer == null) return false;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,conditionPlayer, feature);
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,conditionPlayer);
         for (String cond : conditionname.split(";")) {
             if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
                 try {
