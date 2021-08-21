@@ -4,7 +4,6 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.PacketAPI;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
@@ -17,7 +16,7 @@ import java.util.*;
 public class RFP {
 
     private final YamlConfigurationFile configfile;
-    protected final TabFeature feature;
+    protected final RFPManager feature;
 
     private final String configname;
     private String name;
@@ -27,7 +26,7 @@ public class RFP {
     protected String group;
     public String lastskin;
 
-    public RFP(String configname,Map<String,Object> config, TabFeature feature) {
+    public RFP(String configname,Map<String,Object> config, RFPManager feature) {
         this.feature = feature;
         configfile = TABAdditions.getInstance().getConfig(ConfigType.MAIN);
         this.configname = configname;
@@ -213,7 +212,7 @@ public class RFP {
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_DISPLAY_NAME, fp),feature);
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.UPDATE_LATENCY , fp),feature);
         }
-        PacketAPI.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,true,false, Collections.singletonList(getName()),null, TabAPI.getInstance().getFeatureManager().getFeature("Nametags"));
+        feature.registerScoreboardTeam(p,getSortingTeam(),prefix,suffix,getName());
     }
 
     public String setName(String value) {

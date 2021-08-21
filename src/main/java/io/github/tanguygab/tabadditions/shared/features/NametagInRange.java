@@ -4,8 +4,6 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.cpu.UsageType;
-import me.neznamy.tab.shared.features.NameTag;
 import me.neznamy.tab.api.TabFeature;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -36,7 +34,7 @@ public class NametagInRange extends TabFeature {
 
     @Override
     public void load() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling Nametag In Range", this, UsageType.REPEATING_TASK,()->{
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling Nametag In Range", this, "repeating task",()->{
             int zone = (int) Math.pow(TABAdditions.getInstance().nametagInRange, 2);
             for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 TabPlayer p = tab.getPlayer(player.getUniqueId());
