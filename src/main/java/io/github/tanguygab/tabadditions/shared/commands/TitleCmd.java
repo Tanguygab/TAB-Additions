@@ -18,6 +18,12 @@ public class TitleCmd {
         int stay = (int) properties.get(3);
         int fadeOut = (int) properties.get(4);
 
+        if (name.equals("*")) {
+            for (TabPlayer p : TabAPI.getInstance().getOnlinePlayers())
+                instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p), instance.parsePlaceholders(subtitle, p), fadeIn, stay, fadeOut);
+            return;
+        }
+
         TabPlayer p = null;
         if (args.length > 2)
             p = TabAPI.getInstance().getPlayer(args[2]);
@@ -25,14 +31,11 @@ public class TitleCmd {
             p = TabAPI.getInstance().getPlayer(name);
 
         if (p == null) {
-            instance.sendMessage(name,"&cThis player isn't connected!");
+            instance.sendMessage(name, "&cThis player isn't connected!");
             return;
         }
-        TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aTitle&r");
-        title = instance.parsePlaceholders(title,p);
-        subtitle = instance.parsePlaceholders(subtitle,p);
-
-        instance.getPlatform().sendTitle(p,title,subtitle,fadeIn,stay,fadeOut);
+        instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p), instance.parsePlaceholders(subtitle, p), fadeIn, stay, fadeOut);
     }
+
 
 }

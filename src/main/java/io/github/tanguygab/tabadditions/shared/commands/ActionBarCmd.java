@@ -13,6 +13,14 @@ public class ActionBarCmd {
     public ActionBarCmd(String name, String[] args, String actionbar) {
 
         TABAdditions instance = TABAdditions.getInstance();
+        TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aActionBar&r");
+
+        if (name.equals("*")) {
+            for (TabPlayer p : TabAPI.getInstance().getOnlinePlayers())
+                p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(instance.parsePlaceholders(actionbar,p)), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
+            return;
+        }
+
         TabPlayer p = null;
         if (args.length > 2)
             p = TAB.getInstance().getPlayer(args[2]);
@@ -23,8 +31,6 @@ public class ActionBarCmd {
             instance.sendMessage(name,"&cThis player isn't connected");
             return;
         }
-        TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aActionBar&r");
-        actionbar = instance.parsePlaceholders(actionbar,p);
-        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
+        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(instance.parsePlaceholders(actionbar,p)), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
     }
 }
