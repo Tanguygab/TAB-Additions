@@ -202,7 +202,7 @@ public class ChatManager extends TabFeature {
         if (!config.containsKey("text")) return new IChatBaseComponent("");
         if (plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.item")) && msg.contains(itemInput) && config.get("text").toString().contains("%msg%"))
             return itemcheck(config.get("text")+"",p,msg,viewer, lastcolor);
-        return IChatBaseComponent.optimizedComponent((lastcolor != null ? lastcolor.getHexCode() : "")+plinstance
+        return IChatBaseComponent.optimizedComponent((lastcolor != null ? "#"+lastcolor.getHexCode() : "")+plinstance
                 .parsePlaceholders(config.get("text")+"", p,viewer,p)
                 .replace("%msg%", msg));
     }
@@ -262,7 +262,7 @@ public class ChatManager extends TabFeature {
                     if (part.chars().toArray().length == i+2) return null;
                     char c = part.charAt(i+1);
                     EnumChatFormat color = EnumChatFormat.getByChar(c);
-                    msg += part + emojis.get(emoji).replace("%lastcolor%",color == null ? "&r" : (color.getHexCode()));
+                    msg += part + emojis.get(emoji).replace("%lastcolor%",color == null ? "&r" : ("#"+color.getHexCode()));
                 } else
                     msg += part + emojis.get(emoji).replace("%lastcolor%","&r");
             }
@@ -290,7 +290,7 @@ public class ChatManager extends TabFeature {
         if (ar.isEmpty()) ar.add("");
         TextColor color = null;
         for (String txt2 : ar) {
-            IChatBaseComponent txt3 = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+txt2);
+            IChatBaseComponent txt3 = IChatBaseComponent.optimizedComponent((color != null ? "#"+color.getHexCode() : "")+txt2);
             color = getLastColor(txt3);
             comp.addExtra(txt3);
 
@@ -309,9 +309,9 @@ public class ChatManager extends TabFeature {
                         name = type2;
                     } else name = item.getItemMeta().getDisplayName();
                     if (item.getAmount() > 1)
-                        itemtxt = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
-                    else itemtxt = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+itemOutputSingle.replace("%name%",name));
-                } else itemtxt = IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+itemOutputAir);
+                        itemtxt = IChatBaseComponent.optimizedComponent((color != null ? "#"+color.getHexCode() : "")+itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
+                    else itemtxt = IChatBaseComponent.optimizedComponent((color != null ?"#"+color.getHexCode() : "")+itemOutputSingle.replace("%name%",name));
+                } else itemtxt = IChatBaseComponent.optimizedComponent((color != null ? "#"+color.getHexCode() : "")+itemOutputAir);
                 itemtxt.setText(plinstance.parsePlaceholders(itemtxt.getText(),p,viewer,p));
                 itemtxt.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
                 color = getLastColor(itemtxt);
@@ -321,7 +321,7 @@ public class ChatManager extends TabFeature {
 
         }
 
-        if (list.size() > 1) comp.addExtra(IChatBaseComponent.optimizedComponent((color != null ? color.getHexCode() : "")+list.get(1)));
+        if (list.size() > 1) comp.addExtra(IChatBaseComponent.optimizedComponent((color != null ? "#"+color.getHexCode() : "")+list.get(1)));
         comp.setText("");
         return comp;
     }
