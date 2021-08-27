@@ -122,9 +122,9 @@ public class ChatCmds {
                     p.sendMessage(translation.getString("player_not_found", "&4[TAB] Player not found!"), true);
                 else if (!msgSelf && p == p2)
                     p.sendMessage(translation.getString("tab+_cant_pm_self", "&cYou can't message yourself!"), true);
-                else if (TAB.getInstance().getConfiguration().getPlayerData("togglemsg").contains(p2.getName()))
+                else if (!p.hasPermission("tabadditions.chat.bypass.togglemsg") && TAB.getInstance().getConfiguration().getPlayerData("togglemsg").contains(p2.getName()))
                     p.sendMessage(translation.getString("tab+_has_pm_off", "&cThis player doesn't accept private messages"), true);
-                else if (playerdata.getStringList("msg-ignore." + p2.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
+                else if (!p.hasPermission("tabadditions.chat.bypass.ignore") && playerdata.getStringList("msg-ignore." + p2.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
                     p.sendMessage(translation.getString("tab+_ignores_you", "&cThis player ignores you"), true);
                 else {
                     p.sendMessage(createmsg(p, msg, msgSender, p2));
