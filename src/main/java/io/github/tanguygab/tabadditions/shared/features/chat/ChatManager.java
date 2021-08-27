@@ -8,6 +8,7 @@ import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.chat.ChatClickable;
 import me.neznamy.tab.api.chat.EnumChatFormat;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.chat.TextColor;
@@ -23,18 +24,21 @@ import org.bukkit.inventory.ItemStack;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChatManager extends TabFeature {
 
     private TABAdditions plinstance;
-    private TabAPI tab;
+    private final TabAPI tab;
     private final Map<String,ChatFormat> formats = new HashMap<>();
     public final Map<TabPlayer,String> defformats = new HashMap<>();
 
+    private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^|]+)((\\|\\|(?<hover>[^|]+))(\\|\\|(?<click>[^|]+))?)?}");
 
     public boolean itemEnabled = true;
-    public String itemInput = "[item]";
+    public String itemMainHand = "[item]";
+    public String itemOffHand = "[offhand]";
     public String itemOutput = "%item% x%amount%";
     public String itemOutputSingle = "%item%";
     public String itemOutputAir = "No Item";
@@ -44,6 +48,17 @@ public class ChatManager extends TabFeature {
     public String mentionInput = "@%player%";
     public String mentionOutput = "&b";
     public String mentionSound = "BLOCK_NOTE_BLOCK_PLING";
+
+    public Map<String,Map<String,Object>> customInteractions = new HashMap<>();
+
+    public boolean msgEnabled = true;
+    public String msgSender = "";
+    public String msgViewer = "";
+    public boolean ignoreCmd = true;
+    public boolean togglemsgCmd = true;
+
+    public boolean clearChatCmd = false;
+    public int clearChatAmount = 100;
 
     public Map<String,String> emojis = new HashMap<>();
     public boolean emojiUntranslate = false;
@@ -79,14 +94,26 @@ public class ChatManager extends TabFeature {
         plinstance = TABAdditions.getInstance();
         ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         for (Object format : config.getConfigurationSection("chat-formats").keySet())
-            formats.put(format+"",new ChatFormat(format+"", config.getConfigurationSection("chat-formats."+format),this));
+            formats.put(format+"",new ChatFormat(format+"", config.getConfigurationSection("chat-formats."+format)));
 
         itemEnabled = config.getBoolean("item.enabled",true);
-        itemInput = config.getString("item.input","[item]");
+        itemMainHand = config.getString("item.mainhand","[item]");
+        itemOffHand = config.getString("item.offhand","[offhand]");
         itemOutput = config.getString("item.output","%name% x%amount%");
         itemOutputSingle = config.getString("item.output-single","%name%");
         itemOutputAir = config.getString("item.output-air","No Item");
         itemPermssion = config.getBoolean("item.permission",false);
+
+        customInteractions = config.getConfigurationSection("custom-interactions");
+
+        msgEnabled = config.getBoolean("msg.enabled",true);
+        msgSender = config.getString("msg.sender","{&7[&6&lMe &e➠ &6&l%viewer:prop-customchatname%&7] %msg%||%time%\\n\\n&fClick to reply to &6%viewer:prop-customchatname%&f.||suggest:/msg %player% }");
+        msgViewer = config.getString("msg.sender","{&7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%||%time%\\n\\n&fClick to reply to &6%prop-customchatname%&f.||suggest:/msg %player% }");
+        ignoreCmd = config.getBoolean("msg./ignore",true);
+        togglemsgCmd = config.getBoolean("msg./togglemsg",true);
+
+        clearChatCmd = config.getBoolean("clearchat.enabled",true);
+        clearChatAmount = config.getInt("clearchat.amount",100);
 
         mentionEnabled = config.getBoolean("mention.enabled",true);
         mentionInput = config.getString("mention.input","@%player%");
@@ -106,14 +133,10 @@ public class ChatManager extends TabFeature {
     }
 
     public ChatFormat defFormat() {
-        Map<String,Object> map = new HashMap<>();
-        Map<String,Object> components = new HashMap<>();
-        Map<String,Object> text = new HashMap<>();
+        Map<String,String> map = new HashMap<>();
 
-        text.put("text","%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%&7\u00bb &r%msg%");
-        components.put("text",text);
-        map.put("components",components);
-        return new ChatFormat("default", map,this);
+        map.put("text","{%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%&7\u00bb &r%msg%}");
+        return new ChatFormat("default", map);
     }
 
     public void onChat(TabPlayer p, String msg) {
@@ -148,99 +171,125 @@ public class ChatManager extends TabFeature {
                     discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()), msg, discord.getMainChatChannel(), false);
                 else if (getFormat(p).isViewConditionMet(p,null) && !discord.getOptionalChannel(chatFormat.getChannel()).equals(discord.getMainChatChannel())) discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()),msg, discord.getOptionalChannel(chatFormat.getChannel()),false);
             }
-
-        return;
     }
 
     public IChatBaseComponent createmsg(TabPlayer p, String msg, ChatFormat chatFormat, TabPlayer viewer) {
-
         List<String> codes = Arrays.asList("a", "b", "c", "d", "f", "k", "l", "m", "n", "o", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
         for (String code : codes) {
             if (!p.hasPermission("tabadditions.chat.color.&" + code))
                 msg = msg.replace("&" + code, "");
         }
-        msg = pingcheck(p, msg, viewer);
+
+        msg = pingcheck(p,msg,viewer);
         msg = new RGBUtils().applyFormats(msg, true);
-        msg = EnumChatFormat.color(msg);
-        if (!p.hasPermission("tabadditions.chat.color.rgb")) {
-            msg = Pattern.quote(msg)
-                    .replaceAll("#[0-9a-fA-F]{6}", "")
-                    .replace("\\Q", "")
-                    .replace("\\E", "");
-        }
 
-        Map<String, Map<String, Object>> format = chatFormat.getText();
-        IChatBaseComponent messsage = new IChatBaseComponent("");
-        TextColor oldColor = null;
-        for (Map<String, Object> component : format.values()) {
-            IChatBaseComponent comp = checkText(p, viewer, msg, component,oldColor);
-            checkHoverAndClick(comp, p, viewer, msg, component);
-            messsage.addExtra(comp);
-            oldColor = getLastColor(comp);
-        }
-        return messsage;
-    }
-    public TextColor getLastColor(IChatBaseComponent component) {
-        if (component.getExtra() == null) return component.getModifier().getColor();
-        List<IChatBaseComponent> list = new ArrayList<>(component.getExtra());
-        Collections.reverse(list);
-        for (IChatBaseComponent comp : list) {
-                if (comp.getModifier().getColor() != null)
-                    return comp.getModifier().getColor();
-        }
-        if (component.getModifier().getColor() != null) return component.getModifier().getColor();
-        if (component.getText().contains("\u00A7")) {
-            int i = component.getText().lastIndexOf("\u00A7");
-            if (component.getText().chars().toArray().length == i+2) return null;
-            char c = component.getText().charAt(i+1);
-            return new TextColor(EnumChatFormat.getByChar(c));
-        }
-        return null;
+        String format = removeSpaces(chatFormat.getText());
+
+        return compcheck(msg,format,p,viewer);
     }
 
-    public IChatBaseComponent checkText(TabPlayer p, TabPlayer viewer, String msg, Map<String,Object> config, TextColor lastcolor) {
-        if (!config.containsKey("text")) return new IChatBaseComponent("");
-        if (plinstance.getPlatform().getType() == PlatformType.SPIGOT && itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.item")) && msg.contains(itemInput) && config.get("text").toString().contains("%msg%"))
-            return itemcheck(config.get("text")+"",p,msg,viewer, lastcolor);
-        return IChatBaseComponent.optimizedComponent((lastcolor != null ? "#"+lastcolor.getHexCode() : "")+plinstance
-                .parsePlaceholders(config.get("text")+"", p,viewer,p)
-                .replace("%msg%", msg));
-    }
+    public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
+        text = plinstance.parsePlaceholders(text,p,viewer,p).replace("%msg%",msg);
+        if (!text.startsWith("{")) text = "{"+text;
+        if (!text.endsWith("}")) text = text+"}";
+        text = textcheck(text,p,viewer);
+        text = EnumChatFormat.color(text);
+        Matcher m = chatPartPattern.matcher(text);
+        List<IChatBaseComponent> list = new ArrayList<>();
+        while (m.find()) {
 
-    public IChatBaseComponent checkHoverAndClick(IChatBaseComponent comp,TabPlayer p, TabPlayer viewer, String msg, Map<String,Object> config) {
-        if (config.containsKey("hover") && config.get("hover") instanceof List) {
-            List<String> list = (List<String>) config.get("hover");
-            String txt = "";
-            for (String str : list) {
-                if (list.indexOf(str) > 0) txt += "\n";
-                txt += str;
-            }
-            txt = plinstance.parsePlaceholders(txt,p,viewer,p).replace("%msg%", msg);
-            IChatBaseComponent hover = IChatBaseComponent.optimizedComponent(txt);
-            comp.getModifier().onHoverShowText(hover);
+
+            String txt = m.group("text");
+
+            String hover;
+            try {hover = m.group("hover");}
+            catch (Exception e) {hover = null;}
+            String click;
+            try {click = m.group("click");}
+            catch (Exception e) {click = null;}
+
+            IChatBaseComponent comp = IChatBaseComponent.optimizedComponent(txt);
+            if (hover != null) comp = hovercheck(comp,hover,p,viewer);
+            if (click != null) clickcheck(comp,click);
+            list.add(comp);
         }
-        if (config.containsKey("suggest")) {
-            String txt = plinstance.parsePlaceholders(config.get("suggest")+"",p,viewer,p).replace("%msg%", msg);
-            comp.getModifier().onClickSuggestCommand(txt);
-        }
-        else if (config.containsKey("command")) {
-            String txt = plinstance.parsePlaceholders(config.get("command")+"",p,viewer,p).replace("%msg%", msg);
-            comp.getModifier().onClickRunCommand(txt);
-        }
-        else if (config.containsKey("url")) {
-            String txt = plinstance.parsePlaceholders(config.get("url")+"",p,viewer,p).replace("%msg%", msg);
-            comp.getModifier().onClickOpenUrl(txt);
-        }
+        IChatBaseComponent comp = new IChatBaseComponent("");
+
+        comp.setExtra(list);
         return comp;
     }
 
-    public boolean canSee(TabPlayer sender, TabPlayer viewer) {
-        if (sender == viewer) return true;
-        if (viewer != null && !getFormat(sender).getChannel().equals(getFormat(viewer).getChannel())) return false;
-        else if (viewer == null && !getFormat(sender).getChannel().equals("")) return false;
-        return getFormat(sender).isViewConditionMet(sender, viewer);
-    }
+    public String textcheck(String text,TabPlayer p, TabPlayer viewer) {
+        Matcher m = chatPartPattern.matcher(text);
 
+        while (m.find()) {
+            String txtold = m.group("text");
+            String txt = m.group("text");
+            String hover = null;
+            try {hover = m.group("hover");}
+            catch (Exception ignored) {}
+            String click = null;
+            try {click = m.group("click");}
+            catch (Exception ignored) {}
+            String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
+            if (itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.chat.item"))) {
+                txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
+                txt = txt.replace(itemOffHand, hoverclick+"{[item]||item:offhand}{");
+            }
+            for (String interaction : customInteractions.keySet()) {
+                if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
+                    txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p))+"{");
+                }
+            }
+            text = text.replace(txtold,txt);
+        }
+        return text;
+    }
+    public IChatBaseComponent hovercheck(IChatBaseComponent comp, String hover, TabPlayer p, TabPlayer viewer) {
+        if (hover == null || hover.equals("")) return comp;
+
+        if (hover.startsWith("material:")) {
+            Material mat = Material.getMaterial(hover.replace("material:", ""));
+            if (mat == null) return comp;
+            ItemStack item = new ItemStack(mat);
+            comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
+            return comp;
+        }
+
+        if (hover.startsWith("item:")) {
+            ItemStack item = getItem(hover,p);
+
+            String itemtxt;
+            if (item.getType() != Material.AIR) {
+                String name = getItemName(item);
+                if (item.getAmount() > 1)
+                    itemtxt = itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+"");
+                else itemtxt = itemOutputSingle.replace("%name%",name);
+            } else itemtxt = itemOutputAir;
+
+            if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
+                TextColor color = getLastColor(comp);
+                comp = IChatBaseComponent.optimizedComponent((color == null ? "" : "#"+color.getHexCode())+ plinstance.parsePlaceholders(itemtxt,p,viewer,p));
+            }
+            comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
+            return comp;
+        }
+        comp.getModifier().onHoverShowText(IChatBaseComponent.optimizedComponent(plinstance.parsePlaceholders(hover,p,viewer,p)));
+        return comp;
+    }
+    public void clickcheck(IChatBaseComponent comp, String click) {
+        if (click == null || click.equals("")) return;
+
+        if (click.startsWith("command:"))
+            comp.getModifier().onClickRunCommand(click.replace("command:",""));
+        if (click.startsWith("suggest:"))
+            comp.getModifier().onClickSuggestCommand(click.replace("suggest:",""));
+        if (click.startsWith("url:"))
+            comp.getModifier().onClickOpenUrl(click.replace("url:","").replace(" ",""));
+        if (click.startsWith("copy:"))
+            comp.getModifier().onClick(ChatClickable.EnumClickAction.COPY_TO_CLIPBOARD,click.replace("copy:",""));
+
+    }
     public String emojicheck(TabPlayer p, String msg) {
         for (String emoji : emojis.keySet()) {
             int count = countMatches(msg,emoji);
@@ -269,62 +318,6 @@ public class ChatManager extends TabFeature {
         }
         return msg;
     }
-
-    public IChatBaseComponent itemcheck(String text, TabPlayer p, String msg, TabPlayer viewer, TextColor lastcolor) {
-
-        IChatBaseComponent comp = new IChatBaseComponent("");
-        if (lastcolor != null)
-            comp.getModifier().setColor(lastcolor);
-
-        List<String> list = new ArrayList<>(Arrays.asList(TABAdditions.getInstance().parsePlaceholders(text,p,viewer,p).split("%msg%")));
-        if (list.size() < 1) list.add("");
-        comp.addExtra(IChatBaseComponent.optimizedComponent(list.get(0)));
-
-        ItemStack item;
-        try {item = ((Player) p.getPlayer()).getInventory().getItemInMainHand();}
-        catch (NoSuchMethodError e) {item = ((Player) p.getPlayer()).getInventory().getItemInHand();}
-
-        List<String> ar = new ArrayList<>(Arrays.asList(msg.split(Pattern.quote(itemInput))));
-        int itemcount = countMatches(msg,itemInput);
-
-        if (ar.isEmpty()) ar.add("");
-        TextColor color = null;
-        for (String txt2 : ar) {
-            IChatBaseComponent txt3 = IChatBaseComponent.optimizedComponent((color != null ? "#"+color.getHexCode() : "")+txt2);
-            color = getLastColor(txt3);
-            comp.addExtra(txt3);
-
-            if (itemcount != 0) {
-                IChatBaseComponent itemtxt;
-                if (item.getType() != Material.AIR) {
-                    String name;
-                    if (!item.hasItemMeta() || !item.getItemMeta().hasDisplayName()) {
-                        String type = item.getType().toString().replace("_", " ").toLowerCase();
-                        String type2 = "";
-                        List<String> typelist = new ArrayList<>(Arrays.asList(type.split(" ")));
-                        for (String str : typelist) {
-                            type2 = type2 + str.substring(0, 1).toUpperCase() + str.substring(1);
-                            if (typelist.indexOf(str) != typelist.size() - 1) type2 = type2 + " ";
-                        }
-                        name = type2;
-                    } else name = item.getItemMeta().getDisplayName();
-                    if (item.getAmount() > 1)
-                        itemtxt = IChatBaseComponent.optimizedComponent((color != null ? "#"+color.getHexCode() : "")+itemOutput.replace("%name%",name).replace("%amount%",item.getAmount()+""));
-                    else itemtxt = IChatBaseComponent.optimizedComponent((color != null ?"#"+color.getHexCode() : "")+itemOutputSingle.replace("%name%",name));
-                } else itemtxt = IChatBaseComponent.optimizedComponent((color != null ? "#"+color.getHexCode() : "")+itemOutputAir);
-                itemtxt.setText(plinstance.parsePlaceholders(itemtxt.getText(),p,viewer,p));
-                itemtxt.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
-                color = getLastColor(itemtxt);
-                comp.addExtra(itemtxt);
-                itemcount = itemcount-1;
-            }
-
-        }
-
-        if (list.size() > 1) comp.addExtra(IChatBaseComponent.optimizedComponent((color != null ? "#"+color.getHexCode() : "")+list.get(1)));
-        comp.setText("");
-        return comp;
-    }
     public String pingcheck(TabPlayer p, String msg, TabPlayer viewer) {
 
         String input = TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,viewer);
@@ -340,19 +333,72 @@ public class ChatManager extends TabFeature {
         return msg;
     }
 
+    public ItemStack getItem(String str, TabPlayer p) {
+        str = str.replace("item:","");
+        Player player = (Player) p.getPlayer();
+
+        if (str.equalsIgnoreCase("mainhand")) {
+            try {return player.getInventory().getItemInMainHand();}
+            catch (Exception e) {return player.getInventory().getItemInHand();}
+        }
+        if (str.equalsIgnoreCase("offhand")) {
+            try {return player.getInventory().getItemInOffHand();}
+            catch (Exception e) {return new ItemStack(Material.AIR);}
+        }
+        try {
+            int i = Integer.parseInt(str);
+            ItemStack item = player.getInventory().getItem(i);
+            if (item != null) return item;
+        } catch (Exception ignored) {}
+
+        return new ItemStack(Material.AIR);
+    }
+    public String getItemName(ItemStack item) {
+        if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) return item.getItemMeta().getDisplayName();
+
+        String type = item.getType().toString().replace("_", " ").toLowerCase();
+        String type2 = "";
+        List<String> typelist = new ArrayList<>(Arrays.asList(type.split(" ")));
+        for (String str : typelist) {
+            type2 = type2 + str.substring(0, 1).toUpperCase() + str.substring(1);
+            if (typelist.indexOf(str) != typelist.size() - 1) type2 = type2 + " ";
+        }
+        return type2;
+    }
+    public TextColor getLastColor(IChatBaseComponent component) {
+        if (component.getExtra() == null) return component.getModifier().getColor();
+        List<IChatBaseComponent> list = new ArrayList<>(component.getExtra());
+        Collections.reverse(list);
+        for (IChatBaseComponent comp : list) {
+            if (comp.getModifier().getColor() != null)
+                return comp.getModifier().getColor();
+        }
+        if (component.getModifier().getColor() != null) return component.getModifier().getColor();
+        if (component.getText().contains("\u00A7")) {
+            int i = component.getText().lastIndexOf("\u00A7");
+            if (component.getText().chars().toArray().length == i+2) return null;
+            char c = component.getText().charAt(i+1);
+            return new TextColor(EnumChatFormat.getByChar(c));
+        }
+        return null;
+    }
+
+    public boolean canSee(TabPlayer sender, TabPlayer viewer) {
+        if (sender == viewer) return true;
+        if (viewer != null && !getFormat(sender).getChannel().equals(getFormat(viewer).getChannel())) return false;
+        else if (viewer == null && !getFormat(sender).getChannel().equals("")) return false;
+        return getFormat(sender).isViewConditionMet(sender, viewer);
+    }
     public int countMatches(CharSequence str, CharSequence sub) {
         if (str != null &&  str.length() != 0 && sub != null && sub.length() != 0) {
             int count = 0;
-
-            for(int idx = 0; (idx = str.toString().indexOf(sub.toString(),idx)) != -1; idx += sub.length()) {
+            for(int idx = 0; (idx = str.toString().indexOf(sub.toString(),idx)) != -1; idx += sub.length())
                 ++count;
-            }
-
-
             return count;
-        } else {
-            return 0;
-        }
+        } else return 0;
+    }
+    public String removeSpaces(String str) {
+        return str.replace("{ ","{").replace(" }","}").replace(" || ","||");
     }
 
     @Override
