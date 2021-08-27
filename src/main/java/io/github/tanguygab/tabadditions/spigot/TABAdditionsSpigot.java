@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.*;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatCmds;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.platforms.bukkit.event.TabLoadEvent;
@@ -18,8 +19,8 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
+import java.util.List;
+
 
 public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, TabCompleter, Listener {
 
@@ -48,7 +49,11 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     }
 
     @Override
-    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+    public boolean onCommand(CommandSender sender, Command command, String alias, String[] args) {
+        if (command.getName().equalsIgnoreCase("tab+cmds") && sender instanceof Player && TabAPI.getInstance().getFeatureManager().isFeatureEnabled("&aChat&r")) {
+            ((ChatManager)TabAPI.getInstance().getFeatureManager().getFeature("&aChat&r")).cmds.execute(TabAPI.getInstance().getPlayer(sender.getName()),alias,args);
+            return true;
+        }
         String name = "~Console~";
         if (sender instanceof Player) name = sender.getName();
         Cmd.getMain(name,args);
@@ -57,6 +62,9 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
 
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+        if (command.getName().equalsIgnoreCase("tab+cmds") && sender instanceof Player && TabAPI.getInstance().getFeatureManager().isFeatureEnabled("&aChat&r"))
+            return ((ChatManager)TabAPI.getInstance().getFeatureManager().getFeature("&aChat&r")).cmds.tabcomplete(TabAPI.getInstance().getPlayer(sender.getName()),alias,args);
+
         if (sender.hasPermission("tabadditions.admin"))
             return Cmd.getTabComplete(args);
         return null;

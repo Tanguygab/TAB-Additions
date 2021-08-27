@@ -1,7 +1,13 @@
 package io.github.tanguygab.tabadditions.bungee;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatCmds;
+import me.neznamy.tab.api.TabAPI;
+import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
+import net.md_5.bungee.api.plugin.TabExecutor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,8 +32,10 @@ public final class TABAdditionsBungeeCord extends Plugin {
     public void onEnable() {
         TABAdditions.setInstance(new TABAdditions(new BungeePlatform(this), this,getDataFolder()));
         TABAdditions.getInstance().load();
-        getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
         getProxy().registerChannel("tabadditions:channel");
+        getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("btab+cmds", null, "msg", "ignore", "r", "reply","togglemsg","emojis","clearchat"));
+
     }
 
     @Override
