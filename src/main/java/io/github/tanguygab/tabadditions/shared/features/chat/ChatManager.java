@@ -145,7 +145,7 @@ public class ChatManager extends TabFeature {
             }
             cooldown.remove(p);
         }
-        if (cooldownTime != 0 && !p.hasPermission("tabadditions.chat.cooldown.bypass"))
+        if (cooldownTime != 0 && !p.hasPermission("tabadditions.chat.bypass.cooldown"))
             cooldown.put(p,LocalDateTime.now());
 
         msg = emojicheck(p,msg);
