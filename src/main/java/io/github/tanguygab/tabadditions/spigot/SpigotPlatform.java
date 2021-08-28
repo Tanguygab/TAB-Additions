@@ -3,6 +3,9 @@ package io.github.tanguygab.tabadditions.spigot;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatCmds;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -11,6 +14,10 @@ import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 public class SpigotPlatform extends Platform {
 
@@ -60,6 +67,20 @@ public class SpigotPlatform extends Platform {
 
 		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
 			new TABAdditionsExpansion(plugin).register();
+
+		if (!TabAPI.getInstance().getFeatureManager().isFeatureEnabled("&aChat&r")) return;
+		ChatCmds cmds = ((ChatManager)TabAPI.getInstance().getFeatureManager().getFeature("&aChat&r")).cmds;
+
+		List<String> list = Arrays.asList("msg","reply","ignore","togglemsg","clearchat","emojis");
+		list.forEach(cmd -> {
+			try {
+				if (cmds.getClass().getField(cmd+"Enabled").getBoolean(cmds) && !(plugin.getCommand(cmd) != null && plugin.getCommand(cmd).getExecutor() instanceof TabPlusCmds))
+					plugin.getCommand(cmd).setExecutor(new TabPlusCmds());
+				else if (!cmds.getClass().getField(cmd+"Enabled").getBoolean(cmds) && plugin.getCommand(cmd) != null && plugin.getCommand(cmd).getExecutor() instanceof TabPlusCmds)
+					plugin.getCommand(cmd).setExecutor(null);
+			} catch (Exception e) {e.printStackTrace();}
+		});
+
 	}
 
 	@Override

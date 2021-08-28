@@ -21,14 +21,14 @@ public class ChatCmds {
     public String msgSender;
     public String msgViewer;
     public boolean msgSelf;
-    public boolean ignoreCmd;
-    public boolean togglemsgCmd;
-    public boolean replyCmd;
+    public boolean ignoreEnabled;
+    public boolean togglemsgEnabled;
+    public boolean replyEnabled;
     public Map<TabPlayer, TabPlayer> replies = new HashMap<>();
 
-    public boolean emojisCmd;
+    public boolean emojisEnabled;
 
-    public boolean clearChatCmd;
+    public boolean clearchatEnabled;
     public String clearChatLine;
     public int clearChatAmount;
 
@@ -38,13 +38,13 @@ public class ChatCmds {
         msgSender = config.getString("msg.sender","{&7[&6&lMe &e➠ &6&l%viewer:prop-customchatname%&7] %msg%||%time%\\n\\n&fClick to reply to &6%viewer:prop-customchatname%&f.||suggest:/msg %player% }");
         msgViewer = config.getString("msg.viewer","{&7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%||%time%\\n\\n&fClick to reply to &6%prop-customchatname%&f.||suggest:/msg %player% }");
         msgSelf = config.getBoolean("msg.msg-self",true);
-        ignoreCmd = config.getBoolean("msg./ignore",true);
-        togglemsgCmd = config.getBoolean("msg./togglemsg",true);
-        replyCmd = config.getBoolean("msg./reply",true);
+        ignoreEnabled = config.getBoolean("msg./ignore",true);
+        togglemsgEnabled = config.getBoolean("msg./togglemsg",true);
+        replyEnabled = config.getBoolean("msg./reply",true);
 
-        emojisCmd = config.getBoolean("emojis./emojis",true);
+        emojisEnabled = config.getBoolean("emojis./emojis",true);
 
-        clearChatCmd = config.getBoolean("clearchat.enabled",true);
+        clearchatEnabled = config.getBoolean("clearchat.enabled",true);
         clearChatAmount = config.getInt("clearchat.amount",100);
         clearChatLine = config.getString("clearchat.line","");
     }
@@ -66,20 +66,24 @@ public class ChatCmds {
         ConfigurationFile translation = TAB.getInstance().getConfiguration().getTranslation();
 
         if (cm.emojiEnabled && cmd.equalsIgnoreCase("emojis")) {
-            String output = translation
-                    .getString("tab+_/emojis_header","&7All emojis you have access to (%amount%):")
-                    .replace("%amount%","0");
+            String output = "";
+            int count = 0;
             for (String emoji : cm.emojis.keySet()) {
-                if (p.hasPermission("tabadditions.chat.emoji."+emoji))
-                    output+="\n"+translation
-                        .getString("tab+_/emojis_emoji","&7%emojiraw%&8: &r%emoji%")
-                        .replace("%emojiraw%",emoji)
-                        .replace("%emoji%",cm.emojis.get(emoji));
+                if (p.hasPermission("tabadditions.chat.emoji."+emoji)) {
+                    output += "\n" + translation
+                            .getString("tab+_/emojis_emoji", "&7%emojiraw%&8: &r%emoji%")
+                            .replace("%emojiraw%", emoji)
+                            .replace("%emoji%", cm.emojis.get(emoji));
+                    count++;
+                }
             }
-            p.sendMessage(output,true);
+            p.sendMessage(translation
+                    .getString("tab+_/emojis_header","&7All emojis you have access to (%amount%):")
+                    .replace("%amount%",count+"")
+                    + output,true);
             return;
         }
-        if (clearChatCmd && cmd.equalsIgnoreCase("clearchat") && p.hasPermission("tabadditions.chat.clearchat")) {
+        if (clearchatEnabled && cmd.equalsIgnoreCase("clearchat") && p.hasPermission("tabadditions.chat.clearchat")) {
             String linebreaks = "";
             for (int i = 0; i < clearChatAmount; i++)
                 linebreaks+="\n"+clearChatLine;
@@ -91,7 +95,7 @@ public class ChatCmds {
         if (!msgEnabled) return;
         switch (cmd.toLowerCase()) {
             case "togglemsg": {
-                if (!togglemsgCmd) return;
+                if (!togglemsgEnabled) return;
                 List<String> list = playerdata.getStringList("togglemsg");
                 if (list.contains(p.getName())) {
                     list.remove(p.getName());
@@ -104,7 +108,7 @@ public class ChatCmds {
                 break;
             }
             case "ignore": {
-                if (!ignoreCmd) return;
+                if (!ignoreEnabled) return;
                 if (msg.split(" ").length < 1) {
                     p.sendMessage(translation.getString("player_not_found", "&4[TAB] Player not found!"), true);
                     return;
@@ -125,7 +129,7 @@ public class ChatCmds {
             }
             case "reply":
             case "r":
-                if (!replyCmd) return;
+                if (!replyEnabled) return;
             case "msg": {
                 TabPlayer p2;
                 if (cmd.equals("r") || cmd.equals("reply"))
