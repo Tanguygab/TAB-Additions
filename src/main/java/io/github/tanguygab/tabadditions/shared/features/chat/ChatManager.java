@@ -201,7 +201,6 @@ public class ChatManager extends TabFeature {
             if (click != null) clickcheck(comp,click);
 
             lastcolor = getLastColor(comp);
-            p.sendMessage(lastcolor+" | "+(lastcolor == null ? "" : lastcolor.getHexCode()),false);
             list.add(comp);
         }
         IChatBaseComponent finalcomp = new IChatBaseComponent("");
