@@ -6,7 +6,6 @@ import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.TAB;
 
 public class RealFakePlayerCmd {
     public RealFakePlayerCmd(String nameS, String[] args) {

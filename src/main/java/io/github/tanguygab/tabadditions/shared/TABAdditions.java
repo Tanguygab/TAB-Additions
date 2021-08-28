@@ -11,14 +11,16 @@ import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.api.*;
 import me.neznamy.tab.api.chat.EnumChatFormat;
-import me.neznamy.tab.shared.placeholders.Placeholder;
-import me.neznamy.tab.shared.placeholders.RelationalPlaceholder;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
-import me.neznamy.tab.shared.placeholders.conditions.Condition;
-import me.neznamy.tab.shared.TAB;
 import org.bukkit.entity.Player;
 import org.geysermc.floodgate.api.FloodgateApi;
+
+import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.config.Configs;
+import me.neznamy.tab.shared.placeholders.Placeholder;
+import me.neznamy.tab.shared.placeholders.RelationalPlaceholder;
+import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
 public class TABAdditions {
 
@@ -83,6 +85,10 @@ public class TABAdditions {
             case SKINS: return skinsFile;
             default: return config;
         }
+    }
+
+    public Configs getTABConfigs() {
+        return TAB.getInstance().getConfiguration();
     }
 
     public void load() {
@@ -179,10 +185,10 @@ public class TABAdditions {
                 "tagprefix","tagsuffix","customtagname",
                 "chatprefix","chatsuffix","customchatname",
                 "abovename","belowname","title","actionbar"));
-        if (TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines") != null)
-            props.addAll(TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines"));
-        if (TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines") != null)
-        props.addAll(TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines").keySet());
+        if (getTABConfigs().getConfig().getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines") != null)
+            props.addAll(getTABConfigs().getConfig().getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines"));
+        if (getTABConfigs().getConfig().getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines") != null)
+        props.addAll(getTABConfigs().getConfig().getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines").keySet());
         PlaceholderManager pm = tab.getPlaceholderManager();
         for (Object prop : props) {
             pm.registerPlayerPlaceholder("%prop-"+prop+"%", 100,p->{

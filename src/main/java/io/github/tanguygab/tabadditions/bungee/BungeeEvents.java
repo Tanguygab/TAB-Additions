@@ -68,7 +68,7 @@ public class BungeeEvents implements Listener {
                     break;
                 case "replace":
                     String output = TABAdditions.getInstance().parsePlaceholders(value,p);
-                    Map<Object, String> replacements = TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("placeholder-output-replacements." + value);
+                    Map<Object, String> replacements = TABAdditions.getInstance().getTABConfigs().getConfig().getConfigurationSection("placeholder-output-replacements." + value);
                     result =  TAB.getInstance().getPlaceholderManager().findReplacement(replacements, output).replace("%value%", output);
                     break;
                 case "placeholder":

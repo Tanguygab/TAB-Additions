@@ -1,14 +1,15 @@
 package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
+import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
+import me.neznamy.tab.shared.TAB;
 
 import java.util.*;
 
@@ -58,7 +59,7 @@ public class RFPManager extends TabFeature {
     }
 
     protected void registerScoreboardTeam(TabPlayer p, String teamName, String prefix, String suffix, String rfpname) {
-        if (p.getVersion().getMinorVersion() >= 8 && TAB.getInstance().getConfiguration().isUnregisterBeforeRegister() && TAB.getInstance().getPlatform().getSeparatorType().equals("world")) {
+        if (p.getVersion().getMinorVersion() >= 8 && TABAdditions.getInstance().getTABConfigs().isUnregisterBeforeRegister() && TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT) {
             p.sendCustomPacket(new PacketPlayOutScoreboardTeam(teamName), this);
         }
         p.sendCustomPacket(new PacketPlayOutScoreboardTeam(teamName, prefix, suffix, "always", "never", Collections.singleton(rfpname), 0), this);

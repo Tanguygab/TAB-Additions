@@ -80,12 +80,13 @@ public class Cmd {
     }
 
     public static List<String> getTabComplete(String[] args) {
+        TabAPI tab = TabAPI.getInstance();
         if (args.length == 1)
             return new ArrayList<>(Arrays.asList("help","actionbar","title","tags","fp"));
         if (args.length >= 2) {
             switch (args[0]) {
                 case "actionbar":
-                    ActionBar actionbar = (ActionBar) TabAPI.getInstance().getFeatureManager().getFeature("&aActionBar&r");
+                    ActionBar actionbar = (ActionBar) tab.getFeatureManager().getFeature("&aActionBar&r");
                     if (args.length == 2 && actionbar != null)
                         return actionbar.getLists();
                     break;
@@ -95,7 +96,7 @@ public class Cmd {
                     break;
                 }
                 case "fp": {
-                    RFPManager rfpm = (RFPManager) TabAPI.getInstance().getFeatureManager().getFeature("&aReal Fake Players&r");
+                    RFPManager rfpm = (RFPManager) tab.getFeatureManager().getFeature("&aReal Fake Players&r");
                     if (rfpm == null)
                         return null;
                     if (args.length == 2)
@@ -114,7 +115,7 @@ public class Cmd {
                     break;
                 }
                 case "title": {
-                    Title title = (Title) TabAPI.getInstance().getFeatureManager().getFeature("&aTitle&r");
+                    Title title = (Title) tab.getFeatureManager().getFeature("&aTitle&r");
                     if (args.length == 2 && title != null)
                         return title.getLists();
                     break;

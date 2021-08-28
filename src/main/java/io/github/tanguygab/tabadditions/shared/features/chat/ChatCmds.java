@@ -63,7 +63,7 @@ public class ChatCmds {
         }
 
         ConfigurationFile playerdata = getPlayerData();
-        ConfigurationFile translation = TAB.getInstance().getConfiguration().getTranslation();
+        ConfigurationFile translation = TABAdditions.getInstance().getTABConfigs().getTranslation();
 
         if (cm.emojiEnabled && cmd.equalsIgnoreCase("emojis")) {
             String output = "";
@@ -144,7 +144,7 @@ public class ChatCmds {
                     p.sendMessage(translation.getString("player_not_found", "&4[TAB] Player not found!"), true);
                 else if (!msgSelf && p == p2)
                     p.sendMessage(translation.getString("tab+_cant_pm_self", "&cYou can't message yourself!"), true);
-                else if (!p.hasPermission("tabadditions.chat.bypass.togglemsg") && TAB.getInstance().getConfiguration().getPlayerData("togglemsg").contains(p2.getName()))
+                else if (!p.hasPermission("tabadditions.chat.bypass.togglemsg") && playerdata.getStringList("togglemsg").contains(p2.getName()))
                     p.sendMessage(translation.getString("tab+_has_pm_off", "&cThis player doesn't accept private messages"), true);
                 else if (!p.hasPermission("tabadditions.chat.bypass.ignore") && playerdata.getStringList("msg-ignore." + p2.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
                     p.sendMessage(translation.getString("tab+_ignores_you", "&cThis player ignores you"), true);
@@ -173,7 +173,7 @@ public class ChatCmds {
     }
 
     public ConfigurationFile getPlayerData() {
-        if (TAB.getInstance().getConfiguration().getPlayerData("togglesmsg") == null) {
+        if (TABAdditions.getInstance().getTABConfigs().getPlayerData("togglesmsg") == null) {
             File file = new File(TAB.getInstance().getPlatform().getDataFolder(), "playerdata.yml");
 
             try {
@@ -182,7 +182,7 @@ public class ChatCmds {
             } catch (Exception var4) {
                 TabAPI.getInstance().getErrorManager().criticalError("Failed to load playerdata.yml", var4);
             }
-        } return TAB.getInstance().getConfiguration().getPlayerDataFile();
+        } return TABAdditions.getInstance().getTABConfigs().getPlayerDataFile();
     }
 
 }

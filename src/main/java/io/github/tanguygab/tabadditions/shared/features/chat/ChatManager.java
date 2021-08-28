@@ -14,7 +14,6 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.chat.TextColor;
 import me.neznamy.tab.api.chat.rgb.RGBUtils;
 import me.neznamy.tab.api.config.ConfigurationFile;
-import me.neznamy.tab.shared.TAB;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.Sound;
@@ -134,7 +133,7 @@ public class ChatManager extends TabFeature {
         if (cooldown.containsKey(p)) {
             long time = ChronoUnit.SECONDS.between(cooldown.get(p),LocalDateTime.now());
             if (time < cooldownTime) {
-                p.sendMessage(TAB.getInstance().getConfiguration().getTranslation()
+                p.sendMessage(TABAdditions.getInstance().getTABConfigs().getTranslation()
                         .getString("tab+_message_cooldown", "&cYou have to wait %seconds% more seconds!")
                         .replace("%seconds%", cooldownTime-time+""), true);
                 return;
@@ -407,7 +406,7 @@ public class ChatManager extends TabFeature {
     public boolean onCommand(TabPlayer p, String msg) {
         msg = msg.replaceFirst("/","");
         ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
-        ConfigurationFile translation = TAB.getInstance().getConfiguration().getTranslation();
+        ConfigurationFile translation = TABAdditions.getInstance().getTABConfigs().getTranslation();
 
         if (config.getConfigurationSection("commands") == null || !config.getConfigurationSection("commands").containsKey(msg))
             return false;

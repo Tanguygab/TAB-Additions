@@ -2,14 +2,12 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
-import me.neznamy.tab.shared.TAB;
 
 import java.util.*;
 
@@ -79,7 +77,7 @@ public class RFP {
         String suffix = "";
 
         Map<String,Object> config = configfile.getConfigurationSection("fakeplayers."+configname);
-        Map<String,Object> tabConfig = TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("Groups");
+        Map<String,Object> tabConfig = TABAdditions.getInstance().getTABConfigs().getConfig().getConfigurationSection("Groups");
 
         String configGroup = "";
         for (String g : tabConfig.keySet()) {
@@ -131,7 +129,7 @@ public class RFP {
     }
     public String getSortingTeam() {
         String groups = null;
-        for (String str : TAB.getInstance().getConfiguration().getConfig().getStringList("scoreboard-teams.sorting-types", new ArrayList<>())) {
+        for (String str : TABAdditions.getInstance().getTABConfigs().getConfig().getStringList("scoreboard-teams.sorting-types", new ArrayList<>())) {
             if (str.startsWith("GROUPS:")) {
                 groups = str.replace("GROUPS:","");
                 break;
@@ -168,7 +166,7 @@ public class RFP {
 
         for(int var7 = 0; var7 < var6; ++var7) {
             String group;
-            for(group = var5[var7]; group.startsWith(" "); group = group.substring(1)) {
+            for (group = var5[var7]; group.startsWith(" "); group = group.substring(1)) {
             }
 
             while(group.endsWith(" ")) {
@@ -185,7 +183,7 @@ public class RFP {
             String[] var10 = group.toLowerCase().split(" ");
             int var11 = var10.length;
 
-            for(int var12 = 0; var12 < var11; ++var12) {
+            for (int var12 = 0; var12 < var11; ++var12) {
                 String group0 = var10[var12];
                 sortedGroups.put(group0, sb.toString());
             }

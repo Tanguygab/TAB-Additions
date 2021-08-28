@@ -1,8 +1,8 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.team.TeamManager;
 
 public class TagsCmd {
@@ -19,7 +19,7 @@ public class TagsCmd {
             return;
         }
 
-        TabPlayer p = TabAPI.getInstance().getPlayer(args[2]);
+        TabPlayer p = instance.getPlayer(args[2]);
 
         if (p == null) {
             instance.sendMessage(name,"&cThis player isn't connected");

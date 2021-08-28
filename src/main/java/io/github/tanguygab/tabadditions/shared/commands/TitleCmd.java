@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
 
@@ -26,9 +25,9 @@ public class TitleCmd {
 
         TabPlayer p = null;
         if (args.length > 2)
-            p = TabAPI.getInstance().getPlayer(args[2]);
+            p = instance.getPlayer(args[2]);
         else if (!name.equals("~Console~"))
-            p = TabAPI.getInstance().getPlayer(name);
+            p = instance.getPlayer(name);
 
         if (p == null) {
             instance.sendMessage(name, "&cThis player isn't connected!");
