@@ -223,15 +223,18 @@ public class ChatManager extends TabFeature {
             catch (Exception ignored) {}
             String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
             if (itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.chat.item"))) {
-                txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
-                txt = txt.replace(itemOffHand, hoverclick+"{[item]||item:offhand}{");
+                if (!itemMainHand.equals(""))
+                    txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
+                if (!itemOffHand.equals(""))
+                    txt = txt.replace(itemOffHand, hoverclick+"{[item]||item:offhand}{");
             }
 
             if (emojiEnabled) txt = emojicheck(p,txt,hoverclick);
 
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
-                    txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p))+"{");
+                    if (!customInteractions.get(interaction).get("input").equals(""))
+                        txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p))+"{");
                 }
             }
             text = text.replace(txtold,txt);
@@ -285,7 +288,7 @@ public class ChatManager extends TabFeature {
     public String emojicheck(TabPlayer p, String msg, String hoverclick) {
         for (String emoji : emojis.keySet()) {
             int count = countMatches(msg,emoji);
-            if (count == 0) continue;
+            if (count == 0 || emoji.equals("")) continue;
             if (!p.hasPermission("tabadditions.chat.emoji."+emoji)) {
                 if (emojiUntranslate && msg.contains(emojis.get(emoji)))
                     msg = msg.replace(emojis.get(emoji), emoji);
@@ -307,8 +310,8 @@ public class ChatManager extends TabFeature {
         return msg;
     }
     public String pingcheck(TabPlayer p, String msg, TabPlayer viewer) {
-
         String input = TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,viewer);
+        if (input.equals("")) return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
             msg = (msg.replaceAll("(?i)" + input, TABAdditions.getInstance().parsePlaceholders(mentionOutput, p, viewer, viewer)));
             if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
