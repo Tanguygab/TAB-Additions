@@ -14,7 +14,6 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.chat.TextColor;
 import me.neznamy.tab.api.chat.rgb.RGBUtils;
 import me.neznamy.tab.api.config.ConfigurationFile;
-import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.TAB;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -22,7 +21,6 @@ import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -58,7 +56,6 @@ public class ChatManager extends TabFeature {
     public boolean emojiEnabled = true;
     public boolean emojiPermission = false;
     public boolean emojiUntranslate = false;
-    public boolean emojisCmd = true;
     public String emojiOutput = "";
     public Map<String,String> emojis = new HashMap<>();
 
@@ -119,7 +116,6 @@ public class ChatManager extends TabFeature {
 
         emojiEnabled = config.getBoolean("emojis.enabled",true);
         emojiPermission = config.getBoolean("emojis.permission",false);
-        emojisCmd = config.getBoolean("emojis./emojis",true);
         emojiOutput = config.getString("emojis.output","");
         emojiUntranslate = config.getBoolean("emojis.block-without-permission",false);
         emojis = config.getConfigurationSection("emojis.list");
@@ -147,8 +143,6 @@ public class ChatManager extends TabFeature {
         }
         if (cooldownTime != 0 && !p.hasPermission("tabadditions.chat.bypass.cooldown"))
             cooldown.put(p,LocalDateTime.now());
-
-        msg = emojicheck(p,msg);
 
         ChatFormat chatFormat = getFormat(p);
 
@@ -190,10 +184,10 @@ public class ChatManager extends TabFeature {
         text = EnumChatFormat.color(text);
         Matcher m = chatPartPattern.matcher(text);
         List<IChatBaseComponent> list = new ArrayList<>();
+        TextColor lastcolor = null;
         while (m.find()) {
 
-
-            String txt = m.group("text");
+            String txt = (lastcolor != null && !m.group("text").equals("[item]") ? "#"+lastcolor.getHexCode() : "") + m.group("text");
 
             String hover;
             try {hover = m.group("hover");}
@@ -203,14 +197,17 @@ public class ChatManager extends TabFeature {
             catch (Exception e) {click = null;}
 
             IChatBaseComponent comp = IChatBaseComponent.optimizedComponent(txt);
-            if (hover != null) comp = hovercheck(comp,hover,p,viewer);
+            if (hover != null) comp = hovercheck(comp,hover,p,viewer,lastcolor);
             if (click != null) clickcheck(comp,click);
+
+            lastcolor = getLastColor(comp);
+            p.sendMessage(lastcolor+" | "+(lastcolor == null ? "" : lastcolor.getHexCode()),false);
             list.add(comp);
         }
-        IChatBaseComponent comp = new IChatBaseComponent("");
+        IChatBaseComponent finalcomp = new IChatBaseComponent("");
 
-        comp.setExtra(list);
-        return comp;
+        finalcomp.setExtra(list);
+        return finalcomp;
     }
 
     public String textcheck(String text,TabPlayer p, TabPlayer viewer) {
@@ -230,6 +227,9 @@ public class ChatManager extends TabFeature {
                 txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
                 txt = txt.replace(itemOffHand, hoverclick+"{[item]||item:offhand}{");
             }
+
+            if (emojiEnabled) txt = emojicheck(p,txt,hoverclick);
+
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
                     txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p))+"{");
@@ -239,7 +239,7 @@ public class ChatManager extends TabFeature {
         }
         return text;
     }
-    public IChatBaseComponent hovercheck(IChatBaseComponent comp, String hover, TabPlayer p, TabPlayer viewer) {
+    public IChatBaseComponent hovercheck(IChatBaseComponent comp, String hover, TabPlayer p, TabPlayer viewer, TextColor lastcolor) {
         if (hover == null || hover.equals("")) return comp;
 
         if (hover.startsWith("material:")) {
@@ -262,8 +262,7 @@ public class ChatManager extends TabFeature {
             } else itemtxt = itemOutputAir;
 
             if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
-                TextColor color = getLastColor(comp);
-                comp = IChatBaseComponent.optimizedComponent((color == null ? "" : "#"+color.getHexCode())+ plinstance.parsePlaceholders(itemtxt,p,viewer,p));
+                comp = IChatBaseComponent.optimizedComponent((lastcolor == null ? "" : "#"+lastcolor.getHexCode())+ plinstance.parsePlaceholders(itemtxt,p,viewer,p));
             }
             comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
             return comp;
@@ -284,30 +283,26 @@ public class ChatManager extends TabFeature {
             comp.getModifier().onClick(ChatClickable.EnumClickAction.COPY_TO_CLIPBOARD,click.replace("copy:",""));
 
     }
-    public String emojicheck(TabPlayer p, String msg) {
+    public String emojicheck(TabPlayer p, String msg, String hoverclick) {
         for (String emoji : emojis.keySet()) {
             int count = countMatches(msg,emoji);
-
             if (count == 0) continue;
             if (!p.hasPermission("tabadditions.chat.emoji."+emoji)) {
                 if (emojiUntranslate && msg.contains(emojis.get(emoji)))
                     msg = msg.replace(emojis.get(emoji), emoji);
                 continue;
             }
-
             List<String> list = Arrays.asList(msg.split(Pattern.quote(emoji)));
             msg = "";
+            int counted = 0;
+            String output = hoverclick+removeSpaces(emojiOutput.replace("%emojiraw%",emoji).replace("%emoji%",emojis.get(emoji)))+"{";
             for (String part : list) {
-                if (list.indexOf(part)+1 == list.size() && count != 1)
+                if (list.indexOf(part)+1 == list.size() && counted == count)
                     msg += part;
-                else if (part.contains("&")) {
-                    int i = part.lastIndexOf("&");
-                    if (part.chars().toArray().length == i+2) return null;
-                    char c = part.charAt(i+1);
-                    EnumChatFormat color = EnumChatFormat.getByChar(c);
-                    msg += part + emojis.get(emoji).replace("%lastcolor%",color == null ? "&r" : ("#"+color.getHexCode()));
-                } else
-                    msg += part + emojis.get(emoji).replace("%lastcolor%","&r");
+                else {
+                    msg += part + output;
+                    counted++;
+                }
             }
         }
         return msg;
@@ -333,7 +328,8 @@ public class ChatManager extends TabFeature {
 
         if (str.equalsIgnoreCase("mainhand")) {
             try {return player.getInventory().getItemInMainHand();}
-            catch (Exception e) {return player.getInventory().getItemInHand();}
+            catch (Exception e) {//noinspection deprecation
+                return player.getInventory().getItemInHand();}
         }
         if (str.equalsIgnoreCase("offhand")) {
             try {return player.getInventory().getItemInOffHand();}
@@ -360,21 +356,24 @@ public class ChatManager extends TabFeature {
         return type2;
     }
     public TextColor getLastColor(IChatBaseComponent component) {
-        if (component.getExtra() == null) return component.getModifier().getColor();
-        List<IChatBaseComponent> list = new ArrayList<>(component.getExtra());
-        Collections.reverse(list);
-        for (IChatBaseComponent comp : list) {
-            if (comp.getModifier().getColor() != null)
-                return comp.getModifier().getColor();
+        if (component.getExtra() != null && !component.getExtra().isEmpty()) {
+            List<IChatBaseComponent> list = new ArrayList<>(component.getExtra());
+            Collections.reverse(list);
+            for (IChatBaseComponent comp : list) {
+                return getLastColor2(comp);
+            }
         }
-        if (component.getModifier().getColor() != null) return component.getModifier().getColor();
+        return getLastColor2(component);
+    }
+    public TextColor getLastColor2(IChatBaseComponent component) {
         if (component.getText().contains("\u00A7")) {
             int i = component.getText().lastIndexOf("\u00A7");
-            if (component.getText().chars().toArray().length == i+2) return null;
+            if (component.getText().chars().toArray().length == i+1) return null;
             char c = component.getText().charAt(i+1);
-            return new TextColor(EnumChatFormat.getByChar(c));
+            if (EnumChatFormat.getByChar(c) != null)
+                return new TextColor(EnumChatFormat.getByChar(c));
         }
-        return null;
+        return component.getModifier().getColor();
     }
 
     public boolean canSee(TabPlayer sender, TabPlayer viewer) {
