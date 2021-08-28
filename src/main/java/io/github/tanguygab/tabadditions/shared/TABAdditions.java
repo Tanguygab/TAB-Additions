@@ -11,13 +11,10 @@ import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.api.*;
 import me.neznamy.tab.api.chat.EnumChatFormat;
-import me.neznamy.tab.api.placeholder.Placeholder;
-import me.neznamy.tab.api.placeholder.RelationalPlaceholder;
-import me.neznamy.tab.shared.PropertyImpl;
+import me.neznamy.tab.shared.placeholders.Placeholder;
+import me.neznamy.tab.shared.placeholders.RelationalPlaceholder;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
-import me.neznamy.tab.api.placeholder.PlayerPlaceholder;
-import me.neznamy.tab.api.placeholder.ServerPlaceholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import me.neznamy.tab.shared.TAB;
 import org.bukkit.entity.Player;
@@ -188,57 +185,42 @@ public class TABAdditions {
         props.addAll(TAB.getInstance().getConfiguration().getConfig().getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines").keySet());
         PlaceholderManager pm = tab.getPlaceholderManager();
         for (Object prop : props) {
-            pm.registerPlayerPlaceholder(new PlayerPlaceholder("%prop-"+prop+"%", 100) {
-                @Override
-                public String get(TabPlayer p) {
+            pm.registerPlayerPlaceholder("%prop-"+prop+"%", 100,p->{
                     Property property = p.getProperty(prop+"");
                     if (property != null)
                         return property.updateAndGet();
                     return "";
-                }
             });
         }
-        pm.registerServerPlaceholder(new ServerPlaceholder("%onlinerfp%",1000) {
-            @Override
-            public String get() {
+        pm.registerServerPlaceholder("%onlinerfp%",1000,()->{
                 int count = tab.getOnlinePlayers().length;
                 if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
                     count = count+((RFPManager)tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size();
                 return count+"";
-            }
         });
-        pm.registerPlayerPlaceholder(new PlayerPlaceholder("%canseeonlinerfp%",1000) {
-            @Override
-            public String get(TabPlayer p) {
+        pm.registerPlayerPlaceholder("%canseeonlinerfp%",1000,p->{
                 int count = tab.getOnlinePlayers().length;
                 try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p));}
                 catch (NumberFormatException ignored) {}
                 if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
                     count = count + ((RFPManager) tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size();
                 return count+"";
-            }
         });
         String world = platform.getType() == PlatformType.SPIGOT ? "world" : "server";
-        pm.registerPlayerPlaceholder(new PlayerPlaceholder("%cansee"+world+"online%", 1000) {
-            @Override
-            public String get(TabPlayer p) {
+        pm.registerPlayerPlaceholder("%cansee"+world+"online%", 1000,p->{
                 int count = 0;
                 for (TabPlayer all : tab.getOnlinePlayers())
                     if (all.getWorld().equals(p.getWorld()) && ((Player) p.getPlayer()).canSee((Player) all.getPlayer()))
                         count++;
                 return count+"";
-            }
         });
-        pm.registerPlayerPlaceholder(new PlayerPlaceholder("%cansee"+world+"onlinerfp%",1000) {
-            @Override
-            public String get(TabPlayer p) {
+        pm.registerPlayerPlaceholder("%cansee"+world+"onlinerfp%",1000,p->{
                 int count = 0;
                 try {count = Integer.parseInt(parsePlaceholders("%cansee"+world+"online%",p));}
                 catch (NumberFormatException ignored) {}
                 if (tab.getFeatureManager().isFeatureEnabled("&aReal Fake Players&r"))
                     count = count + ((RFPManager) tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size();
                 return count+"";
-            }
         });
         platform.registerPlaceholders();
     }
@@ -265,7 +247,7 @@ public class TABAdditions {
     }
 
     public String getLastPlaceholderValue(String str, TabPlayer p, TabPlayer viewer) {
-        Placeholder pl = tab.getPlaceholderManager().getPlaceholder(str);
+        Placeholder pl = TAB.getInstance().getPlaceholderManager().getPlaceholder(str);
         if (pl instanceof RelationalPlaceholder) {
             if (p == null || viewer == null) return str;
             return ((RelationalPlaceholder) pl).getLastValue(p, viewer);
