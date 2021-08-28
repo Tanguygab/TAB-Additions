@@ -9,6 +9,10 @@ import net.md_5.bungee.api.plugin.TabExecutor;
 
 public class TabPlusCmds extends Command implements TabExecutor {
 
+    public TabPlusCmds(String name) {
+        super(name);
+    }
+
     public TabPlusCmds(String name, String permission, String... aliases) {
         super(name, permission, aliases);
     }
