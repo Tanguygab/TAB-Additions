@@ -26,6 +26,8 @@ public class ChatCmds {
     public boolean replyCmd;
     public Map<TabPlayer, TabPlayer> replies = new HashMap<>();
 
+    public boolean emojisCmd;
+
     public boolean clearChatCmd;
     public String clearChatLine;
     public int clearChatAmount;
@@ -39,6 +41,8 @@ public class ChatCmds {
         ignoreCmd = config.getBoolean("msg./ignore",true);
         togglemsgCmd = config.getBoolean("msg./togglemsg",true);
         replyCmd = config.getBoolean("msg./reply",true);
+
+        emojisCmd = config.getBoolean("emojis./emojis",true);
 
         clearChatCmd = config.getBoolean("clearchat.enabled",true);
         clearChatAmount = config.getInt("clearchat.amount",100);
@@ -61,6 +65,20 @@ public class ChatCmds {
         ConfigurationFile playerdata = getPlayerData();
         ConfigurationFile translation = TAB.getInstance().getConfiguration().getTranslation();
 
+        if (cm.emojiEnabled && cmd.equalsIgnoreCase("emojis")) {
+            String output = translation
+                    .getString("tab+_/emojis_header","&7All emojis you have access to (%amount%):")
+                    .replace("%amount%","0");
+            for (String emoji : cm.emojis.keySet()) {
+                if (p.hasPermission("tabadditions.chat.emoji."+emoji))
+                    output+="\n"+translation
+                        .getString("tab+_/emojis_emoji","&7%emojiraw%&8: &r%emoji%")
+                        .replace("%emojiraw%",emoji)
+                        .replace("%emoji%",cm.emojis.get(emoji));
+            }
+            p.sendMessage(output,true);
+            return;
+        }
         if (clearChatCmd && cmd.equalsIgnoreCase("clearchat") && p.hasPermission("tabadditions.chat.clearchat")) {
             String linebreaks = "";
             for (int i = 0; i < clearChatAmount; i++)
