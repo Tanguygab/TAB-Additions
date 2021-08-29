@@ -205,7 +205,6 @@ public class ChatManager extends TabFeature {
                 msg = msg.replace("&" + code, "");
         }
 
-        msg = pingcheck(p,msg,viewer);
         msg = new RGBUtils().applyFormats(msg, true);
 
         String format = removeSpaces(chatFormat);
@@ -262,6 +261,8 @@ public class ChatManager extends TabFeature {
             try {click = m.group("click");}
             catch (Exception ignored) {}
             String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
+
+            if (embedURLs) txt = urlcheck(p,txt,hoverclick);
             if (itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.chat.item"))) {
                 if (!itemMainHand.equals(""))
                     txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
@@ -269,8 +270,8 @@ public class ChatManager extends TabFeature {
                     txt = txt.replace(itemOffHand, hoverclick+"{[item]||item:offhand}{");
             }
 
+            if (mentionEnabled) txt = pingcheck(p,txt,viewer);
             if (emojiEnabled) txt = emojicheck(p,txt,hoverclick);
-            if (embedURLs) txt = urlcheck(p,txt,hoverclick);
 
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
@@ -330,7 +331,7 @@ public class ChatManager extends TabFeature {
         for (String emoji : emojis.keySet()) {
             int count = countMatches(msg,emoji);
             if (count == 0 || emoji.equals("")) continue;
-            if (!p.hasPermission("tabadditions.chat.emoji."+emoji)) {
+            if (!p.hasPermission("tabadditions.chat.emoji."+emoji) && !emojis.get(emoji).startsWith("custom|")) {
                 if (emojiUntranslate && msg.contains(emojis.get(emoji)))
                     msg = msg.replace(emojis.get(emoji), emoji);
                 continue;
@@ -338,7 +339,9 @@ public class ChatManager extends TabFeature {
             List<String> list = Arrays.asList(msg.split(Pattern.quote(emoji)));
             msg = "";
             int counted = 0;
-            String output = hoverclick+removeSpaces(emojiOutput.replace("%emojiraw%",emoji).replace("%emoji%",emojis.get(emoji)))+"{";
+            String output1 = emojis.get(emoji).startsWith("custom|") ? emojis.get(emoji).replaceFirst("custom\\|","")
+                    : emojiOutput.replace("%emojiraw%",emoji).replace("%emoji%",emojis.get(emoji));
+            String output = hoverclick+removeSpaces(output1)+"{";
             for (String part : list) {
                 if (list.indexOf(part)+1 == list.size() && counted == count)
                     msg += part;
