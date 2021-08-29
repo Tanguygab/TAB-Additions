@@ -28,6 +28,10 @@ public class ChatCmds {
 
     public boolean emojisEnabled;
 
+    public boolean socialspyEnabled;
+    public boolean spyMsgsEnabled;
+    public String spyMsgsOutput;
+
     public boolean clearchatEnabled;
     public String clearChatLine;
     public int clearChatAmount;
@@ -43,6 +47,10 @@ public class ChatCmds {
         replyEnabled = config.getBoolean("msg./reply",true);
 
         emojisEnabled = config.getBoolean("emojis./emojis",true);
+
+        socialspyEnabled = config.getBoolean("socialspy.enabled",true);
+        spyMsgsEnabled = config.getBoolean("socialspy.msgs.spy",true);
+        spyMsgsOutput = config.getString("socialspy.msgs.output","{SocialSpy-Msg: [6&l%prop-customchatname% &e➠ 6&l%viewer:prop-customchatname%] %msg%||%time%}");
 
         clearchatEnabled = config.getBoolean("clearchat.enabled",true);
         clearChatAmount = config.getInt("clearchat.amount",100);
@@ -83,6 +91,19 @@ public class ChatCmds {
                     + output,true);
             return;
         }
+
+        if (socialspyEnabled && cmd.equalsIgnoreCase("socialspy") && p.hasPermission("tabadditions.chat.socialspy")) {
+            if (cm.spies.contains(p)) {
+                cm.spies.remove(p);
+                p.sendMessage(translation.getString("tab+_chat_socialspy_off", "&cSocialSpy disabled."), true);
+            }
+            else {
+                cm.spies.add(p);
+                p.sendMessage(translation.getString("tab+_chat_socialspy_on", "&aSocialSpy enabled."), true);
+            }
+            return;
+        }
+
         if (clearchatEnabled && cmd.equalsIgnoreCase("clearchat") && p.hasPermission("tabadditions.chat.clearchat")) {
             String linebreaks = "";
             for (int i = 0; i < clearChatAmount; i++)
@@ -133,10 +154,10 @@ public class ChatCmds {
             case "msg": {
                 TabPlayer p2;
                 if (cmd.equals("r") || cmd.equals("reply"))
-                    p2 = replies.getOrDefault(p, null);
+                    p2 = replies.getOrDefault(p,null);
                 else {
                     String player = msg.split(" ")[0];
-                    msg = msg.replaceFirst(player+" ", "");
+                    msg = msg.replaceFirst(player+"( )?", "");
                     p2 = TABAdditions.getInstance().getPlayer(player);
                 }
 
@@ -148,11 +169,17 @@ public class ChatCmds {
                     p.sendMessage(translation.getString("tab+_has_pm_off", "&cThis player doesn't accept private messages"), true);
                 else if (!p.hasPermission("tabadditions.chat.bypass.ignore") && playerdata.getStringList("msg-ignore." + p2.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
                     p.sendMessage(translation.getString("tab+_ignores_you", "&cThis player ignores you"), true);
+                else if (msg.equals("") || msg.equals(" "))
+                    p.sendMessage(translation.getString("tab+_chat_pm_empty", "&7You have to provide a message!"), true);
                 else {
                     p.sendMessage(createmsg(p, msg, msgSender, p2));
                     p2.sendMessage(createmsg(p, msg, msgViewer, p2));
                     replies.put(p, p2);
                     replies.put(p2, p);
+                    if (spyMsgsEnabled) {
+                        List<TabPlayer> list = new ArrayList<>(cm.spies);
+                        for (TabPlayer spy : list) spy.sendMessage(createmsg(p, msg, spyMsgsOutput, p2));
+                    }
                     break;
                 }
             }

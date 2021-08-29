@@ -34,6 +34,7 @@ public final class TABAdditionsBungeeCord extends Plugin {
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("togglemsg"));
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("emojis"));
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("clearchat"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("socialspy"));
     }
 
     @Override

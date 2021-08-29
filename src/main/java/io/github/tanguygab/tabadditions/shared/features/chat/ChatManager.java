@@ -35,31 +35,43 @@ public class ChatManager extends TabFeature {
 
     private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^|]+)((\\|\\|(?<hover>[^|]+))(\\|\\|(?<click>[^|]+))?)?}");
 
-    public boolean itemEnabled = true;
-    public String itemMainHand = "[item]";
-    public String itemOffHand = "[offhand]";
-    public String itemOutput = "%item% x%amount%";
-    public String itemOutputSingle = "%item%";
-    public String itemOutputAir = "No Item";
-    public boolean itemPermssion = false;
+    public boolean itemEnabled;
+    public String itemMainHand;
+    public String itemOffHand;
+    public String itemOutput;
+    public String itemOutputSingle;
+    public String itemOutputAir ;
+    public boolean itemPermssion;
 
-    public boolean mentionEnabled = true;
-    public String mentionInput = "@%player%";
-    public String mentionOutput = "&b";
-    public String mentionSound = "BLOCK_NOTE_BLOCK_PLING";
+    public boolean mentionEnabled;
+    public String mentionInput;
+    public String mentionOutput;
+    public String mentionSound;
 
-    public Map<String,Map<String,Object>> customInteractions = new HashMap<>();
+    public Map<String,Map<String,Object>> customInteractions;
 
     public ChatCmds cmds;
 
-    public boolean emojiEnabled = true;
-    public boolean emojiPermission = false;
-    public boolean emojiUntranslate = false;
-    public String emojiOutput = "";
-    public Map<String,String> emojis = new HashMap<>();
+    public boolean emojiEnabled;
+    public boolean emojiPermission;
+    public boolean emojiUntranslate;
+    public String emojiOutput;
+    public Map<String,String> emojis;
 
-    public long cooldownTime = 0;
+    public boolean spySave;
+    public boolean spyChannelsEnabled;
+    public String spyChannelsOutput;
+    public boolean spyViewConditionsEnabled;
+    public String spyViewConditionsOutput;
+    public List<TabPlayer> spies = new ArrayList<>();
+
+    public long cooldownTime;
     public Map<TabPlayer,LocalDateTime> cooldown = new HashMap<>();
+
+    public boolean embedURLs;
+    public String urlsOutput;
+    public Pattern urlPattern = Pattern.compile("(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}( ?\\. ?| ?\\(?dot\\)? ?)[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)");
+    public Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}( ?\\. ?|\\(?dot\\)?)){3}[0-9]{1,3}");
 
     public ChatManager() {
         super("&aChat&r");
@@ -119,12 +131,34 @@ public class ChatManager extends TabFeature {
         emojiUntranslate = config.getBoolean("emojis.block-without-permission",false);
         emojis = config.getConfigurationSection("emojis.list");
 
+        spySave = config.getBoolean("socialspy.keep-after-reload",true);
+        if (cmds.socialspyEnabled && spySave) {
+            cmds.getPlayerData().getStringList("socialspy", new ArrayList<>()).forEach(p->spies.add(plinstance.getPlayer(p)));
+            cmds.getPlayerData().set("socialspy",null);
+        }
+        spyChannelsEnabled = config.getBoolean("socialspy.channels.spy",true);
+        spyChannelsOutput = config.getString("socialspy.channels.output","{SocialSpy-Channel: %prop-customchatname% &8» %msg%||Channel: %channel%\\n%time%}");
+        spyViewConditionsEnabled = config.getBoolean("socialspy.view-conditions.spy",true);
+        spyViewConditionsOutput = config.getString("socialspy.view-conditions.output","{SocialSpy-ViewCondition: %prop-customchatname% &8» %msg%||Condition: %condition%\\n%time%}");
+
         cooldownTime = Long.parseLong(config.getInt("message-cooldown",0)+"");
+
+        embedURLs = config.getBoolean("embed-urls.enabled",true);
+        urlsOutput = config.getString("embed-urls.output","{&8&l[&4Link&8&l]||&7URL: %url% \\n \\n&7Click to open||url:%url%}");
 
         for (TabPlayer p : tab.getOnlinePlayers()) {
             p.loadPropertyFromConfig(this,"chatprefix");
             p.loadPropertyFromConfig(this,"customchatname",p.getName());
             p.loadPropertyFromConfig(this,"chatsuffix");
+        }
+    }
+
+    @Override
+    public void unload() {
+        if (cmds.socialspyEnabled && spySave) {
+            List<String> list = new ArrayList<>();
+            spies.forEach(p -> list.add(p.getName()));
+            cmds.getPlayerData().set("socialspy", list);
         }
     }
 
@@ -149,7 +183,11 @@ public class ChatManager extends TabFeature {
 
         for (TabPlayer pl : tab.getOnlinePlayers()) {
             if (canSee(p,pl))
-                pl.sendMessage(createmsg(p,msg,chatFormat.getText(),pl));
+                pl.sendMessage(createmsg(p, msg, chatFormat.getText(), pl));
+            else if (isSpying(p,pl).equals("channel"))
+                pl.sendMessage(createmsg(p, msg, spyChannelsOutput,pl));
+            else if (isSpying(p,pl).equals("view-condition"))
+                pl.sendMessage(createmsg(p, msg, spyViewConditionsOutput,pl));
         }
         if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT && Bukkit.getServer().getPluginManager().isPluginEnabled("DiscordSRV"))
             if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true)) {
@@ -176,7 +214,10 @@ public class ChatManager extends TabFeature {
     }
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
-        text = plinstance.parsePlaceholders(text,p,viewer,p).replace("%msg%",msg);
+        text = plinstance.parsePlaceholders(text,p,viewer,p,this)
+                .replace("%msg%",msg)
+                .replace("%channel%",getFormat(p).getChannel())
+                .replace("%condition%",getFormat(p).getViewCondition());
         if (!text.startsWith("{")) text = "{"+text;
         if (!text.endsWith("}")) text = text+"}";
         text = textcheck(text,p,viewer);
@@ -229,11 +270,12 @@ public class ChatManager extends TabFeature {
             }
 
             if (emojiEnabled) txt = emojicheck(p,txt,hoverclick);
+            if (embedURLs) txt = urlcheck(p,txt,hoverclick);
 
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
                     if (!customInteractions.get(interaction).get("input").equals(""))
-                        txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p))+"{");
+                        txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p,this))+"{");
                 }
             }
             text = text.replace(txtold,txt);
@@ -263,12 +305,12 @@ public class ChatManager extends TabFeature {
             } else itemtxt = itemOutputAir;
 
             if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
-                comp = IChatBaseComponent.optimizedComponent((lastcolor == null ? "" : "#"+lastcolor.getHexCode())+ plinstance.parsePlaceholders(itemtxt,p,viewer,p));
+                comp = IChatBaseComponent.optimizedComponent((lastcolor == null ? "" : "#"+lastcolor.getHexCode())+ plinstance.parsePlaceholders(itemtxt,p,viewer,p,this));
             }
             comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
             return comp;
         }
-        comp.getModifier().onHoverShowText(IChatBaseComponent.optimizedComponent(plinstance.parsePlaceholders(hover,p,viewer,p)));
+        comp.getModifier().onHoverShowText(IChatBaseComponent.optimizedComponent(hover));
         return comp;
     }
     public void clickcheck(IChatBaseComponent comp, String click) {
@@ -279,7 +321,7 @@ public class ChatManager extends TabFeature {
         if (click.startsWith("suggest:"))
             comp.getModifier().onClickSuggestCommand(click.replace("suggest:",""));
         if (click.startsWith("url:"))
-            comp.getModifier().onClickOpenUrl(click.replace("url:","").replace(" ",""));
+            comp.getModifier().onClickOpenUrl(click.replace("url:","").trim());
         if (click.startsWith("copy:"))
             comp.getModifier().onClick(ChatClickable.EnumClickAction.COPY_TO_CLIPBOARD,click.replace("copy:",""));
 
@@ -308,11 +350,26 @@ public class ChatManager extends TabFeature {
         }
         return msg;
     }
+    public String urlcheck(TabPlayer p, String msg, String hoverclick) {
+        Matcher urlm = urlPattern.matcher(msg);
+        Matcher ipv4m = ipv4Pattern.matcher(msg);
+
+        while (urlm.find()) {
+            String url = urlm.group();
+            msg = msg.replace(url,hoverclick+removeSpaces(urlsOutput.replace("%url%",url))+"{");
+        }
+        while (ipv4m.find()) {
+            String ipv4 = ipv4m.group();
+            msg = msg.replace(ipv4,hoverclick+removeSpaces(urlsOutput.replace("%url%","http:"+ipv4))+"{");
+        }
+        return msg;
+    }
+
     public String pingcheck(TabPlayer p, String msg, TabPlayer viewer) {
-        String input = TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,viewer);
+        String input = TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,viewer,this);
         if (input.equals("")) return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
-            msg = (msg.replaceAll("(?i)" + input, TABAdditions.getInstance().parsePlaceholders(mentionOutput, p, viewer, viewer)));
+            msg = (msg.replaceAll("(?i)" + input, TABAdditions.getInstance().parsePlaceholders(mentionOutput, p, viewer, viewer,this)));
             if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
                 Player player = (Player) p.getPlayer();
                 try {player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);}
@@ -379,9 +436,14 @@ public class ChatManager extends TabFeature {
 
     public boolean canSee(TabPlayer sender, TabPlayer viewer) {
         if (sender == viewer) return true;
-        if (viewer != null && !getFormat(sender).getChannel().equals(getFormat(viewer).getChannel())) return false;
-        else if (viewer == null && !getFormat(sender).getChannel().equals("")) return false;
+        if (viewer == null) return getFormat(sender).getChannel().equals("");
+        if (!getFormat(sender).getChannel().equals(getFormat(viewer).getChannel())) return false;
         return getFormat(sender).isViewConditionMet(sender, viewer);
+    }
+    public String isSpying(TabPlayer sender, TabPlayer viewer) {
+        if (!getFormat(sender).getChannel().equals(getFormat(viewer).getChannel()) && spyChannelsEnabled && spies.contains(viewer)) return "channel";
+        if (!getFormat(sender).isViewConditionMet(sender, viewer) && spyViewConditionsEnabled && spies.contains(viewer)) return "view-condition";
+        return "";
     }
     public int countMatches(CharSequence str, CharSequence sub) {
         if (str != null &&  str.length() != 0 && sub != null && sub.length() != 0) {
