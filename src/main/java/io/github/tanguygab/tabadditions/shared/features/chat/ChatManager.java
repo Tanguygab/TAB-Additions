@@ -33,7 +33,7 @@ public class ChatManager extends TabFeature {
     private final Map<String,ChatFormat> formats = new HashMap<>();
     public final Map<TabPlayer,String> defformats = new HashMap<>();
 
-    private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^|]+)((\\|\\|(?<hover>[^|]+))(\\|\\|(?<click>[^|]+))?)?}");
+    private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^|]+)((\\|\\|(?<hover>[^|]+)?)(\\|\\|(?<click>[^|]+))?)?}");
 
     public boolean itemEnabled;
     public String itemMainHand;
@@ -229,21 +229,23 @@ public class ChatManager extends TabFeature {
     }
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
+        text = textcheck(text
+                .replace("%msg%",msg)
+                .replace("%channel%",getFormat(p).getChannel())
+                .replace("%condition%",getFormat(p).getViewCondition())
+                ,p,viewer);
         text = plinstance.parsePlaceholders(text,p,viewer,p,this)
                 .replace("%msg%",msg)
                 .replace("%channel%",getFormat(p).getChannel())
                 .replace("%condition%",getFormat(p).getViewCondition());
         if (!text.startsWith("{")) text = "{"+text;
         if (!text.endsWith("}")) text = text+"}";
-        text = textcheck(text,p,viewer);
         text = EnumChatFormat.color(text);
         Matcher m = chatPartPattern.matcher(text);
         List<IChatBaseComponent> list = new ArrayList<>();
         TextColor lastcolor = null;
         while (m.find()) {
-
             String txt = (lastcolor != null && !m.group("text").equals("[item]") ? "#"+lastcolor.getHexCode() : "") + m.group("text");
-
             String hover;
             try {hover = m.group("hover");}
             catch (Exception e) {hover = null;}
@@ -410,14 +412,11 @@ public class ChatManager extends TabFeature {
                     msg = msg.replace(word,output);
                 } else {
                     for (int pos : map.keySet()) {
-                        p.sendMessage(posjump+"",false);
-                        p.sendMessage(posjump+" | "+matcher.start()+" | "+matcher.end()+" | "+pos+" | "+map.get(pos).length(),false);
                         if (map.get(pos).length() > word.length() && pos <= matcher.start() && pos + map.get(pos).length() > matcher.start())
                             continue;
                         StringBuilder sb = new StringBuilder(msg);
                         sb = sb.replace(matcher.start()+posjump, matcher.end()+posjump, output);
                         msg = sb.toString();
-                        p.sendMessage(msg,false);
 
                         posjumps.put(word,posjump+output.length()-word.length());
                     }
