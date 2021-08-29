@@ -17,7 +17,7 @@ public class ActionBarCmd {
 
         if (name.equals("*")) {
             for (TabPlayer p : tab.getOnlinePlayers())
-                p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(instance.parsePlaceholders(actionbar,p)), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
+                p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(instance.parsePlaceholders(actionbar,p,feature)), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
             return;
         }
 
@@ -31,6 +31,6 @@ public class ActionBarCmd {
             instance.sendMessage(name,"&cThis player isn't connected");
             return;
         }
-        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(instance.parsePlaceholders(actionbar,p)), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
+        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(instance.parsePlaceholders(actionbar,p,feature)), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
     }
 }

@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import java.util.Map;
 
@@ -31,10 +32,14 @@ public class ChatFormat {
         if (!config.containsKey("channel")) return "";
         return config.get("channel")+"";
     }
+    public String getViewCondition() {
+        if (!config.containsKey("view-condition")) return "";
+        return config.get("view-condition")+"";
+    }
 
     public boolean isViewConditionMet(TabPlayer sender, TabPlayer viewer) {
         if (!config.containsKey("view-condition") || config.get("view-condition").equals("")) return true;
-        return TABAdditions.getInstance().isConditionMet(config.get("view-condition"),sender,viewer,viewer);
+        return TABAdditions.getInstance().isConditionMet(config.get("view-condition"),sender,viewer,viewer, TabAPI.getInstance().getFeatureManager().getFeature("&aChat&r"));
 
     }
 

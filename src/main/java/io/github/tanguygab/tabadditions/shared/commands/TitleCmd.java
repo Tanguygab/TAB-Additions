@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
 
@@ -10,6 +11,7 @@ public class TitleCmd {
     public TitleCmd(String name, String[] args, List<Object> properties) {
 
         TABAdditions instance = TABAdditions.getInstance();
+        TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aTitle&r");
 
         String title = properties.get(0)+"";
         String subtitle = properties.get(1)+"";
@@ -19,7 +21,7 @@ public class TitleCmd {
 
         if (name.equals("*")) {
             for (TabPlayer p : TabAPI.getInstance().getOnlinePlayers())
-                instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p), instance.parsePlaceholders(subtitle, p), fadeIn, stay, fadeOut);
+                instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p,feature), instance.parsePlaceholders(subtitle, p,feature), fadeIn, stay, fadeOut);
             return;
         }
 
@@ -33,7 +35,7 @@ public class TitleCmd {
             instance.sendMessage(name, "&cThis player isn't connected!");
             return;
         }
-        instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p), instance.parsePlaceholders(subtitle, p), fadeIn, stay, fadeOut);
+        instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p,feature), instance.parsePlaceholders(subtitle, p,feature), fadeIn, stay, fadeOut);
     }
 
 

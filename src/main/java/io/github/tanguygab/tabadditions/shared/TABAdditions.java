@@ -231,28 +231,30 @@ public class TABAdditions {
         platform.registerPlaceholders();
     }
 
-    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabPlayer def) {
+    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabPlayer def, TabFeature feature) {
         List<String> list = tab.getPlaceholderManager().detectPlaceholders(str);
         TabPlayer def2 = def == viewer ? sender : viewer;
         for (String pl : list) {
             if (pl.startsWith("%sender:") && sender != null) {
                 String pl2 = pl.replace("%sender:", "%");
-                str = str.replace(pl,getLastPlaceholderValue(pl2,sender,viewer));
+                str = str.replace(pl,getLastPlaceholderValue(pl2,sender,viewer,feature));
                 continue;
             }
             else if (pl.startsWith("%viewer:") && viewer != null) {
                 String pl2 = pl.replace("%viewer:", "%");
-                str = str.replace(pl,getLastPlaceholderValue(pl2,viewer,sender));
+                str = str.replace(pl,getLastPlaceholderValue(pl2,viewer,sender,feature));
                 continue;
             }
-            str = str.replace(pl,getLastPlaceholderValue(pl,def,def2));
+            str = str.replace(pl,getLastPlaceholderValue(pl,def,def2,feature));
         }
 
 
         return str;
     }
 
-    public String getLastPlaceholderValue(String str, TabPlayer p, TabPlayer viewer) {
+    public String getLastPlaceholderValue(String str, TabPlayer p, TabPlayer viewer, TabFeature feature) {
+        if (feature != null)
+            tab.getPlaceholderManager().addUsedPlaceholder(str,feature);
         Placeholder pl = TAB.getInstance().getPlaceholderManager().getPlaceholder(str);
         if (pl instanceof RelationalPlaceholder) {
             if (p == null || viewer == null) return str;
@@ -262,11 +264,15 @@ public class TABAdditions {
     }
 
     public String parsePlaceholders(String str, TabPlayer p) {
+        return parsePlaceholders(str,p,null);
+    }
+
+    public String parsePlaceholders(String str, TabPlayer p, TabFeature feature) {
         if (str == null) return "";
         //if (p == null) return str;
         if (!str.contains("%")) return EnumChatFormat.color(str);
         for (String pl : tab.getPlaceholderManager().detectPlaceholders(str))
-            str = str.replace(pl,getLastPlaceholderValue(pl,p,null));
+            str = str.replace(pl,getLastPlaceholderValue(pl,p,null,feature));
         return str;
     }
 
@@ -286,9 +292,9 @@ public class TABAdditions {
         return true;
     }
 
-    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, TabPlayer conditionPlayer) {
+    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, TabPlayer conditionPlayer, TabFeature feature) {
         if (sender == null || viewer == null) return false;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,conditionPlayer);
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,conditionPlayer,feature);
         for (String cond : conditionname.split(";")) {
             if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
                 try {
