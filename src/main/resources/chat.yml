@@ -175,7 +175,7 @@ embed-urls:
 char-filter:
   enabled: true
   char-replacement: "*"
-  ouput: "{
+  output: "{
   %replacement%
   ||
   Someone used a bad word!
