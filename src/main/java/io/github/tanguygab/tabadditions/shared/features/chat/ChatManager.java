@@ -229,17 +229,13 @@ public class ChatManager extends TabFeature {
     }
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
-        text = textcheck(text
-                .replace("%msg%",msg)
-                .replace("%channel%",getFormat(p).getChannel())
-                .replace("%condition%",getFormat(p).getViewCondition())
-                ,p,viewer);
         text = plinstance.parsePlaceholders(text,p,viewer,p,this)
                 .replace("%msg%",msg)
                 .replace("%channel%",getFormat(p).getChannel())
                 .replace("%condition%",getFormat(p).getViewCondition());
         if (!text.startsWith("{")) text = "{"+text;
         if (!text.endsWith("}")) text = text+"}";
+        text = textcheck(text,p,viewer);
         text = EnumChatFormat.color(text);
         Matcher m = chatPartPattern.matcher(text);
         List<IChatBaseComponent> list = new ArrayList<>();
