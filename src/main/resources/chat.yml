@@ -174,7 +174,8 @@ embed-urls:
   ||url:%url%  }"
 char-filter:
   enabled: true
-  char-replacement: "*"
+  char-replacement: '*'
+  fake-length: 0
   output: "{
   %replacement%
   ||
@@ -185,9 +186,9 @@ char-filter:
   suggest:%word%
   }"
   filter:
-    - "shit(s)?"
-    - "fuck"
-    - "bitch"
-    - "ass(hole)?"
+    - shit(s)?
+    - fuck(er(s)?)?
+    - bitch(es)?
+    - ass(hole|es)?
   exempt:
-    - "bypass"
+    - bypass

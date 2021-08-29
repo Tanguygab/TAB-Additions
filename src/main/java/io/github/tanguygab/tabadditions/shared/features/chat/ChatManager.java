@@ -73,6 +73,13 @@ public class ChatManager extends TabFeature {
     public Pattern urlPattern = Pattern.compile("(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}( ?\\. ?| ?\\(?dot\\)? ?)[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)");
     public Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}( ?\\. ?|\\(?dot\\)?)){3}[0-9]{1,3}");
 
+    public boolean filterEnabled;
+    public String filterChar;
+    public int filterFakeLength;
+    public String filterOutput;
+    public List<Pattern> filterPatterns = new ArrayList<>();
+    public List<String> filterExempt;
+
     public ChatManager() {
         super("&aChat&r");
         tab = TabAPI.getInstance();
@@ -97,7 +104,7 @@ public class ChatManager extends TabFeature {
     public ChatFormat defFormat() {
         Map<String,String> map = new HashMap<>();
 
-        map.put("text","{%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%&7\u00bb &r%msg%}");
+        map.put("text","{%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%&7\u00bb &r%msg%||%time%}");
         return new ChatFormat("default", map);
     }
 
@@ -137,14 +144,23 @@ public class ChatManager extends TabFeature {
             cmds.getPlayerData().set("socialspy",null);
         }
         spyChannelsEnabled = config.getBoolean("socialspy.channels.spy",true);
-        spyChannelsOutput = config.getString("socialspy.channels.output","{SocialSpy-Channel: %prop-customchatname% &8» %msg%||Channel: %channel%\\n%time%}");
+        spyChannelsOutput = config.getString("socialspy.channels.output","{SocialSpy-Channel: %prop-customchatname% &8» %msg%||Channel: %channel%\n%time%}");
         spyViewConditionsEnabled = config.getBoolean("socialspy.view-conditions.spy",true);
-        spyViewConditionsOutput = config.getString("socialspy.view-conditions.output","{SocialSpy-ViewCondition: %prop-customchatname% &8» %msg%||Condition: %condition%\\n%time%}");
+        spyViewConditionsOutput = config.getString("socialspy.view-conditions.output","{SocialSpy-ViewCondition: %prop-customchatname% &8» %msg%||Condition: %condition%\n%time%}");
 
         cooldownTime = Long.parseLong(config.getInt("message-cooldown",0)+"");
 
         embedURLs = config.getBoolean("embed-urls.enabled",true);
-        urlsOutput = config.getString("embed-urls.output","{&8&l[&4Link&8&l]||&7URL: %url% \\n \\n&7Click to open||url:%url%}");
+        urlsOutput = config.getString("embed-urls.output","{&8&l[&4Link&8&l]||&7URL: %url%\n\n&7Click to open||url:%url%}");
+
+        filterEnabled = config.getBoolean("char-filter.enabled",true);
+        filterChar = config.getString("char-filter.char-replacement","*");
+        filterFakeLength = config.getInt("char-filter.fake-length",0);
+        filterOutput = config.getString("char-filter.output","{%replacement%||Someone used a bad word!\n\nClick to see it anyways||suggest:%word%}");
+        config.getStringList("char-filter.filter").forEach(filter->filterPatterns.add(Pattern.compile(filter)));
+        filterExempt = config.getStringList("char-filter.exempt", new ArrayList<>());
+
+
 
         for (TabPlayer p : tab.getOnlinePlayers()) {
             p.loadPropertyFromConfig(this,"chatprefix");
@@ -263,6 +279,7 @@ public class ChatManager extends TabFeature {
             String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
 
             if (embedURLs) txt = urlcheck(txt,hoverclick);
+            if (filterEnabled) txt = filtercheck(p,txt,hoverclick);
             if (itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.chat.item"))) {
                 if (!itemMainHand.equals(""))
                     txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
@@ -364,6 +381,48 @@ public class ChatManager extends TabFeature {
         while (ipv4m.find()) {
             String ipv4 = ipv4m.group();
             msg = msg.replace(ipv4,hoverclick+removeSpaces(urlsOutput.replace("%url%","http:"+ipv4))+"{");
+        }
+        return msg;
+    }
+    public String filtercheck(TabPlayer p,String msg, String hoverclick) {
+        if (p.hasPermission("tabadditions.chat.bypass.filter")) return msg;
+        for (Pattern pattern : filterPatterns) {
+            Matcher matcher = pattern.matcher(msg);
+            Map<Integer, String> map = new HashMap<>();
+            for (String bypass : filterExempt) {
+                if (!msg.contains(bypass)) continue;
+                Matcher m = Pattern.compile(bypass).matcher(msg);
+                while (m.find()) {
+                    map.put(m.start(), bypass);
+                }
+            }
+            Map<String, Integer> posjumps = new HashMap<>();
+            while (matcher.find()) {
+                String word = matcher.group();
+                String wordreplaced = "";
+                int i = filterFakeLength < 1 ? word.length() : filterFakeLength;
+                for (int j = 0; j < i; j++)
+                    wordreplaced+=filterChar;
+                int posjump = posjumps.getOrDefault(word,0);
+                String output = hoverclick+removeSpaces(filterOutput.replace("%word%",word).replace("%replacement%",wordreplaced))+"{";
+
+                if (map.isEmpty()) {
+                    msg = msg.replace(word,output);
+                } else {
+                    for (int pos : map.keySet()) {
+                        p.sendMessage(posjump+"",false);
+                        p.sendMessage(posjump+" | "+matcher.start()+" | "+matcher.end()+" | "+pos+" | "+map.get(pos).length(),false);
+                        if (map.get(pos).length() > word.length() && pos <= matcher.start() && pos + map.get(pos).length() > matcher.start())
+                            continue;
+                        StringBuilder sb = new StringBuilder(msg);
+                        sb = sb.replace(matcher.start()+posjump, matcher.end()+posjump, output);
+                        msg = sb.toString();
+                        p.sendMessage(msg,false);
+
+                        posjumps.put(word,posjump+output.length()-word.length());
+                    }
+                }
+            }
         }
         return msg;
     }
