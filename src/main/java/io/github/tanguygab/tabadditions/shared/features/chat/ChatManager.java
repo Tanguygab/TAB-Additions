@@ -262,7 +262,7 @@ public class ChatManager extends TabFeature {
             catch (Exception ignored) {}
             String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
 
-            if (embedURLs) txt = urlcheck(p,txt,hoverclick);
+            if (embedURLs) txt = urlcheck(txt,hoverclick);
             if (itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.chat.item"))) {
                 if (!itemMainHand.equals(""))
                     txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
@@ -270,7 +270,7 @@ public class ChatManager extends TabFeature {
                     txt = txt.replace(itemOffHand, hoverclick+"{[item]||item:offhand}{");
             }
 
-            if (mentionEnabled) txt = pingcheck(p,txt,viewer);
+            if (mentionEnabled) txt = pingcheck(p,txt,viewer,hoverclick);
             if (emojiEnabled) txt = emojicheck(p,txt,hoverclick);
 
             for (String interaction : customInteractions.keySet()) {
@@ -353,7 +353,7 @@ public class ChatManager extends TabFeature {
         }
         return msg;
     }
-    public String urlcheck(TabPlayer p, String msg, String hoverclick) {
+    public String urlcheck(String msg, String hoverclick) {
         Matcher urlm = urlPattern.matcher(msg);
         Matcher ipv4m = ipv4Pattern.matcher(msg);
 
@@ -368,12 +368,13 @@ public class ChatManager extends TabFeature {
         return msg;
     }
 
-    public String pingcheck(TabPlayer p, String msg, TabPlayer viewer) {
-        String input = TABAdditions.getInstance().parsePlaceholders(mentionInput,p,viewer,viewer,this);
+    public String pingcheck(TabPlayer p, String msg, TabPlayer viewer, String hoverclick) {
+        String input = plinstance.parsePlaceholders(mentionInput,p,viewer,viewer,this);
         if (input.equals("")) return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
-            msg = (msg.replaceAll("(?i)" + input, TABAdditions.getInstance().parsePlaceholders(mentionOutput, p, viewer, viewer,this)));
-            if (TABAdditions.getInstance().getPlatform().getType().equals(PlatformType.SPIGOT)) {
+            msg = msg.replaceAll("(?i)"+input, hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{");
+
+            if (plinstance.getPlatform().getType().equals(PlatformType.SPIGOT)) {
                 Player player = (Player) p.getPlayer();
                 try {player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);}
                 catch (Exception ignored) {}
