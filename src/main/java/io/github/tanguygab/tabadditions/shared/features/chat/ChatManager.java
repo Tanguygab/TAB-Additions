@@ -63,7 +63,7 @@ public class ChatManager extends TabFeature {
     public String spyChannelsOutput;
     public boolean spyViewConditionsEnabled;
     public String spyViewConditionsOutput;
-    public List<TabPlayer> spies = new ArrayList<>();
+    public List<String> spies = new ArrayList<>();
 
     public long cooldownTime;
     public Map<TabPlayer,LocalDateTime> cooldown = new HashMap<>();
@@ -140,7 +140,7 @@ public class ChatManager extends TabFeature {
 
         spySave = config.getBoolean("socialspy.keep-after-reload",true);
         if (cmds.socialspyEnabled && spySave) {
-            cmds.getPlayerData().getStringList("socialspy", new ArrayList<>()).forEach(p->spies.add(plinstance.getPlayer(p)));
+            spies.addAll(cmds.getPlayerData().getStringList("socialspy", new ArrayList<>()));
             cmds.getPlayerData().set("socialspy",null);
         }
         spyChannelsEnabled = config.getBoolean("socialspy.channels.spy",true);
@@ -171,11 +171,8 @@ public class ChatManager extends TabFeature {
 
     @Override
     public void unload() {
-        if (cmds.socialspyEnabled && spySave) {
-            List<String> list = new ArrayList<>();
-            spies.forEach(p -> list.add(p.getName()));
-            cmds.getPlayerData().set("socialspy", list);
-        }
+        if (cmds.socialspyEnabled && spySave)
+            cmds.getPlayerData().set("socialspy", spies);
     }
 
     public void onChat(TabPlayer p, String msg) {
@@ -499,8 +496,8 @@ public class ChatManager extends TabFeature {
         return getFormat(sender).isViewConditionMet(sender, viewer);
     }
     public String isSpying(TabPlayer sender, TabPlayer viewer) {
-        if (!getFormat(sender).getChannel().equals(getFormat(viewer).getChannel()) && spyChannelsEnabled && spies.contains(viewer)) return "channel";
-        if (!getFormat(sender).isViewConditionMet(sender, viewer) && spyViewConditionsEnabled && spies.contains(viewer)) return "view-condition";
+        if (!getFormat(sender).getChannel().equals(getFormat(viewer).getChannel()) && spyChannelsEnabled && spies.contains(viewer.getName().toLowerCase())) return "channel";
+        if (!getFormat(sender).isViewConditionMet(sender, viewer) && spyViewConditionsEnabled && spies.contains(viewer.getName().toLowerCase())) return "view-condition";
         return "";
     }
     public int countMatches(CharSequence str, CharSequence sub) {

@@ -93,12 +93,12 @@ public class ChatCmds {
         }
 
         if (socialspyEnabled && cmd.equalsIgnoreCase("socialspy") && p.hasPermission("tabadditions.chat.socialspy")) {
-            if (cm.spies.contains(p)) {
-                cm.spies.remove(p);
+            if (cm.spies.contains(p.getName().toLowerCase())) {
+                cm.spies.remove(p.getName().toLowerCase());
                 p.sendMessage(translation.getString("tab+_chat_socialspy_off", "&cSocialSpy disabled."), true);
             }
             else {
-                cm.spies.add(p);
+                cm.spies.add(p.getName().toLowerCase());
                 p.sendMessage(translation.getString("tab+_chat_socialspy_on", "&aSocialSpy enabled."), true);
             }
             return;
@@ -177,8 +177,12 @@ public class ChatCmds {
                     replies.put(p, p2);
                     replies.put(p2, p);
                     if (spyMsgsEnabled) {
-                        List<TabPlayer> list = new ArrayList<>(cm.spies);
-                        for (TabPlayer spy : list) spy.sendMessage(createmsg(p, msg, spyMsgsOutput, p2));
+                        List<String> list = new ArrayList<>(cm.spies);
+                        for (String spy : list) {
+                            TabPlayer tabspy = TABAdditions.getInstance().getPlayer(spy);
+                            if (tabspy != null)
+                                tabspy.sendMessage(createmsg(p, msg, spyMsgsOutput, p2));
+                        }
                     }
                     break;
                 }
