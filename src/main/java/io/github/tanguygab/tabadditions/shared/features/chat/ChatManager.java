@@ -228,12 +228,11 @@ public class ChatManager extends TabFeature {
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
         msg = msg.replace("|","┃");
         text = plinstance.parsePlaceholders(text,p,viewer,p,this)
-                .replace("%msg%",msg)
                 .replace("%channel%",getFormat(p).getChannel())
                 .replace("%condition%",getFormat(p).getViewCondition());
         if (!text.startsWith("{")) text = "{"+text;
         if (!text.endsWith("}")) text = text+"}";
-        text = textcheck(text,p,viewer);
+        text = textcheck(text,p,viewer,msg);
         text = EnumChatFormat.color(text);
         Matcher m = chatPartPattern.matcher(text);
         List<IChatBaseComponent> list = new ArrayList<>();
@@ -279,7 +278,7 @@ public class ChatManager extends TabFeature {
         return finalcomp;
     }
 
-    public String textcheck(String text,TabPlayer p, TabPlayer viewer) {
+    public String textcheck(String text,TabPlayer p, TabPlayer viewer, String msg) {
         Matcher m = chatPartPattern.matcher(text);
 
         while (m.find()) {
@@ -292,6 +291,11 @@ public class ChatManager extends TabFeature {
             try {click = m.group("click");}
             catch (Exception ignored) {}
             String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
+            txt = txt.replace("%msg%",msg);
+
+            if (mentionEnabled) {
+                txt = pingcheck(p,txt,viewer,hoverclick);
+            }
 
             if (embedURLs) txt = urlcheck(txt,hoverclick);
             if (filterEnabled) txt = filtercheck(p,txt,hoverclick);
@@ -302,7 +306,6 @@ public class ChatManager extends TabFeature {
                     txt = txt.replace(itemOffHand, hoverclick+"{[item]||item:offhand}{");
             }
 
-            if (mentionEnabled) txt = pingcheck(p,txt,viewer,hoverclick);
             if (emojiEnabled) txt = emojicheck(p,txt,hoverclick);
 
             for (String interaction : customInteractions.keySet()) {
@@ -444,8 +447,7 @@ public class ChatManager extends TabFeature {
         String input = plinstance.parsePlaceholders(mentionInput,p,viewer,viewer,this);
         if (input.equals("")) return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
-            msg = msg.replaceAll("(?i)"+input, hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{");
-
+            msg = msg.replaceAll("(?i)"+Pattern.quote(input), hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{");
             if (plinstance.getPlatform().getType().equals(PlatformType.SPIGOT)) {
                 Player player = (Player) viewer.getPlayer();
                 try {player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);}
