@@ -238,9 +238,11 @@ public class ChatManager extends TabFeature {
         Matcher m = chatPartPattern.matcher(text);
         List<IChatBaseComponent> list = new ArrayList<>();
         TextColor lastcolor = null;
+        String lastMagic = "";
         while (m.find()) {
-            String color = lastcolor != null ? "#"+lastcolor.getHexCode() : "";
+            String color =  (lastcolor != null ? "#"+lastcolor.getHexCode() : "")+lastMagic;
             String txt = (!m.group("text").equals("[item]") ? color : "") + m.group("text");
+            txt = txt.replace("%lastcolor%",color);
             String hover;
             try {hover = m.group("hover");}
             catch (Exception e) {hover = null;}
@@ -249,8 +251,24 @@ public class ChatManager extends TabFeature {
             catch (Exception e) {click = null;}
 
             IChatBaseComponent comp = IChatBaseComponent.optimizedComponent(txt);
+
             if (hover != null) comp = hovercheck(comp,hover,p,viewer,lastcolor);
             if (click != null) clickcheck(comp,click);
+
+
+            if ("KkLlMmNnOoRrXxRr".contains(comp.toLegacyText().charAt(comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1)+"")) {
+                List<Character> chars = new ArrayList<>();
+                for (char c : txt.toCharArray())
+                    chars.add(c);
+                Collections.reverse(chars);
+
+                for (int i = 0; i < chars.size() - 1; ++i) {
+                    if (chars.get(i) == EnumChatFormat.COLOR_CHAR && "KkLlMmNnOoRrXxRr".indexOf(chars.get(i - 1)) > -1) {
+                        lastMagic = EnumChatFormat.COLOR_STRING + Character.toLowerCase(chars.get(i - 1));
+                        break;
+                    }
+                }
+            }
 
             lastcolor = getLastColor(comp);
             list.add(comp);
@@ -484,10 +502,20 @@ public class ChatManager extends TabFeature {
     public TextColor getLastColor2(IChatBaseComponent component) {
         if (component.getText().contains("\u00A7")) {
             int i = component.getText().lastIndexOf("\u00A7");
-            if (component.getText().chars().toArray().length == i+1) return null;
+            if (component.getText().toCharArray().length == i+1) return null;
             char c = component.getText().charAt(i+1);
-            if (EnumChatFormat.getByChar(c) != null)
+            if (EnumChatFormat.getByChar(c) != null && EnumChatFormat.getByChar(c).getHexCode() != null)
                 return new TextColor(EnumChatFormat.getByChar(c));
+            if ("KkLlMmNnOoRrXxRr".contains(c+"")) {
+                StringBuilder sb = new StringBuilder(component.getText());
+                sb.setCharAt(sb.lastIndexOf("\u00A7"),' ');
+                int i2 = sb.lastIndexOf("\u00A7");
+                if (sb.toString().toCharArray().length == i2+1) return null;
+                char c2 = sb.charAt(i2+1);
+                if (EnumChatFormat.getByChar(c) != null && EnumChatFormat.getByChar(c).getHexCode() != null)
+                    return new TextColor(EnumChatFormat.getByChar(c2));
+
+            }
         }
         return component.getModifier().getColor();
     }
