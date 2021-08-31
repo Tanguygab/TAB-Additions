@@ -226,7 +226,7 @@ public class ChatManager extends TabFeature {
     }
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
-        msg = msg.replace("|","┃");
+        msg = msg.replace("|","\u2503");
         text = plinstance.parsePlaceholders(text,p,viewer,p,this)
                 .replace("%channel%",getFormat(p).getChannel())
                 .replace("%condition%",getFormat(p).getViewCondition());
