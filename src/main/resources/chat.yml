@@ -100,7 +100,7 @@ emojis:
   output: '{
   %emoji%
   ||
-  %emoji% &7%emojiraw% &d/emojis
+  %emoji%%lastcolor% &7%emojiraw% &d/emojis
   ||
   command:/emojis
   }'

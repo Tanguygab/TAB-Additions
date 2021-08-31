@@ -226,6 +226,7 @@ public class ChatManager extends TabFeature {
     }
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
+        msg = msg.replace("|","┃");
         text = plinstance.parsePlaceholders(text,p,viewer,p,this)
                 .replace("%msg%",msg)
                 .replace("%channel%",getFormat(p).getChannel())
@@ -238,7 +239,8 @@ public class ChatManager extends TabFeature {
         List<IChatBaseComponent> list = new ArrayList<>();
         TextColor lastcolor = null;
         while (m.find()) {
-            String txt = (lastcolor != null && !m.group("text").equals("[item]") ? "#"+lastcolor.getHexCode() : "") + m.group("text");
+            String color = lastcolor != null ? "#"+lastcolor.getHexCode() : "";
+            String txt = (!m.group("text").equals("[item]") ? color : "") + m.group("text");
             String hover;
             try {hover = m.group("hover");}
             catch (Exception e) {hover = null;}
@@ -318,7 +320,8 @@ public class ChatManager extends TabFeature {
             } else itemtxt = itemOutputAir;
 
             if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
-                comp = IChatBaseComponent.optimizedComponent((lastcolor == null ? "" : "#"+lastcolor.getHexCode())+ plinstance.parsePlaceholders(itemtxt,p,viewer,p,this));
+                String color = lastcolor == null ? "" : "#"+lastcolor.getHexCode();
+                comp = IChatBaseComponent.optimizedComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p,this)+color);
             }
             comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
             return comp;
