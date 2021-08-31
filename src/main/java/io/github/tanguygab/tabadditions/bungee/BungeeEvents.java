@@ -10,7 +10,6 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.platforms.bungeecord.event.TabLoadEvent;
 import me.neznamy.tab.api.Property;
-import me.neznamy.tab.shared.TAB;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
@@ -68,8 +67,7 @@ public class BungeeEvents implements Listener {
                     break;
                 case "replace":
                     String output = TABAdditions.getInstance().parsePlaceholders(value,p);
-                    Map<Object, String> replacements = TABAdditions.getInstance().getTABConfigs().getConfig().getConfigurationSection("placeholder-output-replacements." + value);
-                    result =  TAB.getInstance().getPlaceholderManager().findReplacement(replacements, output).replace("%value%", output);
+                    result =  tab.getPlaceholderManager().findReplacement(value, output).replace("%value%", output);
                     break;
                 case "placeholder":
                     value = in.readUTF();

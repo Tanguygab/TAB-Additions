@@ -140,8 +140,8 @@ public class ChatManager extends TabFeature {
 
         spySave = config.getBoolean("socialspy.keep-after-reload",true);
         if (cmds.socialspyEnabled && spySave) {
-            spies.addAll(cmds.getPlayerData().getStringList("socialspy", new ArrayList<>()));
-            cmds.getPlayerData().set("socialspy",null);
+            spies.addAll(tab.getPlayerCache().getStringList("socialspy", new ArrayList<>()));
+            tab.getPlayerCache().set("socialspy",null);
         }
         spyChannelsEnabled = config.getBoolean("socialspy.channels.spy",true);
         spyChannelsOutput = config.getString("socialspy.channels.output","{SocialSpy-Channel: %prop-customchatname% &8» %msg%||Channel: %channel%\n%time%}");
@@ -172,7 +172,7 @@ public class ChatManager extends TabFeature {
     @Override
     public void unload() {
         if (cmds.socialspyEnabled && spySave)
-            cmds.getPlayerData().set("socialspy", spies);
+            tab.getPlayerCache().set("socialspy", spies);
     }
 
     public void onChat(TabPlayer p, String msg) {
@@ -180,7 +180,7 @@ public class ChatManager extends TabFeature {
         if (cooldown.containsKey(p)) {
             long time = ChronoUnit.SECONDS.between(cooldown.get(p),LocalDateTime.now());
             if (time < cooldownTime) {
-                p.sendMessage(TABAdditions.getInstance().getTABConfigs().getTranslation()
+                p.sendMessage(plinstance.getTranslation()
                         .getString("tab+_message_cooldown", "&cYou have to wait %seconds% more seconds!")
                         .replace("%seconds%", cooldownTime-time+""), true);
                 return;
@@ -202,8 +202,8 @@ public class ChatManager extends TabFeature {
             else if (isSpying(p,pl).equals("view-condition"))
                 pl.sendMessage(createmsg(p, msg, spyViewConditionsOutput,pl));
         }
-        if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT && Bukkit.getServer().getPluginManager().isPluginEnabled("DiscordSRV"))
-            if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true)) {
+        if (plinstance.getPlatform().getType() == PlatformType.SPIGOT && Bukkit.getServer().getPluginManager().isPluginEnabled("DiscordSRV"))
+            if (plinstance.getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true)) {
                 DiscordSRV discord = DiscordSRV.getPlugin();
                 if (canSee(p, null))
                     discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()), msg, discord.getMainChatChannel(), false);
@@ -447,7 +447,7 @@ public class ChatManager extends TabFeature {
             msg = msg.replaceAll("(?i)"+input, hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{");
 
             if (plinstance.getPlatform().getType().equals(PlatformType.SPIGOT)) {
-                Player player = (Player) p.getPlayer();
+                Player player = (Player) viewer.getPlayer();
                 try {player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);}
                 catch (Exception ignored) {}
             }
@@ -554,7 +554,7 @@ public class ChatManager extends TabFeature {
     public boolean onCommand(TabPlayer p, String msg) {
         msg = msg.replaceFirst("/","");
         ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
-        ConfigurationFile translation = TABAdditions.getInstance().getTABConfigs().getTranslation();
+        ConfigurationFile translation = plinstance.getTranslation();
 
         if (config.getConfigurationSection("commands") == null || !config.getConfigurationSection("commands").containsKey(msg))
             return false;

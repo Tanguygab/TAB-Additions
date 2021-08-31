@@ -44,7 +44,7 @@ public class RealFakePlayerCmd {
         } else {
             RFP rfp = rfpm.getRFP(name);
             if (args[1].equalsIgnoreCase("info"))
-                output = rfp.getInfo();
+                output = rfp.getInfo(TabAPI.getInstance().getPlayer(nameS));
 
             else if (args[1].equalsIgnoreCase("edit")) {
                 String prop = args[3];

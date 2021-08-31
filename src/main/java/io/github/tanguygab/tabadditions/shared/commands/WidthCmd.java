@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 
@@ -56,7 +57,7 @@ public class WidthCmd {
                 int c = Integer.parseInt(args[2]);
                 try {
                     int i = Integer.parseInt(args[3]);
-                    ConfigurationFile cfg = instance.getTABConfigs().getConfig();
+                    ConfigurationFile cfg = TabAPI.getInstance().getConfig();
                     Map<Integer,Integer> map = cfg.getConfigurationSection("tablist-name-formatting.character-width-overrides");
                     map.put(c,i);
                     cfg.set("character-width-overrides",map);

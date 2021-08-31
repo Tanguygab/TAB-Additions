@@ -3,14 +3,16 @@ package io.github.tanguygab.tabadditions.shared.features;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.api.TabFeature;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
+import java.util.concurrent.Future;
+
 public class NametagInRange extends TabFeature {
 
     private final TabAPI tab;
+    private Future<?> task;
 
     public NametagInRange() {
         super("&aNametag in Range&r");
@@ -34,7 +36,7 @@ public class NametagInRange extends TabFeature {
 
     @Override
     public void load() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"handling Nametag In Range", this, "repeating task",()->{
+        task = tab.getThreadManager().startRepeatingMeasuredTask(500,"handling Nametag In Range", this, "repeating task",()->{
             int zone = (int) Math.pow(TABAdditions.getInstance().nametagInRange, 2);
             for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 TabPlayer p = tab.getPlayer(player.getUniqueId());
@@ -54,6 +56,7 @@ public class NametagInRange extends TabFeature {
 
     @Override
     public void unload() {
+        task.cancel(true);
         for (TabPlayer p : tab.getOnlinePlayers()) {
             for (TabPlayer p2 : tab.getOnlinePlayers()) {
                 if (p != p2)

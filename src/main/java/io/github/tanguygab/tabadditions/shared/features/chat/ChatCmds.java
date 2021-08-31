@@ -6,8 +6,6 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.config.ConfigurationFile;
-import me.neznamy.tab.api.config.YamlConfigurationFile;
-import me.neznamy.tab.shared.TAB;
 import org.bukkit.entity.Player;
 
 import java.io.File;
@@ -62,6 +60,7 @@ public class ChatCmds {
     }
 
     public void execute(TabPlayer p, String cmd, String[] args) {
+        TABAdditions plugin = TABAdditions.getInstance();
         List<String> args2 = Arrays.asList(args);
         String msg = "";
         for (String str : args2) {
@@ -70,8 +69,8 @@ public class ChatCmds {
                 msg += " ";
         }
 
-        ConfigurationFile playerdata = getPlayerData();
-        ConfigurationFile translation = TABAdditions.getInstance().getTABConfigs().getTranslation();
+        ConfigurationFile playerdata = TabAPI.getInstance().getPlayerCache();
+        ConfigurationFile translation = plugin.getTranslation();
 
         if (cm.emojiEnabled && cmd.equalsIgnoreCase("emojis")) {
             String output = "";
@@ -158,7 +157,7 @@ public class ChatCmds {
                 else {
                     String player = msg.split(" ")[0];
                     msg = msg.replaceFirst(player+"( )?", "");
-                    p2 = TABAdditions.getInstance().getPlayer(player);
+                    p2 = plugin.getPlayer(player);
                 }
 
                 if (p2 == null)
@@ -179,7 +178,7 @@ public class ChatCmds {
                     if (spyMsgsEnabled) {
                         List<String> list = new ArrayList<>(cm.spies);
                         for (String spy : list) {
-                            TabPlayer tabspy = TABAdditions.getInstance().getPlayer(spy);
+                            TabPlayer tabspy = plugin.getPlayer(spy);
                             if (tabspy != null)
                                 tabspy.sendMessage(createmsg(p, msg, spyMsgsOutput, p2));
                         }
@@ -201,19 +200,6 @@ public class ChatCmds {
             return list;
         }
         return null;
-    }
-
-    public ConfigurationFile getPlayerData() {
-        if (TABAdditions.getInstance().getTABConfigs().getPlayerData("togglesmsg") == null) {
-            File file = new File(TAB.getInstance().getPlatform().getDataFolder(), "playerdata.yml");
-
-            try {
-                if (file.exists() || file.createNewFile())
-                    return new YamlConfigurationFile(null, file);
-            } catch (Exception var4) {
-                TabAPI.getInstance().getErrorManager().criticalError("Failed to load playerdata.yml", var4);
-            }
-        } return TABAdditions.getInstance().getTABConfigs().getPlayerDataFile();
     }
 
 }

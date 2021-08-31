@@ -17,7 +17,6 @@ import io.github.tanguygab.tabadditions.shared.PlatformType;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 
 public class SpigotPlatform extends Platform {
 

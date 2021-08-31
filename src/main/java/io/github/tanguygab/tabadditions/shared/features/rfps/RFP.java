@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.rfps;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.PropertyConfiguration;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
@@ -61,8 +62,8 @@ public class RFP {
     public UUID getUUID() {
         return uuid;
     }
-    public String getInfo() {
-        String[] props = getProps();
+    public String getInfo(TabPlayer p) {
+        String[] props = getProps(p);
         return "&6Information on FakePlayer &2"+ configname + "&6:" +
                 "\n&aName: &f" + name +
                 "\n&aLatency bar: &f" + latency +
@@ -72,34 +73,17 @@ public class RFP {
                 "\n&aSuffix: &f" + props[1] +
                 "\n&aTeam: &f" + getSortingTeam();
     }
-    public String[] getProps() {
+    public String[] getProps(TabPlayer p) {
+        PropertyConfiguration groupconfig = TabAPI.getInstance().getGroups();
+
         String prefix = "";
         String suffix = "";
-
-        Map<String,Object> config = configfile.getConfigurationSection("fakeplayers."+configname);
-        Map<String,Object> tabConfig = TABAdditions.getInstance().getTABConfigs().getConfig().getConfigurationSection("Groups");
-
-        String configGroup = "";
-        for (String g : tabConfig.keySet()) {
-            if (g.equalsIgnoreCase(group)) {
-                configGroup = g;
-                break;
-            }
-        }
-
-        if (config.containsKey("prefix"))
-            prefix = config.get("prefix")+"";
-        else if (!configGroup.equals("") && ((Map<String,Object>)tabConfig.get(configGroup)).containsKey("tabprefix"))
-            prefix = ((Map<String,Object>)tabConfig.get(configGroup)).get("tabprefix")+"";
-        else if (tabConfig.containsKey("_OTHER_") && ((Map<String,Object>)tabConfig.get("_OTHER_")).containsKey("tabprefix"))
-            prefix = ((Map<String,Object>)tabConfig.get("_OTHER_")).get("tabprefix")+"";
-
-        if (config.containsKey("suffix"))
-            suffix = config.get("suffix")+"";
-        else if (!configGroup.equals("") && ((Map<String,Object>)tabConfig.get(configGroup)).containsKey("tabsuffix"))
-            suffix = ((Map<String,Object>)tabConfig.get(configGroup)).get("tabsuffix")+"";
-        else if (tabConfig.containsKey("_OTHER_") && ((Map<String,Object>)tabConfig.get("_OTHER_")).containsKey("tabsuffix"))
-            suffix = ((Map<String,Object>)tabConfig.get("_OTHER_")).get("tabsuffix")+"";
+        String[] prefix2 = groupconfig.getProperty(group,"prefix",p.getServer(),p.getWorld());
+        if (prefix2.length > 0)
+        prefix = prefix2[0];
+        String[] suffix2 = groupconfig.getProperty(group,"suffix",p.getServer(),p.getWorld());
+        if (suffix2.length > 0)
+            suffix = suffix2[0];
 
         return new String[]{prefix,suffix};
     }
@@ -107,7 +91,7 @@ public class RFP {
     public PacketPlayOutPlayerInfo.PlayerInfoData get(TabPlayer p) {
         PacketPlayOutPlayerInfo.PlayerInfoData rfp = new PacketPlayOutPlayerInfo.PlayerInfoData(uuid);
         rfp.setName(getName());
-        String[] props = getProps();
+        String[] props = getProps(p);
         props[0] = TABAdditions.getInstance().parsePlaceholders(props[0],p,feature);
         props[1] = TABAdditions.getInstance().parsePlaceholders(props[1],p,feature);
 
@@ -129,7 +113,7 @@ public class RFP {
     }
     public String getSortingTeam() {
         String groups = null;
-        for (String str : TABAdditions.getInstance().getTABConfigs().getConfig().getStringList("scoreboard-teams.sorting-types", new ArrayList<>())) {
+        for (String str : TabAPI.getInstance().getConfig().getStringList("scoreboard-teams.sorting-types", new ArrayList<>())) {
             if (str.startsWith("GROUPS:")) {
                 groups = str.replace("GROUPS:","");
                 break;
@@ -197,7 +181,7 @@ public class RFP {
     public void update(TabPlayer p, Object skin) {
         PacketPlayOutPlayerInfo.PlayerInfoData fp = get(p);
         p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()),feature);
-        String[] props = getProps();
+        String[] props = getProps(p);
         String prefix = TABAdditions.getInstance().parsePlaceholders(props[0],p,feature);
         String suffix = TABAdditions.getInstance().parsePlaceholders(props[1],p,feature);
         String icon = TABAdditions.getInstance().parsePlaceholders(this.skin,p,feature);

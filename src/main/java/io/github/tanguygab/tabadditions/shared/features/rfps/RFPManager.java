@@ -9,15 +9,16 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
-import me.neznamy.tab.shared.TAB;
 
 import java.util.*;
+import java.util.concurrent.Future;
 
 public class RFPManager extends TabFeature {
 
     private final Map<String, RFP> rfps = new HashMap<>();
 
     private final TabAPI tab;
+    private Future<?> task;
 
     public RFPManager() {
         super("&aReal Fake Players&r");
@@ -49,8 +50,8 @@ public class RFPManager extends TabFeature {
         rfps.put(name,rfp);
         for (TabPlayer p : tab.getOnlinePlayers()) {
             p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()),this);
-            String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p,this);
-            String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p,this);
+            String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[0],p,this);
+            String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[1],p,this);
             registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix, rfp.getName());
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, rfp.get(p)),this);
 
@@ -59,7 +60,7 @@ public class RFPManager extends TabFeature {
     }
 
     protected void registerScoreboardTeam(TabPlayer p, String teamName, String prefix, String suffix, String rfpname) {
-        if (p.getVersion().getMinorVersion() >= 8 && TABAdditions.getInstance().getTABConfigs().isUnregisterBeforeRegister() && TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT) {
+        if (p.getVersion().getMinorVersion() >= 8 && tab.getConfig().getBoolean("unregister-before-register",true) && TABAdditions.getInstance().getPlatform().getType() == PlatformType.SPIGOT) {
             p.sendCustomPacket(new PacketPlayOutScoreboardTeam(teamName), this);
         }
         p.sendCustomPacket(new PacketPlayOutScoreboardTeam(teamName, prefix, suffix, "always", "never", Collections.singleton(rfpname), 0), this);
@@ -91,8 +92,8 @@ public class RFPManager extends TabFeature {
             for (RFP rfp : rfps) {
                 fps.add(rfp.get(p));
                 p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()),this);
-                String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[0],p,this);
-                String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps()[1],p,this);
+                String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[0],p,this);
+                String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[1],p,this);
                 registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,rfp.getName());
             }
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps),this);
@@ -126,11 +127,12 @@ public class RFPManager extends TabFeature {
     }
 
     public void refresh() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,"refreshing RFPs", this, "refreshing",() -> {
+        task = tab.getThreadManager().startRepeatingMeasuredTask(500,"refreshing RFPs", this, "refreshing",() -> {
             for (TabPlayer p : tab.getOnlinePlayers()) {
                 updateRFPs(p);
             }
         });
+
     }
 
     public void updateRFPs(TabPlayer p) {
@@ -146,6 +148,7 @@ public class RFPManager extends TabFeature {
 
     @Override
     public void unload() {
+        task.cancel(true);
         removeRFPAll();
     }
 
