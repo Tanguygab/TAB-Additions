@@ -260,7 +260,12 @@ public class TABAdditions {
             if (p == null || viewer == null) return str;
             return ((RelationalPlaceholder) pl).getLastValue(p, viewer);
         }
-        return pl.getLastValue(p);
+        String value = pl.getLastValue(p);
+        String newValue = String.valueOf(parsePlaceholders(TAB.getInstance().getPlaceholderManager().findReplacement(getTABConfigs().getConfig().getConfigurationSection("placeholder-output-replacements."+pl.getIdentifier()), EnumChatFormat.color(value)),p,viewer,p,feature));
+        if (newValue.contains("%value%"))
+            newValue = newValue.replace("%value%", value);
+
+        return newValue;
     }
 
     public String parsePlaceholders(String str, TabPlayer p) {
