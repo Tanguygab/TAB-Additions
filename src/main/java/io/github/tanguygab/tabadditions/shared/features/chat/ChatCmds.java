@@ -4,11 +4,11 @@ import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.chat.EnumChatFormat;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import org.bukkit.entity.Player;
 
-import java.io.File;
 import java.util.*;
 
 public class ChatCmds {
@@ -73,21 +73,25 @@ public class ChatCmds {
         ConfigurationFile translation = plugin.getTranslation();
 
         if (cm.emojiEnabled && cmd.equalsIgnoreCase("emojis")) {
-            String output = "";
+            List<IChatBaseComponent> list = new ArrayList<>();
             int count = 0;
             for (String emoji : cm.emojis.keySet()) {
                 if (p.hasPermission("tabadditions.chat.emoji."+emoji)) {
-                    output += "\n" + translation
+                    IChatBaseComponent comp = IChatBaseComponent.optimizedComponent("\n" + EnumChatFormat.color(translation
                             .getString("tab+_/emojis_emoji", "&7%emojiraw%&8: &r%emoji%")
                             .replace("%emojiraw%", emoji)
-                            .replace("%emoji%", cm.emojis.get(emoji));
+                            .replace("%emoji%", cm.emojis.get(emoji)))
+                    );
+                    comp.getModifier().onClickSuggestCommand(emoji);
+                    list.add(comp);
                     count++;
                 }
             }
-            p.sendMessage(translation
+            IChatBaseComponent comp = IChatBaseComponent.optimizedComponent(EnumChatFormat.color(translation
                     .getString("tab+_/emojis_header","&7All emojis you have access to (%amount%):")
-                    .replace("%amount%",count+"")
-                    + output,true);
+                    .replace("%amount%",count+"")));
+            comp.setExtra(list);
+            p.sendMessage(comp);
             return;
         }
 
