@@ -291,11 +291,11 @@ public class ChatManager extends TabFeature {
             try {click = m.group("click");}
             catch (Exception ignored) {}
             String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
-            txt = txt.replace("%msg%",msg);
 
-            if (mentionEnabled) {
-                txt = pingcheck(p,txt,viewer,hoverclick);
-            }
+
+            if (mentionEnabled)
+                txt = txt.replace("%msg%",pingcheck(p,msg,viewer,hoverclick));
+            else txt = txt.replace("%msg%",msg);
 
             if (embedURLs) txt = urlcheck(txt,hoverclick);
             if (filterEnabled) txt = filtercheck(p,txt,hoverclick);
