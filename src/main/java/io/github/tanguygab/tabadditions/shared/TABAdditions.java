@@ -249,10 +249,10 @@ public class TABAdditions {
         }
 
 
-        return str;
+        return EnumChatFormat.color(str);
     }
 
-    public String getLastPlaceholderValue(String str, TabPlayer p, TabPlayer viewer, TabFeature feature) {
+    private String getLastPlaceholderValue(String str, TabPlayer p, TabPlayer viewer, TabFeature feature) {
         if (feature != null)
             tab.getPlaceholderManager().addUsedPlaceholder(str,feature);
         Placeholder pl = TAB.getInstance().getPlaceholderManager().getPlaceholder(str);
@@ -273,7 +273,7 @@ public class TABAdditions {
         if (!str.contains("%")) return EnumChatFormat.color(str);
         for (String pl : tab.getPlaceholderManager().detectPlaceholders(str))
             str = str.replace(pl,getLastPlaceholderValue(pl,p,null,feature));
-        return str;
+        return EnumChatFormat.color(str);
     }
 
     public boolean isConditionMet(String str, TabPlayer p) {
