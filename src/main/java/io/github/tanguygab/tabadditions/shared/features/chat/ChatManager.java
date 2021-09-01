@@ -48,6 +48,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public String mentionInput;
     public String mentionOutput;
     public String mentionSound;
+    public List<String> mentionDisabled = new ArrayList<>();
 
     public Map<String,Map<String,Object>> customInteractions;
 
@@ -139,6 +140,10 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         mentionInput = config.getString("mention.input","@%player%");
         mentionOutput = config.getString("mention.output","&b@%player%");
         mentionSound = config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING");
+        if (cmds.togglementionEnabled) {
+            mentionDisabled.addAll(tab.getConfiguration().getPlayerDataFile().getStringList("togglemention", new ArrayList<>()));
+            tab.getConfiguration().getPlayerDataFile().set("togglemention",null);
+        }
 
         emojiEnabled = config.getBoolean("emojis.enabled",true);
         emojiPermission = config.getBoolean("emojis.permission",false);
@@ -181,6 +186,8 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public void unload() {
         if (cmds.socialspyEnabled && spySave)
             tab.getConfiguration().getPlayerDataFile().set("socialspy", spies);
+        if (cmds.togglementionEnabled)
+            tab.getConfiguration().getPlayerDataFile().set("togglemention", mentionDisabled);
     }
 
 
@@ -454,7 +461,10 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
 
     public String pingcheck(TabPlayer p, String msg, TabPlayer viewer, String hoverclick) {
         String input = plinstance.parsePlaceholders(mentionInput,p,viewer,viewer);
-        if (input.equals("")) return msg;
+        if (input.equals("") || viewer == null) return msg;
+        if (!p.hasPermission("tabadditions.chat.bypass.togglemention") && mentionDisabled.contains(viewer.getName().toLowerCase())) return msg;
+        if (!p.hasPermission("tabadditions.chat.bypass.ignore") && tab.getConfiguration().getPlayerDataFile().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
+            return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
             msg = msg.replaceAll("(?i)"+Pattern.quote(input), hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p)+"{");
             if (plinstance.getPlatform().getType().equals(PlatformType.SPIGOT)) {
