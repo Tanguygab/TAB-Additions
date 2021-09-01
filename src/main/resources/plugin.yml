@@ -11,3 +11,11 @@ commands:
     usage: /command
     permission: tabadditions.admin
     aliases: [taba,tabaddon,tab+,tabaddition]
+  msg:
+  reply:
+    aliases: [ r ]
+  togglemsg:
+  ignore:
+  emojis:
+  clearchat:
+  socialspy:

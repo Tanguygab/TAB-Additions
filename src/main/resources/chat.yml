@@ -1,31 +1,194 @@
-default-format: "default"
-
+default-format: default
+DiscordSRV-Support: true
+message-cooldown: 0
+item:
+  enabled: true
+  mainhand: '[item]'
+  offhand: '[offhand]'
+  permission: true
+  output: '&e%name% &f(&8x%amount%&f)'
+  output-single: '%name%'
+  output-air: ''
 mention:
   enabled: true
   input: '@%player%'
-  output: '&b@%player%'
-  output-for-everyone: true
-DiscordSRV-Support: true
-
+  output: '{
+  &b@%viewer:player%
+  ||
+  Mentioned!
+  ||
+  suggest:@%player%  }'
+  sound: BLOCK_NOTE_BLOCK_PLING
 chat-formats:
   default:
-    components:
-      prefix:
-        text: "%prop-chatprefix% "
-        hover:
-          - "Prefix hover"
-      name:
-        text: "%prop-customchatname%"
-        hover:
-          - "&cHP: %player_health%"
-          - "&aMode: #00FF00%player_gamemode%"
-        suggest: "/msg %player_name% "
-      suffix:
-        text: " %prop-chatsuffix%"
-        hover:
-          - "Suffix hover"
-      msg:
-        text: "&7» %msg%"
-        hover:
-          - "%time%"
-        suggest: "Hey %player_name%"
+    text: '{
+    %prop-customchatname% &8» %msg%
+    ||
+    %time%
+    ||
+    suggest:/msg %player%  }'
+  staffchat:
+    text: '{
+    &4STAFFCHAT &c%prop-customchatname% &8» %msg%
+    ||
+    %time%
+    ||
+    suggest:/staffchat
+    }'
+custom-interactions:
+  pos:
+    input: '[pos]'
+    output: "{
+    World: %player_world%
+    ||
+    X: %player_x%
+    \nY: %player_y%
+    \nZ: %player_z%
+    ||
+    suggest:/tpa %player%
+    }"
+  links:
+    input: '[links]'
+    output: "{
+    &8&l[&aHover for TAB's Links&8&l]
+    ||
+    &5Discord: https://discord.gg/EaSvdk6
+    \n&7GitHub: https://github.com/NEZNAMY/TAB
+    \n&9MC-Market: https://www.mc-market.org/resources/14009
+    \n&2Polymart: https://polymart.org/resource/484
+    \n&8Wiki: https://github.com/NEZNAMY/TAB/wiki
+    \n
+    \n&7Click to join our Discord server!
+    ||
+    url:https://discord.gg/EaSvdk6
+    }"
+msg:
+  enabled: true
+  sender: "{
+  &7[&6&lMe &e➠ &6&l%viewer:prop-customchatname%&7] %msg%
+  ||
+  %time%
+  \n
+  \n&fClick to reply to &6%viewer:prop-customchatname%&f.
+  ||
+  suggest:/r  }"
+  viewer: "{
+  &7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%
+  ||
+  %time%
+  \n
+  \n&fClick to reply to &6%prop-customchatname%&f.
+  ||
+  suggest:/r  }"
+  /togglemsg: true
+  /ignore: true
+  /reply: true
+  msg-self: true
+clearchat:
+  enabled: true
+  amount: 100
+  line: ''
+commands:
+  staffchat:
+    condition: permission:tab.staff
+    format: staffchat
+    name: StaffChat
+emojis:
+  enabled: true
+  permission: false
+  /emojis: true
+  output: '{
+  %emoji%
+  ||
+  %emoji%%lastcolor% &7%emojiraw% &d/emojis
+  ||
+  command:/emojis
+  }'
+  block-without-permission: false
+  list:
+    <3: ❤
+    ':discord:': "custom|{
+    &5Discord
+    ||
+    Join our Discord server!
+    ||
+    url:https://discord.gg/EaSvdk6
+    }"
+    ':shrug:': ¯\_(ツ)_/¯
+    ':pvp:': ⚔
+    ':death:': ☠
+    ':star:': ✮
+    ':up:': ⬆
+    ':tableflip:': (╯°□°）╯︵ ┻━┻
+    ':surrender:': \("▔□▔)/
+    ':o:': ( ﾟ◡ﾟ)/
+    ':grr:': ლ(ಠ益ಠლ)
+    ':cool:': (☞ﾟヮﾟ)☞
+    ':sword:': ╰(⇀︿⇀)つ-]═───
+    ':kiss:': (っ˘з(˘⌣˘ )
+    ':n:': '&c&lNO'
+    ':y:': '&a&lYES'
+    ':pan:': ︻┳═一
+    ':cup:': ( ＾▽＾)っ✂╰⋃╯
+    ':x:': '&c&l✘'
+    ':check:': '&2&l✔'
+    ':owo:': (o･ω･o)
+    ':happy:': (ᵔ◡ᵔ)
+    ':wow:': (✯◡✯)
+    ':love:': (❤ω❤)
+    ':sad:': (︶︹︺)
+    ':argh:': ヽ(‵﹏´)ノ
+socialspy:
+  enabled: true
+  keep-after-reload: true
+  msgs:
+    spy: true
+    output: '{
+    &b&l[SocialSpy-Msg] &7[&6&l%prop-customchatname% &e➠ &6&l%viewer:prop-customchatname%&7] %msg%
+    ||
+    %time%
+    }'
+  channels:
+    spy: true
+    output: "{
+    &b&l[SocialSpy-Channel]&r %prop-customchatname% &8» %msg%
+    ||
+    Channel: %channel%
+    \n%time%
+    }"
+  view-conditions:
+    spy: true
+    output: "{
+    &b&l[SocialSpy-ViewCondition]&r %prop-customchatname% &8» %msg%
+    ||
+    Condition: %condition%
+    \n%time%
+    }"
+embed-urls:
+  enabled: true
+  output: "{
+  &8&l[&4Link&8&l]
+  ||&7URL: %url%
+  \n
+  \n&7Click to open
+  ||url:%url%  }"
+char-filter:
+  enabled: true
+  char-replacement: '*'
+  fake-length: 0
+  output: "{
+  %replacement%
+  ||
+  Someone used a bad word!
+  \n
+  \nClick to see it anyways
+  ||
+  suggest:%word%
+  }"
+  filter:
+    - shit(s)?
+    - fuck(er(s)?)?
+    - bitch(es)?
+    - ass(hole|es)?
+  exempt:
+    - bypass
