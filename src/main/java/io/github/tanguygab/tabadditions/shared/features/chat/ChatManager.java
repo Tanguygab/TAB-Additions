@@ -248,7 +248,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         TextColor lastcolor = null;
         String lastMagic = "";
         while (m.find()) {
-            String color =  (lastcolor != null ? "#"+lastcolor.getHexCode() : "")+lastMagic;
+            String color =  (lastcolor != null ? lastcolor.getHexCode() : "")+lastMagic;
             String txt = (!m.group("text").equals("[item]") ? color : "") + m.group("text");
             txt = txt.replace("%lastcolor%",color);
             String hover;
@@ -349,7 +349,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
             } else itemtxt = itemOutputAir;
 
             if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
-                String color = lastcolor == null ? "" : "#"+lastcolor.getHexCode();
+                String color = lastcolor == null ? "" : lastcolor.getHexCode();
                 comp = IChatBaseComponent.optimizedComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p)+color);
             }
             comp.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
