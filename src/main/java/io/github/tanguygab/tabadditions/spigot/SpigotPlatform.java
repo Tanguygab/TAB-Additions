@@ -70,7 +70,7 @@ public class SpigotPlatform extends Platform {
 		if (!TabAPI.getInstance().getFeatureManager().isFeatureEnabled("&aChat&r")) return;
 		ChatCmds cmds = ((ChatManager)TabAPI.getInstance().getFeatureManager().getFeature("&aChat&r")).cmds;
 
-		List<String> list = Arrays.asList("msg","reply","ignore","togglemsg","clearchat","emojis","socialspy");
+		List<String> list = Arrays.asList("msg","reply","ignore","togglemsg","clearchat","emojis","socialspy","togglemention");
 		list.forEach(cmd -> {
 			try {
 				if (cmds.getClass().getField(cmd+"Enabled").getBoolean(cmds) && !(plugin.getCommand(cmd) != null && plugin.getCommand(cmd).getExecutor() instanceof TabPlusCmds))

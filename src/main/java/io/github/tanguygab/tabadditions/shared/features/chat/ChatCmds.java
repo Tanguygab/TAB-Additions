@@ -21,6 +21,7 @@ public class ChatCmds {
     public boolean msgSelf;
     public boolean ignoreEnabled;
     public boolean togglemsgEnabled;
+    public boolean togglementionEnabled;
     public boolean replyEnabled;
     public Map<TabPlayer, TabPlayer> replies = new HashMap<>();
 
@@ -43,6 +44,7 @@ public class ChatCmds {
         ignoreEnabled = config.getBoolean("msg./ignore",true);
         togglemsgEnabled = config.getBoolean("msg./togglemsg",true);
         replyEnabled = config.getBoolean("msg./reply",true);
+        togglementionEnabled = config.getBoolean("mention./togglemention",true);
 
         emojisEnabled = config.getBoolean("emojis./emojis",true);
 
@@ -113,6 +115,17 @@ public class ChatCmds {
                 linebreaks+="\n"+clearChatLine;
             p.sendMessage(linebreaks,false);
             p.sendMessage(translation.getString("tab+_chat_cleared", "&aChat cleared by %name%!").replace("%name%",p.getName()),true);
+            return;
+        }
+        if (togglementionEnabled && cmd.equalsIgnoreCase("togglemention")) {
+            if (cm.mentionDisabled.contains(p.getName().toLowerCase())) {
+                cm.mentionDisabled.remove(p.getName().toLowerCase());
+                p.sendMessage(translation.getString("tab+_chat_mention_off", "&cMentions disabled."), true);
+            }
+            else {
+                cm.mentionDisabled.add(p.getName().toLowerCase());
+                p.sendMessage(translation.getString("tab+_chat_mention_on", "&aMentions enabled."), true);
+            }
             return;
         }
 

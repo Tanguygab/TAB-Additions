@@ -45,8 +45,9 @@ public class ChatManager extends TabFeature {
 
     public boolean mentionEnabled;
     public String mentionInput;
-    public String mentionOutput;
     public String mentionSound;
+    public String mentionOutput;
+    public List<String> mentionDisabled = new ArrayList<>();
 
     public Map<String,Map<String,Object>> customInteractions;
 
@@ -131,6 +132,10 @@ public class ChatManager extends TabFeature {
         mentionInput = config.getString("mention.input","@%player%");
         mentionOutput = config.getString("mention.output","&b@%player%");
         mentionSound = config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING");
+        if (cmds.togglementionEnabled) {
+            mentionDisabled.addAll(tab.getPlayerCache().getStringList("togglemention", new ArrayList<>()));
+            tab.getPlayerCache().set("togglemention",null);
+        }
 
         emojiEnabled = config.getBoolean("emojis.enabled",true);
         emojiPermission = config.getBoolean("emojis.permission",false);
@@ -173,6 +178,8 @@ public class ChatManager extends TabFeature {
     public void unload() {
         if (cmds.socialspyEnabled && spySave)
             tab.getPlayerCache().set("socialspy", spies);
+        if (cmds.togglementionEnabled)
+            tab.getPlayerCache().set("togglemention", mentionDisabled);
     }
 
     public void onChat(TabPlayer p, String msg) {
@@ -367,7 +374,7 @@ public class ChatManager extends TabFeature {
         for (String emoji : emojis.keySet()) {
             int count = countMatches(msg,emoji);
             if (count == 0 || emoji.equals("")) continue;
-            if (!p.hasPermission("tabadditions.chat.emoji."+emoji) && !emojis.get(emoji).startsWith("custom|")) {
+            if (!p.hasPermission("tabadditions.chat.emoji."+emoji)) {
                 if (emojiUntranslate && msg.contains(emojis.get(emoji)))
                     msg = msg.replace(emojis.get(emoji), emoji);
                 continue;
@@ -375,8 +382,7 @@ public class ChatManager extends TabFeature {
             List<String> list = Arrays.asList(msg.split(Pattern.quote(emoji)));
             msg = "";
             int counted = 0;
-            String output1 = emojis.get(emoji).startsWith("custom|") ? emojis.get(emoji).replaceFirst("custom\\|","")
-                    : emojiOutput.replace("%emojiraw%",emoji).replace("%emoji%",emojis.get(emoji));
+            String output1 = emojiOutput.replace("%emojiraw%",emoji).replace("%emoji%",emojis.get(emoji));
             String output = hoverclick+removeSpaces(output1)+"{";
             for (String part : list) {
                 if (list.indexOf(part)+1 == list.size() && counted == count)
@@ -446,6 +452,8 @@ public class ChatManager extends TabFeature {
     public String pingcheck(TabPlayer p, String msg, TabPlayer viewer, String hoverclick) {
         String input = plinstance.parsePlaceholders(mentionInput,p,viewer,viewer,this);
         if (input.equals("")) return msg;
+        if (!p.hasPermission("tabadditions.chat.bypass.togglemention") && mentionDisabled.contains(viewer.getName().toLowerCase())) return msg;
+        if (!p.hasPermission("tabadditions.chat.bypass.ignore") && tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
         if (msg.toLowerCase().contains(input.toLowerCase())) {
             msg = msg.replaceAll("(?i)"+Pattern.quote(input), hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{");
             if (plinstance.getPlatform().getType().equals(PlatformType.SPIGOT)) {
