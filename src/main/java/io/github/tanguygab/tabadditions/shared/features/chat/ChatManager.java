@@ -451,9 +451,10 @@ public class ChatManager extends TabFeature {
 
     public String pingcheck(TabPlayer p, String msg, TabPlayer viewer, String hoverclick) {
         String input = plinstance.parsePlaceholders(mentionInput,p,viewer,viewer,this);
-        if (input.equals("")) return msg;
+        if (input.equals("") || viewer == null) return msg;
         if (!p.hasPermission("tabadditions.chat.bypass.togglemention") && mentionDisabled.contains(viewer.getName().toLowerCase())) return msg;
         if (!p.hasPermission("tabadditions.chat.bypass.ignore") && tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
+            return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
             msg = msg.replaceAll("(?i)"+Pattern.quote(input), hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{");
             if (plinstance.getPlatform().getType().equals(PlatformType.SPIGOT)) {
