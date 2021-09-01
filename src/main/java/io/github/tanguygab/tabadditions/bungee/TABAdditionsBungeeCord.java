@@ -28,6 +28,14 @@ public final class TABAdditionsBungeeCord extends Plugin {
         TABAdditions.getInstance().load();
         getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
         getProxy().registerChannel("tabadditions:channel");
+        getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("msg"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("ignore"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("reply",null,"r"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("togglemsg"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("emojis"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("clearchat"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("socialspy"));
     }
 
     @Override

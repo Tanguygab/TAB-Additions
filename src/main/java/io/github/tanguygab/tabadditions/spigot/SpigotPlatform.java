@@ -3,7 +3,11 @@ package io.github.tanguygab.tabadditions.spigot;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.TAFeature;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatCmds;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.TAB;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -11,6 +15,9 @@ import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class SpigotPlatform extends Platform {
 
@@ -60,6 +67,20 @@ public class SpigotPlatform extends Platform {
 
 		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
 			new TABAdditionsExpansion(plugin).register();
+
+		if (!TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.CHAT.toString())) return;
+		ChatCmds cmds = ((ChatManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.CHAT.toString())).cmds;
+
+		List<String> list = Arrays.asList("msg","reply","ignore","togglemsg","clearchat","emojis","socialspy");
+		list.forEach(cmd -> {
+			try {
+				if (cmds.getClass().getField(cmd+"Enabled").getBoolean(cmds) && !(plugin.getCommand(cmd) != null && plugin.getCommand(cmd).getExecutor() instanceof TabPlusCmds))
+					plugin.getCommand(cmd).setExecutor(new TabPlusCmds());
+				else if (!cmds.getClass().getField(cmd+"Enabled").getBoolean(cmds) && plugin.getCommand(cmd) != null && plugin.getCommand(cmd).getExecutor() instanceof TabPlusCmds)
+					plugin.getCommand(cmd).setExecutor(null);
+			} catch (Exception e) {e.printStackTrace();}
+		});
+
 	}
 
 	@Override
