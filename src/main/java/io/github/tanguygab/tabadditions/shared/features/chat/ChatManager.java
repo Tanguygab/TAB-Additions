@@ -54,10 +54,10 @@ public class ChatManager extends TabFeature {
     public ChatCmds cmds;
 
     public boolean emojiEnabled;
-    public boolean emojiPermission;
     public boolean emojiUntranslate;
     public String emojiOutput;
-    public Map<String,String> emojis;
+    public Map<String,Map<String,Object>> emojis = new HashMap<>();
+    public Map<String,String> emojisDefault = new HashMap<>();
 
     public boolean spySave;
     public boolean spyChannelsEnabled;
@@ -138,10 +138,10 @@ public class ChatManager extends TabFeature {
         }
 
         emojiEnabled = config.getBoolean("emojis.enabled",true);
-        emojiPermission = config.getBoolean("emojis.permission",false);
         emojiOutput = config.getString("emojis.output","");
         emojiUntranslate = config.getBoolean("emojis.block-without-permission",false);
-        emojis = config.getConfigurationSection("emojis.list");
+        emojis = config.getConfigurationSection("emojis.categories");
+        emojisDefault = config.getConfigurationSection("emojis.list");
 
         spySave = config.getBoolean("socialspy.keep-after-reload",true);
         if (cmds.socialspyEnabled && spySave) {
@@ -371,25 +371,32 @@ public class ChatManager extends TabFeature {
 
     }
     public String emojicheck(TabPlayer p, String msg, String hoverclick) {
-        for (String emoji : emojis.keySet()) {
-            int count = countMatches(msg,emoji);
-            if (count == 0 || emoji.equals("")) continue;
-            if (!p.hasPermission("tabadditions.chat.emoji."+emoji)) {
-                if (emojiUntranslate && msg.contains(emojis.get(emoji)))
-                    msg = msg.replace(emojis.get(emoji), emoji);
-                continue;
-            }
-            List<String> list = Arrays.asList(msg.split(Pattern.quote(emoji)));
-            msg = "";
-            int counted = 0;
-            String output1 = emojiOutput.replace("%emojiraw%",emoji).replace("%emoji%",emojis.get(emoji));
-            String output = hoverclick+removeSpaces(output1)+"{";
-            for (String part : list) {
-                if (list.indexOf(part)+1 == list.size() && counted == count)
-                    msg += part;
-                else {
-                    msg += part + output;
-                    counted++;
+        for (String category : emojis.keySet()) {
+            if (!cmds.canUseEmojiCategory(p, category)) continue;
+            Map<String, String> list = (Map<String, String>) emojis.get(category).get("list");
+            if (list == null || list.isEmpty()) continue;
+
+            for (String emoji : list.keySet()) {
+                int count = countMatches(msg, emoji);
+                if (count == 0 || emoji.equals("")) continue;
+                if (!cmds.canUseEmoji(p, category,emoji)) {
+                    if (emojiUntranslate && msg.contains(list.get(emoji)))
+                        msg = msg.replace(list.get(emoji), emoji);
+                    continue;
+                }
+                List<String> list2 = Arrays.asList(msg.split(Pattern.quote(emoji)));
+                msg = "";
+                int counted = 0;
+                String output1 = emojis.get(category).containsKey("output") ? emojis.get(category).get("output")+"" : emojiOutput;
+                output1 = output1.replace("%emojiraw%", emoji).replace("%emoji%", list.get(emoji));
+                String output = hoverclick + removeSpaces(output1) + "{";
+                for (String part : list2) {
+                    if (list2.indexOf(part) + 1 == list2.size() && counted == count)
+                        msg += part;
+                    else {
+                        msg += part + output;
+                        counted++;
+                    }
                 }
             }
         }

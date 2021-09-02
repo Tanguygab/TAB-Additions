@@ -95,49 +95,49 @@ commands:
     name: StaffChat
 emojis:
   enabled: true
-  permission: false
   /emojis: true
-  output: '{
-  %emoji%
-  ||
-  %emoji%%lastcolor% &7%emojiraw% &d/emojis
-  ||
-  command:/emojis
-  }'
-  block-without-permission: false
-  list:
-    <3: ❤
-    ':discord:': "custom|{
-    &5Discord
-    ||
-    Join our Discord server!
-    ||
-    url:https://discord.gg/EaSvdk6
-    }"
-    ':shrug:': ¯\_(ツ)_/¯
-    ':pvp:': ⚔
-    ':death:': ☠
-    ':star:': ✮
-    ':up:': ⬆
-    ':tableflip:': (╯°□°）╯︵ ┻━┻
-    ':surrender:': \("▔□▔)/
-    ':o:': ( ﾟ◡ﾟ)/
-    ':grr:': ლ(ಠ益ಠლ)
-    ':cool:': (☞ﾟヮﾟ)☞
-    ':sword:': ╰(⇀︿⇀)つ-]═───
-    ':kiss:': (っ˘з(˘⌣˘ )
-    ':n:': '&c&lNO'
-    ':y:': '&a&lYES'
-    ':pan:': ︻┳═一
-    ':cup:': ( ＾▽＾)っ✂╰⋃╯
-    ':x:': '&c&l✘'
-    ':check:': '&2&l✔'
-    ':owo:': (o･ω･o)
-    ':happy:': (ᵔ◡ᵔ)
-    ':wow:': (✯◡✯)
-    ':love:': (❤ω❤)
-    ':sad:': (︶︹︺)
-    ':argh:': ヽ(‵﹏´)ノ
+  output: '{%emoji%%lastcolor%|| %emoji% &7%emojiraw% &d/emojis||command:/emojis}'
+  block-without-permission: true
+  categories:
+    default:
+      list:
+          "<3:" ❤
+            ":shrug:" ¯\_(ツ)_/¯
+            ':pvp:': ⚔
+            ':death:': ☠
+            ":star:": ✮
+            ":up:": ⬆
+            ':tableflip:': (╯°□°）╯︵ ┻━┻
+            ':surrender:': \("▔□▔)/
+            ':grr:': ლ(ಠ益ಠლ)
+            ':sword:': ╰(⇀︿⇀)つ-]═───
+    paid:
+      permission: "permission"
+      output: |-
+        {%emoji%%lastcolor%
+          ||&eEmote &7◆ &f&lShop
+
+          &7This emote is obtainable in our shop.
+
+          &7Click to see other emojis you have access to
+        ||suggest:/emojis}
+      list:
+        ":cool:": (☞ﾟヮﾟ)☞
+        ":kiss:": (っ˘з(˘⌣˘ )
+        ':n:': '&c&lNO'
+        ':y:': '&a&lYES'
+        ':gun:': ︻┳═一
+        ":owo:": (o･ω･o)
+        ":happy:": (ᵔ◡ᵔ)
+        ":wow:": (✯◡✯)
+        ":love:" (❤ω❤)
+        ':sad:': (︶︹︺)
+        ':argh:': ヽ(‵﹏´)ノ
+    staff:
+      permission: "category"
+      list:
+        ":cross:": '&c&l✘'
+        ":check:" '&2&l✔'
 socialspy:
   enabled: true
   keep-after-reload: true
