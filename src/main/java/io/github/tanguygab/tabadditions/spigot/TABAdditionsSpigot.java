@@ -63,8 +63,8 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
     }
 
     public String itemStack(ItemStack item) {
+        String pack = getServer().getClass().getPackage().getName().split("\\.")[3];
         try {
-            String pack = getServer().getClass().getPackage().getName().split("\\.")[3];
             return Class.forName("net.minecraft.server." + pack + ".ItemStack")
                     .getMethod("save", Class.forName("net.minecraft.server." + pack + ".NBTTagCompound"))
                     .invoke(Class.forName("org.bukkit.craftbukkit." + pack + ".inventory.CraftItemStack")
@@ -72,7 +72,16 @@ public class TABAdditionsSpigot extends JavaPlugin implements CommandExecutor, T
                             Class.forName("net.minecraft.server." + pack + ".NBTTagCompound")
                                     .getConstructor().newInstance()).toString();
         } catch (Exception e) {
-            return null;
+            try {
+                return Class.forName("net.minecraft.world.item.ItemStack")
+                        .getMethod("save", Class.forName("net.minecraft.nbt.NBTTagCompound"))
+                        .invoke(Class.forName("org.bukkit.craftbukkit." + pack + ".inventory.CraftItemStack")
+                                        .getMethod("asNMSCopy", ItemStack.class).invoke(null, item),
+                                Class.forName("net.minecraft.nbt.NBTTagCompound")
+                                        .getConstructor().newInstance()).toString();
+            } catch (Exception e2) {
+                return null;
+            }
         }
     }
 }
