@@ -98,9 +98,9 @@ emojis:
   permission: false
   /emojis: true
   output: '{
-  %emoji%
+  %emoji%%lastcolor%
   ||
-  %emoji%%lastcolor% &7%emojiraw% &d/emojis
+  %emoji% &7%emojiraw% &d/emojis
   ||
   command:/emojis
   }'
