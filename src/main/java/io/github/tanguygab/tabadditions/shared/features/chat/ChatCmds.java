@@ -157,11 +157,10 @@ public class ChatCmds {
                 break;
             }
             case "reply":
-            case "r":
                 if (!replyEnabled) return;
             case "msg": {
                 TabPlayer p2;
-                if (cmd.equals("r") || cmd.equals("reply"))
+                if (cmd.equals("reply"))
                     p2 = replies.getOrDefault(p,null);
                 else {
                     String player = msg.split(" ")[0];
