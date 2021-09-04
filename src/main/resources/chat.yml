@@ -101,16 +101,16 @@ emojis:
   categories:
     default:
       list:
-          "<3:" ❤
-            ":shrug:" ¯\_(ツ)_/¯
-            ':pvp:': ⚔
-            ':death:': ☠
-            ":star:": ✮
-            ":up:": ⬆
-            ':tableflip:': (╯°□°）╯︵ ┻━┻
-            ':surrender:': \("▔□▔)/
-            ':grr:': ლ(ಠ益ಠლ)
-            ':sword:': ╰(⇀︿⇀)つ-]═───
+        "<3" ❤
+        ":shrug:" ¯\_(ツ)_/¯
+        ':pvp:': ⚔
+        ':death:': ☠
+        ":star:": ✮
+        ":up:": ⬆
+        ':tableflip:': (╯°□°）╯︵ ┻━┻
+        ':surrender:': \("▔□▔)/
+        ':grr:': ლ(ಠ益ಠლ)
+        ':sword:': ╰(⇀︿⇀)つ-]═───
     paid:
       permission: "permission"
       output: |-
