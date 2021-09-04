@@ -206,7 +206,7 @@ public class ChatCmds {
         String permOn = cm.emojis.get(category).containsKey("permission") ? cm.emojis.get(category).get("permission")+"" : "";
         if (permOn.equalsIgnoreCase("emoji") && p.hasPermission("tabadditions.chat.emoji."+emoji))
             return true;
-        return permOn.equalsIgnoreCase("category") && p.hasPermission("tabadditions.chat.emoji.category."+category);
+        return !permOn.equalsIgnoreCase("category") || p.hasPermission("tabadditions.chat.emoji.category."+category);
     }
 
     public void getEmojisCategories(TabPlayer p) {
