@@ -101,8 +101,8 @@ emojis:
   categories:
     default:
       list:
-        "<3" ❤
-        ":shrug:" ¯\_(ツ)_/¯
+        "<3": ❤
+        ":shrug:": ¯\_(ツ)_/¯
         ':pvp:': ⚔
         ':death:': ☠
         ":star:": ✮
@@ -130,14 +130,14 @@ emojis:
         ":owo:": (o･ω･o)
         ":happy:": (ᵔ◡ᵔ)
         ":wow:": (✯◡✯)
-        ":love:" (❤ω❤)
+        ":love:": (❤ω❤)
         ':sad:': (︶︹︺)
         ':argh:': ヽ(‵﹏´)ノ
     staff:
       permission: "category"
       list:
         ":cross:": '&c&l✘'
-        ":check:" '&2&l✔'
+        ":check:": '&2&l✔'
 socialspy:
   enabled: true
   keep-after-reload: true
