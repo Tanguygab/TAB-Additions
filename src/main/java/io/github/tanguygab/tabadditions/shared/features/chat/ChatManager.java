@@ -256,7 +256,7 @@ public class ChatManager extends TabFeature {
             try {click = m.group("click");}
             catch (Exception e) {click = null;}
 
-            IChatBaseComponent comp = IChatBaseComponent.optimizedComponent(txt);
+            IChatBaseComponent comp = createComponent(txt,p);
 
             if (hover != null) comp = hovercheck(comp,hover,p,viewer,lastcolor);
             if (click != null) clickcheck(comp,click);
@@ -349,12 +349,12 @@ public class ChatManager extends TabFeature {
 
             if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
                 String color = lastcolor == null ? "" : "#"+lastcolor.getHexCode();
-                comp = IChatBaseComponent.optimizedComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p,this)+color);
+                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p,this)+color,p);
             }
             comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
             return comp;
         }
-        comp.getModifier().onHoverShowText(IChatBaseComponent.optimizedComponent(hover));
+        comp.getModifier().onHoverShowText(createComponent(hover,p));
         return comp;
     }
     public void clickcheck(IChatBaseComponent comp, String click) {
@@ -559,6 +559,9 @@ public class ChatManager extends TabFeature {
     }
     public String removeSpaces(String str) {
         return str.replace("{ ","{").replace(" }","}").replace(" || ","||");
+    }
+    public IChatBaseComponent createComponent(String str, TabPlayer p) {
+        return p.getVersion().getMinorVersion() > 735 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
     }
 
     @Override

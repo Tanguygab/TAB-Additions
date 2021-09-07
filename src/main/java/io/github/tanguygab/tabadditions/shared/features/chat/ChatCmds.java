@@ -214,17 +214,17 @@ public class ChatCmds {
 
         for (String emojiCategory : cm.emojis.keySet()) {
             if (canUseEmojiCategory(p,emojiCategory)) {
-                IChatBaseComponent subcomp = IChatBaseComponent.optimizedComponent("\n"+EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
+                IChatBaseComponent subcomp = cm.createComponent("\n"+EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
                         .getString("tab+_/emojis_category","&7 - &8%category%")
-                        .replace("%category%",emojiCategory)));
+                        .replace("%category%",emojiCategory)),p);
                 subcomp.getModifier().onClickRunCommand("/emojis "+emojiCategory);
                 list.add(subcomp);
             }
         }
-        IChatBaseComponent comp = IChatBaseComponent.optimizedComponent("\n"+EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
+        IChatBaseComponent comp = cm.createComponent("\n"+EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
                 .getString("tab+_/emojis_categories_header","&7All categories of emojis you have access to (%amount%):")
                 .replace("%amount%",list.size()+"")
-        ));
+        ),p);
         comp.setExtra(list);
         p.sendMessage(comp);
     }
@@ -236,18 +236,18 @@ public class ChatCmds {
 
         for (String emoji : emojis.keySet()) {
             if (!canUseEmoji(p,category,emoji)) continue;
-            IChatBaseComponent comp = IChatBaseComponent.optimizedComponent("\n" + EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
+            IChatBaseComponent comp = cm.createComponent("\n" + EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
                     .getString("tab+_/emojis_emoji", "&7 - %emojiraw%&8: &r%emoji%")
                     .replace("%emojiraw%", emoji)
                     .replace("%emoji%", emojis.get(emoji)))
-            );
+            ,p);
             comp.getModifier().onClickSuggestCommand(emoji);
             list.add(comp);
         }
 
-        IChatBaseComponent comp = IChatBaseComponent.optimizedComponent(EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
+        IChatBaseComponent comp = cm.createComponent(EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
                 .getString("tab+_/emojis_emojis_header","&7All emojis in this category (%amount%):")
-                .replace("%amount%",list.size()+"")));
+                .replace("%amount%",list.size()+"")),p);
         comp.setExtra(list);
         p.sendMessage(comp);
     }
