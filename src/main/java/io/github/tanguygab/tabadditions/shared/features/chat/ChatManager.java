@@ -271,7 +271,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
             if (click != null) clickcheck(comp,click);
 
 
-            if (comp.toLegacyText().lastIndexOf("\u00A7")+1 > -1 && "KkLlMmNnOoRrXxRr".contains(comp.toLegacyText().charAt(comp.toLegacyText().lastIndexOf("\u00A7")+1)+"")) {
+            if (comp.toLegacyText().lastIndexOf("\u00A7")+1 < comp.toLegacyText().length() && "KkLlMmNnOoRrXxRr".contains(comp.toLegacyText().charAt(comp.toLegacyText().lastIndexOf("\u00A7")+1)+"")) {
                 List<Character> chars = new ArrayList<>();
                 for (char c : txt.toCharArray())
                     chars.add(c);
