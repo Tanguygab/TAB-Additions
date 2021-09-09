@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.spigot;
 
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatCmds;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
@@ -77,6 +78,8 @@ public class SpigotPlatform extends Platform {
 					plugin.getCommand(cmd).setExecutor(new TabPlusCmds());
 				else if (!cmds.getClass().getField(cmd+"Enabled").getBoolean(cmds) && plugin.getCommand(cmd) != null && plugin.getCommand(cmd).getExecutor() instanceof TabPlusCmds)
 					plugin.getCommand(cmd).setExecutor(null);
+				if (cmd.equals("msg"))
+					plugin.getCommand(cmd).setAliases(TABAdditions.getInstance().getConfig(ConfigType.CHAT).getStringList("msg./msg-aliases",Arrays.asList("m","w","tell","whisper")));
 			} catch (Exception e) {e.printStackTrace();}
 		});
 

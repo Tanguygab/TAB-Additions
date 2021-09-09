@@ -84,6 +84,7 @@ msg:
   /ignore: true
   /reply: true
   msg-self: true
+  /msg-aliases: [m, w, tell, whisper]
 clearchat:
   enabled: true
   amount: 100

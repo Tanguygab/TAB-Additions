@@ -1,8 +1,10 @@
 package io.github.tanguygab.tabadditions.bungee;
 
+import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import net.md_5.bungee.api.plugin.Plugin;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,7 +30,8 @@ public final class TABAdditionsBungeeCord extends Plugin {
         TABAdditions.getInstance().load();
         getProxy().registerChannel("tabadditions:channel");
         getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
-        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("msg"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("msg",null,TABAdditions.getInstance().getConfig(ConfigType.CHAT).getStringList("msg./msg-aliases", Arrays.asList("m","w","tell","whisper")).toArray(new String[]{})));
+
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("ignore"));
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("reply",null,"r"));
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("togglemsg"));
