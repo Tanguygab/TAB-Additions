@@ -5,6 +5,7 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
+import me.neznamy.tab.api.ProtocolVersion;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
@@ -262,7 +263,7 @@ public class ChatManager extends TabFeature {
             if (click != null) clickcheck(comp,click);
 
 
-            if ("KkLlMmNnOoRrXxRr".contains(comp.toLegacyText().charAt(comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1)+"")) {
+            if (comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1 > -1 && "KkLlMmNnOoRrXxRr".contains(comp.toLegacyText().charAt(comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1)+"")) {
                 List<Character> chars = new ArrayList<>();
                 for (char c : txt.toCharArray())
                     chars.add(c);
@@ -561,7 +562,7 @@ public class ChatManager extends TabFeature {
         return str.replace("{ ","{").replace(" }","}").replace(" || ","||");
     }
     public IChatBaseComponent createComponent(String str, TabPlayer p) {
-        return p.getVersion().getMinorVersion() > 735 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
+        return p.getVersion().getMinorVersion() < 16 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
     }
 
     @Override
