@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
+import com.sun.tools.doclint.Entity;
 import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
@@ -562,7 +563,7 @@ public class ChatManager extends TabFeature {
         return str.replace("{ ","{").replace(" }","}").replace(" || ","||");
     }
     public IChatBaseComponent createComponent(String str, TabPlayer p) {
-        return p.getVersion().getMinorVersion() < 16 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
+        return p != null && p.getVersion().getMinorVersion() < 16 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
     }
 
     @Override
