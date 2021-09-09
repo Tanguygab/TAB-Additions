@@ -257,7 +257,7 @@ public class ChatManager extends TabFeature {
             try {click = m.group("click");}
             catch (Exception e) {click = null;}
 
-            IChatBaseComponent comp = createComponent(txt,p);
+            IChatBaseComponent comp = createComponent(txt,viewer);
 
             if (hover != null) comp = hovercheck(comp,hover,p,viewer,lastcolor);
             if (click != null) clickcheck(comp,click);
@@ -350,12 +350,12 @@ public class ChatManager extends TabFeature {
 
             if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
                 String color = lastcolor == null ? "" : "#"+lastcolor.getHexCode();
-                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p,this)+color,p);
+                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p,this)+color,viewer);
             }
             comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
             return comp;
         }
-        comp.getModifier().onHoverShowText(createComponent(hover,p));
+        comp.getModifier().onHoverShowText(createComponent(hover,viewer));
         return comp;
     }
     public void clickcheck(IChatBaseComponent comp, String click) {
