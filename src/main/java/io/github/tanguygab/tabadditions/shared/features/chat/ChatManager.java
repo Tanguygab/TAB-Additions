@@ -264,7 +264,7 @@ public class ChatManager extends TabFeature {
             if (click != null) clickcheck(comp,click);
 
 
-            if (comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1 > -1 && "KkLlMmNnOoRrXxRr".contains(comp.toLegacyText().charAt(comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1)+"")) {
+            if (comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1 < comp.toLegacyText().length() && "KkLlMmNnOoRrXxRr".contains(comp.toLegacyText().charAt(comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1)+"")) {
                 List<Character> chars = new ArrayList<>();
                 for (char c : txt.toCharArray())
                     chars.add(c);
