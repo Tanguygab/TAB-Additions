@@ -265,7 +265,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
             try {click = m.group("click");}
             catch (Exception e) {click = null;}
 
-            IChatBaseComponent comp = IChatBaseComponent.optimizedComponent(txt);
+            IChatBaseComponent comp = createComponent(txt,viewer);
 
             if (hover != null) comp = hovercheck(comp,hover,p,viewer,lastcolor);
             if (click != null) clickcheck(comp,click);
@@ -357,12 +357,12 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
 
             if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
                 String color = lastcolor == null ? "" : lastcolor.getHexCode();
-                comp = IChatBaseComponent.optimizedComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p)+color);
+                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p)+color,viewer);
             }
             comp.onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
             return comp;
         }
-        comp.onHoverShowText(IChatBaseComponent.optimizedComponent(hover));
+        comp.onHoverShowText(createComponent(hover,viewer));
         return comp;
     }
     public void clickcheck(IChatBaseComponent comp, String click) {
@@ -563,6 +563,9 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     }
     public String removeSpaces(String str) {
         return str.replace("{ ","{").replace(" }","}").replace(" || ","||");
+    }
+    public IChatBaseComponent createComponent(String str, TabPlayer p) {
+        return p.getVersion().getMinorVersion() < 16 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
     }
 
     @Override

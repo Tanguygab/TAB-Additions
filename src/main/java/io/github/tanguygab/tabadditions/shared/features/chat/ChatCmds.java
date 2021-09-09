@@ -78,19 +78,19 @@ public class ChatCmds {
             int count = 0;
             for (String emoji : cm.emojis.keySet()) {
                 if (p.hasPermission("tabadditions.chat.emoji."+emoji)) {
-                    IChatBaseComponent comp = IChatBaseComponent.optimizedComponent("\n" + TAB.getInstance().getPlaceholderManager().color(translation
+                    IChatBaseComponent comp = cm.createComponent("\n" + TAB.getInstance().getPlaceholderManager().color(translation
                             .getString("tab+_/emojis_emoji", "&7%emojiraw%&8: &r%emoji%")
                             .replace("%emojiraw%", emoji)
                             .replace("%emoji%", cm.emojis.get(emoji)))
-                    );
+                    ,p);
                     comp.onClickSuggestCommand(emoji);
                     list.add(comp);
                     count++;
                 }
             }
-            IChatBaseComponent comp = IChatBaseComponent.optimizedComponent(TAB.getInstance().getPlaceholderManager().color(translation
+            IChatBaseComponent comp = cm.createComponent(TAB.getInstance().getPlaceholderManager().color(translation
                     .getString("tab+_/emojis_header","&7All emojis you have access to (%amount%):")
-                    .replace("%amount%",count+"")));
+                    .replace("%amount%",count+"")),p);
             comp.setExtra(list);
             p.sendMessage(comp);
             return;
