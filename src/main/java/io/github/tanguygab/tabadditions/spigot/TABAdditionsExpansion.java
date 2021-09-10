@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.neznamy.tab.api.TabAPI;
@@ -29,7 +30,13 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
 
     @Override
     public List<String> getPlaceholders() {
-        return new ArrayList<>(Arrays.asList("%tabadditions_tag_visible%", "%tabadditions_fakeplayers_amount%"));
+        return new ArrayList<>(Arrays.asList(
+                "%tabadditions_tag_visible%",
+                "%tabadditions_fakeplayers_amount%",
+                "%tabadditions_chat_mentions%",
+                "%tabadditions_chat_messages%",
+                "%tabadditions_chat_socialspy%"
+        ));
     }
 
     @Override
@@ -58,6 +65,16 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
         if (p == null) return "";
 
         if (identifier.equals("tag_visible")) return !TabAPI.getInstance().getTeamManager().hasHiddenNametag(p)+"";
+
+        if (identifier.startsWith("chat_")) {
+            ChatManager cm = (ChatManager) TabAPI.getInstance().getFeatureManager().getFeature("&aChat&r");
+            if (identifier.equals("chat_mentions"))
+                return cm.mentionDisabled.contains(p.getName().toLowerCase()) ? "Off" : "On";
+            if (identifier.equals("chat_messages"))
+                return TabAPI.getInstance().getPlayerCache().getStringList("togglemsg").contains(p.getName().toLowerCase()) ? "Off" : "On";
+            if (identifier.equals("chat_socialspy"))
+                return cm.spies.contains(p.getName().toLowerCase()) ? "On" : "Off";
+        }
 
         return "";
     }
