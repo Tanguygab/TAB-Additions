@@ -31,7 +31,13 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
 
     @Override
     public List<String> getPlaceholders() {
-        return new ArrayList<>(Arrays.asList("%tabadditions_tag_visible%", "%tabadditions_fakeplayers_amount%","%tabadditions_layout_activated%"));
+        return new ArrayList<>(Arrays.asList(
+                "%tabadditions_tag_visible%",
+                "%tabadditions_fakeplayers_amount%",
+                "%tabadditions_chat_mentions%",
+                "%tabadditions_chat_messages%",
+                "%tabadditions_chat_socialspy%"
+        ));
     }
 
     @Override
