@@ -76,9 +76,6 @@ public class SpigotPlatform extends Platform {
 			try {
 				if (cmds.getClass().getField(cmd+"Enabled").getBoolean(cmds) && !(plugin.getCommand(cmd) != null && plugin.getCommand(cmd).getExecutor() instanceof TabPlusCmds)) {
 					plugin.getCommand(cmd).setExecutor(new TabPlusCmds());
-					if (cmd.equals("msg")) {
-						plugin.getCommand(cmd).setAliases(TABAdditions.getInstance().getConfig(ConfigType.CHAT).getStringList("msg./msg-aliases", Arrays.asList("m", "w", "tell", "whisper")));
-					}
 				}
 				else if (!cmds.getClass().getField(cmd+"Enabled").getBoolean(cmds) && plugin.getCommand(cmd) != null && plugin.getCommand(cmd).getExecutor() instanceof TabPlusCmds)
 					plugin.getCommand(cmd).setExecutor(null);

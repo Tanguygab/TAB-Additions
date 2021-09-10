@@ -12,6 +12,7 @@ commands:
     permission: tabadditions.admin
     aliases: [taba,tabaddon,tab+,tabaddition]
   msg:
+    aliases: [m,w,whisper,tell]
   reply:
     aliases: [r]
   togglemsg:
