@@ -4,8 +4,10 @@ import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
 import me.neznamy.tab.shared.config.ConfigurationFile;
+import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
 import org.bukkit.entity.Player;
 
 import java.util.*;
@@ -54,6 +56,26 @@ public class ChatCmds {
         clearchatEnabled = config.getBoolean("clearchat.enabled",true);
         clearChatAmount = config.getInt("clearchat.amount",100);
         clearChatLine = config.getString("clearchat.line","");
+
+        PlaceholderManager pm = TAB.getInstance().getPlaceholderManager();
+        pm.registerPlaceholder(new PlayerPlaceholder("%chat-mentions%", 1000) {
+            @Override
+            public String get(TabPlayer p) {
+                return cm.mentionDisabled.contains(p.getName().toLowerCase()) ? "Off" : "On";
+            }
+        });
+        pm.registerPlaceholder(new PlayerPlaceholder("%chat-socialspy%", 1000) {
+            @Override
+            public String get(TabPlayer p) {
+                return cm.spies.contains(p.getName().toLowerCase()) ? "On" : "Off";
+            }
+        });
+        pm.registerPlaceholder(new PlayerPlaceholder("%chat-messages%", 1000) {
+            @Override
+            public String get(TabPlayer p) {
+                return TAB.getInstance().getConfiguration().getPlayerData("togglemsg").contains(p.getName().toLowerCase()) ? "Off" : "On";
+            }
+        });
     }
 
     public IChatBaseComponent createmsg(TabPlayer p, String msg, String chatformat, TabPlayer viewer) {
@@ -152,11 +174,11 @@ public class ChatCmds {
                 String p2 = msg.split(" ")[0].toLowerCase();
                 Map<String, List<String>> map = playerdata.getConfigurationSection("msg-ignore");
                 if (map.containsKey(p.getName())) {
-                    if (map.get(p.getName()).contains(p2)) {
-                        map.get(p.getName()).remove(p2);
+                    if (map.get(p.getName()).contains(p2.toLowerCase())) {
+                        map.get(p.getName()).remove(p2.toLowerCase());
                         p.sendMessage(translation.getString("tab+_ignore_off", "&aYou will now receive new private messages from %name%!").replace("%name%", p2), true);
                     } else {
-                        map.get(p.getName()).add(p2);
+                        map.get(p.getName()).add(p2.toLowerCase());
                         p.sendMessage(translation.getString("tab+_ignore_on", "&cYou won't receive any new private messages from %name%!").replace("%name%", p2), true);
                     }
                 } else map.put(p.getName(), new ArrayList<>(Collections.singletonList(p2)));
@@ -180,7 +202,7 @@ public class ChatCmds {
                     p.sendMessage(translation.getString("player_not_found", "&4[TAB] Player not found!"), true);
                 else if (!msgSelf && p == p2)
                     p.sendMessage(translation.getString("tab+_cant_pm_self", "&cYou can't message yourself!"), true);
-                else if (!p.hasPermission("tabadditions.chat.bypass.togglemsg") && playerdata.getStringList("togglemsg").contains(p2.getName()))
+                else if (!p.hasPermission("tabadditions.chat.bypass.togglemsg") && playerdata.getStringList("togglemsg").contains(p2.getName().toLowerCase()))
                     p.sendMessage(translation.getString("tab+_has_pm_off", "&cThis player doesn't accept private messages"), true);
                 else if (!p.hasPermission("tabadditions.chat.bypass.ignore") && playerdata.getStringList("msg-ignore." + p2.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
                     p.sendMessage(translation.getString("tab+_ignores_you", "&cThis player ignores you"), true);
