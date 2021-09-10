@@ -73,7 +73,7 @@ public class ChatManager extends TabFeature {
 
     public boolean embedURLs;
     public String urlsOutput;
-    public Pattern urlPattern = Pattern.compile("(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}( ?\\. ?| ?\\(?dot\\)? ?)[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*)");
+    public Pattern urlPattern = Pattern.compile("([&\u00A7][a-fA-Fk-oK-OrR0-9])?(?<url>(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}( ?\\. ?| ?\\(?dot\\)? ?)[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*))");
     public Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}( ?\\. ?|\\(?dot\\)?)){3}[0-9]{1,3}");
 
     public boolean filterEnabled;
@@ -308,6 +308,7 @@ public class ChatManager extends TabFeature {
 
             if (embedURLs) txt = urlcheck(txt,hoverclick);
             if (filterEnabled) txt = filtercheck(p,txt,hoverclick);
+
             if (itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.chat.item"))) {
                 if (!itemMainHand.equals(""))
                     txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
@@ -409,8 +410,11 @@ public class ChatManager extends TabFeature {
         Matcher ipv4m = ipv4Pattern.matcher(msg);
 
         while (urlm.find()) {
-            String url = urlm.group();
-            msg = msg.replace(url,hoverclick+removeSpaces(urlsOutput.replace("%url%",url))+"{");
+            String oldurl = urlm.group("url");
+            String url = oldurl;
+            if (!url.startsWith("https://") && !url.startsWith("http://"))
+                url = "http://"+url;
+            msg = msg.replace(oldurl,hoverclick+removeSpaces(urlsOutput.replace("%url%",url))+"{");
         }
         while (ipv4m.find()) {
             String ipv4 = ipv4m.group();
