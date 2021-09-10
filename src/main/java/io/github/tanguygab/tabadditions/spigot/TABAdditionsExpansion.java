@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.TAFeature;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.layouts.LayoutManager;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -61,8 +62,15 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
         if (identifier.equals("tag_visible")) return !p.hasHiddenNametag()+"";
         if (identifier.equals("layout_activated") && TABAdditions.getInstance().layoutEnabled)
             return !((LayoutManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.TA_LAYOUT.toString())).toggledOff.contains(p)+"";
-
-
+        if (identifier.startsWith("chat_")) {
+            ChatManager cm = (ChatManager) TAB.getInstance().getFeatureManager().getFeature(TAFeature.CHAT.toString());
+            if (identifier.equals("chat_mentions"))
+                return cm.mentionDisabled.contains(p.getName().toLowerCase()) ? "Off" : "On";
+            if (identifier.equals("chat_messages"))
+                return TAB.getInstance().getConfiguration().getPlayerData("togglemsg").contains(p.getName().toLowerCase()) ? "Off" : "On";
+            if (identifier.equals("chat_socialspy"))
+                return cm.spies.contains(p.getName().toLowerCase()) ? "On" : "Off";
+        }
 
         return "";
     }
