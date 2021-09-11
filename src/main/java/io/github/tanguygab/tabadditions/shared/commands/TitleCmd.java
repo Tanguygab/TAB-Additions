@@ -1,12 +1,8 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
-import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
-import net.md_5.bungee.api.Title;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import org.bukkit.entity.Player;
 
 import java.util.List;
 
@@ -21,11 +17,17 @@ public class TitleCmd {
         int stay = (int) properties.get(3);
         int fadeOut = (int) properties.get(4);
 
+        if (name.equals("*")) {
+            for (TabPlayer p : TAB.getInstance().getPlayers())
+                instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p), instance.parsePlaceholders(subtitle, p), fadeIn, stay, fadeOut);
+            return;
+        }
+
         TabPlayer p = null;
         if (args.length > 2)
-            p = TAB.getInstance().getPlayer(args[2]);
+            p = instance.getPlayer(args[2]);
         else if (!name.equals("~Console~"))
-            p = TAB.getInstance().getPlayer(name);
+            p = instance.getPlayer(name);
 
         if (p == null) {
             instance.sendMessage(name,"&cThis player isn't connected!");

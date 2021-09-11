@@ -11,11 +11,18 @@ public class ActionBarCmd {
     public ActionBarCmd(String name, String[] args, String actionbar) {
 
         TABAdditions instance = TABAdditions.getInstance();
+
+        if (name.equals("*")) {
+            for (TabPlayer p : TAB.getInstance().getPlayers())
+                p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.fromColoredText(instance.parsePlaceholders(actionbar,p)), PacketPlayOutChat.ChatMessageType.GAME_INFO));
+            return;
+        }
+
         TabPlayer p = null;
         if (args.length > 2)
-            p = TAB.getInstance().getPlayer(args[2]);
+            p = instance.getPlayer(args[2]);
         else if (!name.equals("~Console~"))
-            p = TAB.getInstance().getPlayer(name);
+            p = instance.getPlayer(name);
 
         if (p == null) {
             instance.sendMessage(name,"&cThis player isn't connected");
