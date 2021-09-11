@@ -19,7 +19,7 @@ public class TitleCmd {
         int stay = (int) properties.get(3);
         int fadeOut = (int) properties.get(4);
 
-        if (name.equals("*")) {
+        if (args.length > 2 && args[2].equals("*")) {
             for (TabPlayer p : TabAPI.getInstance().getOnlinePlayers())
                 instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p,feature), instance.parsePlaceholders(subtitle, p,feature), fadeIn, stay, fadeOut);
             return;

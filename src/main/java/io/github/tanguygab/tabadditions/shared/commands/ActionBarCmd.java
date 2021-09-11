@@ -15,7 +15,7 @@ public class ActionBarCmd {
         TABAdditions instance = TABAdditions.getInstance();
         TabFeature feature = tab.getFeatureManager().getFeature("&aActionBar&r");
 
-        if (name.equals("*")) {
+        if (args.length > 2 && args[2].equals("*")) {
             for (TabPlayer p : tab.getOnlinePlayers())
                 p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(instance.parsePlaceholders(actionbar,p,feature)), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
             return;
