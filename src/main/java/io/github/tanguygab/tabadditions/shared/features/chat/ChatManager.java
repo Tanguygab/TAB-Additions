@@ -71,6 +71,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     public Map<TabPlayer,LocalDateTime> cooldown = new HashMap<>();
 
     public boolean embedURLs;
+    public boolean embedURLsAutoAddHttp;
     public String urlsOutput;
     public Pattern urlPattern = Pattern.compile("([&§][a-fA-Fk-oK-OrR0-9])?(?<url>(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}( ?\\. ?| ?\\(?dot\\)? ?)[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*))");
     public Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}( ?\\. ?|\\(?dot\\)?)){3}[0-9]{1,3}");
@@ -164,6 +165,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         cooldownTime = Long.parseLong(config.getInt("message-cooldown",0)+"");
 
         embedURLs = config.getBoolean("embed-urls.enabled",true);
+        embedURLsAutoAddHttp = config.getBoolean("embed-urls.auto-add-http",false);
         urlsOutput = config.getString("embed-urls.output","{&8&l[&4Link&8&l]||&7URL: %url%\n\n&7Click to open||url:%url%}");
 
         filterEnabled = config.getBoolean("char-filter.enabled",true);
@@ -372,8 +374,12 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
             comp.onClickRunCommand(click.replace("command:",""));
         if (click.startsWith("suggest:"))
             comp.onClickSuggestCommand(click.replace("suggest:",""));
-        if (click.startsWith("url:"))
-            comp.onClickOpenUrl(click.replace("url:","").trim());
+        if (click.startsWith("url:")) {
+            String url = click.replace("url:", "").trim();
+            if (!url.startsWith("https://") && !url.startsWith("http://"))
+                url = "http://"+url;
+            comp.onClickOpenUrl(url);
+        }
         if (click.startsWith("copy:"))
             comp.onClick(IChatBaseComponent.ClickAction.COPY_TO_CLIPBOARD,click.replace("copy:",""));
     }
@@ -411,7 +417,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         while (urlm.find()) {
             String oldurl = urlm.group("url");
             String url = oldurl;
-            if (!url.startsWith("https://") && !url.startsWith("http://"))
+            if (embedURLsAutoAddHttp && !url.startsWith("https://") && !url.startsWith("http://"))
                 url = "http://"+url;
             msg = msg.replace(oldurl,hoverclick+removeSpaces(urlsOutput.replace("%url%",url))+"{");
         }

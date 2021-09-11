@@ -166,6 +166,7 @@ socialspy:
     }"
 embed-urls:
   enabled: true
+  auto-add-http: false
   output: "{
   &8&l[&4Link&8&l]
   ||&7URL: %url%
