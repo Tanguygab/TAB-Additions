@@ -12,7 +12,7 @@ public class ActionBarCmd {
 
         TABAdditions instance = TABAdditions.getInstance();
 
-        if (name.equals("*")) {
+        if (args.length > 2 && args[2].equals("*")) {
             for (TabPlayer p : TAB.getInstance().getPlayers())
                 p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.fromColoredText(instance.parsePlaceholders(actionbar,p)), PacketPlayOutChat.ChatMessageType.GAME_INFO));
             return;
