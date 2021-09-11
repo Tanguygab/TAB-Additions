@@ -469,8 +469,7 @@ public class ChatManager extends TabFeature {
         if (!p.hasPermission("tabadditions.chat.bypass.ignore") && tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
             return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
-            msg = msg.replaceAll("(?i)"+Pattern.quote(input), Pattern.quote(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{"));
-            msg = msg.replace("\\Q","").replace("\\E","");
+            msg = msg.replaceAll("(?i)"+Pattern.quote(input), Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{"));
             if (plinstance.getPlatform().getType().equals(PlatformType.SPIGOT)) {
                 Player player = (Player) viewer.getPlayer();
                 try {player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);}
