@@ -141,11 +141,11 @@ public class ChatCmds {
         if (togglementionEnabled && cmd.equalsIgnoreCase("togglemention")) {
             if (cm.mentionDisabled.contains(p.getName().toLowerCase())) {
                 cm.mentionDisabled.remove(p.getName().toLowerCase());
-                p.sendMessage(translation.getString("tab+_chat_mention_off", "&cMentions disabled."), true);
+                p.sendMessage(translation.getString("tab+_chat_mention_on", "&aMentions enabled."), true);
             }
             else {
                 cm.mentionDisabled.add(p.getName().toLowerCase());
-                p.sendMessage(translation.getString("tab+_chat_mention_on", "&aMentions enabled."), true);
+                p.sendMessage(translation.getString("tab+_chat_mention_off", "&cMentions disabled."), true);
             }
             return;
         }
