@@ -155,8 +155,8 @@ public class ChatCmds {
             case "togglemsg": {
                 if (!togglemsgEnabled) return;
                 List<String> list = playerdata.getStringList("togglemsg");
-                if (list.contains(p.getName())) {
-                    list.remove(p.getName());
+                if (list.contains(p.getName().toLowerCase())) {
+                    list.remove(p.getName().toLowerCase());
                     p.sendMessage(translation.getString("tab+_togglemsg_off", "&aYou will now receive new private messages!"), true);
                 } else {
                     list.add(p.getName());
