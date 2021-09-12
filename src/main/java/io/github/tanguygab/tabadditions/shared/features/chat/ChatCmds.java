@@ -134,10 +134,10 @@ public class ChatCmds {
                 List<String> list = playerdata.getStringList("togglemsg");
                 if (list.contains(p.getName().toLowerCase())) {
                     list.remove(p.getName().toLowerCase());
-                    p.sendMessage(translation.getString("tab+_togglemsg_off", "&aYou will now receive new private messages!"), true);
+                    p.sendMessage(translation.getString("tab+_chat_messages_off", "&aYou will now receive new private messages!"), true);
                 } else {
                     list.add(p.getName().toLowerCase());
-                    p.sendMessage(translation.getString("tab+_togglemsg_on", "&cYou won't receive any new private messages!"), true);
+                    p.sendMessage(translation.getString("tab+_chat_messages_on", "&cYou won't receive any new private messages!"), true);
                 }
                 playerdata.set("togglemsg", list);
                 break;
