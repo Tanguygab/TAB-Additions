@@ -18,5 +18,7 @@ public abstract class Platform {
 
 	public abstract void reload();
 
+	public abstract void loadFeatures();
+
 	public abstract void disable();
 }

@@ -76,6 +76,9 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
+	public void loadFeatures() {}
+
+	@Override
 	public void disable() {
 		plugin.getProxy().getPluginManager().unregisterCommands(plugin);
 		plugin.getProxy().getPluginManager().unregisterListeners(plugin);

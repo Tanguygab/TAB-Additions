@@ -146,7 +146,7 @@ public class TABAdditions {
         enabled = false;
     }
 
-    private void registerFeature(TabFeature feature) {
+    public void registerFeature(TabFeature feature) {
         FeatureManager fm = tab.getFeatureManager();
         fm.registerFeature(feature.getFeatureName(),feature);
     }
@@ -164,21 +164,7 @@ public class TABAdditions {
         //RFP
         if (rfpEnabled)
             registerFeature(new RFPManager());
-        //Sneak Hide Nametag
-        if (sneakhideEnabled)
-            registerFeature(new SneakHideNametag());
-        //Sneak Hide Nametag
-        if (sithideEnabled)
-            registerFeature(new SitHideNametag());
-        //Nametag in Range
-        if (nametagInRange != 0)
-            registerFeature(new NametagInRange());
-        //Tablist Names Radius
-        if (tablistNamesRadius != 0)
-            registerFeature(new TablistNamesRadius());
-        //Only You
-        if (onlyyou)
-            registerFeature(new OnlyYou());
+
     }
 
     private void loadPlaceholders() {

@@ -2,8 +2,8 @@ package io.github.tanguygab.tabadditions.spigot;
 
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
-import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatCmds;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabAPI;
@@ -82,6 +82,26 @@ public class SpigotPlatform extends Platform {
 			} catch (Exception e) {e.printStackTrace();}
 		});
 
+	}
+
+	@Override
+	public void loadFeatures() {
+		TABAdditions instance = TABAdditions.getInstance();
+		//Sneak Hide Nametag
+		if (instance.sneakhideEnabled)
+			instance.registerFeature(new SneakHideNametag());
+		//Sneak Hide Nametag
+		if (instance.sithideEnabled)
+			instance.registerFeature(new SitHideNametag());
+		//Nametag in Range
+		if (instance.nametagInRange != 0)
+			instance.registerFeature(new NametagInRange());
+		//Tablist Names Radius
+		if (instance.tablistNamesRadius != 0)
+			instance.registerFeature(new TablistNamesRadius());
+		//Only You
+		if (instance.onlyyou)
+			instance.registerFeature(new OnlyYou());
 	}
 
 	@Override

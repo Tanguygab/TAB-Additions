@@ -2,6 +2,6 @@ name: TAB-Additions
 version: 1.6.1
 main: io.github.tanguygab.tabadditions.bungee.TABAdditionsBungeeCord
 description: More features for the plugin TAB !
-softdepends: [floodgate-bungee,AdvancedBan]
+softDepends: [floodgate-bungee,AdvancedBan]
 depends: [TAB]
 author: Tanguygab
