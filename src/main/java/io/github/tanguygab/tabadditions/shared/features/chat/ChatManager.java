@@ -34,6 +34,7 @@ public class ChatManager extends TabFeature {
     private final TabAPI tab;
     private final Map<String,ChatFormat> formats = new HashMap<>();
     public final Map<TabPlayer,String> defformats = new HashMap<>();
+    public boolean forceColors;
 
     private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^|]+)((\\|\\|(?<hover>[^|]+)?)(\\|\\|(?<click>[^|]+))?)?}");
 
@@ -118,6 +119,8 @@ public class ChatManager extends TabFeature {
         ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         for (Object format : config.getConfigurationSection("chat-formats").keySet())
             formats.put(format+"",new ChatFormat(format+"", config.getConfigurationSection("chat-formats."+format)));
+
+        forceColors = config.getBoolean("force-fix-colors",false);
 
         itemEnabled = config.getBoolean("item.enabled",true);
         itemMainHand = config.getString("item.mainhand","[item]");
@@ -573,6 +576,7 @@ public class ChatManager extends TabFeature {
         return str.replace("{ ","{").replace(" }","}").replace(" || ","||");
     }
     public IChatBaseComponent createComponent(String str, TabPlayer p) {
+        if (forceColors && p != null) return IChatBaseComponent.fromColoredText(str);
         return p != null && p.getVersion().getMinorVersion() < 16 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
     }
 
