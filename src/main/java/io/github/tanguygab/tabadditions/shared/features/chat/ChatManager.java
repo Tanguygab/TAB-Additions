@@ -491,13 +491,17 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         Player player = (Player) p.getPlayer();
 
         if (str.equalsIgnoreCase("mainhand")) {
-            try {return player.getInventory().getItemInMainHand();}
-            catch (Exception e) {//noinspection deprecation
-                return player.getInventory().getItemInHand();}
+            if (TAB.getInstance().getServerVersion().getMinorVersion() < 9)
+                return player.getInventory().getItemInMainHand();
+            else
+                //noinspection deprecation
+                return player.getInventory().getItemInHand();
         }
         if (str.equalsIgnoreCase("offhand")) {
-            try {return player.getInventory().getItemInOffHand();}
-            catch (Exception e) {return new ItemStack(Material.AIR);}
+            if (TAB.getInstance().getServerVersion().getMinorVersion() < 9)
+                return player.getInventory().getItemInOffHand();
+            else
+                return new ItemStack(Material.AIR);
         }
         try {
             int i = Integer.parseInt(str);
