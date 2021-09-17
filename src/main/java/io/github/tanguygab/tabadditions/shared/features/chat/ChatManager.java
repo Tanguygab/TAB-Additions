@@ -494,13 +494,17 @@ public class ChatManager extends TabFeature {
         Player player = (Player) p.getPlayer();
 
         if (str.equalsIgnoreCase("mainhand")) {
-            try {return player.getInventory().getItemInMainHand();}
-            catch (Exception e) {//noinspection deprecation
-                return player.getInventory().getItemInHand();}
+            if (tab.getServerVersion().getMinorVersion() < 9)
+                return player.getInventory().getItemInMainHand();
+            else
+                //noinspection deprecation
+                return player.getInventory().getItemInHand();
         }
         if (str.equalsIgnoreCase("offhand")) {
-            try {return player.getInventory().getItemInOffHand();}
-            catch (Exception e) {return new ItemStack(Material.AIR);}
+            if (tab.getServerVersion().getMinorVersion() < 9)
+                return player.getInventory().getItemInOffHand();
+            else
+                return new ItemStack(Material.AIR);
         }
         try {
             int i = Integer.parseInt(str);
