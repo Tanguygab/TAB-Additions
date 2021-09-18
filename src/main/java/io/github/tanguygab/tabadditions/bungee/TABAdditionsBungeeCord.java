@@ -26,16 +26,17 @@ public final class TABAdditionsBungeeCord extends Plugin {
     public void onEnable() {
         TABAdditions.setInstance(new TABAdditions(new BungeePlatform(this), this,getDataFolder()));
         TABAdditions.getInstance().load();
-        getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
         getProxy().registerChannel("tabadditions:channel");
         getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
-        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("msg"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("msg",null, "m","w","tell","whisper"));
+
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("ignore"));
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("reply",null,"r"));
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("togglemsg"));
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("emojis"));
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("clearchat"));
         getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("socialspy"));
+        getProxy().getPluginManager().registerCommand(this, new TabPlusCmds("togglemention"));
     }
 
     @Override
