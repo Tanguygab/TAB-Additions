@@ -10,6 +10,8 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import org.bukkit.entity.Player;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 
 public class ChatCmds {
@@ -25,6 +27,9 @@ public class ChatCmds {
     public boolean togglementionEnabled;
     public boolean replyEnabled;
     public Map<TabPlayer, TabPlayer> replies = new HashMap<>();
+    public long msgCooldownTime;
+    public Map<TabPlayer,LocalDateTime> msgCooldown = new HashMap<>();
+
 
     public boolean emojisEnabled;
 
@@ -46,6 +51,7 @@ public class ChatCmds {
         togglemsgEnabled = config.getBoolean("msg./togglemsg",true);
         replyEnabled = config.getBoolean("msg./reply",true);
         togglementionEnabled = config.getBoolean("mention./togglemention",true);
+        msgCooldownTime = Long.parseLong(config.getInt("msg.cooldown",0)+"");
 
         emojisEnabled = config.getBoolean("emojis./emojis",true);
 
@@ -165,6 +171,19 @@ public class ChatCmds {
             case "reply":
                 if (!replyEnabled) return;
             case "msg": {
+                if (msgCooldown.containsKey(p)) {
+                    long time = ChronoUnit.SECONDS.between(msgCooldown.get(p), LocalDateTime.now());
+                    if (time < msgCooldownTime) {
+                        p.sendMessage(translation
+                                .getString("tab+_message_cooldown", "&cYou have to wait %seconds% more seconds!")
+                                .replace("%seconds%", msgCooldownTime-time+""), true);
+                        return;
+                    }
+                    msgCooldown.remove(p);
+                }
+                if (msgCooldownTime != 0 && !p.hasPermission("tabadditions.chat.bypass.cooldown"))
+                    msgCooldown.put(p,LocalDateTime.now());
+
                 TabPlayer p2;
                 if (cmd.equals("reply"))
                     p2 = replies.getOrDefault(p,null);

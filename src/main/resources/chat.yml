@@ -85,6 +85,7 @@ msg:
   /reply: true
   msg-self: true
   /msg-aliases: [m, w, tell, whisper]
+  cooldown: 0
 clearchat:
   enabled: true
   amount: 100
