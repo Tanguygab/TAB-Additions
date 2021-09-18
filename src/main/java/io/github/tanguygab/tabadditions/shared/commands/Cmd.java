@@ -27,10 +27,10 @@ public class Cmd {
                         instance.sendMessage(name,"&cYou have to provide an actionbar!");
                     else {
                         Map<String,String> section = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getConfigurationSection("bars");
-                        if (!section.containsKey(args[1]))
+                        if (!section.containsKey(args[1]) && !args[1].startsWith("custom:"))
                             instance.sendMessage(name,"&cThis actionbar doesn't exist!");
                         else
-                            new ActionBarCmd(name, args, section.get(args[1]));
+                            new ActionBarCmd(name, args, section.containsKey(args[1]) ? section.get(args[1]) : args[1]);
                     }
                     break;
                 }
@@ -41,13 +41,15 @@ public class Cmd {
                         instance.sendMessage(name,"&cYou have to provide a title!");
                     else {
                         Map<String,String> titleSection = TABAdditions.getInstance().getConfig(ConfigType.TITLE).getConfigurationSection("titles."+args[1]);
-                        if (titleSection.keySet().isEmpty()) {
+                        if ((titleSection == null || titleSection.isEmpty()) && !args[1].startsWith("custom:")) {
                             instance.sendMessage(name,"&cThis title doesn't exist!");
                         }
                         else {
                             List<Object> titleProperties = new ArrayList<>();
-                            for (Object property : titleSection.keySet())
-                                titleProperties.add(titleSection.get(property));
+                            if (!args[1].startsWith("custom:")) {
+                                for (Object property : titleSection.keySet())
+                                    titleProperties.add(titleSection.get(property));
+                            }
                             new TitleCmd(name, args, titleProperties);
                         }
                     }

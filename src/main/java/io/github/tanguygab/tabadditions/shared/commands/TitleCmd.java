@@ -13,11 +13,25 @@ public class TitleCmd {
         TABAdditions instance = TABAdditions.getInstance();
         TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aTitle&r");
 
-        String title = properties.get(0)+"";
-        String subtitle = properties.get(1)+"";
-        int fadeIn = (int) properties.get(2);
-        int stay = (int) properties.get(3);
-        int fadeOut = (int) properties.get(4);
+        String title;
+        String subtitle;
+        int fadeIn;
+        int stay;
+        int fadeOut;
+        if (!args[1].startsWith("custom:")) {
+            title = properties.get(1)+"";
+            subtitle = properties.get(0)+"";
+            fadeIn = (int) properties.get(2);
+            stay = (int) properties.get(3);
+            fadeOut = (int) properties.get(4);
+        } else {
+            String[] t = args[1].replace("custom:","").split("\\|\\|");
+            title = t[0];
+            subtitle = t.length > 1 ? t[1] : "";
+            fadeIn = t.length > 2 ? parseInt(t[2]) : 5;
+            stay = t.length > 3 ? parseInt(t[3]) : 5;
+            fadeOut = t.length > 4 ? parseInt(t[4]) : 5;
+        }
 
         if (args.length > 2 && args[2].equals("*")) {
             for (TabPlayer p : TabAPI.getInstance().getOnlinePlayers())
@@ -38,5 +52,12 @@ public class TitleCmd {
         instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p,feature), instance.parsePlaceholders(subtitle, p,feature), fadeIn, stay, fadeOut);
     }
 
+    public int parseInt(String str) {
+        try {
+            return Integer.parseInt(str);
+        } catch (Exception e) {
+            return 5;
+        }
+    }
 
 }
