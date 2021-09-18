@@ -89,8 +89,11 @@ public class Cmd {
             switch (args[0]) {
                 case "actionbar":
                     ActionBar actionbar = (ActionBar) tab.getFeatureManager().getFeature("&aActionBar&r");
-                    if (args.length == 2 && actionbar != null)
-                        return actionbar.getLists();
+                    if (args.length == 2 && actionbar != null) {
+                        List<String> list = new ArrayList<>(actionbar.getLists());
+                        list.add("custom:<text>");
+                        return list;
+                    }
                     break;
                 case "tags": {
                     if (args.length == 2)
@@ -118,8 +121,11 @@ public class Cmd {
                 }
                 case "title": {
                     Title title = (Title) tab.getFeatureManager().getFeature("&aTitle&r");
-                    if (args.length == 2 && title != null)
-                        return title.getLists();
+                    if (args.length == 2 && title != null) {
+                        List<String> list = new ArrayList<>(title.getLists());
+                        list.add("custom:<title>||<subtitle>||<fadein>||<stay>||<fadeout>");
+                        return list;
+                    }
                     break;
                 }
                 case "width": {
