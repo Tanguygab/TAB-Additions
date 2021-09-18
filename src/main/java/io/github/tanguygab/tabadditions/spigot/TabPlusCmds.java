@@ -17,7 +17,7 @@ public class TabPlusCmds implements CommandExecutor, TabCompleter {
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (sender instanceof Player && TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.CHAT.toString())) {
-            ((ChatManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.CHAT.toString())).cmds.execute(TAB.getInstance().getPlayer(sender.getName()),alias,args);
+            ((ChatManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.CHAT.toString())).cmds.execute(TAB.getInstance().getPlayer(sender.getName()), command.getName(), args);
             return true;
         }
         return true;
@@ -26,7 +26,7 @@ public class TabPlusCmds implements CommandExecutor, TabCompleter {
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
         if (sender instanceof Player && TAB.getInstance().getFeatureManager().isFeatureEnabled(TAFeature.CHAT.toString()))
-            return ((ChatManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.CHAT.toString())).cmds.tabcomplete(TAB.getInstance().getPlayer(sender.getName()),alias,args);
+            return ((ChatManager)TAB.getInstance().getFeatureManager().getFeature(TAFeature.CHAT.toString())).cmds.tabcomplete(TAB.getInstance().getPlayer(sender.getName()), command.getName(), args);
         return null;
     }
 }
