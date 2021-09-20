@@ -8,10 +8,11 @@ import me.neznamy.tab.api.TabAPI;
 import java.util.List;
 
 public class TitleCmd {
+
+
     public TitleCmd(String name, String[] args, List<Object> properties) {
 
         TABAdditions instance = TABAdditions.getInstance();
-        TabFeature feature = TabAPI.getInstance().getFeatureManager().getFeature("&aTitle&r");
 
         String title;
         String subtitle;
@@ -35,7 +36,7 @@ public class TitleCmd {
 
         if (args.length > 2 && args[2].equals("*")) {
             for (TabPlayer p : TabAPI.getInstance().getOnlinePlayers())
-                instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p,feature), instance.parsePlaceholders(subtitle, p,feature), fadeIn, stay, fadeOut);
+                instance.getPlatform().sendTitle(p, parseText(title, p), parseText(subtitle, p), fadeIn, stay, fadeOut);
             return;
         }
 
@@ -49,15 +50,19 @@ public class TitleCmd {
             instance.sendMessage(name, "&cThis player isn't connected!");
             return;
         }
-        instance.getPlatform().sendTitle(p, instance.parsePlaceholders(title, p,feature), instance.parsePlaceholders(subtitle, p,feature), fadeIn, stay, fadeOut);
+        instance.getPlatform().sendTitle(p, parseText(title, p), parseText(subtitle, p), fadeIn, stay, fadeOut);
     }
 
-    public int parseInt(String str) {
+    private int parseInt(String str) {
         try {
             return Integer.parseInt(str);
         } catch (Exception e) {
             return 5;
         }
+    }
+
+    private String parseText(String str, TabPlayer p) {
+        return TABAdditions.getInstance().parsePlaceholders(str,p,TabAPI.getInstance().getFeatureManager().getFeature("&aTitle&r")).replace("_"," ");
     }
 
 }
