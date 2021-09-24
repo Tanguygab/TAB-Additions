@@ -355,7 +355,7 @@ public class ChatManager extends TabFeature {
                 else itemtxt = itemOutputSingle.replace("%name%",name);
             } else itemtxt = itemOutputAir;
 
-            if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
+            if (comp.toFlatText().replaceAll("^\\s+","").equals("[item]")) {
                 String color = lastcolor == null ? "" : "#"+lastcolor.getHexCode();
                 comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p,this)+color,viewer);
             }
