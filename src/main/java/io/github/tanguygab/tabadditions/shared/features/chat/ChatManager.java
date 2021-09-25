@@ -33,6 +33,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     private final TAB tab;
     private final Map<String,ChatFormat> formats = new HashMap<>();
     public final Map<TabPlayer,String> defformats = new HashMap<>();
+    public boolean regexInputs;
 
     private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^|]+)((\\|\\|(?<hover>[^|]+)?)(\\|\\|(?<click>[^|]+))?)?}");
 
@@ -124,6 +125,8 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         for (Object format : config.getConfigurationSection("chat-formats").keySet())
             formats.put(format+"",new ChatFormat(format+"", config.getConfigurationSection("chat-formats."+format)));
+
+        regexInputs = config.getBoolean("regex-inputs",false);
 
         itemEnabled = config.getBoolean("item.enabled",true);
         itemMainHand = config.getString("item.mainhand","[item]");
@@ -311,16 +314,16 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
 
 
             if (mentionEnabled)
-                txt = txt.replace("%msg%",pingcheck(p,msg,viewer,hoverclick));
-            else txt = txt.replace("%msg%",msg);
+                txt = replaceInput(txt,"%msg%",pingcheck(p,msg,viewer,hoverclick));
+            else txt = replaceInput(txt,"%msg%",msg);
 
             if (embedURLs) txt = urlcheck(txt,hoverclick);
             if (filterEnabled) txt = filtercheck(p,txt,hoverclick);
             if (itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.chat.item"))) {
                 if (!itemMainHand.equals(""))
-                    txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
+                    txt = replaceInput(txt,itemMainHand, hoverclick+"{[item]||item:mainhand}{");
                 if (!itemOffHand.equals(""))
-                    txt = txt.replace(itemOffHand, hoverclick+"{[item]||item:offhand}{");
+                    txt = replaceInput(txt,itemOffHand, hoverclick+"{[item]||item:offhand}{");
             }
 
             if (emojiEnabled) txt = emojicheck(p,txt,hoverclick);
@@ -328,7 +331,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
                     if (!customInteractions.get(interaction).get("input").equals(""))
-                        txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p))+"{");
+                        txt = replaceInput(txt,customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p,this))+"{");
                 }
             }
             text = text.replace(txtold,txt);
@@ -357,7 +360,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
                 else itemtxt = itemOutputSingle.replace("%name%",name);
             } else itemtxt = itemOutputAir;
 
-            if (comp.getText().replaceAll("^\\s+","").equals("[item]")) {
+            if (comp.toFlatText().replaceAll("^\\s+","").equals("[item]")) {
                 String color = lastcolor == null ? "" : lastcolor.getHexCode();
                 comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p)+color,viewer);
             }
@@ -475,7 +478,10 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         if (!p.hasPermission("tabadditions.chat.bypass.ignore") && tab.getConfiguration().getPlayerDataFile().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
             return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
-            msg = msg.replaceAll("(?i)"+Pattern.quote(input), Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p)+"{"));
+            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{");
+            if (regexInputs)
+                msg = msg.replaceAll(input,Matcher.quoteReplacement(output));
+            else msg = msg.replaceAll("(?i)"+Pattern.quote(input), output);
             if (plinstance.getPlatform().getType().equals(PlatformType.SPIGOT)) {
                 Player player = (Player) viewer.getPlayer();
                 try {player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);}
@@ -579,6 +585,10 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     }
     public IChatBaseComponent createComponent(String str, TabPlayer p) {
         return p != null && p.getVersion().getMinorVersion() < 16 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
+    }
+
+    public String replaceInput(String str, String input, String output) {
+        return regexInputs ? str.replaceAll(input,output) : str.replace(input,output);
     }
 
     @Override
