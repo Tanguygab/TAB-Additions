@@ -331,7 +331,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
                     if (!customInteractions.get(interaction).get("input").equals(""))
-                        txt = replaceInput(txt,customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p,this))+"{");
+                        txt = replaceInput(txt,customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p))+"{");
                 }
             }
             text = text.replace(txtold,txt);
@@ -478,7 +478,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         if (!p.hasPermission("tabadditions.chat.bypass.ignore") && tab.getConfiguration().getPlayerDataFile().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
             return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
-            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{");
+            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p)+"{");
             if (regexInputs)
                 msg = msg.replaceAll(input,Matcher.quoteReplacement(output));
             else msg = msg.replaceAll("(?i)"+Pattern.quote(input), output);
