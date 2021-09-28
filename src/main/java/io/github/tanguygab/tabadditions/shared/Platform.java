@@ -14,6 +14,8 @@ public abstract class Platform {
 
 	public abstract void registerPlaceholders();
 
+	public abstract void registerCommand(String cmd, boolean bool, String... aliases);
+
 	public abstract void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout);
 
 	public abstract void reload();

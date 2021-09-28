@@ -58,6 +58,15 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
+	public void registerCommand(String cmd, boolean bool, String... aliases) {
+		if (bool) {
+			if (aliases == null)
+				plugin.getProxy().getPluginManager().registerCommand(plugin, new TabPlusCmds(cmd));
+			else plugin.getProxy().getPluginManager().registerCommand(plugin, new TabPlusCmds(cmd, null, aliases));
+		}
+	}
+
+	@Override
 	public void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout) {
 		Title t = plugin.getProxy().createTitle()
 				.title(new TextComponent(title))
