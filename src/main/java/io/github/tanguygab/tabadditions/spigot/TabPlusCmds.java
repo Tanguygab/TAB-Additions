@@ -22,7 +22,7 @@ public class TabPlusCmds implements CommandExecutor, TabCompleter {
             ((Title)getFeature("Title")).toggleTitle(sender.getName());
             return true;
         }
-        if (command.getName().equals("toggletitle") && featureEnabled("Title")) {
+        if (command.getName().equals("toggleactionbar") && featureEnabled("ActionBar")) {
             ((ActionBar)getFeature("ActionBar")).toggleActionBar(sender.getName());
             return true;
         }

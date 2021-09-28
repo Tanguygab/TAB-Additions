@@ -25,7 +25,7 @@ public class TabPlusCmds extends Command implements TabExecutor {
     public void execute(CommandSender sender, String[] args) {
         if (getName().equals("toggletitle") && featureEnabled("Title"))
             ((Title)getFeature("Title")).toggleTitle(sender.getName());
-        if (getName().equals("toggletitle") && featureEnabled("Title"))
+        if (getName().equals("toggleactionbar") && featureEnabled("ActionBar"))
             ((ActionBar)getFeature("ActionBar")).toggleActionBar(sender.getName());
         if (sender instanceof Player && featureEnabled("Chat"))
             ((ChatManager)getFeature("Chat")).cmds.execute(TabAPI.getInstance().getPlayer(sender.getName()),getName(),args);
