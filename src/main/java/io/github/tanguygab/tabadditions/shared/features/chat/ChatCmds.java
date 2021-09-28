@@ -24,21 +24,21 @@ public class ChatCmds {
     public String msgViewer;
     public boolean msgSelf;
     public boolean ignoreEnabled;
-    public boolean togglemsgEnabled;
-    public boolean togglementionEnabled;
+    public boolean toggleMsgEnabled;
+    public boolean toggleMentionEnabled;
     public boolean replyEnabled;
     public Map<TabPlayer, TabPlayer> replies = new HashMap<>();
     public long msgCooldownTime;
     public Map<TabPlayer,LocalDateTime> msgCooldown = new HashMap<>();
 
-
     public boolean emojisEnabled;
+    public boolean toggleEmojiEnabled;
 
-    public boolean socialspyEnabled;
+    public boolean socialSpyEnabled;
     public boolean spyMsgsEnabled;
     public String spyMsgsOutput;
 
-    public boolean clearchatEnabled;
+    public boolean clearChatEnabled;
     public String clearChatLine;
     public int clearChatAmount;
 
@@ -49,18 +49,19 @@ public class ChatCmds {
         msgViewer = config.getString("msg.viewer","{&7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%||%time%\\n\\n&fClick to reply to &6%prop-customchatname%&f.||suggest:/msg %player% }");
         msgSelf = config.getBoolean("msg.msg-self",true);
         ignoreEnabled = config.getBoolean("msg./ignore",true);
-        togglemsgEnabled = config.getBoolean("msg./togglemsg",true);
+        toggleMsgEnabled = config.getBoolean("msg./togglemsg",true);
         replyEnabled = config.getBoolean("msg./reply",true);
-        togglementionEnabled = config.getBoolean("mention./togglemention",true);
+        toggleMentionEnabled = config.getBoolean("mention./togglemention",true);
         msgCooldownTime = Long.parseLong(config.getInt("msg.cooldown",0)+"");
 
         emojisEnabled = config.getBoolean("emojis./emojis",true);
+        toggleEmojiEnabled = config.getBoolean("emojis./toggleemoji",true);
 
-        socialspyEnabled = config.getBoolean("socialspy.enabled",true);
+        socialSpyEnabled = config.getBoolean("socialspy.enabled",true);
         spyMsgsEnabled = config.getBoolean("socialspy.msgs.spy",true);
         spyMsgsOutput = config.getString("socialspy.msgs.output","{SocialSpy-Msg: [6&l%prop-customchatname% &e➠ 6&l%viewer:prop-customchatname%] %msg%||%time%}");
 
-        clearchatEnabled = config.getBoolean("clearchat.enabled",true);
+        clearChatEnabled = config.getBoolean("clearchat.enabled",true);
         clearChatAmount = config.getInt("clearchat.amount",100);
         clearChatLine = config.getString("clearchat.line","");
 
@@ -73,11 +74,12 @@ public class ChatCmds {
         p.registerCommand("msg",msgEnabled,"tell","whisper","w","m");
         p.registerCommand("reply",replyEnabled,"r");
         p.registerCommand("ignore",ignoreEnabled);
-        p.registerCommand("togglemsg",togglemsgEnabled);
-        p.registerCommand("togglemention",togglementionEnabled);
+        p.registerCommand("togglemsg", toggleMsgEnabled);
+        p.registerCommand("togglemention", toggleMentionEnabled);
         p.registerCommand("emojis",emojisEnabled);
-        p.registerCommand("socialspy",socialspyEnabled);
-        p.registerCommand("clearchat",clearchatEnabled);
+        p.registerCommand("socialspy", socialSpyEnabled);
+        p.registerCommand("clearchat", clearChatEnabled);
+        p.registerCommand("toggleemoji", toggleEmojiEnabled);
     }
 
     public IChatBaseComponent createmsg(TabPlayer p, String msg, String chatformat, TabPlayer viewer) {
@@ -97,57 +99,78 @@ public class ChatCmds {
         ConfigurationFile playerdata = TabAPI.getInstance().getPlayerCache();
         ConfigurationFile translation = plugin.getTranslation();
 
-        if (cm.emojiEnabled && cmd.equalsIgnoreCase("emojis")) {
-            if (args.length < 1) {
-                getEmojisCategories(p);
+        switch (cmd) {
+            case "emojis": {
+                if (!cm.emojiEnabled) return;
+
+                if (args.length < 1) {
+                    getEmojisCategories(p);
+                    return;
+                }
+
+                String cat = args[0];
+                if (!cm.emojis.containsKey(cat) || !cm.emojis.get(cat).containsKey("list") || !p.hasPermission("tabadditions.chat.emoji.category."+cat)) {
+                    p.sendMessage(translation.getString("tab+_/emojis_category_not_found","&7This category doesn't exist."),true);
+                    return;
+                }
+                getEmojiCategory(p,cat);
                 return;
             }
+            case "socialspy": {
+                if (!socialSpyEnabled || !p.hasPermission("tabadditions.chat.socialspy")) return;
 
-            String cat = args[0];
-            if (!cm.emojis.containsKey(cat) || !cm.emojis.get(cat).containsKey("list") || !p.hasPermission("tabadditions.chat.emoji.category."+cat)) {
-                p.sendMessage(translation.getString("tab+_/emojis_category_not_found","&7This category doesn't exist."),true);
+                if (cm.spies.contains(p.getName().toLowerCase())) {
+                    cm.spies.remove(p.getName().toLowerCase());
+                    p.sendMessage(translation.getString("tab+_chat_socialspy_off", "&cSocialSpy disabled."), true);
+                }
+                else {
+                    cm.spies.add(p.getName().toLowerCase());
+                    p.sendMessage(translation.getString("tab+_chat_socialspy_on", "&aSocialSpy enabled."), true);
+                }
                 return;
             }
-            getEmojiCategory(p,cat);
-            return;
-        }
+            case "clearchat": {
+                if (!clearChatEnabled || !p.hasPermission("tabadditions.chat.clearchat")) return;
 
-        if (socialspyEnabled && cmd.equalsIgnoreCase("socialspy") && p.hasPermission("tabadditions.chat.socialspy")) {
-            if (cm.spies.contains(p.getName().toLowerCase())) {
-                cm.spies.remove(p.getName().toLowerCase());
-                p.sendMessage(translation.getString("tab+_chat_socialspy_off", "&cSocialSpy disabled."), true);
+                String linebreaks = "";
+                for (int i = 0; i < clearChatAmount; i++)
+                    linebreaks+="\n"+clearChatLine;
+                p.sendMessage(linebreaks,false);
+                p.sendMessage(translation.getString("tab+_chat_cleared", "&aChat cleared by %name%!").replace("%name%",p.getName()),true);
+                return;
             }
-            else {
-                cm.spies.add(p.getName().toLowerCase());
-                p.sendMessage(translation.getString("tab+_chat_socialspy_on", "&aSocialSpy enabled."), true);
-            }
-            return;
-        }
+            case "togglemention": {
+                if (!toggleMentionEnabled) return;
 
-        if (clearchatEnabled && cmd.equalsIgnoreCase("clearchat") && p.hasPermission("tabadditions.chat.clearchat")) {
-            String linebreaks = "";
-            for (int i = 0; i < clearChatAmount; i++)
-                linebreaks+="\n"+clearChatLine;
-            p.sendMessage(linebreaks,false);
-            p.sendMessage(translation.getString("tab+_chat_cleared", "&aChat cleared by %name%!").replace("%name%",p.getName()),true);
-            return;
-        }
-        if (togglementionEnabled && cmd.equalsIgnoreCase("togglemention")) {
-            if (cm.mentionDisabled.contains(p.getName().toLowerCase())) {
-                cm.mentionDisabled.remove(p.getName().toLowerCase());
-                p.sendMessage(translation.getString("tab+_chat_mention_on", "&aMentions enabled."), true);
+                if (cm.mentionDisabled.contains(p.getName().toLowerCase())) {
+                    cm.mentionDisabled.remove(p.getName().toLowerCase());
+                    p.sendMessage(translation.getString("tab+_chat_mention_on", "&aMentions enabled."), true);
+                }
+                else {
+                    cm.mentionDisabled.add(p.getName().toLowerCase());
+                    p.sendMessage(translation.getString("tab+_chat_mention_off", "&cMentions disabled."), true);
+                }
+                return;
             }
-            else {
-                cm.mentionDisabled.add(p.getName().toLowerCase());
-                p.sendMessage(translation.getString("tab+_chat_mention_off", "&cMentions disabled."), true);
+            case "toggleemoji": {
+                if (!toggleEmojiEnabled) return;
+
+                if (cm.toggleEmoji.contains(p.getName().toLowerCase())) {
+                    cm.toggleEmoji.remove(p.getName().toLowerCase());
+                    p.sendMessage(translation.getString("tab+_chat_emojis_on", "&aEmojis enabled."), true);
+                }
+                else {
+                    cm.toggleEmoji.add(p.getName().toLowerCase());
+                    p.sendMessage(translation.getString("tab+_chat_emojis_off", "&cEmojis disabled."), true);
+                }
+                return;
             }
-            return;
         }
 
         if (!msgEnabled) return;
         switch (cmd.toLowerCase()) {
             case "togglemsg": {
-                if (!togglemsgEnabled) return;
+                if (!toggleMsgEnabled) return;
                 List<String> list = playerdata.getStringList("togglemsg");
                 if (list.contains(p.getName().toLowerCase())) {
                     list.remove(p.getName().toLowerCase());
@@ -157,7 +180,7 @@ public class ChatCmds {
                     p.sendMessage(translation.getString("tab+_chat_messages_off", "&cYou won't receive any new private messages!"), true);
                 }
                 playerdata.set("togglemsg", list);
-                break;
+                return;
             }
             case "ignore": {
                 if (!ignoreEnabled) return;
@@ -177,7 +200,7 @@ public class ChatCmds {
                     }
                 } else map.put(p.getName().toLowerCase(), new ArrayList<>(Collections.singletonList(p2.toLowerCase())));
                 playerdata.set("msg-ignore", map);
-                break;
+                return;
             }
             case "reply":
                 if (!replyEnabled) return;
@@ -227,7 +250,6 @@ public class ChatCmds {
                                 tabspy.sendMessage(createmsg(p, msg, spyMsgsOutput, p2));
                         }
                     }
-                    break;
                 }
             }
         }

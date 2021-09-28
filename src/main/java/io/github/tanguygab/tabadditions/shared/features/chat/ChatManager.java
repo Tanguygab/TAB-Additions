@@ -1,12 +1,10 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
-import com.sun.tools.doclint.Entity;
 import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
-import me.neznamy.tab.api.ProtocolVersion;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
@@ -62,6 +60,7 @@ public class ChatManager extends TabFeature {
     public String emojiOutput;
     public Map<String,Map<String,Object>> emojis = new HashMap<>();
     public Map<String,String> emojisDefault = new HashMap<>();
+    public List<String> toggleEmoji = new ArrayList<>();
 
     public boolean spySave;
     public boolean spyChannelsEnabled;
@@ -140,7 +139,7 @@ public class ChatManager extends TabFeature {
         mentionInput = config.getString("mention.input","@%player%");
         mentionOutput = config.getString("mention.output","&b@%player%");
         mentionSound = config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING");
-        if (cmds.togglementionEnabled) {
+        if (cmds.toggleMentionEnabled) {
             mentionDisabled.addAll(tab.getPlayerCache().getStringList("togglemention", new ArrayList<>()));
             tab.getPlayerCache().set("togglemention",null);
         }
@@ -150,9 +149,13 @@ public class ChatManager extends TabFeature {
         emojiUntranslate = config.getBoolean("emojis.block-without-permission",false);
         emojis = config.getConfigurationSection("emojis.categories");
         emojisDefault = config.getConfigurationSection("emojis.list");
+        if (cmds.toggleEmojiEnabled) {
+            spies.addAll(tab.getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
+            tab.getPlayerCache().set("toggleemoji",null);
+        }
 
         spySave = config.getBoolean("socialspy.keep-after-reload",true);
-        if (cmds.socialspyEnabled && spySave) {
+        if (cmds.socialSpyEnabled && spySave) {
             spies.addAll(tab.getPlayerCache().getStringList("socialspy", new ArrayList<>()));
             tab.getPlayerCache().set("socialspy",null);
         }
@@ -185,10 +188,12 @@ public class ChatManager extends TabFeature {
 
     @Override
     public void unload() {
-        if (cmds.socialspyEnabled && spySave)
+        if (cmds.socialSpyEnabled && spySave)
             tab.getPlayerCache().set("socialspy", spies);
-        if (cmds.togglementionEnabled)
+        if (cmds.toggleMentionEnabled)
             tab.getPlayerCache().set("togglemention", mentionDisabled);
+        if (cmds.toggleEmojiEnabled)
+            tab.getPlayerCache().set("toggleemoji", toggleEmoji);
     }
 
     public void onChat(TabPlayer p, String msg) {
@@ -385,6 +390,8 @@ public class ChatManager extends TabFeature {
 
     }
     public String emojicheck(TabPlayer p, String msg, String hoverclick) {
+        if (toggleEmoji.contains(p.getName().toLowerCase())) return msg;
+
         for (String category : emojis.keySet()) {
             if (!cmds.canUseEmojiCategory(p, category)) continue;
             Map<String, String> list = (Map<String, String>) emojis.get(category).get("list");

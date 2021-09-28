@@ -98,6 +98,7 @@ commands:
 emojis:
   enabled: true
   /emojis: true
+  /toggleemoji: true
   output: '{%emoji%%lastcolor%|| %emoji% &7%emojiraw% &d/emojis||command:/emojis}'
   block-without-permission: true
   categories:
