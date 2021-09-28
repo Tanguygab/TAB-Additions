@@ -1,3 +1,5 @@
+toggletitle: true
+
 titles:
   welcome:
     title: "&2Welcome &a%player%&2,"
