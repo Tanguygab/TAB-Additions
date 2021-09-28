@@ -165,6 +165,8 @@ public class TABAdditions {
         if (rfpEnabled)
             registerFeature(new RFPManager());
 
+        platform.loadFeatures();
+
     }
 
     private void loadPlaceholders() {
