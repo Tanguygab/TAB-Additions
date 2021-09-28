@@ -171,17 +171,17 @@ public class ChatCmds {
                     p.sendMessage(translation.getString("player_not_found", "&4[TAB] Player not found!"), true);
                     return;
                 }
-                String p2 = msg.split(" ")[0].toLowerCase();
+                String p2 = msg.split(" ")[0];
                 Map<String, List<String>> map = playerdata.getConfigurationSection("msg-ignore");
-                if (map.containsKey(p.getName())) {
-                    if (map.get(p.getName()).contains(p2.toLowerCase())) {
-                        map.get(p.getName()).remove(p2.toLowerCase());
+                if (map.containsKey(p.getName().toLowerCase())) {
+                    if (map.get(p.getName().toLowerCase()).contains(p2.toLowerCase())) {
+                        map.get(p.getName().toLowerCase()).remove(p2.toLowerCase());
                         p.sendMessage(translation.getString("tab+_ignore_off", "&aYou will now receive new private messages from %name%!").replace("%name%", p2), true);
                     } else {
-                        map.get(p.getName()).add(p2.toLowerCase());
+                        map.get(p.getName().toLowerCase()).add(p2.toLowerCase());
                         p.sendMessage(translation.getString("tab+_ignore_on", "&cYou won't receive any new private messages from %name%!").replace("%name%", p2), true);
                     }
-                } else map.put(p.getName(), new ArrayList<>(Collections.singletonList(p2)));
+                } else map.put(p.getName().toLowerCase(), new ArrayList<>(Collections.singletonList(p2.toLowerCase())));
                 playerdata.set("msg-ignore", map);
                 break;
             }
