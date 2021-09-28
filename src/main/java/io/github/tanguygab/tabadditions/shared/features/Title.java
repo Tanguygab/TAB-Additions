@@ -15,6 +15,7 @@ public class Title extends TabFeature {
 
     public Title() {
         super("&aTitle&r");
+        load();
     }
 
     public List<String> toggleTitle = new ArrayList<>();
@@ -78,10 +79,10 @@ public class Title extends TabFeature {
 
         if (toggleTitle.contains(name.toLowerCase())) {
             toggleTitle.remove(name.toLowerCase());
-            p.sendMessage(translation.getString("tab+_titles_off", "&cYou won't receive any new titles!"), true);
+            p.sendMessage(translation.getString("tab+_titles_on", "&aYou will now receive new titles!"), true);
         } else {
             toggleTitle.add(name.toLowerCase());
-            p.sendMessage(translation.getString("tab+_titles_on", "&aYou will now receive new titles!"), true);
+            p.sendMessage(translation.getString("tab+_titles_off", "&cYou won't receive any new titles!"), true);
         }
     }
 

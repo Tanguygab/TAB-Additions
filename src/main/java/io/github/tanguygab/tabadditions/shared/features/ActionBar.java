@@ -16,6 +16,7 @@ public class ActionBar extends TabFeature {
 
     public ActionBar() {
         super("&aActionBar&r");
+        load();
     }
 
     public List<String> toggleActionBar = new ArrayList<>();
@@ -69,10 +70,10 @@ public class ActionBar extends TabFeature {
 
         if (toggleActionBar.contains(name.toLowerCase())) {
             toggleActionBar.remove(name.toLowerCase());
-            p.sendMessage(translation.getString("tab+_actionbars_off", "&cYou won't receive any new actionbars!"), true);
+            p.sendMessage(translation.getString("tab+_actionbars_on", "&aYou will now receive new actionbars!"), true);
         } else {
             toggleActionBar.add(name.toLowerCase());
-            p.sendMessage(translation.getString("tab+_actionbars_on", "&aYou will now receive new actionbars!"), true);
+            p.sendMessage(translation.getString("tab+_actionbars_off", "&cYou won't receive any new actionbars!"), true);
         }
     }
 }
