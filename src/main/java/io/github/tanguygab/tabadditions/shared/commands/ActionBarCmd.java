@@ -1,11 +1,9 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.features.ActionBar;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.chat.IChatBaseComponent;
-import me.neznamy.tab.api.protocol.PacketPlayOutChat;
 
 public class ActionBarCmd {
 
@@ -13,14 +11,12 @@ public class ActionBarCmd {
 
         TabAPI tab = TabAPI.getInstance();
         TABAdditions instance = TABAdditions.getInstance();
-        TabFeature feature = tab.getFeatureManager().getFeature("&aActionBar&r");
+        ActionBar feature = (ActionBar) tab.getFeatureManager().getFeature("&aActionBar&r");
 
-        if (actionbar.startsWith("custom:"))
-            actionbar = actionbar.replace("custom:","");
 
         if (args.length > 2 && args[2].equals("*")) {
             for (TabPlayer p : tab.getOnlinePlayers())
-                p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(parseText(actionbar,p,feature)), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
+                feature.sendActionBar(p,actionbar);
             return;
         }
 
@@ -34,11 +30,8 @@ public class ActionBarCmd {
             instance.sendMessage(name,"&cThis player isn't connected");
             return;
         }
-        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(parseText(actionbar,p,feature)), PacketPlayOutChat.ChatMessageType.GAME_INFO),feature);
+        feature.sendActionBar(p,actionbar.replace("_"," "));
     }
 
-    private String parseText(String str, TabPlayer p, TabFeature feature) {
-        return TABAdditions.getInstance().parsePlaceholders(str,p,feature).replace("_"," ");
-    }
 
 }

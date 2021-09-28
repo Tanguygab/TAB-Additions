@@ -1,7 +1,10 @@
 package io.github.tanguygab.tabadditions.spigot;
 
+import io.github.tanguygab.tabadditions.shared.features.ActionBar;
+import io.github.tanguygab.tabadditions.shared.features.Title;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.TabFeature;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -15,17 +18,32 @@ public class TabPlusCmds implements CommandExecutor, TabCompleter {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if (sender instanceof Player && TabAPI.getInstance().getFeatureManager().isFeatureEnabled("&aChat&r")) {
-            ((ChatManager)TabAPI.getInstance().getFeatureManager().getFeature("&aChat&r")).cmds.execute(TabAPI.getInstance().getPlayer(sender.getName()),command.getName(),args);
+        if (command.getName().equals("toggletitle") && featureEnabled("Title")) {
+            ((Title)getFeature("Title")).toggleTitle(sender.getName());
+            return true;
+        }
+        if (command.getName().equals("toggletitle") && featureEnabled("Title")) {
+            ((ActionBar)getFeature("ActionBar")).toggleActionBar(sender.getName());
+            return true;
+        }
+        if (sender instanceof Player && featureEnabled("Chat")) {
+            ((ChatManager)getFeature("Chat")).cmds.execute(TabAPI.getInstance().getPlayer(sender.getName()),command.getName(),args);
             return true;
         }
         return true;
     }
 
+    private boolean featureEnabled(String feature) {
+        return TabAPI.getInstance().getFeatureManager().isFeatureEnabled("&a"+feature+"&r");
+    }
+    private TabFeature getFeature(String feature) {
+        return TabAPI.getInstance().getFeatureManager().getFeature("&a"+feature+"&r");
+    }
+
     @Override
     public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String alias, @NotNull String[] args) {
-        if (sender instanceof Player && TabAPI.getInstance().getFeatureManager().isFeatureEnabled("&aChat&r"))
-            return ((ChatManager)TabAPI.getInstance().getFeatureManager().getFeature("&aChat&r")).cmds.tabcomplete(TabAPI.getInstance().getPlayer(sender.getName()),command.getName(),args);
+        if (sender instanceof Player && featureEnabled("Chat"))
+            return ((ChatManager)getFeature("Chat")).cmds.tabcomplete(TabAPI.getInstance().getPlayer(sender.getName()),command.getName(),args);
         return null;
     }
 }

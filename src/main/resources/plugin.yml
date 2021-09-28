@@ -15,9 +15,11 @@ commands:
     aliases: [m,w,whisper,tell]
   reply:
     aliases: [r]
-  togglemsg:
   ignore:
   emojis:
   clearchat:
   socialspy:
+  togglemsg:
   togglemention:
+  toggleactionbar:
+  toggletitle:
