@@ -6,6 +6,7 @@ import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
 import me.neznamy.tab.shared.config.ConfigurationFile;
+import me.neznamy.tab.shared.features.PlaceholderManager;
 import me.neznamy.tab.shared.features.types.Loadable;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.TAB;
@@ -13,6 +14,8 @@ import me.neznamy.tab.shared.features.types.event.CommandListener;
 import me.neznamy.tab.shared.features.types.event.JoinEventListener;
 import me.neznamy.tab.shared.packets.EnumChatFormat;
 import me.neznamy.tab.shared.packets.IChatBaseComponent;
+import me.neznamy.tab.shared.placeholders.PlayerPlaceholder;
+import me.neznamy.tab.shared.placeholders.ServerPlaceholder;
 import me.neznamy.tab.shared.rgb.RGBUtils;
 import me.neznamy.tab.shared.rgb.TextColor;
 import org.bukkit.Bukkit;
@@ -178,6 +181,25 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         config.getStringList("char-filter.filter").forEach(filter->filterPatterns.add(Pattern.compile(filter)));
         filterExempt = config.getStringList("char-filter.exempt", new ArrayList<>());
 
+        PlaceholderManager pm = tab.getPlaceholderManager();
+        pm.registerPlaceholder(new ServerPlaceholder("%chat-emoji-total%", 500000000) {
+            @Override
+            public String get() {
+                return  emojis.size() + "";
+            }
+        });
+
+        pm.registerPlaceholder(new PlayerPlaceholder("%chat-emoji-amount%", 3000) {
+            @Override
+            public String get(TabPlayer p) {
+                int amt = 0;
+                for (String emoji : emojis.keySet()) {
+                    if (p.hasPermission("tabadditions.chat.emoji." + emoji))
+                        amt++;
+                }
+                return amt + "";
+            }
+        });
 
 
         for (TabPlayer p : tab.getPlayers()) {
