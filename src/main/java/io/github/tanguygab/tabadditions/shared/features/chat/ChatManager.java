@@ -5,6 +5,7 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
+import me.neznamy.tab.api.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
@@ -59,7 +60,6 @@ public class ChatManager extends TabFeature {
     public boolean emojiUntranslate;
     public String emojiOutput;
     public Map<String,Map<String,Object>> emojis = new HashMap<>();
-    public Map<String,String> emojisDefault = new HashMap<>();
     public List<String> toggleEmoji = new ArrayList<>();
 
     public boolean spySave;
@@ -148,7 +148,6 @@ public class ChatManager extends TabFeature {
         emojiOutput = config.getString("emojis.output","");
         emojiUntranslate = config.getBoolean("emojis.block-without-permission",false);
         emojis = config.getConfigurationSection("emojis.categories");
-        emojisDefault = config.getConfigurationSection("emojis.list");
         if (cmds.toggleEmojiEnabled) {
             spies.addAll(tab.getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
             tab.getPlayerCache().set("toggleemoji",null);
@@ -176,6 +175,24 @@ public class ChatManager extends TabFeature {
         filterOutput = config.getString("char-filter.output","{%replacement%||Someone used a bad word!\n\nClick to see it anyways||suggest:%word%}");
         config.getStringList("char-filter.filter").forEach(filter->filterPatterns.add(Pattern.compile(filter)));
         filterExempt = config.getStringList("char-filter.exempt", new ArrayList<>());
+
+        PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
+        int i=0;
+        for (String category : emojis.keySet())
+            i += ((Map<String,String>)emojis.get(category).get("list")).size();
+        int finalI = i;
+        pm.registerServerPlaceholder("%chat-emoji-total%",500000000, ()-> finalI +"");
+
+        pm.registerPlayerPlaceholder("%chat-emoji-amount%",3000,p->{
+            int amt=0;
+            for (String category : emojis.keySet()) {
+                for (String emoji : ((Map<String,String>)emojis.get(category).get("list")).keySet()) {
+                    if (cmds.canUseEmoji(p, category, emoji))
+                        amt++;
+                }
+            }
+            return amt+"";
+        });
 
 
 
