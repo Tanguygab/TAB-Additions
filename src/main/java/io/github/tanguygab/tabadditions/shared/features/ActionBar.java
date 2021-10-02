@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.Property;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabFeature;
@@ -11,6 +12,7 @@ import me.neznamy.tab.api.protocol.PacketPlayOutChat;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 public class ActionBar extends TabFeature {
 
@@ -20,29 +22,46 @@ public class ActionBar extends TabFeature {
     }
 
     public List<String> toggleActionBar = new ArrayList<>();
+    public List<TabPlayer> noBar = new ArrayList<>();
+    public Future<?> task;
 
     @Override
     public void load() {
+        TabAPI tab = TabAPI.getInstance();
         boolean toggleEnabled = TABAdditions.getInstance().getConfig(ConfigType.TITLE).getBoolean("toggleactionbar",true);
         TABAdditions.getInstance().getPlatform().registerCommand("toggleactionbar",toggleEnabled);
         if (toggleEnabled) {
-            toggleActionBar.addAll(TabAPI.getInstance().getPlayerCache().getStringList("toggleactionbar", new ArrayList<>()));
-            TabAPI.getInstance().getPlayerCache().set("toggleactionbar",null);
+            toggleActionBar.addAll(tab.getPlayerCache().getStringList("toggleactionbar", new ArrayList<>()));
+            tab.getPlayerCache().set("toggleactionbar",null);
         }
+
+        for (TabPlayer p : tab.getOnlinePlayers())
+            p.loadPropertyFromConfig(this,"actionbar");
+
+        task = tab.getThreadManager().startRepeatingMeasuredTask(2000,"handling permanent ActionBars",this,"refreshing",()->{
+            for (TabPlayer p : tab.getOnlinePlayers()) {
+                if (noBar.contains(p)) continue;
+                Property prop = p.getProperty("actionbar");
+                sendActionBar(p,prop.updateAndGet());
+            }
+        });
     }
 
     @Override
     public void unload() {
+        task.cancel(true);
         if (TABAdditions.getInstance().getConfig(ConfigType.TITLE).getBoolean("toggleactionbar",true))
             TabAPI.getInstance().getPlayerCache().set("toggleactionbar", toggleActionBar);
     }
 
     @Override
     public void onJoin(TabPlayer p) {
+        p.loadPropertyFromConfig(this,"join-actionbar");
         p.loadPropertyFromConfig(this,"actionbar");
-        String prop = p.getProperty("actionbar").updateAndGet();
+        String prop = p.getProperty("join-actionbar").updateAndGet();
         if (prop.equals("")) return;
         String actionbar = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getString("bars." + prop,"");
+        addToNoBar(p);
         sendActionBar(p,actionbar);
     }
 
@@ -62,6 +81,11 @@ public class ActionBar extends TabFeature {
 
         p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),this);
 
+    }
+
+    public void addToNoBar(TabPlayer p) {
+        noBar.add(p);
+        TabAPI.getInstance().getThreadManager().runTaskLater(2000,"handling ActionBar on join for "+p.getName(),this,"",()-> noBar.remove(p));
     }
 
     public void toggleActionBar(String name) {

@@ -15,8 +15,10 @@ public class ActionBarCmd {
 
 
         if (args.length > 2 && args[2].equals("*")) {
-            for (TabPlayer p : tab.getOnlinePlayers())
-                feature.sendActionBar(p,actionbar);
+            for (TabPlayer p : tab.getOnlinePlayers()) {
+                feature.addToNoBar(p);
+                feature.sendActionBar(p, actionbar);
+            }
             return;
         }
 
@@ -30,6 +32,7 @@ public class ActionBarCmd {
             instance.sendMessage(name,"&cThis player isn't connected");
             return;
         }
+        feature.addToNoBar(p);
         feature.sendActionBar(p,actionbar.replace("_"," "));
     }
 
