@@ -596,7 +596,7 @@ public class ChatManager extends TabFeature {
         return str.replace("{ ","{").replace(" }","}").replace(" || ","||");
     }
     public IChatBaseComponent createComponent(String str, TabPlayer p) {
-        if (forceColors && p != null) return IChatBaseComponent.fromColoredText(str);
+        if (forceColors) return IChatBaseComponent.fromColoredText(str);
         return p != null && p.getVersion().getMinorVersion() < 16 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
     }
 
