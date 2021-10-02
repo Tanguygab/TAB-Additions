@@ -424,8 +424,11 @@ public class ChatManager extends TabFeature {
         return msg;
     }
     public String urlcheck(String msg, String hoverclick) {
-        Matcher urlm = urlPattern.matcher(msg);
-        Matcher ipv4m = ipv4Pattern.matcher(msg);
+        String msg2 = msg.replaceAll("#[A-Fa-f0-9]{6}"," "); // removing RGB colors to avoid IPV4 check from killing them
+        plinstance.sendMessage("Tanguygab",msg+" | "+msg2);
+        Matcher urlm = urlPattern.matcher(msg2);
+        Matcher ipv4m = ipv4Pattern.matcher(msg2);
+
 
         while (urlm.find()) {
             String oldurl = urlm.group("url");
@@ -437,6 +440,7 @@ public class ChatManager extends TabFeature {
         while (ipv4m.find()) {
             String ipv4 = ipv4m.group();
             msg = msg.replace(ipv4,hoverclick+removeSpaces(urlsOutput.replace("%url%",ipv4))+"{");
+
         }
         return msg;
     }
