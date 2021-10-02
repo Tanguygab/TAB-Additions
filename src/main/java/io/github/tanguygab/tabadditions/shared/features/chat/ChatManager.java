@@ -414,6 +414,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         return msg;
     }
     public String urlcheck(String msg, String hoverclick) {
+        String msg2 = msg.replaceAll("#[A-Fa-f0-9]{6}"," "); // removing RGB colors to avoid IPV4 check from killing them
         Matcher urlm = urlPattern.matcher(msg);
         Matcher ipv4m = ipv4Pattern.matcher(msg);
 
