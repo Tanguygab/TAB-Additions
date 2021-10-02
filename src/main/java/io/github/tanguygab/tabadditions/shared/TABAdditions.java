@@ -30,7 +30,7 @@ public class TABAdditions {
     public final File dataFolder;
     private final Skins skins;
     private final TabAPI tab;
-    public final Map<String, TabFeature> features = new HashMap<>();
+    public final List<String> features = new ArrayList<>();
     public boolean enabled;
 
     private YamlConfigurationFile config;
@@ -136,11 +136,11 @@ public class TABAdditions {
     public void disable() {
         FeatureManager fm = tab.getFeatureManager();
 
-        for (String feature : features.keySet()) {
+        features.forEach(feature->{
             if (fm.isFeatureEnabled(feature))
                 fm.getFeature(feature).unload();
             fm.unregisterFeature(feature);
-        }
+        });
         skins.unload();
 
         enabled = false;
@@ -148,6 +148,7 @@ public class TABAdditions {
 
     public void registerFeature(TabFeature feature) {
         FeatureManager fm = tab.getFeatureManager();
+        features.add(feature.getFeatureName());
         fm.registerFeature(feature.getFeatureName(),feature);
     }
 
