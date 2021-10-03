@@ -299,6 +299,7 @@ public class TABAdditions {
 
     public String parsePlaceholders(String str, TabPlayer p) {
         if (str == null) return "";
+        str = TAB.getInstance().getPlaceholderManager().color(str);
         if (p == null) return str;
         if (!str.contains("%")) return str;
         return new Property(p,str).get();
