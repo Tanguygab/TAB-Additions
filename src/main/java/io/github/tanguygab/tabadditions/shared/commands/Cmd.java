@@ -28,10 +28,10 @@ public class Cmd {
                         instance.sendMessage(name,"&cYou have to provide an actionbar!");
                     else {
                         Map<String,String> section = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getConfigurationSection("bars");
-                        if (!section.containsKey(args[1]))
+                        if (!section.containsKey(args[1]) && !args[1].startsWith("custom:"))
                             instance.sendMessage(name,"&cThis actionbar doesn't exist!");
                         else
-                            new ActionBarCmd(name, args, section.get(args[1]));
+                            new ActionBarCmd(name, args, section.containsKey(args[1]) ? section.get(args[1]) : args[1]);
                     }
                     break;
                 }
