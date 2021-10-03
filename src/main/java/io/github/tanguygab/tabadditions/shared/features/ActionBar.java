@@ -63,7 +63,7 @@ public class ActionBar implements JoinEventListener, Loadable {
         if (actionbar.startsWith("custom:"))
             actionbar = actionbar.replace("custom:","").replace("_"," ");
 
-        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO));
+        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.fromColoredText(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO));
 
     }
 
