@@ -256,7 +256,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
     }
 
     public IChatBaseComponent createmsg(TabPlayer p, String msg, String chatFormat, TabPlayer viewer) {
-        List<String> codes = Arrays.asList("a", "b", "c", "d", "f", "k", "l", "m", "n", "o", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
+        List<String> codes = Arrays.asList("a", "b", "c", "d", "e", "f", "k", "l", "m", "n", "o", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9");
         for (String code : codes) {
             if (!p.hasPermission("tabadditions.chat.color.&" + code))
                 msg = msg.replace("&" + code, "");
