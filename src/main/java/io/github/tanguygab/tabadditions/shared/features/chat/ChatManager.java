@@ -442,7 +442,6 @@ public class ChatManager extends TabFeature {
     }
     public String urlcheck(String msg, String hoverclick) {
         String msg2 = msg.replaceAll("#[A-Fa-f0-9]{6}"," "); // removing RGB colors to avoid IPV4 check from killing them
-        plinstance.sendMessage("Tanguygab",msg+" | "+msg2);
         Matcher urlm = urlPattern.matcher(msg2);
         Matcher ipv4m = ipv4Pattern.matcher(msg2);
 
