@@ -60,7 +60,8 @@ public class ChatManager extends TabFeature {
     public boolean emojiUntranslate;
     public String emojiOutput;
     public Map<String,Map<String,Object>> emojis = new HashMap<>();
-    public int emojiCount;
+    public int emojiTotalCount;
+    public Map<String,Integer> emojiCounts = new HashMap<>();
     public List<String> toggleEmoji = new ArrayList<>();
 
     public boolean spySave;
@@ -179,21 +180,15 @@ public class ChatManager extends TabFeature {
 
         PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
         int i=0;
-        for (String category : emojis.keySet())
-            i += ((Map<String,String>)emojis.get(category).get("list")).size();
-        emojiCount = i;
-        pm.registerServerPlaceholder("%chat-emoji-total%",500000000, ()->emojiCount+"");
+        for (String category : emojis.keySet()) {
+            Map<String,String> list = (Map<String, String>) emojis.get(category).get("list");
+            emojiCounts.put(category,list.size());
+            i += list.size();
+        }
+        emojiTotalCount = i;
+        pm.registerServerPlaceholder("%chat-emoji-total%",500000000, ()-> emojiTotalCount +"");
 
-        pm.registerPlayerPlaceholder("%chat-emoji-amount%",3000,p->{
-            int amt=0;
-            for (String category : emojis.keySet()) {
-                for (String emoji : ((Map<String,String>)emojis.get(category).get("list")).keySet()) {
-                    if (cmds.canUseEmoji(p, category, emoji))
-                        amt++;
-                }
-            }
-            return amt+"";
-        });
+        pm.registerPlayerPlaceholder("%chat-emoji-owned%",3000,p->ownedEmojis(p)+"");
 
 
 
@@ -202,6 +197,22 @@ public class ChatManager extends TabFeature {
             p.loadPropertyFromConfig(this,"customchatname",p.getName());
             p.loadPropertyFromConfig(this,"chatsuffix");
         }
+    }
+
+    public int ownedEmojis(TabPlayer p) {
+        int amt=0;
+        for (String category : emojis.keySet())
+            amt+=ownedEmojis(p,category);
+        return amt;
+    }
+
+    public int ownedEmojis(TabPlayer p, String category) {
+        int amt=0;
+        for (String emoji : ((Map<String,String>)emojis.get(category).get("list")).keySet()) {
+            if (cmds.canUseEmoji(p, category, emoji))
+                amt++;
+        }
+        return amt;
     }
 
     @Override

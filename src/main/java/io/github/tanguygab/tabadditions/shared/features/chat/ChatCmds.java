@@ -110,7 +110,7 @@ public class ChatCmds {
                 }
 
                 String cat = args[0];
-                if (!cm.emojis.containsKey(cat) || !cm.emojis.get(cat).containsKey("list") || !p.hasPermission("tabadditions.chat.emoji.category."+cat)) {
+                if (!canUseEmojiCategory(p,cat)) {
                     p.sendMessage(translation.getString("tab+_/emojis_category_not_found","&7This category doesn't exist."),true);
                     return;
                 }
@@ -257,14 +257,16 @@ public class ChatCmds {
     }
 
     public boolean canUseEmojiCategory(TabPlayer p, String category) {
+        if (!cm.emojiCounts.containsKey(category)) return false;
         String permOn = cm.emojis.get(category).containsKey("permission") ? cm.emojis.get(category).get("permission")+"" : "";
         return !permOn.equalsIgnoreCase("category") || p.hasPermission("tabadditions.chat.emoji.category."+category);
 
     }
     public boolean canUseEmoji(TabPlayer p, String category, String emoji) {
+        if (!cm.emojiCounts.containsKey(category)) return false;
         String permOn = cm.emojis.get(category).containsKey("permission") ? cm.emojis.get(category).get("permission")+"" : "";
-        if (permOn.equalsIgnoreCase("emoji") && p.hasPermission("tabadditions.chat.emoji."+emoji))
-            return true;
+        if (permOn.equalsIgnoreCase("emoji"))
+            return p.hasPermission("tabadditions.chat.emoji."+emoji);
         return !permOn.equalsIgnoreCase("category") || p.hasPermission("tabadditions.chat.emoji.category."+category);
     }
 
@@ -273,17 +275,23 @@ public class ChatCmds {
 
         for (String emojiCategory : cm.emojis.keySet()) {
             if (canUseEmojiCategory(p,emojiCategory)) {
+                int owned = cm.ownedEmojis(p,emojiCategory);
+                if (owned == 0) continue;
                 IChatBaseComponent subcomp = cm.createComponent("\n"+EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
-                        .getString("tab+_/emojis_category","&7 - &8%category%")
-                        .replace("%category%",emojiCategory)),p);
+                        .getString("tab+_/emojis_category","&7 - &8%category% (%owned%/%max%)")
+                        .replace("%category%",emojiCategory)
+                        .replace("%owned%",owned+"")
+                        .replace("%max%",cm.emojiCounts.get(emojiCategory)+"")
+                ),p);
                 subcomp.getModifier().onClickRunCommand("/emojis "+emojiCategory);
                 list.add(subcomp);
             }
         }
         IChatBaseComponent comp = cm.createComponent("\n"+EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
-                .getString("tab+_/emojis_categories_header","&7All categories of emojis you have access to (%amount%/%max%):")
+                .getString("tab+_/emojis_categories_header","&7All categories of emojis you have access to (%amount%, Emojis: %owned%/%max%):")
                 .replace("%amount%",list.size()+"")
-                .replace("%max%",cm.emojiCount+"")
+                .replace("%owned%",cm.ownedEmojis(p)+"")
+                .replace("%max%",cm.emojiTotalCount +"")
         ),p);
         comp.setExtra(list);
         p.sendMessage(comp);
@@ -299,17 +307,24 @@ public class ChatCmds {
             IChatBaseComponent comp = cm.createComponent("\n" + EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
                     .getString("tab+_/emojis_emoji", "&7 - %emojiraw%&8: &r%emoji%")
                     .replace("%emojiraw%", emoji)
-                    .replace("%emoji%", emojis.get(emoji)))
-            ,p);
+                    .replace("%emoji%", emojis.get(emoji))
+                    ),p);
             comp.getModifier().onClickSuggestCommand(emoji);
             list.add(comp);
         }
 
+        if (list.isEmpty()) {
+            p.sendMessage(TABAdditions.getInstance().getTranslation().getString("tab+_/emojis_category_not_found", "&7This category doesn't exist."), true);
+            return;
+        }
         IChatBaseComponent comp = cm.createComponent(EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
-                .getString("tab+_/emojis_emojis_header","&7All emojis in this category (%amount%):")
-                .replace("%amount%",list.size()+"")),p);
+                .getString("tab+_/emojis_emojis_header","&7All emojis in this category (%owned%/%max%):")
+                .replace("%owned%",list.size()+"")
+                .replace("%max%",cm.emojiCounts.get(category) +"")
+        ),p);
         comp.setExtra(list);
         p.sendMessage(comp);
+
     }
 
     public List<String> tabcomplete(TabPlayer p, String cmd, String[] args) {
