@@ -185,7 +185,7 @@ public class ChatCmds {
             }
             case "ignore": {
                 if (!ignoreEnabled) return;
-                if (msg.split(" ").length < 1) {
+                if (msg.equals("")) {
                     p.sendMessage(translation.getString("player_not_found", "&4[TAB] Player not found!"), true);
                     return;
                 }
@@ -281,8 +281,9 @@ public class ChatCmds {
             }
         }
         IChatBaseComponent comp = cm.createComponent("\n"+EnumChatFormat.color(TABAdditions.getInstance().getTranslation()
-                .getString("tab+_/emojis_categories_header","&7All categories of emojis you have access to (%amount%):")
+                .getString("tab+_/emojis_categories_header","&7All categories of emojis you have access to (%amount%/%max%):")
                 .replace("%amount%",list.size()+"")
+                .replace("%max%",cm.emojiCount+"")
         ),p);
         comp.setExtra(list);
         p.sendMessage(comp);

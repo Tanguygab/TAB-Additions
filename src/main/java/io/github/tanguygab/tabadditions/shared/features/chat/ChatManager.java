@@ -60,6 +60,7 @@ public class ChatManager extends TabFeature {
     public boolean emojiUntranslate;
     public String emojiOutput;
     public Map<String,Map<String,Object>> emojis = new HashMap<>();
+    public int emojiCount;
     public List<String> toggleEmoji = new ArrayList<>();
 
     public boolean spySave;
@@ -180,8 +181,8 @@ public class ChatManager extends TabFeature {
         int i=0;
         for (String category : emojis.keySet())
             i += ((Map<String,String>)emojis.get(category).get("list")).size();
-        int finalI = i;
-        pm.registerServerPlaceholder("%chat-emoji-total%",500000000, ()-> finalI +"");
+        emojiCount = i;
+        pm.registerServerPlaceholder("%chat-emoji-total%",500000000, ()->emojiCount+"");
 
         pm.registerPlayerPlaceholder("%chat-emoji-amount%",3000,p->{
             int amt=0;
