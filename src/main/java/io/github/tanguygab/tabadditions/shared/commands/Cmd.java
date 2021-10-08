@@ -43,11 +43,12 @@ public class Cmd {
                         Map<String,String> titleSection = TABAdditions.getInstance().getConfig(ConfigType.TITLE).getConfigurationSection("titles."+args[1]);
                         if ((titleSection == null || titleSection.isEmpty()) && !args[1].startsWith("custom:")) {
                             instance.sendMessage(name,"&cThis title doesn't exist!");
+                            return;
                         }
                         else {
                             List<Object> titleProperties = new ArrayList<>();
                             if (!args[1].startsWith("custom:")) {
-                                for (Object property : titleSection.keySet())
+                                for (String property : titleSection.keySet())
                                     titleProperties.add(titleSection.get(property));
                             }
                             new TitleCmd(name, args, titleProperties);

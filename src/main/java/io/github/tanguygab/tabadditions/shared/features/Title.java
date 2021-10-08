@@ -44,7 +44,7 @@ public class Title extends TabFeature {
         int fadeIn;
         int stay;
         int fadeOut;
-        if (args.length > 1 && !args[1].startsWith("custom:")) {
+        if (args.length < 1 || !args[1].startsWith("custom:")) {
             title = properties.get(1)+"";
             subtitle = properties.get(0)+"";
             fadeIn = (int) properties.get(2);
@@ -63,11 +63,11 @@ public class Title extends TabFeature {
 
     @Override
     public void onJoin(TabPlayer p) {
-        p.loadPropertyFromConfig(this,"title");
-        Map<String,Object> tSection = TABAdditions.getInstance().getConfig(ConfigType.TITLE).getConfigurationSection("titles." + p.getProperty("title").get());
+        p.loadPropertyFromConfig(this,"join-title");
+        Map<String,Object> tSection = TABAdditions.getInstance().getConfig(ConfigType.TITLE).getConfigurationSection("titles." + p.getProperty("join-title").get());
         if (tSection != null && tSection.size() >= 5) {
             List<Object> titleProperties = new ArrayList<>();
-            for (Object property : tSection.keySet())
+            for (String property : tSection.keySet())
                 titleProperties.add(tSection.get(property));
             sendTitle(titleProperties, new String[]{},p);
         }
