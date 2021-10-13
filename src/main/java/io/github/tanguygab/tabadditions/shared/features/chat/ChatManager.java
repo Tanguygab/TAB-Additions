@@ -178,7 +178,7 @@ public class ChatManager implements Loadable, JoinEventListener, CommandListener
         filterChar = config.getString("char-filter.char-replacement","*");
         filterFakeLength = config.getInt("char-filter.fake-length",0);
         filterOutput = config.getString("char-filter.output","{%replacement%||Someone used a bad word!\n\nClick to see it anyways||suggest:%word%}");
-        config.getStringList("char-filter.filter").forEach(filter->filterPatterns.add(Pattern.compile(filter)));
+        config.getStringList("char-filter.filter", new ArrayList<>()).forEach(filter->filterPatterns.add(Pattern.compile(filter)));
         filterExempt = config.getStringList("char-filter.exempt", new ArrayList<>());
 
         PlaceholderManager pm = tab.getPlaceholderManager();
