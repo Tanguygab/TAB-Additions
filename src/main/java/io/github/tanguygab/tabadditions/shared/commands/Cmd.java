@@ -30,7 +30,7 @@ public class Cmd {
                         if (!section.containsKey(args[1]) && !args[1].startsWith("custom:"))
                             instance.sendMessage(name,"&cThis actionbar doesn't exist!");
                         else
-                            new ActionBarCmd(name, args, section.containsKey(args[1]) ? section.get(args[1]) : args[1]);
+                            new ActionBarCmd(name, args, args[1]);
                     }
                     break;
                 }

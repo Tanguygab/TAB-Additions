@@ -60,9 +60,8 @@ public class ActionBar extends TabFeature {
         p.loadPropertyFromConfig(this,"actionbar");
         String prop = p.getProperty("join-actionbar").updateAndGet();
         if (prop.equals("")) return;
-        String actionbar = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getString("bars." + prop,"");
         addToNoBar(p);
-        sendActionBar(p,actionbar);
+        sendActionBar(p,prop);
     }
 
     public List<String> getLists() {
@@ -74,10 +73,11 @@ public class ActionBar extends TabFeature {
 
     public void sendActionBar(TabPlayer p, String actionbar) {
         if (toggleActionBar.contains(p.getName().toLowerCase()) || actionbar.equals("")) return;
-
-        actionbar = TABAdditions.getInstance().parsePlaceholders(actionbar,p);
         if (actionbar.startsWith("custom:"))
-            actionbar = actionbar.replace("custom:","").replace("_"," ");
+            actionbar = TABAdditions.getInstance().parsePlaceholders(actionbar.replace("custom:",""),p).replace("_"," ");
+        else actionbar = TABAdditions.getInstance().parsePlaceholders(TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getString("bars." + actionbar,""),p);
+
+
 
         p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),this);
 
