@@ -19,17 +19,17 @@
 
   "platforms": [
     {
-      "Platform": "spigot",
+      "id": "spigot",
       "main": "io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot",
       "version": "^1.8.0"
     },
     {
-      "Platform": "paper",
+      "id": "paper",
       "main": "io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot",
       "version": "^1.8.0"
     },
     {
-      "Platform": "bungeecord",
+      "id": "bungeecord",
       "main": "io.github.tanguygab.tabadditions.bungee.TABAdditionsBungeeCord",
       "version": "^0.0.1"
     }
