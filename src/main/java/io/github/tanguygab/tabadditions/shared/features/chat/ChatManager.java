@@ -439,7 +439,7 @@ public class ChatManager extends TabFeature {
                 int counted = 0;
                 String output1 = emojis.get(category).containsKey("output") ? emojis.get(category).get("output")+"" : emojiOutput;
                 output1 = output1.replace("%emojiraw%", emoji).replace("%emoji%", list.get(emoji));
-                String output = hoverclick + removeSpaces(output1) + "{";
+                String output = hoverclick + plinstance.parsePlaceholders(removeSpaces(output1),p) + "{";
                 for (String part : list2) {
                     if (list2.indexOf(part) + 1 == list2.size() && counted == count)
                         msg += part;
