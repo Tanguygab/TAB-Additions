@@ -1,0 +1,59 @@
+{
+  "name": "TAB-Additions",
+  "slug": "tabadditions",
+
+  "author": {
+    "name": "Tanguygab",
+    "website": ""
+  },
+
+  "url": {
+    "source": "https://github.com/Tanguygab/TAB-Additions/",
+    "jenkins": "",
+    "docs": "https://github.com/Tanguygab/TAB-Additions/wiki",
+    "issues": "https://github.com/Tanguygab/TAB-Additions/issues",
+    "website": ""
+  },
+
+  "version": "1.6.1",
+
+  "platforms": [
+    {
+      "Platform": "spigot",
+      "main": "io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot",
+      "version": "^1.8.0"
+    },
+    {
+      "Platform": "paper",
+      "main": "io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot",
+      "version": "^1.8.0"
+    },
+    {
+      "Platform": "bungeecord",
+      "main": "io.github.tanguygab.tabadditions.bungee.TABAdditionsBungeeCord",
+      "version": "^0.0.1"
+    }
+  ],
+  "dependencies": [
+    {
+      "id": "tab",
+      "type": "required",
+      "version": "^3.0.0"
+    },
+    {
+      "id": "placeholderapi",
+      "type": "optional",
+      "version": "^2.10.10"
+    }
+  ],
+
+  "changelog": [
+    "**THIS VERSION ONLY SUPPORTS TAB 3.0, USE 1.5.14 FOR TAB 2.9.2**",
+    "",
+    "[-] Removed Layout as TAB now has that feature in a better way",
+    "[+] Added emoji categories with custom output and permissions",
+    "[~] Fixed Actionbars",
+    "[~] Parsing placeholders inside emojis",
+    "[+/~] Lots of other stuff I don't remember"
+  ]
+}
