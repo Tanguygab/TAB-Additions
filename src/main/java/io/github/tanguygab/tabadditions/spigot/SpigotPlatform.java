@@ -55,7 +55,11 @@ public class SpigotPlatform extends Platform {
 
 	@Override
 	public void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout) {
-		((Player)p.getPlayer()).sendTitle(title,subtitle,fadein,stay,fadeout);
+		try {
+			((Player) p.getPlayer()).sendTitle(title, subtitle, fadein, stay, fadeout);
+		} catch (Exception e) {
+			((Player) p.getPlayer()).sendTitle(title,subtitle);
+		}
 	}
 
 	@Override
