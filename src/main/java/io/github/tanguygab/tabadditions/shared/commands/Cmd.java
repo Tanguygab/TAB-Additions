@@ -72,10 +72,6 @@ public class Cmd {
                     new TagsCmd(name, args);
                     break;
                 }
-                case "width": {
-                    new WidthCmd(name, args);
-                    break;
-                }
                 case "test": {
                     instance.sendMessage(name,"&7Nothing to see here :D");
                 }
