@@ -19,6 +19,11 @@
 
   "platforms": [
     {
+      "id": "bukkit",
+      "main": "io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot",
+      "version": "^1.8.0"
+    },
+    {
       "id": "spigot",
       "main": "io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot",
       "version": "^1.8.0"
