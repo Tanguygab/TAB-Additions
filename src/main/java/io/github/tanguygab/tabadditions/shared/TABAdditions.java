@@ -48,6 +48,7 @@ public class TABAdditions {
     public int tablistNamesRadius = 0;
     public boolean rfpEnabled;
     public boolean onlyyou = false;
+    public boolean condNametagsEnabled;
 
     public TABAdditions(Platform platform, Object plugin,File dataFolder) {
         this.dataFolder = dataFolder;
@@ -113,13 +114,13 @@ public class TABAdditions {
             actionbarsEnabled = config.getBoolean("features.actionbars",false);
             rfpEnabled = config.getBoolean("features.real-fake-players",false);
             chatEnabled = config.getBoolean("features.chat",false);
+            condNametagsEnabled = config.getBoolean("features.conditional-nametags",false);
             if (platform.getType() == PlatformType.SPIGOT) {
                 sithideEnabled = config.getBoolean("features.sit-hide-nametags", false);
                 sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
                 onlyyou = config.getBoolean("features.only-you",false);
-
             }
         } catch (IOException e) {
             platform.disable();
@@ -165,6 +166,9 @@ public class TABAdditions {
         //RFP
         if (rfpEnabled)
             registerFeature(new RFPManager());
+        //ConditionalNametags
+        if (condNametagsEnabled)
+            registerFeature(new ConditionalNametags());
 
         platform.loadFeatures();
 
