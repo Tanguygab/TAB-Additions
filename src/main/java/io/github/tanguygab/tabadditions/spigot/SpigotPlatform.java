@@ -4,9 +4,7 @@ import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.*;
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatCmds;
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
-import me.neznamy.tab.api.TabAPI;
+
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -15,10 +13,6 @@ import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
-
-import java.util.Arrays;
-import java.util.List;
-
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
