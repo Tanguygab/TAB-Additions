@@ -4,7 +4,7 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
-import me.neznamy.tab.api.PlaceholderManager;
+import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.chat.EnumChatFormat;

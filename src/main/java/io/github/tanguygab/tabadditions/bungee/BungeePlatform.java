@@ -6,7 +6,7 @@ import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.PlaceholderManager;
+import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.TextComponent;

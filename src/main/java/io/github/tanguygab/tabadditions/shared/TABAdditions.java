@@ -15,6 +15,7 @@ import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.placeholder.Placeholder;
+import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.layout.skin.SkinManager;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
