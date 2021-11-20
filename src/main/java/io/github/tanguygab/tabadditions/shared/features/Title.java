@@ -2,10 +2,10 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.config.ConfigurationFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.Map;
 public class Title extends TabFeature {
 
     public Title() {
-        super("&aTitle&r");
+        super("Title","&aTitle&r");
         load();
     }
 
@@ -75,14 +75,14 @@ public class Title extends TabFeature {
 
     public void toggleTitle(String name) {
         TabPlayer p = TabAPI.getInstance().getPlayer(name);
-        ConfigurationFile translation = TABAdditions.getInstance().getTranslation();
+        TranslationFile translation = TABAdditions.getInstance().getMsgs();
 
         if (toggleTitle.contains(name.toLowerCase())) {
             toggleTitle.remove(name.toLowerCase());
-            p.sendMessage(translation.getString("tab+_titles_on", "&aYou will now receive new titles!"), true);
+            p.sendMessage(translation.titleOn, true);
         } else {
             toggleTitle.add(name.toLowerCase());
-            p.sendMessage(translation.getString("tab+_titles_off", "&cYou won't receive any new titles!"), true);
+            p.sendMessage(translation.titleOff, true);
         }
     }
 

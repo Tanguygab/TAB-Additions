@@ -34,10 +34,10 @@ public class TabPlusCmds implements CommandExecutor, TabCompleter {
     }
 
     private boolean featureEnabled(String feature) {
-        return TabAPI.getInstance().getFeatureManager().isFeatureEnabled("&a"+feature+"&r");
+        return TabAPI.getInstance().getFeatureManager().isFeatureEnabled(feature);
     }
     private TabFeature getFeature(String feature) {
-        return TabAPI.getInstance().getFeatureManager().getFeature("&a"+feature+"&r");
+        return TabAPI.getInstance().getFeatureManager().getFeature(feature);
     }
 
     @Override

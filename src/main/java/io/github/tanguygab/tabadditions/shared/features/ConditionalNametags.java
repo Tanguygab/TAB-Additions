@@ -16,7 +16,7 @@ public class ConditionalNametags extends TabFeature {
     private final boolean def;
 
     public ConditionalNametags() {
-        super("&aConditional Nametags&r");
+        super("Conditional Nametags","&aConditional Nametags&r");
         tab = TabAPI.getInstance();
         for (TabPlayer p : tab.getOnlinePlayers()) p.loadPropertyFromConfig(this,"nametag-condition");
         def = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("conditional-nametags.show-by-default",true);

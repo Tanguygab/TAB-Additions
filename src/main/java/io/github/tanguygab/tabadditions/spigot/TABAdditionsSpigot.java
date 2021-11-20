@@ -29,9 +29,9 @@ public class TABAdditionsSpigot extends JavaPlugin implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
         TabAPI tab = TabAPI.getInstance();
-        if (!tab.getFeatureManager().isFeatureEnabled("&aChat&r")) return;
+        if (!tab.getFeatureManager().isFeatureEnabled("Chat")) return;
         e.setCancelled(true);
-        ((ChatManager)tab.getFeatureManager().getFeature("&aChat&r")).onChat(tab.getPlayer(e.getPlayer().getUniqueId()),e.getMessage());
+        ((ChatManager)tab.getFeatureManager().getFeature("Chat")).onChat(tab.getPlayer(e.getPlayer().getUniqueId()),e.getMessage());
     }
 
     @Override

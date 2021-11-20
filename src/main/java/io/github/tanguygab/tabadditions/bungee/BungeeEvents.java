@@ -17,8 +17,6 @@ import net.md_5.bungee.api.plugin.Listener;
 import net.md_5.bungee.event.EventHandler;
 import net.md_5.bungee.event.EventPriority;
 
-import java.util.Map;
-
 
 public class BungeeEvents implements Listener {
 
@@ -31,11 +29,11 @@ public class BungeeEvents implements Listener {
     public void onChat(ChatEvent e) {
         if (e.isCommand() || e.isCancelled()) return;
         TabAPI tab = TabAPI.getInstance();
-        if (!tab.getFeatureManager().isFeatureEnabled("&aChat&r")) return;
+        if (!tab.getFeatureManager().isFeatureEnabled("Chat")) return;
         if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("chat-from-bukkit-bridge",false))
             return;
         e.setCancelled(true);
-        ((ChatManager)tab.getFeatureManager().getFeature("&aChat&r")).onChat(tab.getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()),e.getMessage());
+        ((ChatManager)tab.getFeatureManager().getFeature("Chat")).onChat(tab.getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()),e.getMessage());
     }
 
     @EventHandler
@@ -47,8 +45,8 @@ public class BungeeEvents implements Listener {
         TabPlayer p = tab.getPlayer(((ProxiedPlayer) e.getReceiver()).getUniqueId());
         if (subChannel.equalsIgnoreCase("Chat")) {
             String msg = in.readUTF();
-            if (tab.getFeatureManager().isFeatureEnabled("&aChat&r"))
-                ((ChatManager)tab.getFeatureManager().getFeature("&aChat&r")).onChat(p,msg);
+            if (tab.getFeatureManager().isFeatureEnabled("Chat"))
+                ((ChatManager)tab.getFeatureManager().getFeature("Chat")).onChat(p,msg);
             return;
         }
         if (subChannel.equalsIgnoreCase("PlaceholderAPI")) {

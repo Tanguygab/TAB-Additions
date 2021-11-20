@@ -12,7 +12,7 @@ public class OnlyYou extends TabFeature {
     private final Plugin plugin;
 
     public OnlyYou() {
-        super("&aOnly You&r");
+        super("Only You","&aOnly You&r");
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
         load();
     }

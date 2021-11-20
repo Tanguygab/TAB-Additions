@@ -4,6 +4,7 @@ import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
 import me.neznamy.tab.api.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
@@ -88,7 +89,7 @@ public class ChatManager extends TabFeature {
     public List<String> filterExempt;
 
     public ChatManager() {
-        super("&aChat&r");
+        super("Chat","&aChat&r");
         tab = TabAPI.getInstance();
         load();
     }
@@ -230,9 +231,7 @@ public class ChatManager extends TabFeature {
         if (cooldown.containsKey(p)) {
             long time = ChronoUnit.SECONDS.between(cooldown.get(p),LocalDateTime.now());
             if (time < cooldownTime) {
-                p.sendMessage(plinstance.getTranslation()
-                        .getString("tab+_message_cooldown", "&cYou have to wait %seconds% more seconds!")
-                        .replace("%seconds%", cooldownTime-time+""), true);
+                p.sendMessage(plinstance.getMsgs().getCooldown(cooldownTime-time), true);
                 return;
             }
             cooldown.remove(p);
@@ -277,7 +276,7 @@ public class ChatManager extends TabFeature {
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
         msg = msg.replace("|","\u2503");
-        text = plinstance.parsePlaceholders(text,p,viewer,p,this)
+        text = plinstance.parsePlaceholders(text,p,viewer,this)
                 .replace("%channel%",getFormat(p).getChannel())
                 .replace("%condition%",getFormat(p).getViewCondition());
         if (!text.startsWith("{")) text = "{"+text;
@@ -362,7 +361,7 @@ public class ChatManager extends TabFeature {
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
                     if (!customInteractions.get(interaction).get("input").equals(""))
-                        txt = replaceInput(txt,customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,p,this))+"{");
+                        txt = replaceInput(txt,customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,this))+"{");
                 }
             }
             text = text.replace(txtold,txt);
@@ -393,7 +392,7 @@ public class ChatManager extends TabFeature {
 
             if (comp.toFlatText().replaceAll("^\\s+","").equals("[item]")) {
                 String color = lastcolor == null ? "" : "#"+lastcolor.getHexCode();
-                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,p,this)+color,viewer);
+                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,this)+color,viewer);
             }
             comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
             return comp;
@@ -513,13 +512,13 @@ public class ChatManager extends TabFeature {
     }
 
     public String pingcheck(TabPlayer p, String msg, TabPlayer viewer, String hoverclick) {
-        String input = plinstance.parsePlaceholders(mentionInput,p,viewer,viewer,this);
+        String input = plinstance.parsePlaceholders(mentionInput,p,viewer,this);
         if (input.equals("") || viewer == null) return msg;
         if (!p.hasPermission("tabadditions.chat.bypass.togglemention") && mentionDisabled.contains(viewer.getName().toLowerCase())) return msg;
         if (!p.hasPermission("tabadditions.chat.bypass.ignore") && tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
             return msg;
         if (msg.toLowerCase().contains(input.toLowerCase())) {
-            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,p,this)+"{");
+            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,this)+"{");
             if (regexInputs)
                 msg = msg.replaceAll(input,Matcher.quoteReplacement(output));
             else msg = msg.replaceAll("(?i)"+Pattern.quote(input), output);
@@ -643,7 +642,7 @@ public class ChatManager extends TabFeature {
     public boolean onCommand(TabPlayer p, String msg) {
         msg = msg.replaceFirst("/","");
         ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
-        ConfigurationFile translation = plinstance.getTranslation();
+        TranslationFile translation = plinstance.getMsgs();
 
         if (config.getConfigurationSection("commands") == null || !config.getConfigurationSection("commands").containsKey(msg))
             return false;
@@ -652,15 +651,15 @@ public class ChatManager extends TabFeature {
         String format = cmd.get("format")+"";
         String name = cmd.get("name")+"";
         if (!plinstance.isConditionMet(condition,p))
-            p.sendMessage(translation.getString("no_permission","&cI'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error."),true);
+            p.sendMessage(translation.getNoPermission(),true);
         else {
             if (defformats.containsKey(p)) {
                 defformats.remove(p);
-                p.sendMessage(translation.getString("tab+_chat-cmd-leave","&7You left %name%!").replace("%name%",name), true);
+                p.sendMessage(translation.getCmdLeave(name), true);
             }
             else {
                 defformats.put(p, format);
-                p.sendMessage(translation.getString("tab+_chat-cmd-join","&7You joined %name%!").replace("%name%",name), true);
+                p.sendMessage(translation.getCmdJoin(name), true);
             }
         }
         return true;

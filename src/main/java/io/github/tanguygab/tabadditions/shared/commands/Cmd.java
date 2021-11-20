@@ -85,7 +85,7 @@ public class Cmd {
         if (args.length >= 2) {
             switch (args[0]) {
                 case "actionbar":
-                    ActionBar actionbar = (ActionBar) tab.getFeatureManager().getFeature("&aActionBar&r");
+                    ActionBar actionbar = (ActionBar) tab.getFeatureManager().getFeature("ActionBar");
                     if (args.length == 2 && actionbar != null) {
                         List<String> list = new ArrayList<>(actionbar.getLists());
                         list.add("custom:<text>");
@@ -98,7 +98,7 @@ public class Cmd {
                     break;
                 }
                 case "fp": {
-                    RFPManager rfpm = (RFPManager) tab.getFeatureManager().getFeature("&aReal Fake Players&r");
+                    RFPManager rfpm = (RFPManager) tab.getFeatureManager().getFeature("Real Fake Players");
                     if (rfpm == null)
                         return null;
                     if (args.length == 2)
@@ -117,7 +117,7 @@ public class Cmd {
                     break;
                 }
                 case "title": {
-                    Title title = (Title) tab.getFeatureManager().getFeature("&aTitle&r");
+                    Title title = (Title) tab.getFeatureManager().getFeature("Title");
                     if (args.length == 2 && title != null) {
                         List<String> list = new ArrayList<>(title.getLists());
                         list.add("custom:<title>||<subtitle>||<fadein>||<stay>||<fadeout>");

@@ -21,7 +21,7 @@ public class SitHideNametag extends TabFeature implements Listener {
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
 
     public SitHideNametag() {
-        super("&aSit Hide Nametag&r");
+        super("Site Hide Nametag","&aSit Hide Nametag&r");
         load();
     }
 

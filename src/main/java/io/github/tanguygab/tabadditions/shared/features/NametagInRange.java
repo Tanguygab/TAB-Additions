@@ -14,7 +14,7 @@ public class NametagInRange extends TabFeature {
     private RepeatingTask task;
 
     public NametagInRange() {
-        super("&aNametag in Range&r");
+        super("Nametag In Range","&aNametag in Range&r");
         tab = TabAPI.getInstance();
         for (TabPlayer p : tab.getOnlinePlayers()) {
             for (TabPlayer p2 : tab.getOnlinePlayers()) {

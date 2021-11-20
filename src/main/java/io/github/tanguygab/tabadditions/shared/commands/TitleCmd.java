@@ -13,7 +13,7 @@ public class TitleCmd {
     public TitleCmd(String name, String[] args, List<Object> properties) {
 
         TABAdditions instance = TABAdditions.getInstance();
-        Title feature = (Title) TabAPI.getInstance().getFeatureManager().getFeature("&aTitle&r");
+        Title feature = (Title) TabAPI.getInstance().getFeatureManager().getFeature("Title");
 
 
         if (args.length > 2 && args[2].equals("*")) {

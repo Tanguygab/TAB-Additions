@@ -11,7 +11,7 @@ public class ActionBarCmd {
 
         TabAPI tab = TabAPI.getInstance();
         TABAdditions instance = TABAdditions.getInstance();
-        ActionBar feature = (ActionBar) tab.getFeatureManager().getFeature("&aActionBar&r");
+        ActionBar feature = (ActionBar) tab.getFeatureManager().getFeature("ActionBar");
 
 
         if (args.length > 2 && args[2].equals("*")) {

@@ -6,13 +6,12 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.config.YamlConfigurationFile;
+import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
 import me.neznamy.tab.api.task.RepeatingTask;
 
 import java.util.*;
-import java.util.concurrent.Future;
 
 public class RFPManager extends TabFeature {
 
@@ -22,7 +21,7 @@ public class RFPManager extends TabFeature {
     private RepeatingTask task;
 
     public RFPManager() {
-        super("&aReal Fake Players&r");
+        super("Real Fake Players","&aReal Fake Players&r");
         tab = TabAPI.getInstance();
         load();
     }
@@ -41,7 +40,7 @@ public class RFPManager extends TabFeature {
 
         UUID uuid = UUID.randomUUID();
 
-        YamlConfigurationFile config = TABAdditions.getInstance().getConfig(ConfigType.MAIN);
+        ConfigurationFile config = TABAdditions.getInstance().getConfig(ConfigType.MAIN);
 
         config.set("fakeplayers."+name+".name", name);
         config.set("fakeplayers."+name+".uuid", uuid+"");
@@ -139,7 +138,7 @@ public class RFPManager extends TabFeature {
     public void updateRFPs(TabPlayer p) {
         List<RFP> rfps = new ArrayList<>(this.rfps.values());
         for (RFP rfp : rfps) {
-            Object skin = TABAdditions.getInstance().getSkins().getIcon(rfp.skin, p, this);
+            Object skin = TABAdditions.getInstance().getSkins().getSkin(rfp.skin);
             if (skin != null) {
                 if (!TABAdditions.getInstance().enabled) return;
                 rfp.update(p, skin);

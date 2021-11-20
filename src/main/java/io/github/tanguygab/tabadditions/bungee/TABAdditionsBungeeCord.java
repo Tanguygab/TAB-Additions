@@ -1,14 +1,9 @@
 package io.github.tanguygab.tabadditions.bungee;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatCmds;
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
-import me.neznamy.tab.api.TabAPI;
 import net.md_5.bungee.api.plugin.Plugin;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public final class TABAdditionsBungeeCord extends Plugin {

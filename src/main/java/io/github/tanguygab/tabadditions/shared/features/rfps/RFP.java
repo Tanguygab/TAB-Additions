@@ -5,7 +5,7 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.PropertyConfiguration;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.config.YamlConfigurationFile;
+import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
@@ -14,7 +14,7 @@ import java.util.*;
 
 public class RFP {
 
-    private final YamlConfigurationFile configfile;
+    private final ConfigurationFile configfile;
     protected final RFPManager feature;
 
     private final String configname;

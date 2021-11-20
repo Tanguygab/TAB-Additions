@@ -2,12 +2,12 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import me.neznamy.tab.api.Property;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
-import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.protocol.PacketPlayOutChat;
 import me.neznamy.tab.api.task.RepeatingTask;
 
@@ -17,7 +17,7 @@ import java.util.List;
 public class ActionBar extends TabFeature {
 
     public ActionBar() {
-        super("&aActionBar&r");
+        super("ActionBar","&aActionBar&r");
         load();
     }
 
@@ -90,14 +90,14 @@ public class ActionBar extends TabFeature {
 
     public void toggleActionBar(String name) {
         TabPlayer p = TabAPI.getInstance().getPlayer(name);
-        ConfigurationFile translation = TABAdditions.getInstance().getTranslation();
+        TranslationFile translation = TABAdditions.getInstance().getMsgs();
 
         if (toggleActionBar.contains(name.toLowerCase())) {
             toggleActionBar.remove(name.toLowerCase());
-            p.sendMessage(translation.getString("tab+_actionbars_on", "&aYou will now receive new actionbars!"), true);
+            p.sendMessage(translation.actionBarOn, true);
         } else {
             toggleActionBar.add(name.toLowerCase());
-            p.sendMessage(translation.getString("tab+_actionbars_off", "&cYou won't receive any new actionbars!"), true);
+            p.sendMessage(translation.actionBarOff, true);
         }
     }
 }

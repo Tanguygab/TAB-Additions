@@ -19,7 +19,7 @@ public class SneakHideNametag extends TabFeature implements Listener {
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
 
     public SneakHideNametag() {
-        super("&aSneak Hide Nametag&r");
+        super("Sneak Hide Nametag","&aSneak Hide Nametag&r");
         load();
     }
 

@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
-import io.github.tanguygab.tabadditions.shared.Skins;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
 import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
@@ -10,7 +9,7 @@ import me.neznamy.tab.api.TabPlayer;
 public class RealFakePlayerCmd {
     public RealFakePlayerCmd(String nameS, String[] args) {
         TABAdditions instance = TABAdditions.getInstance();
-        RFPManager rfpm = (RFPManager) TabAPI.getInstance().getFeatureManager().getFeature("&aReal Fake Players&r");
+        RFPManager rfpm = (RFPManager) TabAPI.getInstance().getFeatureManager().getFeature("Real Fake Players");
         String output = "";
 
         if (args[1].equalsIgnoreCase("list")) {
@@ -77,7 +76,7 @@ public class RealFakePlayerCmd {
                 for (TabPlayer p : TabAPI.getInstance().getOnlinePlayers()) {
                     Object skin = null;
                     if (prop.equalsIgnoreCase("skin"))
-                        skin = Skins.getInstance().getIcon(value, p,rfpm);
+                        skin = instance.getSkins().getSkin(value);
                     rfp.update(p, skin);
                 }
             }

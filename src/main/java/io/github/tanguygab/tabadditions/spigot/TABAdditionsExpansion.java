@@ -58,7 +58,7 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
     public String onPlaceholderRequest(Player player, String identifier){
 
         if (identifier.equals("fakeplayers_amount") && TABAdditions.getInstance().rfpEnabled)
-            return ((RFPManager)tab.getFeatureManager().getFeature("&aReal Fake Players&r")).getRFPS().size()+"";
+            return ((RFPManager)tab.getFeatureManager().getFeature("Real Fake Players")).getRFPS().size()+"";
 
         if (player == null) return "";
         TabPlayer p = tab.getPlayer(player.getUniqueId());
@@ -67,7 +67,7 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
         if (identifier.equals("tag_visible")) return !TabAPI.getInstance().getTeamManager().hasHiddenNametag(p)+"";
 
         if (identifier.startsWith("chat_")) {
-            ChatManager cm = (ChatManager) TabAPI.getInstance().getFeatureManager().getFeature("&aChat&r");
+            ChatManager cm = (ChatManager) TabAPI.getInstance().getFeatureManager().getFeature("Chat");
             if (identifier.equals("chat_mentions"))
                 return cm.mentionDisabled.contains(p.getName().toLowerCase()) ? "Off" : "On";
             if (identifier.equals("chat_messages"))

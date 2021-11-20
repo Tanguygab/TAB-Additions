@@ -53,7 +53,7 @@
   ],
 
   "changelog": [
-    "<font color=\"FF0000\">**THIS VERSION ONLY SUPPORTS TAB 3.0 PRE-2, USE 1.5.14 FOR TAB 2.9.2**</font>",
+    "<font color=\"FF0000\">**THIS VERSION ONLY SUPPORTS TAB 3.0 PRE-3, USE 1.5.14 FOR TAB 2.9.2**</font>",
     "",
     "[-] Removed Layout as TAB now has that feature in a better way",
     "[+] Added emoji categories with custom output and permissions",
