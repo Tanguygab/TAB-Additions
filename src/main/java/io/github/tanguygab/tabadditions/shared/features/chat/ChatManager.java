@@ -557,7 +557,8 @@ public class ChatManager extends TabFeature {
 
         return new ItemStack(Material.AIR);
     }
-    public String getItemName(ItemStack item) {
+    public String getItemName(Object i) {
+        ItemStack item = (ItemStack) i;
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) return item.getItemMeta().getDisplayName();
 
         String type = item.getType().toString().replace("_", " ").toLowerCase();
