@@ -112,7 +112,7 @@ public class ChatManager extends TabFeature {
     public ChatFormat defFormat() {
         Map<String,String> map = new HashMap<>();
 
-        map.put("text","{%tab_chatprefix% %tab_customchatname% %tab_chatsuffix%&7\u00bb &r%msg%||%time%}");
+        map.put("text","{%prop-chatprefix% %prop-customchatname% %prop-chatsuffix%&7\u00bb &r%msg%||%time%}");
         return new ChatFormat("default", map);
     }
 
