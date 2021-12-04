@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
-import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
@@ -16,7 +15,7 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.chat.TextColor;
 import me.neznamy.tab.api.chat.rgb.RGBUtils;
 import me.neznamy.tab.api.config.ConfigurationFile;
-import org.bukkit.Bukkit;
+
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -251,13 +250,13 @@ public class ChatManager extends TabFeature {
             else if (isSpying(p,pl).equals("view-condition"))
                 pl.sendMessage(createmsg(p, msg, spyViewConditionsOutput,pl));
         }
-        if (plinstance.getPlatform().getType() == PlatformType.SPIGOT && Bukkit.getServer().getPluginManager().isPluginEnabled("DiscordSRV"))
-            if (plinstance.getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true)) {
-                DiscordSRV discord = DiscordSRV.getPlugin();
-                if (canSee(p, null))
-                    discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()), msg, discord.getMainChatChannel(), false);
-                else if (getFormat(p).isViewConditionMet(p,null) && !discord.getOptionalChannel(chatFormat.getChannel()).equals(discord.getMainChatChannel())) discord.processChatMessage(Bukkit.getServer().getPlayer(p.getUniqueId()),msg, discord.getOptionalChannel(chatFormat.getChannel()),false);
-            }
+
+        if (plinstance.getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true)) {
+            if (canSee(p,null))
+                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msg,chatFormat.getChannel(),false);
+            else if (getFormat(p).isViewConditionMet(p,null))
+                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msg,chatFormat.getChannel(),true);
+        }
     }
 
     public IChatBaseComponent createmsg(TabPlayer p, String msg, String chatFormat, TabPlayer viewer) {

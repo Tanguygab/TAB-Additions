@@ -2,17 +2,20 @@ package io.github.tanguygab.tabadditions.spigot;
 
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
+import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.*;
 
 import me.neznamy.tab.api.TabPlayer;
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
+
+import java.util.UUID;
+
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
@@ -36,7 +39,7 @@ public class SpigotPlatform extends Platform {
 
 	@Override
 	public boolean isPluginEnabled(String plugin) {
-		return Bukkit.getPluginManager().isPluginEnabled(plugin);
+		return this.plugin.getServer().getPluginManager().isPluginEnabled(plugin);
 	}
 
 	@Override
@@ -61,9 +64,9 @@ public class SpigotPlatform extends Platform {
 		TABAdditions.getInstance().reload();
 
 		HandlerList.unregisterAll((Plugin) plugin);
-		Bukkit.getServer().getPluginManager().registerEvents(plugin, plugin);
+		plugin.getServer().getPluginManager().registerEvents(plugin, plugin);
 
-		if (Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null)
+		if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
 			new TABAdditionsExpansion(plugin).register();
 
 	}
@@ -97,5 +100,17 @@ public class SpigotPlatform extends Platform {
 	@Override
 	public void disable() {
 		plugin.getPluginLoader().disablePlugin(plugin);
+	}
+
+	@Override
+	public void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition) {
+		if (!plugin.getServer().getPluginManager().isPluginEnabled("DiscordSRV")) return;
+
+		Player p = plugin.getServer().getPlayer(uuid);
+		DiscordSRV discord = DiscordSRV.getPlugin();
+		if (!viewCondition)
+		discord.processChatMessage(p, msg, discord.getMainChatChannel(), false);
+		else if (!discord.getOptionalChannel(channel).equals(discord.getMainChatChannel()))
+			discord.processChatMessage(p, msg, discord.getOptionalChannel(channel),false);
 	}
 }

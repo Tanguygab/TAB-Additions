@@ -2,6 +2,8 @@ package io.github.tanguygab.tabadditions.shared;
 
 import me.neznamy.tab.api.TabPlayer;
 
+import java.util.UUID;
+
 public abstract class Platform {
 
 	public abstract PlatformType getType();
@@ -23,4 +25,6 @@ public abstract class Platform {
 	public abstract void loadFeatures();
 
 	public abstract void disable();
+
+    public abstract void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition);
 }

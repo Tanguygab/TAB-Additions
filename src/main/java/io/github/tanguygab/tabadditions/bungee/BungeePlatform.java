@@ -1,6 +1,8 @@
 package io.github.tanguygab.tabadditions.bungee;
 
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
@@ -12,6 +14,8 @@ import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
+
+import java.util.UUID;
 
 public class BungeePlatform extends Platform {
 
@@ -92,5 +96,15 @@ public class BungeePlatform extends Platform {
 		plugin.getProxy().getPluginManager().unregisterCommands(plugin);
 		plugin.getProxy().getPluginManager().unregisterListeners(plugin);
 
+	}
+
+	@Override
+	public void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition) {
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF("DiscordSRV");
+		out.writeUTF(msg);
+		out.writeUTF(channel);
+		out.writeUTF(viewCondition+"");
+		plugin.getProxy().getPlayer(UUID.randomUUID()).sendData("tabadditions:channel",out.toByteArray());
 	}
 }
