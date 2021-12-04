@@ -380,7 +380,7 @@ public class ChatManager extends TabFeature {
         }
 
         if (hover.startsWith("item:")) {
-            ItemStack item = getItem(hover,p);
+            ItemStack item = (ItemStack) getItem(hover,p);
 
             String itemtxt;
             if (item.getType() != Material.AIR) {
@@ -532,7 +532,7 @@ public class ChatManager extends TabFeature {
         return msg;
     }
 
-    public ItemStack getItem(String str, TabPlayer p) {
+    public Object getItem(String str, TabPlayer p) {
         str = str.replace("item:","");
         Player player = (Player) p.getPlayer();
 
