@@ -228,7 +228,7 @@ public class ChatCmds {
                     p.sendMessage(translation.getPlayerNotFound(player), true);
                 else if (!msgSelf && p == p2)
                     p.sendMessage(translation.cantPmSelf, true);
-                else if (!p.hasPermission("tabadditions.chat.bypass.togglemsg") && playerdata.getStringList("togglemsg").contains(p2.getName().toLowerCase()))
+                else if (!p.hasPermission("tabadditions.chat.bypass.togglemsg") && playerdata.getStringList("togglemsg", new ArrayList<>()).contains(p2.getName().toLowerCase()))
                     p.sendMessage(translation.hasPmOff, true);
                 else if (!p.hasPermission("tabadditions.chat.bypass.ignore") && playerdata.getStringList("msg-ignore." + p2.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
                     p.sendMessage(translation.isIgnored, true);
