@@ -1,5 +1,8 @@
 default-format: default
-DiscordSRV-Support: true
+discord:
+  enabled: false
+  DiscordSRV: false
+  EssentialsX: false
 message-cooldown: 0
 item:
   enabled: true

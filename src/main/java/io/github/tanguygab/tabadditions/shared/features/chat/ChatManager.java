@@ -251,11 +251,12 @@ public class ChatManager extends TabFeature {
                 pl.sendMessage(createmsg(p, msg, spyViewConditionsOutput,pl));
         }
 
-        if (plinstance.getConfig(ConfigType.CHAT).getBoolean("DiscordSRV-Support",true)) {
+        Map<String, Boolean> cfg = plinstance.getConfig(ConfigType.CHAT).getConfigurationSection("discord");
+        if (cfg.getOrDefault("enabled",false)) {
             if (canSee(p,null))
-                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msg,chatFormat.getChannel(),false);
+                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msg,chatFormat.getChannel(),false, cfg);
             else if (getFormat(p).isViewConditionMet(p,null))
-                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msg,chatFormat.getChannel(),true);
+                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msg,chatFormat.getChannel(),true, cfg);
         }
     }
 

@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared;
 
 import me.neznamy.tab.api.TabPlayer;
 
+import java.util.Map;
 import java.util.UUID;
 
 public abstract class Platform {
@@ -26,5 +27,5 @@ public abstract class Platform {
 
 	public abstract void disable();
 
-    public abstract void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition);
+    public abstract void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition, Map<String, Boolean> cfg);
 }

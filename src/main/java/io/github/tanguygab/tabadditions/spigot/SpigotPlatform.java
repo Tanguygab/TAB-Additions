@@ -7,6 +7,8 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.*;
 
 import me.neznamy.tab.api.TabPlayer;
+import net.essentialsx.api.v2.services.discord.DiscordService;
+import net.essentialsx.api.v2.services.discord.MessageType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
@@ -14,6 +16,7 @@ import org.bukkit.plugin.Plugin;
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class SpigotPlatform extends Platform {
@@ -103,14 +106,26 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition) {
-		if (!plugin.getServer().getPluginManager().isPluginEnabled("DiscordSRV")) return;
+	public void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, Map<String,Boolean> cfg) {
 
 		Player p = plugin.getServer().getPlayer(uuid);
+		if (cfg.getOrDefault("DiscordSRV",false) && isPluginEnabled("DiscordSRV")) sendDiscordSRV(p,msg,channel,viewCondition);
+		if (cfg.getOrDefault("EssentialsX",false) && isPluginEnabled("Essentials") && !viewCondition) sendEssentialsX(p,msg);
+	}
+
+	public void sendDiscordSRV(Player p, String msg, String channel, boolean viewCondition) {
 		DiscordSRV discord = DiscordSRV.getPlugin();
+
 		if (!viewCondition)
-		discord.processChatMessage(p, msg, discord.getMainChatChannel(), false);
+			discord.processChatMessage(p, msg, discord.getMainChatChannel(), false);
 		else if (!discord.getOptionalChannel(channel).equals(discord.getMainChatChannel()))
 			discord.processChatMessage(p, msg, discord.getOptionalChannel(channel),false);
 	}
+
+	public void sendEssentialsX(Player p, String msg) {
+		DiscordService api = plugin.getServer().getServicesManager().load(DiscordService.class);
+		assert api != null;
+		api.sendChatMessage(p, msg);
+	}
+
 }

@@ -15,6 +15,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
+import java.util.Map;
 import java.util.UUID;
 
 public class BungeePlatform extends Platform {
@@ -99,7 +100,7 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition) {
+	public void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition, Map<String, Boolean> cfg) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("DiscordSRV");
 		out.writeUTF(msg);

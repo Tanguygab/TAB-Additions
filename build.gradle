@@ -28,6 +28,10 @@ repositories {
     maven { url 'https://nexus.scarsz.me/content/groups/public/' }
     maven { url 'https://nexus.vankka.dev/repository/maven-public/'}
     maven { url 'https://repo.nukkitx.com/maven-snapshots'}
+    maven {
+        name = 'ess-repo'
+        url = 'https://repo.essentialsx.net/releases/'
+    }
 
 }
 
@@ -36,6 +40,7 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.18.1-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.10.9'
     compileOnly 'com.discordsrv:discordsrv:1.21.1'
+    compileOnly 'net.essentialsx:EssentialsXDiscord:2.19.2'
     compileOnly files('../TAB-3.0.0.jar','../nms-1.16.5.jar','../AdvancedBan.jar')
 
 }
