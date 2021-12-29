@@ -9,8 +9,6 @@ public abstract class Platform {
 
 	public abstract PlatformType getType();
 
-	public abstract Object getSkin(String[] props);
-
 	public abstract boolean isPluginEnabled(String plugin);
 
 	public abstract String getVersion();
@@ -20,6 +18,8 @@ public abstract class Platform {
 	public abstract void registerCommand(String cmd, boolean bool, String... aliases);
 
 	public abstract void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout);
+
+	public abstract void sendSound(TabPlayer p, String sound);
 
 	public abstract void reload();
 

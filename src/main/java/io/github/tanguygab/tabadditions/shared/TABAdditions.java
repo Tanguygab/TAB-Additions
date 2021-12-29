@@ -16,6 +16,7 @@ import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import me.neznamy.tab.shared.PropertyImpl;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.layout.skin.SkinManager;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
@@ -227,56 +228,33 @@ public class TABAdditions {
     }
 
     public String parsePlaceholders(String str, TabPlayer p) {
-        return parsePlaceholders(str,p,null,null);
+        return parsePlaceholders(str,p,null);
     }
 
     public String parsePlaceholders(String str, TabPlayer p, TabFeature feature) {
         if (str == null) return "";
         if (!str.contains("%")) return EnumChatFormat.color(str);
-        for (String pl : tab.getPlaceholderManager().detectPlaceholders(str))
-            str = str.replace(pl,getLastPlaceholderValue(pl,p,null,feature));
+        str = new PropertyImpl(feature,p,str).get();
         return EnumChatFormat.color(str);
     }
 
-    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabFeature feature) {
-        List<String> list = tab.getPlaceholderManager().detectPlaceholders(str);
+    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabFeature f) {
+        List<String> list = TabAPI.getInstance().getPlaceholderManager().detectPlaceholders(str);
         for (String pl : list) {
             if (pl.startsWith("%sender:") && sender != null) {
                 String pl2 = pl.replace("%sender:", "%");
-                str = str.replace(pl,getLastPlaceholderValue(pl2,sender,viewer,feature));
+                str = str.replace(pl,new PropertyImpl(f,sender,pl2).getFormat(viewer));
                 continue;
             }
             else if (pl.startsWith("%viewer:") && viewer != null) {
                 String pl2 = pl.replace("%viewer:", "%");
-                str = str.replace(pl,getLastPlaceholderValue(pl2,viewer,sender,feature));
+                str = str.replace(pl,new PropertyImpl(f,viewer,pl2).getFormat(sender));
                 continue;
             }
-            str = str.replace(pl,getLastPlaceholderValue(pl,sender,viewer,feature));
+            str = str.replace(pl,new PropertyImpl(f,sender,pl).getFormat(viewer));
         }
         return EnumChatFormat.color(str);
     }
-
-    private String getLastPlaceholderValue(String str, TabPlayer p, TabPlayer viewer, TabFeature feature) {
-        if (feature != null)
-            tab.getPlaceholderManager().addUsedPlaceholder(str,feature);
-        Placeholder pl = TAB.getInstance().getPlaceholderManager().getPlaceholder(str);
-        if (pl instanceof RelationalPlaceholderImpl) {
-            if (p == null || viewer == null) return str;
-            return ((RelationalPlaceholderImpl) pl).getLastValue(p, viewer);
-        }
-        String value = "";
-        if (pl instanceof ServerPlaceholderImpl)
-            value = ((ServerPlaceholderImpl) pl).getLastValue(p);
-        if (pl instanceof PlayerPlaceholderImpl)
-            value = p == null ? pl.getIdentifier() : ((PlayerPlaceholderImpl) pl).getLastValue(p);
-        String newValue = tab.getPlaceholderManager().findReplacement(pl.getIdentifier(), value);
-        if (newValue.contains("%value%"))
-            newValue = newValue.replace("%value%", value);
-
-        return newValue;
-    }
-
-
 
     public boolean isConditionMet(String str, TabPlayer p) {
         if (str == null || str.equals("null")) return true;

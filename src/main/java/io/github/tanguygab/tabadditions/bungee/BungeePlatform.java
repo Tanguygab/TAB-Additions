@@ -32,15 +32,6 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public Object getSkin(String[] props) {
-		String[][] properties = new String[1][3];
-		properties[0][0] = "textures";
-		properties[0][1] = props[0];
-		properties[0][2] = props[1];
-		return properties;
-	}
-
-	@Override
 	public boolean isPluginEnabled(String plugin) {
 		return this.plugin.getProxy().getPluginManager().getPlugin(plugin) != null;
 	}
@@ -80,6 +71,11 @@ public class BungeePlatform extends Platform {
 				.stay(stay)
 				.fadeOut(fadeout);
 		((ProxiedPlayer)p.getPlayer()).sendTitle(t);
+	}
+
+	@Override
+	public void sendSound(TabPlayer p, String sound) {
+		// not supported
 	}
 
 	@Override

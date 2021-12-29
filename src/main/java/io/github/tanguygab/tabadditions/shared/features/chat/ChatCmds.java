@@ -230,7 +230,7 @@ public class ChatCmds {
                     p.sendMessage(translation.cantPmSelf, true);
                 else if (!p.hasPermission("tabadditions.chat.bypass.togglemsg") && playerdata.getStringList("togglemsg", new ArrayList<>()).contains(p2.getName().toLowerCase()))
                     p.sendMessage(translation.hasPmOff, true);
-                else if (!p.hasPermission("tabadditions.chat.bypass.ignore") && playerdata.getStringList("msg-ignore." + p2.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
+                else if (!p.hasPermission("tabadditions.chat.bypass.ignore") && isIgnored(p,p2))
                     p.sendMessage(translation.isIgnored, true);
                 else if (msg.equals("") || msg.equals(" "))
                     p.sendMessage(translation.pmEmpty, true);
@@ -322,4 +322,7 @@ public class ChatCmds {
         return null;
     }
 
+    public boolean isIgnored(TabPlayer p, TabPlayer viewer) {
+        return tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase());
+    }
 }

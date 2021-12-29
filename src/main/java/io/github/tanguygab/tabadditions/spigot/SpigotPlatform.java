@@ -1,14 +1,12 @@
 package io.github.tanguygab.tabadditions.spigot;
 
-import com.mojang.authlib.properties.Property;
-import com.mojang.authlib.properties.PropertyMap;
 import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.*;
 
 import me.neznamy.tab.api.TabPlayer;
 import net.essentialsx.api.v2.services.discord.DiscordService;
-import net.essentialsx.api.v2.services.discord.MessageType;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
@@ -33,14 +31,6 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public Object getSkin(String[] props) {
-		PropertyMap properties = new PropertyMap();
-		Property property = new Property("textures",props[0],props[1]);
-		properties.put("textures",property);
-		return properties;
-	}
-
-	@Override
 	public boolean isPluginEnabled(String plugin) {
 		return this.plugin.getServer().getPluginManager().isPluginEnabled(plugin);
 	}
@@ -60,6 +50,13 @@ public class SpigotPlatform extends Platform {
 		} catch (Exception e) {
 			((Player) p.getPlayer()).sendTitle(title,subtitle);
 		}
+	}
+
+	@Override
+	public void sendSound(TabPlayer p, String sound) {
+		Player player = (Player) p.getPlayer();
+		try {player.playSound(player.getLocation(), Sound.valueOf(sound), 1, 1);}
+		catch (Exception ignored) {}
 	}
 
 	@Override

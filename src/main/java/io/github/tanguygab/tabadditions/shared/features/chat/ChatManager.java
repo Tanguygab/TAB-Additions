@@ -51,6 +51,7 @@ public class ChatManager extends TabFeature {
     public String mentionSound;
     public String mentionOutput;
     public List<String> mentionDisabled = new ArrayList<>();
+    public boolean mentionOutputEveryone;
 
     public Map<String,Map<String,Object>> customInteractions;
 
@@ -145,6 +146,7 @@ public class ChatManager extends TabFeature {
             mentionDisabled.addAll(tab.getPlayerCache().getStringList("togglemention", new ArrayList<>()));
             tab.getPlayerCache().set("togglemention",null);
         }
+        mentionOutputEveryone = config.getBoolean("mention.output-for-everyone",true);
 
         emojiEnabled = config.getBoolean("emojis.enabled",true);
         emojiOutput = config.getString("emojis.output","");
@@ -512,24 +514,36 @@ public class ChatManager extends TabFeature {
     }
 
     public String pingcheck(TabPlayer p, String msg, TabPlayer viewer, String hoverclick) {
-        String input = plinstance.parsePlaceholders(mentionInput,p,viewer,this);
-        if (input.equals("") || viewer == null) return msg;
-        if (!p.hasPermission("tabadditions.chat.bypass.togglemention") && mentionDisabled.contains(viewer.getName().toLowerCase())) return msg;
-        if (!p.hasPermission("tabadditions.chat.bypass.ignore") && tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()))
-            return msg;
-        if (msg.toLowerCase().contains(input.toLowerCase())) {
-            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,viewer,this)+"{");
+        boolean check = false;
+        TabPlayer p2 = viewer;
+        if (mentionOutputEveryone) {
+            for (TabPlayer all : tab.getOnlinePlayers()) {
+                if (pingcheck2(p,msg,all)) {
+                    check = true;
+                    p2 = all;
+                }
+            }
+        } else check = pingcheck2(p,msg,viewer);
+
+        if (check) {
+            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,p2,this)+"{");
+            String input = plinstance.parsePlaceholders(mentionInput,p2,this);
             if (regexInputs)
                 msg = msg.replaceAll(input,Matcher.quoteReplacement(output));
             else msg = msg.replaceAll("(?i)"+Pattern.quote(input), output);
-            if (plinstance.getPlatform().getType().equals(PlatformType.SPIGOT)) {
-                Player player = (Player) viewer.getPlayer();
-                try {player.playSound(player.getLocation(), Sound.valueOf(mentionSound), 1, 1);}
-                catch (Exception ignored) {}
-            }
-        }
 
+            if (viewer == p2)
+                plinstance.getPlatform().sendSound(viewer,mentionSound);
+        }
         return msg;
+    }
+
+    public boolean pingcheck2(TabPlayer p, String msg, TabPlayer viewer) {
+        String input = plinstance.parsePlaceholders(mentionInput,viewer,this);
+        if (input.equals("") || viewer == null) return false;
+        if (!p.hasPermission("tabadditions.chat.bypass.togglemention") && mentionDisabled.contains(viewer.getName().toLowerCase())) return false;
+        if (!p.hasPermission("tabadditions.chat.bypass.ignore") && cmds.isIgnored(p,viewer)) return false;
+        return msg.toLowerCase().contains(input.toLowerCase());
     }
 
     public Object getItem(String str, TabPlayer p) {
