@@ -57,7 +57,16 @@ public class TABAdditionsSpigot extends JavaPlugin implements Listener {
                                 Class.forName("net.minecraft.nbt.NBTTagCompound")
                                         .getConstructor().newInstance()).toString();
             } catch (Exception e2) {
-                return null;
+                try {
+                    return Class.forName("net.minecraft.world.item.ItemStack")
+                            .getMethod("b", Class.forName("net.minecraft.nbt.NBTTagCompound"))
+                            .invoke(Class.forName("org.bukkit.craftbukkit." + pack + ".inventory.CraftItemStack")
+                                            .getMethod("asNMSCopy", ItemStack.class).invoke(null, item),
+                                    Class.forName("net.minecraft.nbt.NBTTagCompound")
+                                            .getConstructor().newInstance()).toString();
+                } catch (Exception e3) {
+                    return null;
+                }
             }
         }
     }
