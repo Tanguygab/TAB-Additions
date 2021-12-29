@@ -78,8 +78,8 @@ public class ChatManager extends TabFeature {
     public boolean embedURLs;
     public boolean embedURLsAutoAddHttp;
     public String urlsOutput;
-    public Pattern urlPattern = Pattern.compile("([&\u00A7][a-fA-Fk-oK-OrR0-9])?(?<url>(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}( ?\\. ?| ?\\(?dot\\)? ?)[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*))");
-    public Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}( ?\\. ?|\\(?dot\\)?)){3}[0-9]{1,3}");
+    public Pattern urlPattern = Pattern.compile("([&\u00A7][a-fA-Fk-oK-OrR0-9])?(?<url>(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*))");
+    public Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}\\.){3}[0-9]{1,3}");
 
     public boolean filterEnabled;
     public String filterChar;
@@ -273,11 +273,12 @@ public class ChatManager extends TabFeature {
 
         String format = removeSpaces(chatFormat);
 
+        msg = msg.replace("{","<bracketleft>").replace("}","<bracketright>").replace("|","<bar>");
+
         return compcheck(msg,format,p,viewer);
     }
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
-        msg = msg.replace("|","\u2503");
         text = plinstance.parsePlaceholders(text,p,viewer,this)
                 .replace("%channel%",getFormat(p).getChannel())
                 .replace("%condition%",getFormat(p).getViewCondition());
@@ -638,6 +639,7 @@ public class ChatManager extends TabFeature {
         return str.replace("{ ","{").replace(" }","}").replace(" || ","||");
     }
     public IChatBaseComponent createComponent(String str, TabPlayer p) {
+        str = str.replace("<bracketleft>","{").replace("<bracketright>","}").replace("<bar>","|");
         if (forceColors) return IChatBaseComponent.fromColoredText(str);
         return p != null && p.getVersion().getMinorVersion() < 16 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
     }
