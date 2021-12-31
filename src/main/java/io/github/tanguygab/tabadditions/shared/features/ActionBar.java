@@ -42,7 +42,8 @@ public class ActionBar extends TabFeature {
             for (TabPlayer p : tab.getOnlinePlayers()) {
                 if (noBar.contains(p)) continue;
                 Property prop = p.getProperty("actionbar");
-                sendActionBar(p,prop.updateAndGet());
+                if (prop != null)
+                    sendActionBar(p,prop.updateAndGet());
             }
         });
     }
