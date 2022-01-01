@@ -3,7 +3,6 @@ package io.github.tanguygab.tabadditions.spigot;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.platforms.bukkit.event.TabLoadEvent;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -19,11 +18,6 @@ public class TABAdditionsSpigot extends JavaPlugin implements Listener {
         TABAdditions.setInstance(new TABAdditions(new SpigotPlatform(this), this,getDataFolder()));
         TABAdditions.getInstance().load();
         getCommand("tabadditions").setExecutor(new MainCmd());
-    }
-
-    @EventHandler
-    public void onTABLoad(TabLoadEvent e) {
-        TABAdditions.getInstance().getPlatform().reload();
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
