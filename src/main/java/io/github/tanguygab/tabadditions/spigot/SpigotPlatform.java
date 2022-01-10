@@ -107,7 +107,7 @@ public class SpigotPlatform extends Platform {
 
 		Player p = plugin.getServer().getPlayer(uuid);
 		if (cfg.getOrDefault("DiscordSRV",false) && isPluginEnabled("DiscordSRV")) sendDiscordSRV(p,msg,channel,viewCondition);
-		if (cfg.getOrDefault("EssentialsX",false) && isPluginEnabled("Essentials") && !viewCondition) sendEssentialsX(p,msg);
+		if (cfg.getOrDefault("EssentialsX",false) && isPluginEnabled("EssentialsDiscord") && !viewCondition) sendEssentialsX(p,msg);
 	}
 
 	public void sendDiscordSRV(Player p, String msg, String channel, boolean viewCondition) {
