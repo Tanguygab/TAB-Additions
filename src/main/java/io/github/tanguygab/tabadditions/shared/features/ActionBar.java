@@ -38,7 +38,7 @@ public class ActionBar extends TabFeature {
         for (TabPlayer p : tab.getOnlinePlayers())
             p.loadPropertyFromConfig(this,"actionbar");
 
-        task = tab.getThreadManager().startRepeatingMeasuredTask(1000,"handling permanent ActionBars",this,"refreshing",()->{
+        task = tab.getThreadManager().startRepeatingMeasuredTask(1000,this,"handling permanent ActionBars",()->{
             for (TabPlayer p : tab.getOnlinePlayers()) {
                 if (noBar.contains(p)) continue;
                 Property prop = p.getProperty("actionbar");
@@ -86,7 +86,7 @@ public class ActionBar extends TabFeature {
 
     public void addToNoBar(TabPlayer p) {
         noBar.add(p);
-        TabAPI.getInstance().getThreadManager().runTaskLater(2000,"handling ActionBar "+p.getName(),this,"",()-> noBar.remove(p));
+        TabAPI.getInstance().getThreadManager().runTaskLater(2000,this,"handling ActionBar "+p.getName(),()-> noBar.remove(p));
     }
 
     public void toggleActionBar(String name) {

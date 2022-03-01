@@ -9,6 +9,7 @@ import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
+import me.neznamy.tab.api.protocol.Skin;
 
 import java.util.*;
 
@@ -178,7 +179,7 @@ public class RFP {
         return sortedGroups;
     }
 
-    public void update(TabPlayer p, Object skin) {
+    public void update(TabPlayer p, Skin skin) {
         PacketPlayOutPlayerInfo.PlayerInfoData fp = get(p);
         p.sendCustomPacket(new PacketPlayOutScoreboardTeam(getSortingTeam()),feature);
         String[] props = getProps(p);

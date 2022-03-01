@@ -9,6 +9,7 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
+import me.neznamy.tab.api.protocol.Skin;
 import me.neznamy.tab.api.task.RepeatingTask;
 
 import java.util.*;
@@ -127,7 +128,7 @@ public class RFPManager extends TabFeature {
     }
 
     public void refresh() {
-        task = tab.getThreadManager().startRepeatingMeasuredTask(500,"refreshing RFPs", this, "refreshing",() -> {
+        task = tab.getThreadManager().startRepeatingMeasuredTask(500,this,"refreshing RFPs",() -> {
             for (TabPlayer p : tab.getOnlinePlayers()) {
                 updateRFPs(p);
             }
@@ -138,7 +139,7 @@ public class RFPManager extends TabFeature {
     public void updateRFPs(TabPlayer p) {
         List<RFP> rfps = new ArrayList<>(this.rfps.values());
         for (RFP rfp : rfps) {
-            Object skin = TABAdditions.getInstance().getSkins().getSkin(rfp.skin);
+            Skin skin = TABAdditions.getInstance().getSkins().getSkin(rfp.skin);
             if (skin != null) {
                 if (!TABAdditions.getInstance().enabled) return;
                 rfp.update(p, skin);

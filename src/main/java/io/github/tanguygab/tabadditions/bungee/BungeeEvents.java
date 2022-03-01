@@ -55,7 +55,7 @@ public class BungeeEvents implements Listener {
                     result = ""+tab.getBossBarManager().hasBossBarVisible(p);
                     break;
                 case "ntpreview":
-                    result = ""+p.isPreviewingNametag();
+                    result = ""+tab.getTeamManager().hasHiddenNameTagVisibilityView(p);
                     break;
                 case "replace":
                     String output = TABAdditions.getInstance().parsePlaceholders(value,p);

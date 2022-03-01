@@ -30,7 +30,7 @@ public class ConditionalNametags extends TabFeature {
 
     @Override
     public void load() {
-        task = tab.getThreadManager().startRepeatingMeasuredTask(500,"handling Nametag In Range", this, "repeating task",()->{
+        task = tab.getThreadManager().startRepeatingMeasuredTask(500,this,"handling Nametag In Range",()->{
             TeamManager tm = tab.getTeamManager();
             for (TabPlayer p : tab.getOnlinePlayers()) {
                 if (p == null) return;

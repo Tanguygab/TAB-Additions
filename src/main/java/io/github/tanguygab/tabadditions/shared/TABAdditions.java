@@ -17,7 +17,7 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
-import me.neznamy.tab.shared.PropertyImpl;
+import me.neznamy.tab.shared.DynamicText;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.layout.skin.SkinManager;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
@@ -233,10 +233,14 @@ public class TABAdditions {
         return parsePlaceholders(str,p,null);
     }
 
+    public static DynamicText newDynamicTextBecauseISuckAtUsingTheseThings(TabPlayer p, String str, TabFeature feature) {
+        return new DynamicText("",feature,p,str,"ARMenu");
+    }
+
     public String parsePlaceholders(String str, TabPlayer p, TabFeature feature) {
         if (str == null) return "";
         if (!str.contains("%")) return EnumChatFormat.color(str);
-        str = new PropertyImpl(feature,p,str).get();
+        str = newDynamicTextBecauseISuckAtUsingTheseThings(p,str,feature).get();
         return EnumChatFormat.color(str);
     }
 
@@ -245,15 +249,15 @@ public class TABAdditions {
         for (String pl : list) {
             if (pl.startsWith("%sender:") && sender != null) {
                 String pl2 = pl.replace("%sender:", "%");
-                str = str.replace(pl,new PropertyImpl(f,sender,pl2).getFormat(viewer));
+                str = str.replace(pl,newDynamicTextBecauseISuckAtUsingTheseThings(sender,pl2,f).getFormat(viewer));
                 continue;
             }
             else if (pl.startsWith("%viewer:") && viewer != null) {
                 String pl2 = pl.replace("%viewer:", "%");
-                str = str.replace(pl,new PropertyImpl(f,viewer,pl2).getFormat(sender));
+                str = str.replace(pl,newDynamicTextBecauseISuckAtUsingTheseThings(viewer,pl2,f).getFormat(sender));
                 continue;
             }
-            str = str.replace(pl,new PropertyImpl(f,sender,pl).getFormat(viewer));
+            str = str.replace(pl,newDynamicTextBecauseISuckAtUsingTheseThings(sender,pl,f).getFormat(viewer));
         }
         return EnumChatFormat.color(str);
     }

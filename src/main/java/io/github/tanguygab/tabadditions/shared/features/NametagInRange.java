@@ -35,7 +35,7 @@ public class NametagInRange extends TabFeature {
 
     @Override
     public void load() {
-        task = tab.getThreadManager().startRepeatingMeasuredTask(500,"handling Nametag In Range", this, "repeating task",()->{
+        task = tab.getThreadManager().startRepeatingMeasuredTask(500,this,"handling Nametag In Range",()->{
             int zone = (int) Math.pow(TABAdditions.getInstance().nametagInRange, 2);
             for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 TabPlayer p = tab.getPlayer(player.getUniqueId());
