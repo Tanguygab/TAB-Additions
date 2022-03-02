@@ -54,6 +54,7 @@ public class TABAdditions {
     public boolean rfpEnabled;
     public boolean onlyyou = false;
     public boolean condNametagsEnabled;
+    private boolean condAppearenceEnabled;
 
     public TABAdditions(Platform platform, Object plugin,File dataFolder) {
         this.dataFolder = dataFolder;
@@ -125,6 +126,7 @@ public class TABAdditions {
                 nametagInRange = config.getInt("features.nametag-in-range", 0);
                 tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
                 onlyyou = config.getBoolean("features.only-you",false);
+                condAppearenceEnabled = config.getBoolean("features.conditional-appearance",false);
             }
         } catch (IOException e) {
             platform.disable();
@@ -172,6 +174,9 @@ public class TABAdditions {
         //ConditionalNametags
         if (condNametagsEnabled)
             registerFeature(new ConditionalNametags());
+        //ConditionalAppearance
+        if (condAppearenceEnabled)
+            registerFeature(new ConditionalAppearance());
 
         platform.loadFeatures();
 
