@@ -1,11 +1,9 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
-import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
-import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
@@ -15,9 +13,10 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.chat.TextColor;
 import me.neznamy.tab.api.chat.rgb.RGBUtils;
 import me.neznamy.tab.api.config.ConfigurationFile;
-
+import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import me.neznamy.tab.api.placeholder.RelationalPlaceholder;
+import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
 import org.bukkit.Material;
-import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -35,6 +34,9 @@ public class ChatManager extends TabFeature {
     public final Map<TabPlayer,String> defformats = new HashMap<>();
     public boolean regexInputs;
     public boolean forceColors;
+    public int msgPlaceholderStay;
+
+    public RelationalPlaceholder chatPlaceholder;
 
     private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^|]+)((\\|\\|(?<hover>[^|]+)?)(\\|\\|(?<click>[^|]+))?)?}");
 
@@ -125,6 +127,7 @@ public class ChatManager extends TabFeature {
 
         regexInputs = config.getBoolean("regex-inputs",false);
         forceColors = config.getBoolean("force-fix-colors",false);
+        msgPlaceholderStay = config.getInt("msg-placeholder-stay",3000);
 
         itemEnabled = config.getBoolean("item.enabled",true);
         itemMainHand = config.getString("item.mainhand","[item]");
@@ -181,6 +184,8 @@ public class ChatManager extends TabFeature {
         filterExempt = config.getStringList("char-filter.exempt", new ArrayList<>());
 
         PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
+        chatPlaceholder = pm.registerRelationalPlaceholder("%rel_chat%",-1,(viewer,target)->"");
+        chatPlaceholder.enableTriggerMode();
         int i=0;
         for (String category : emojis.keySet()) {
             Map<String,String> list = (Map<String, String>) emojis.get(category).get("list");
@@ -191,8 +196,6 @@ public class ChatManager extends TabFeature {
         pm.registerServerPlaceholder("%chat-emoji-total%",500000000, ()-> emojiTotalCount +"");
 
         pm.registerPlayerPlaceholder("%chat-emoji-owned%",3000,p->ownedEmojis(p)+"");
-
-
 
         for (TabPlayer p : tab.getOnlinePlayers()) {
             p.loadPropertyFromConfig(this,"chatprefix");
@@ -244,13 +247,19 @@ public class ChatManager extends TabFeature {
 
         tab.sendConsoleMessage(createmsg(p,msg,chatFormat.getText(),null).toLegacyText(), true);
 
-        for (TabPlayer pl : tab.getOnlinePlayers()) {
-            if (canSee(p,pl))
-                pl.sendMessage(createmsg(p, msg, chatFormat.getText(), pl));
-            else if (isSpying(p,pl).equals("channel"))
-                pl.sendMessage(createmsg(p, msg, spyChannelsOutput,pl));
-            else if (isSpying(p,pl).equals("view-condition"))
-                pl.sendMessage(createmsg(p, msg, spyViewConditionsOutput,pl));
+        for (TabPlayer viewer : tab.getOnlinePlayers()) {
+            IChatBaseComponent comp = null;
+            if (canSee(p,viewer)) comp = createmsg(p, msg, chatFormat.getText(), viewer);
+            else if (isSpying(p,viewer).equals("channel")) comp = createmsg(p, msg, spyChannelsOutput,viewer);
+            else if (isSpying(p,viewer).equals("view-condition")) comp = createmsg(p, msg, spyViewConditionsOutput,viewer);
+            if (comp == null) continue;
+            viewer.sendMessage(comp);
+            chatPlaceholder.updateValue(viewer,p,msg);
+
+            tab.getThreadManager().runTaskLater(msgPlaceholderStay,()->{
+                if (((RelationalPlaceholderImpl)chatPlaceholder).getLastValue(viewer,p).equals(msg))
+                    chatPlaceholder.updateValue(viewer,p,"");
+            });
         }
 
         Map<String, Boolean> cfg = plinstance.getConfig(ConfigType.CHAT).getConfigurationSection("discord");
