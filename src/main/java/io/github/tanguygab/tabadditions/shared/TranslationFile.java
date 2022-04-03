@@ -1,13 +1,13 @@
 package io.github.tanguygab.tabadditions.shared;
 
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.config.ConfigurationFile;
-import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.config.MessageFile;
+import me.neznamy.tab.api.config.YamlConfigurationFile;
 
-public class TranslationFile {
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 
-    private final MessageFile tabMsgs;
+public class TranslationFile extends YamlConfigurationFile {
 
     public final String providePlayer;
     private final String chatCleared;
@@ -48,46 +48,46 @@ public class TranslationFile {
     private final String cmdLeave;
 
 
-    public TranslationFile(ConfigurationFile file) {
-        tabMsgs = TAB.getInstance().getConfiguration().getMessages();
+    public TranslationFile(InputStream source, File destination) throws IOException {
+        super(source,destination);
 
-        providePlayer = file.getString("provide_player","&cYou have to provide a player name!");
-        chatCleared = file.getString("chat_cleared", "&aChat cleared by %name%!");
-        cooldown = file.getString("message_cooldown", "&cYou have to wait %seconds% more seconds!");
+        providePlayer = getString("provide_player","&cYou have to provide a player name!");
+        chatCleared = getString("chat_cleared", "&aChat cleared by %name%!");
+        cooldown = getString("message_cooldown", "&cYou have to wait %seconds% more seconds!");
 
-        actionBarOn = file.getString("actionbars_on", "&aYou will now receive new actionbars!");
-        actionBarOff = file.getString("actionbars_off", "&cYou won't receive any new actionbars!");
+        actionBarOn = getString("actionbars_on", "&aYou will now receive new actionbars!");
+        actionBarOff = getString("actionbars_off", "&cYou won't receive any new actionbars!");
 
-        titleOn = file.getString("titles_on", "&aYou will now receive new titles!");
-        titleOff = file.getString("titles_off", "&cYou won't receive any new titles!");
+        titleOn = getString("titles_on", "&aYou will now receive new titles!");
+        titleOff = getString("titles_off", "&cYou won't receive any new titles!");
 
-        emojiOn = file.getString("emojis_on", "&aEmojis enabled.");
-        emojiOff = file.getString("emojis_off", "&cEmojis disabled.");
-        emojiCategoryNotFound = file.getString("emojis_category_not_found","&7This category doesn't exist.");
-        emojiCategory = file.getString("emojis_category","&7 - &8%category% (%owned%/%max%)");
-        emojiCategoryHeader = file.getString("emojis_categories_header","&7All categories of emojis you have access to (%amount%, Emojis: %owned%/%max%):");
-        emoji = file.getString("emojis_emoji", "&7 - %emojiraw%&8: &r%emoji%");
-        emojiHeader = file.getString("emojis_emoji_header","&7All emojis in this category (%owned%/%max%):");
+        emojiOn = getString("emojis_on", "&aEmojis enabled.");
+        emojiOff = getString("emojis_off", "&cEmojis disabled.");
+        emojiCategoryNotFound = getString("emojis_category_not_found","&7This category doesn't exist.");
+        emojiCategory = getString("emojis_category","&7 - &8%category% (%owned%/%max%)");
+        emojiCategoryHeader = getString("emojis_categories_header","&7All categories of emojis you have access to (%amount%, Emojis: %owned%/%max%):");
+        emoji = getString("emojis_emoji", "&7 - %emojiraw%&8: &r%emoji%");
+        emojiHeader = getString("emojis_emoji_header","&7All emojis in this category (%owned%/%max%):");
 
-        socialSpyOn = file.getString("socialspy_on", "&aSocialSpy enabled.");
-        socialSpyOff = file.getString("socialspy_off", "&cSocialSpy disabled.");
+        socialSpyOn = getString("socialspy_on", "&aSocialSpy enabled.");
+        socialSpyOff = getString("socialspy_off", "&cSocialSpy disabled.");
 
-        mentionOn = file.getString("chat_mention_on", "&aMentions enabled.");
-        mentionOff = file.getString("chat_mention_off", "&cMentions disabled.");
+        mentionOn = getString("chat_mention_on", "&aMentions enabled.");
+        mentionOff = getString("chat_mention_off", "&cMentions disabled.");
 
-        pmOn = file.getString("pm_on", "&aYou will now receive new private messages!");
-        pmOff = file.getString("pm_off", "&cYou won't receive any new private messages!");
-        pmCooldown = file.getString("pm_cooldown", "&cYou have to wait %seconds% more seconds!");
-        cantPmSelf = file.getString("cant_pm_self", "&cYou can't message yourself!");
-        pmEmpty = file.getString("pm_empty", "&7You have to provide a message!");
-        hasPmOff = file.getString("has_pm_off", "&cThis player doesn't accept private messages");
+        pmOn = getString("pm_on", "&aYou will now receive new private messages!");
+        pmOff = getString("pm_off", "&cYou won't receive any new private messages!");
+        pmCooldown = getString("pm_cooldown", "&cYou have to wait %seconds% more seconds!");
+        cantPmSelf = getString("cant_pm_self", "&cYou can't message yourself!");
+        pmEmpty = getString("pm_empty", "&7You have to provide a message!");
+        hasPmOff = getString("has_pm_off", "&cThis player doesn't accept private messages");
 
-        ignoreOn = file.getString("ignore_on", "&cYou won't receive any new private messages from %name%!");
-        ignoreOff = file.getString("ignore_off", "&aYou will now receive new private messages from %name%!");
-        isIgnored = file.getString("is_ignored", "&cThis player ignores you");
+        ignoreOn = getString("ignore_on", "&cYou won't receive any new private messages from %name%!");
+        ignoreOff = getString("ignore_off", "&aYou will now receive new private messages from %name%!");
+        isIgnored = getString("is_ignored", "&cThis player ignores you");
 
-        cmdJoin = file.getString("cmd_join","&7You joined %name%!");
-        cmdLeave = file.getString("cmd_leave","&7You left %name%!");
+        cmdJoin = getString("cmd_join","&7You joined %name%!");
+        cmdLeave = getString("cmd_leave","&7You left %name%!");
 
 
     }
@@ -127,12 +127,10 @@ public class TranslationFile {
     }
 
     public String getPlayerNotFound(String name) {
-        return tabMsgs.getPlayerNotFound(name);
+        return getString("player-not-online", "&cNo online player found with the name \"%player%\"").replace("%player%", name);
     }
 
-    public String getNoPermission() {
-        return tabMsgs.getNoPermission();
-    }
+    public String NO_PERMISSIONS = getString("no-permission", "&cI'm sorry, but you do not have permission to perform this command. Please contact the server administrators if you believe that this is in error.");
 
     public String getCmdJoin(String name) {
         return cmdJoin.replace("%name%",name);

@@ -15,16 +15,11 @@ import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
-import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
-import me.neznamy.tab.shared.DynamicText;
-import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.features.layout.skin.SkinManager;
-import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
-import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
-import me.neznamy.tab.shared.placeholders.ServerPlaceholderImpl;
 import org.bukkit.entity.Player;
 
+import me.neznamy.tab.shared.DynamicText;
+import me.neznamy.tab.shared.features.layout.skin.SkinManager;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
 public class TABAdditions {
@@ -112,7 +107,7 @@ public class TABAdditions {
             titleConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("titles.yml"), new File(dataFolder, "titles.yml"));
             actionbarConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("actionbars.yml"), new File(dataFolder, "actionbars.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
-            translation = new TranslationFile(new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml")));
+            translation = new TranslationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml"));
             skins = new SkinManager("texture:f3d5e43de5d4177c4baf2f44161554473a3b0be5430998b5fcd826af943afe3");
 
             titlesEnabled = config.getBoolean("features.titles",false);
