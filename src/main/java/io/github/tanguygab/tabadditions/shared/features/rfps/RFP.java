@@ -77,14 +77,13 @@ public class RFP {
     public String[] getProps(TabPlayer p) {
         PropertyConfiguration groupconfig = TabAPI.getInstance().getGroups();
 
-        String prefix = "";
-        String suffix = "";
-        String[] prefix2 = groupconfig.getProperty(group,"prefix",p.getServer(),p.getWorld());
-        if (prefix2.length > 0)
-        prefix = prefix2[0];
-        String[] suffix2 = groupconfig.getProperty(group,"suffix",p.getServer(),p.getWorld());
-        if (suffix2.length > 0)
-            suffix = suffix2[0];
+        String prefix = configfile.getString("fakeplayers." + configname + ".prefix","");;
+        String[] prefix2 = groupconfig.getProperty(group,"tabprefix",p.getServer(),p.getWorld());
+        if (prefix2.length > 0) prefix = prefix2[0];
+
+        String suffix = configfile.getString("fakeplayers." + configname + ".suffix","");
+        String[] suffix2 = groupconfig.getProperty(group,"tabsuffix",p.getServer(),p.getWorld());
+        if (suffix2.length > 0) suffix = suffix2[0];
 
         return new String[]{prefix,suffix};
     }
