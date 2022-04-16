@@ -8,8 +8,8 @@ features:
   tablist-names-radius: 0
   sit-hide-nametag: false
   sneak-hide-nametags: false
-  conditional-nametags: true
-  conditional-appearance: true
+  conditional-nametags: false
+  conditional-appearance: false
 
 conditional-nametags:
   show-by-default: false
