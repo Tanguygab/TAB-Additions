@@ -46,6 +46,7 @@ public class ConditionalNametags extends TabFeature {
         Property prop = p.getProperty("nametag-condition");
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
+        if (cond.equals("")) return def;
         return TABAdditions.getInstance().isConditionMet(cond,p);
     }
 
