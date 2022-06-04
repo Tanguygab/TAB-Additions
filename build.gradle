@@ -44,7 +44,7 @@ dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.18.2-R0.1-SNAPSHOT'
     compileOnly 'me.clip:placeholderapi:2.11.1'
     compileOnly 'com.discordsrv:discordsrv:1.25.0'
-    compileOnly 'net.essentialsx:EssentialsXDiscord:2.19.2'
+    compileOnly 'net.essentialsx:EssentialsXDiscord:2.19.4'
     compileOnly files('../TAB-3.1.1.jar','../AdvancedBan.jar')
 
 }
