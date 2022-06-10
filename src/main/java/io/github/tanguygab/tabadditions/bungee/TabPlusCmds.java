@@ -9,8 +9,6 @@ import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.TabExecutor;
-import org.bukkit.entity.Player;
-
 public class TabPlusCmds extends Command implements TabExecutor {
 
     public TabPlusCmds(String name) {
@@ -27,7 +25,7 @@ public class TabPlusCmds extends Command implements TabExecutor {
             ((Title)getFeature("Title")).toggleTitle(sender.getName());
         if (getName().equals("toggleactionbar") && featureEnabled("ActionBar"))
             ((ActionBar)getFeature("ActionBar")).toggleActionBar(sender.getName());
-        if (sender instanceof Player && featureEnabled("Chat"))
+        if (sender instanceof ProxiedPlayer && featureEnabled("Chat"))
             ((ChatManager)getFeature("Chat")).cmds.execute(TabAPI.getInstance().getPlayer(sender.getName()),getName(),args);
     }
 
