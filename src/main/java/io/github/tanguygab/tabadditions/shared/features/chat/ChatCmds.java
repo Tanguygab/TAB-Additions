@@ -216,14 +216,17 @@ public class ChatCmds {
 
                 String player = "";
                 TabPlayer p2;
-                if (cmd.equals("reply"))
-                    p2 = replies.getOrDefault(p,null);
+                if (cmd.equals("reply")) {
+                    p2 = replies.getOrDefault(p, null);
+                    player = p2 != null ? p2.getName() : "";
+                }
                 else {
                     player = msg.split(" ")[0];
                     msg = msg.replaceFirst(player+"( )?", "");
                     p2 = plugin.getPlayer(player);
                 }
-
+                if (player.equals(""))
+                    p.sendMessage(translation.providePlayer,true);
                 if (p2 == null)
                     p.sendMessage(translation.getPlayerNotFound(player), true);
                 else if (!msgSelf && p == p2)

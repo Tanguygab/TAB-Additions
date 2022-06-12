@@ -184,7 +184,6 @@ public class ChatManager extends TabFeature {
 
         PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
         chatPlaceholder = pm.registerRelationalPlaceholder("%rel_chat%",-1,(viewer,target)->"");
-        chatPlaceholder.enableTriggerMode();
         int i=0;
         for (String category : emojis.keySet()) {
             Map<String,String> list = (Map<String, String>) emojis.get(category).get("list");
@@ -255,7 +254,7 @@ public class ChatManager extends TabFeature {
             viewer.sendMessage(comp);
             chatPlaceholder.updateValue(viewer,p,msg);
 
-            tab.getThreadManager().runTaskLater(msgPlaceholderStay,()->{
+            tab.getThreadManager().runTaskLater(msgPlaceholderStay,this,"update %rel_chat% for "+viewer.getName()+" viewing "+p.getName(),()->{
                 if ((chatPlaceholder).getLastValue(viewer,p).equals(msg))
                     chatPlaceholder.updateValue(viewer,p,"");
             });
@@ -277,7 +276,7 @@ public class ChatManager extends TabFeature {
                 msg = msg.replace("&" + code, "");
         }
 
-        msg = new RGBUtils().applyFormats(msg, true);
+        msg = new RGBUtils().applyFormats(msg);
 
         String format = removeSpaces(chatFormat);
 
