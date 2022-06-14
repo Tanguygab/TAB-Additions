@@ -227,7 +227,7 @@ public class ChatCmds {
                 }
                 if (player.equals(""))
                     p.sendMessage(translation.providePlayer,true);
-                if (p2 == null)
+                else if (p2 == null)
                     p.sendMessage(translation.getPlayerNotFound(player), true);
                 else if (!msgSelf && p == p2)
                     p.sendMessage(translation.cantPmSelf, true);
