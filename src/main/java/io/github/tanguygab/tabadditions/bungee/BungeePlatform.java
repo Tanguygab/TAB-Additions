@@ -45,12 +45,8 @@ public class BungeePlatform extends Platform {
 	public void registerPlaceholders() {
 		PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
 		TABAdditions taba = TABAdditions.getInstance();
-		pm.registerPlayerPlaceholder("%money%",1000,p->taba.parsePlaceholders("%vault_eco_balance%",p));
-		pm.registerPlayerPlaceholder("%health%",100,p->taba.parsePlaceholders("%player_health_rounded%",p));
-		pm.registerServerPlaceholder("%tps%",1000,()->taba.parsePlaceholders("%server_tps_1%",null));
-		pm.registerPlayerPlaceholder("%afk%",500,p->taba.parsePlaceholders("%essentials_afk%",p));
 		for (String server : ProxyServer.getInstance().getServers().keySet())
-			pm.registerServerPlaceholder("%server-online:" + server + "%",10000,()->((TABAdditionsBungeeCord)plugin).getServerStatus(server));
+			pm.registerServerPlaceholder("%server-status:" + server + "%",10000,()->((TABAdditionsBungeeCord)plugin).getServerStatus(server));
 	}
 
 	@Override
