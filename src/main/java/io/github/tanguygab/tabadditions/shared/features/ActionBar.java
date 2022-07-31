@@ -9,10 +9,10 @@ import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.protocol.PacketPlayOutChat;
-import me.neznamy.tab.api.task.RepeatingTask;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Future;
 
 public class ActionBar extends TabFeature {
 
@@ -23,7 +23,7 @@ public class ActionBar extends TabFeature {
 
     public List<String> toggleActionBar = new ArrayList<>();
     public List<TabPlayer> noBar = new ArrayList<>();
-    public RepeatingTask task;
+    public Future<?> task;
 
     @Override
     public void load() {
@@ -50,7 +50,7 @@ public class ActionBar extends TabFeature {
 
     @Override
     public void unload() {
-        task.cancel();
+        task.cancel(true);
         if (TABAdditions.getInstance().getConfig(ConfigType.TITLE).getBoolean("toggleactionbar",true))
             TabAPI.getInstance().getPlayerCache().set("toggleactionbar", toggleActionBar);
     }

@@ -6,13 +6,14 @@ import me.neznamy.tab.api.Property;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.task.RepeatingTask;
 import me.neznamy.tab.api.team.TeamManager;
+
+import java.util.concurrent.Future;
 
 public class ConditionalNametags extends TabFeature {
 
     private final TabAPI tab;
-    private RepeatingTask task;
+    private Future<?> task;
     private final boolean def;
 
     public ConditionalNametags() {
@@ -37,8 +38,6 @@ public class ConditionalNametags extends TabFeature {
                 if (getCondition(p)) tm.showNametag(p);
                 else tm.hideNametag(p);
             }
-
-
         });
     }
 
@@ -52,7 +51,7 @@ public class ConditionalNametags extends TabFeature {
 
     @Override
     public void unload() {
-        task.cancel();
+        task.cancel(true);
         for (TabPlayer p : tab.getOnlinePlayers())
             tab.getTeamManager().showNametag(p);
     }

@@ -10,16 +10,16 @@ import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.protocol.PacketPlayOutPlayerInfo;
 import me.neznamy.tab.api.protocol.PacketPlayOutScoreboardTeam;
 import me.neznamy.tab.api.protocol.Skin;
-import me.neznamy.tab.api.task.RepeatingTask;
 
 import java.util.*;
+import java.util.concurrent.Future;
 
 public class RFPManager extends TabFeature {
 
     private final Map<String, RFP> rfps = new HashMap<>();
 
     private final TabAPI tab;
-    private RepeatingTask task;
+    private Future<?> task;
 
     public RFPManager() {
         super("Real Fake Players","&aReal Fake Players&r");
@@ -149,7 +149,7 @@ public class RFPManager extends TabFeature {
 
     @Override
     public void unload() {
-        task.cancel();
+        task.cancel(true);
         removeRFPAll();
     }
 
