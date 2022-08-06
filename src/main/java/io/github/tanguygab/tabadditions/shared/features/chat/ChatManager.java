@@ -310,8 +310,8 @@ public class ChatManager extends TabFeature {
 
             IChatBaseComponent comp = createComponent(txt,viewer);
 
-            if (hover != null) comp = hovercheck(comp,hover,p,viewer,lastcolor);
-            if (click != null) clickcheck(comp,click);
+            if (hover != null) comp = hovercheck(comp,hover.replace("%msg%",msg),p,viewer,lastcolor);
+            if (click != null) clickcheck(comp,click.replace("%msg%",msg));
 
 
             if (comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1 < comp.toLegacyText().length() && "KkLlMmNnOoRrXxRr".contains(comp.toLegacyText().charAt(comp.toLegacyText().lastIndexOf(EnumChatFormat.COLOR_STRING)+1)+"")) {
