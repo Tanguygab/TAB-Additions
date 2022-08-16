@@ -48,8 +48,8 @@ public class ConditionalAppearance extends TabFeature {
 
     private void refresh(Player p, Player all) {
         if (p == all) return;
-        if (getCondition(p)) sync(()->all.showPlayer(plugin,p));
-        else sync(()->all.hidePlayer(plugin,p));
+        if (getCondition(p)) sync(()->show(p,all));
+        else sync(()->hide(p,all));
     }
 
     private void sync(Runnable run) {
@@ -74,8 +74,23 @@ public class ConditionalAppearance extends TabFeature {
     public void unload() {
         for (Player p : Bukkit.getOnlinePlayers()) {
             for (Player all : Bukkit.getOnlinePlayers()) {
-                if (p != all) p.showPlayer(plugin,all);
+                if (p != all) show(p,all);
             }
+        }
+    }
+
+    private void show(Player p, Player target) {
+        try {
+            p.showPlayer(plugin, target);
+        } catch (Exception e) {
+            p.showPlayer(target);
+        }
+    }
+    private void hide(Player p, Player target) {
+        try {
+            p.hidePlayer(plugin, target);
+        } catch (Exception e) {
+            p.hidePlayer(target);
         }
     }
 

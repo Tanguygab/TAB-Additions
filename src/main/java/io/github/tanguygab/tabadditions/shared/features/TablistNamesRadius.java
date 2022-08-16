@@ -19,7 +19,7 @@ public class TablistNamesRadius extends TabFeature {
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
                 if (p != p2)
-                    p.hidePlayer(plugin,p2);
+                    hide(p,p2);
             }
         }
         load();
@@ -32,10 +32,10 @@ public class TablistNamesRadius extends TabFeature {
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                     if (p != player && p.getWorld().equals(player.getWorld()) && player.getLocation().distanceSquared(p.getLocation()) < zone) {
-                        p.showPlayer(plugin,player);
+                        show(p,player);
                     }
                     else if (p != player) {
-                        p.hidePlayer(plugin,player);
+                        hide(p,player);
                     }
                 }
             }
@@ -43,7 +43,7 @@ public class TablistNamesRadius extends TabFeature {
                 for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                     for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
                         if (p != p2)
-                            p.showPlayer(plugin, p2);
+                            show(p, p2);
                     }
                 }
             }
@@ -62,9 +62,24 @@ public class TablistNamesRadius extends TabFeature {
         Bukkit.getServer().getScheduler().runTask(plugin,()->{
             Player p = (Player) tabPlayer.getPlayer();
             for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
-                p.hidePlayer(plugin,p2);
-                p2.hidePlayer(plugin,p);
+                hide(p,p2);
+                hide(p2,p);
             }
         });
+    }
+
+    private void show(Player p, Player target) {
+        try {
+            p.showPlayer(plugin, target);
+        } catch (Exception e) {
+            p.showPlayer(target);
+        }
+    }
+    private void hide(Player p, Player target) {
+        try {
+            p.hidePlayer(plugin, target);
+        } catch (Exception e) {
+            p.hidePlayer(target);
+        }
     }
 }

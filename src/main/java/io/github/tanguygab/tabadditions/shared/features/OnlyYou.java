@@ -22,7 +22,7 @@ public class OnlyYou extends TabFeature {
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
                 if (p != p2)
-                    p.hidePlayer(plugin, p2);
+                    hide(p, p2);
             }
         }
     }
@@ -32,7 +32,7 @@ public class OnlyYou extends TabFeature {
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
                 if (p != p2)
-                    p.showPlayer(plugin, p2);
+                    show(p, p2);
             }
         }
     }
@@ -43,10 +43,25 @@ public class OnlyYou extends TabFeature {
         Bukkit.getServer().getScheduler().runTask(plugin, ()->{
                 for (Player p2 : Bukkit.getServer().getOnlinePlayers())
                     if (p != p2) {
-                        p.hidePlayer(plugin, p2);
-                        p2.hidePlayer(plugin,p);
+                        hide(p, p2);
+                        hide(p2,p);
                     }
         });
+    }
+
+    private void show(Player p, Player target) {
+        try {
+            p.showPlayer(plugin, target);
+        } catch (Exception e) {
+            p.showPlayer(target);
+        }
+    }
+    private void hide(Player p, Player target) {
+        try {
+            p.hidePlayer(plugin, target);
+        } catch (Exception e) {
+            p.hidePlayer(target);
+        }
     }
 
 }
