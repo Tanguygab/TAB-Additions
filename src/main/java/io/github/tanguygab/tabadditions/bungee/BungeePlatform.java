@@ -15,6 +15,7 @@ import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Plugin;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -99,5 +100,13 @@ public class BungeePlatform extends Platform {
 		out.writeUTF(channel);
 		out.writeUTF(viewCondition+"");
 		plugin.getProxy().getPlayer(UUID.randomUUID()).sendData("tabadditions:channel",out.toByteArray());
+	}
+
+	@Override
+	public void addToChatComplete(TabPlayer p, List<String> emojis) {}
+
+	@Override
+	public boolean supportsChatSuggestions() {
+		return false;
 	}
 }

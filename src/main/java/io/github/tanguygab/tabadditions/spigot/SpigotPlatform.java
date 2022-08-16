@@ -1,31 +1,36 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import github.scarsz.discordsrv.DiscordSRV;
+import github.scarsz.discordsrv.util.NMSUtil;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.*;
 
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.platforms.bukkit.nms.NMSStorage;
+import me.neznamy.tab.shared.TAB;
 import net.essentialsx.api.v2.services.discord.DiscordService;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
+	private final boolean chatSuggestions;
 
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
+		chatSuggestions = TAB.getInstance().getServerVersion().getMinorVersion() >= 19;
 	}
 
 	@Override
@@ -132,4 +137,22 @@ public class SpigotPlatform extends Platform {
 		api.sendChatMessage(p, msg);
 	}
 
+	@Override
+	public void addToChatComplete(TabPlayer p, List<String> emojis) {
+		NMSStorage nms = NMSStorage.getInstance();
+		try {
+			Class<?> chatCompleteClass = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket");
+			Class<?> actionEnum = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket$a");
+			Object packet = chatCompleteClass.getConstructor(actionEnum,List.class).newInstance(actionEnum.getEnumConstants()[0],emojis);
+			nms.sendPacket.invoke(nms.PLAYER_CONNECTION.get(nms.getHandle.invoke(p.getPlayer())),packet);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	@Override
+	public boolean supportsChatSuggestions() {
+		return chatSuggestions;
+	}
 }

@@ -102,6 +102,7 @@ emojis:
   enabled: true
   /emojis: true
   /toggleemoji: true
+  auto-complete: true #only works on 1.19+!
   output: '{%emoji%%lastcolor%|| %emoji% &7%emojiraw% &d/emojis||command:/emojis}'
   block-without-permission: true
   categories:

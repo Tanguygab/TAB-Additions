@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
+import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
@@ -61,6 +62,7 @@ public class ChatManager extends TabFeature {
     public boolean emojiEnabled;
     public boolean emojiUntranslate;
     public String emojiOutput;
+    public boolean emojisAutoComplete;
     public Map<String,Map<String,Object>> emojis = new HashMap<>();
     public int emojiTotalCount;
     public Map<String,Integer> emojiCounts = new HashMap<>();
@@ -158,6 +160,7 @@ public class ChatManager extends TabFeature {
             spies.addAll(tab.getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
             tab.getPlayerCache().set("toggleemoji",null);
         }
+        emojisAutoComplete = config.getBoolean("emojis.auto-complete",true);
 
         spySave = config.getBoolean("socialspy.keep-after-reload",true);
         if (cmds.socialSpyEnabled && spySave) {
@@ -195,11 +198,7 @@ public class ChatManager extends TabFeature {
 
         pm.registerPlayerPlaceholder("%chat-emoji-owned%",3000,p->ownedEmojis(p)+"");
 
-        for (TabPlayer p : tab.getOnlinePlayers()) {
-            p.loadPropertyFromConfig(this,"chatprefix");
-            p.loadPropertyFromConfig(this,"customchatname",p.getName());
-            p.loadPropertyFromConfig(this,"chatsuffix");
-        }
+        for (TabPlayer p : tab.getOnlinePlayers()) onJoin(p);
     }
 
     public int ownedEmojis(TabPlayer p) {
@@ -660,6 +659,22 @@ public class ChatManager extends TabFeature {
         p.loadPropertyFromConfig(this,"chatprefix");
         p.loadPropertyFromConfig(this,"customchatname",p.getName());
         p.loadPropertyFromConfig(this,"chatsuffix");
+
+        if (plinstance.getPlatform().supportsChatSuggestions()) {
+            List<String> list = new ArrayList<>();
+            for (String category : emojis.keySet()) {
+                Map<String,String> categoryEmojis = (Map<String,String>)emojis.get(category).get("list");
+                if (cmds.canUseEmojiCategory(p,category)) {
+                    list.addAll(categoryEmojis.keySet());
+                    continue;
+                }
+                for (String emoji : categoryEmojis.keySet())
+                    if (cmds.canUseEmoji(p,category,emoji))
+                        list.add(emoji);
+            }
+            if (emojisAutoComplete)
+                plinstance.getPlatform().addToChatComplete(p,list);
+        }
     }
 
     @Override
