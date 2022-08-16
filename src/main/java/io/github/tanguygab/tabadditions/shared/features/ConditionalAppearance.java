@@ -82,14 +82,14 @@ public class ConditionalAppearance extends TabFeature {
     private void show(Player p, Player target) {
         try {
             p.showPlayer(plugin, target);
-        } catch (Exception e) {
+        } catch (NoSuchMethodError e) {
             p.showPlayer(target);
         }
     }
     private void hide(Player p, Player target) {
         try {
             p.hidePlayer(plugin, target);
-        } catch (Exception e) {
+        } catch (NoSuchMethodError e) {
             p.hidePlayer(target);
         }
     }
