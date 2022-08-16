@@ -17,12 +17,6 @@ public class NametagInRange extends TabFeature {
     public NametagInRange() {
         super("Nametag In Range","&aNametag in Range&r");
         tab = TabAPI.getInstance();
-        for (TabPlayer p : tab.getOnlinePlayers()) {
-            for (TabPlayer p2 : tab.getOnlinePlayers()) {
-                if (p != p2)
-                    tab.getTeamManager().hideNametag(p,p2);
-            }
-        }
         load();
     }
 
