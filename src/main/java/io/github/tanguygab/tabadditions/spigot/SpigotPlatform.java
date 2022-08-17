@@ -122,7 +122,8 @@ public class SpigotPlatform extends Platform {
 		DiscordSRV discord = DiscordSRV.getPlugin();
 		if (msg.contains("[item]")) {
 			ChatManager chat = (ChatManager) TabAPI.getInstance().getFeatureManager().getFeature("Chat");
-			msg.replace("[item]",chat.hovercheck(null,"item:mainhand",TabAPI.getInstance().getPlayer(p.getUniqueId()),null,null).toFlatText());
+			TabPlayer player = TabAPI.getInstance().getPlayer(p.getUniqueId());
+			msg = msg.replace("[item]",chat.hovercheck(chat.createComponent("",player),"item:mainhand",player,null,null).toFlatText());
 		}
 
 		if (!viewCondition)
