@@ -381,6 +381,7 @@ public class ChatManager extends TabFeature {
         if (hover == null || hover.equals("")) return comp;
 
         if (hover.startsWith("material:")) {
+            if (plinstance.getPlatform().getType() != PlatformType.SPIGOT) return comp;
             Material mat = Material.getMaterial(hover.replace("material:", ""));
             if (mat == null) return comp;
             ItemStack item = new ItemStack(mat);
@@ -389,6 +390,7 @@ public class ChatManager extends TabFeature {
         }
 
         if (hover.startsWith("item:")) {
+            if (plinstance.getPlatform().getType() != PlatformType.SPIGOT) return comp;
             ItemStack item = (ItemStack) getItem(hover,p);
 
             String itemtxt;
