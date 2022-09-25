@@ -31,6 +31,7 @@ chat-formats:
     ||
     suggest:/msg %player%  }'
   staffchat:
+    view-condition: "permission:tab.staff"
     text: '{
     &4STAFFCHAT &c%prop-customchatname% &8» %msg%
     ||
