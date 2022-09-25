@@ -186,7 +186,7 @@ public class TABAdditions {
         if (cfg.getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines") != null)
             props.addAll(cfg.getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines"));
         if (cfg.getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines") != null)
-        props.addAll(cfg.getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines").keySet());
+            props.addAll(cfg.getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines").keySet());
         PlaceholderManager pm = tab.getPlaceholderManager();
         for (Object prop : props) {
             pm.registerPlayerPlaceholder("%prop-"+prop+"%", 100,p->{
@@ -226,7 +226,7 @@ public class TABAdditions {
                     count = count + ((RFPManager) tab.getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
                 return count+"";
         });
-        platform.registerPlaceholders();
+        platform.registerPlaceholders(pm);
     }
 
     public String parsePlaceholders(String str, TabPlayer p) {
@@ -278,7 +278,7 @@ public class TABAdditions {
         return true;
     }
 
-    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, TabFeature feature) {
+    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, boolean checkForViewer, TabFeature feature) {
         if (sender == null || viewer == null) return false;
         String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,feature);
         for (String cond : conditionname.split(";")) {
@@ -292,8 +292,9 @@ public class TABAdditions {
             } else {
                 Condition condition = Condition.getCondition(cond.replace("!",""));
                 if (condition != null) {
-                    if (cond.startsWith("!") && condition.isMet(sender)) return false;
-                    if (!cond.startsWith("!") && !condition.isMet(sender)) return false;
+                    boolean result = condition.isMet(checkForViewer ? viewer : sender);
+                    if (cond.startsWith("!") && result) return false;
+                    if (!cond.startsWith("!") && !result) return false;
                 }
             }
         }

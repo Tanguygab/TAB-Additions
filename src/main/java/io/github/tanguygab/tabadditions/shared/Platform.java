@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared;
 
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.placeholder.PlaceholderManager;
 
 import java.util.List;
 import java.util.Map;
@@ -14,7 +15,7 @@ public abstract class Platform {
 
 	public abstract String getVersion();
 
-	public abstract void registerPlaceholders();
+	public abstract void registerPlaceholders(PlaceholderManager pm);
 
 	public abstract void registerCommand(String cmd, boolean bool, String... aliases);
 
