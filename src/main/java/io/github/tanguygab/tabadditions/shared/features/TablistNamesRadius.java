@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import org.bukkit.Bukkit;
@@ -31,12 +32,12 @@ public class TablistNamesRadius extends TabFeature {
             int zone = (int) Math.pow(TABAdditions.getInstance().tablistNamesRadius, 2);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
-                    if (p != player && p.getWorld().equals(player.getWorld()) && player.getLocation().distanceSquared(p.getLocation()) < zone) {
-                        show(p,player);
-                    }
-                    else if (p != player) {
-                        hide(p,player);
-                    }
+                    if (p != player
+                            && p.getWorld().equals(player.getWorld())
+                            && player.getLocation().distanceSquared(p.getLocation()) < zone
+                            && !TabAPI.getInstance().getPlayer(p.getUniqueId()).isVanished()
+                    ) show(p,player);
+                    else if (p != player) hide(p,player);
                 }
             }
             if (!enabled) {
