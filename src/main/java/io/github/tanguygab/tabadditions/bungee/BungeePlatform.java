@@ -7,7 +7,6 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
@@ -43,9 +42,7 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public void registerPlaceholders() {
-		PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
-		TABAdditions taba = TABAdditions.getInstance();
+	public void registerPlaceholders(PlaceholderManager pm) {
 		for (String server : ProxyServer.getInstance().getServers().keySet())
 			pm.registerServerPlaceholder("%server-status:" + server + "%",10000,()->((TABAdditionsBungeeCord)plugin).getServerStatus(server));
 	}

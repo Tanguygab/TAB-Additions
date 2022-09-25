@@ -1,16 +1,16 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import github.scarsz.discordsrv.DiscordSRV;
-import github.scarsz.discordsrv.util.NMSUtil;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.*;
 
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.platforms.bukkit.nms.NMSStorage;
-import me.neznamy.tab.shared.TAB;
 import net.essentialsx.api.v2.services.discord.DiscordService;
+import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
@@ -30,7 +30,7 @@ public class SpigotPlatform extends Platform {
 
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
-		chatSuggestions = TAB.getInstance().getServerVersion().getMinorVersion() >= 19;
+		chatSuggestions = TabAPI.getInstance().getServerVersion().getMinorVersion() >= 19;
 	}
 
 	@Override
@@ -49,7 +49,14 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public void registerPlaceholders() {}
+	public void registerPlaceholders(PlaceholderManager pm) {
+		pm.registerRelationalPlaceholder("%rel_distance%",1000,(viewer, target) -> {
+			if (!viewer.getWorld().equals(target.getWorld())) return "-1";
+			Location vLoc = ((Player)viewer.getPlayer()).getLocation();
+			Location tLoc = ((Player)target.getPlayer()).getLocation();
+			return vLoc.distanceSquared(tLoc);
+		});
+	}
 
 	@Override
 	public void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout) {
