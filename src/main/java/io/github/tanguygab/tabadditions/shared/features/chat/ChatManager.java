@@ -307,10 +307,6 @@ public class ChatManager extends TabFeature {
             try {click = m.group("click");}
             catch (Exception e) {click = null;}
 
-            p.sendMessage(txt,false);
-            p.sendMessage(hover,false);
-            p.sendMessage(click,false);
-
             IChatBaseComponent comp = createComponent(txt,viewer);
 
             if (hover != null) comp = hovercheck(comp,hover.replace("%msg%",msg),p,viewer,lastcolor);
