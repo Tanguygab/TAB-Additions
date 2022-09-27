@@ -37,6 +37,10 @@ public class ChatFormat {
         return config.get("view-condition")+"";
     }
 
+    public boolean hasViewCondition() {
+        return config.containsKey("view-condition") && !config.get("view-condition").equals("");
+    }
+
     public boolean isViewConditionMet(TabPlayer sender, TabPlayer viewer) {
         if (!config.containsKey("view-condition") || config.get("view-condition").equals("")) return true;
         return TABAdditions.getInstance().isConditionMet(config.get("view-condition"),sender,viewer,true,TabAPI.getInstance().getFeatureManager().getFeature("Chat"));

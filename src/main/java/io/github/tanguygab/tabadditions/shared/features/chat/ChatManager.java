@@ -38,7 +38,7 @@ public class ChatManager extends TabFeature {
 
     public RelationalPlaceholder chatPlaceholder;
 
-    private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^|]+)((\\|\\|(?<hover>[^|]+)?)(\\|\\|(?<click>[^|]+))?)?}");
+    private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^}|]+)((\\|\\|(?<hover>[^}|]+)?)(\\|\\|(?<click>[^}|]+))?)?}");
 
     public boolean itemEnabled;
     public String itemMainHand;
@@ -306,6 +306,10 @@ public class ChatManager extends TabFeature {
             String click;
             try {click = m.group("click");}
             catch (Exception e) {click = null;}
+
+            p.sendMessage(txt,false);
+            p.sendMessage(hover,false);
+            p.sendMessage(click,false);
 
             IChatBaseComponent comp = createComponent(txt,viewer);
 
@@ -626,9 +630,10 @@ public class ChatManager extends TabFeature {
 
     public boolean canSee(TabPlayer sender, TabPlayer viewer) {
         if (sender == viewer) return true;
-        if (viewer == null) return getFormat(sender).getChannel().equals("");
-        if (!getFormat(sender).getChannel().equals(getFormat(viewer).getChannel())) return false;
-        return getFormat(sender).isViewConditionMet(sender, viewer);
+        ChatFormat f = getFormat(sender);
+        if (viewer == null) return f.getChannel().equals("") && !f.hasViewCondition();
+        if (!f.getChannel().equals(f.getChannel())) return false;
+        return f.isViewConditionMet(sender, viewer);
     }
     public String isSpying(TabPlayer sender, TabPlayer viewer) {
         if (!getFormat(sender).getChannel().equals(getFormat(viewer).getChannel()) && spyChannelsEnabled && spies.contains(viewer.getName().toLowerCase())) return "channel";
