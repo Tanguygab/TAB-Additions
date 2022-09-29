@@ -12,6 +12,10 @@ import me.neznamy.tab.platforms.bukkit.nms.NMSStorage;
 import net.essentialsx.api.v2.services.discord.DiscordService;
 import org.bukkit.Location;
 import org.bukkit.Sound;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
@@ -19,6 +23,9 @@ import org.bukkit.plugin.Plugin;
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -28,9 +35,18 @@ public class SpigotPlatform extends Platform {
 	private final TABAdditionsSpigot plugin;
 	private final boolean chatSuggestions;
 
+	private Field mapField;
+	private Method getCommandMap;
+
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
 		chatSuggestions = TabAPI.getInstance().getServerVersion().getMinorVersion() >= 19;
+
+		try {
+			mapField = SimpleCommandMap.class.getDeclaredField("knownCommands");
+			mapField.setAccessible(true);
+			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
+		} catch (Exception e) {e.printStackTrace();}
 	}
 
 	@Override
@@ -88,8 +104,14 @@ public class SpigotPlatform extends Platform {
 
 	@Override
 	public void registerCommand(String cmd, boolean bool, String... aliases) {
-		if (bool && plugin.getCommand(cmd) != null)
-			plugin.getCommand(cmd).setExecutor(new TabPlusCmds());
+		if (!bool) return;
+		try {
+			Map<String, Command> map = (Map<String, Command>) mapField.get(getCommandMap.invoke(plugin.getServer()));
+
+			if (map.containsKey(cmd)) return;
+			Command command = new BukkitCommand(cmd,"","/"+cmd,Arrays.asList(aliases)) {@Override public boolean execute(CommandSender sender, String commandLabel, String[] args) {return true;}};
+			map.put(cmd, command);
+		} catch (Exception e) {e.printStackTrace();}
 	}
 
 	@Override

@@ -90,6 +90,8 @@ public class ChatManager extends TabFeature {
     public String filterOutput;
     public List<Pattern> filterPatterns = new ArrayList<>();
     public List<String> filterExempt;
+    public Map<String,Map<String,String>> commands;
+
 
     public ChatManager() {
         super("Chat","&aChat&r");
@@ -184,6 +186,11 @@ public class ChatManager extends TabFeature {
         filterOutput = config.getString("char-filter.output","{%replacement%||Someone used a bad word!\n\nClick to see it anyways||suggest:%word%}");
         config.getStringList("char-filter.filter", new ArrayList<>()).forEach(filter->filterPatterns.add(Pattern.compile(filter)));
         filterExempt = config.getStringList("char-filter.exempt", new ArrayList<>());
+
+
+        commands = config.getConfigurationSection("commands");
+        commands.forEach((cmd,cfg)->plinstance.getPlatform().registerCommand(cmd,true));
+
 
         PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
         chatPlaceholder = pm.registerRelationalPlaceholder("%rel_chat%",-1,(viewer,target)->"");
@@ -686,9 +693,8 @@ public class ChatManager extends TabFeature {
         ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         TranslationFile translation = plinstance.getMsgs();
 
-        if (config.getConfigurationSection("commands") == null || !config.getConfigurationSection("commands").containsKey(msg))
-            return false;
-        Map<String,String> cmd = (Map<String, String>) config.getConfigurationSection("commands").get(msg);
+        Map<String,String> cmd = commands.get(msg);
+        if (cmd == null) return false;
         String condition = cmd.get("condition")+"";
         String format = cmd.get("format")+"";
         String name = cmd.get("name")+"";
@@ -706,4 +712,5 @@ public class ChatManager extends TabFeature {
         }
         return true;
     }
+
 }
