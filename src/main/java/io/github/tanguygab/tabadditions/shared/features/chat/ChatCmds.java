@@ -319,19 +319,6 @@ public class ChatCmds {
 
     }
 
-    public List<String> tabcomplete(TabPlayer p, String cmd, String[] args) {
-        if (msgEnabled) return null;
-        if ((cmd.equalsIgnoreCase("msg") || cmd.equalsIgnoreCase("ignore") && args.length == 1)) {
-            List<String> list = new ArrayList<>();
-            for (TabPlayer player : tab.getOnlinePlayers()) {
-                if (!player.isVanished() && player != p && (TABAdditions.getInstance().getPlatform().getType() != PlatformType.SPIGOT || ((Player)p.getPlayer()).canSee((Player) player.getPlayer())))
-                    list.add(player.getName());
-            }
-            return list;
-        }
-        return null;
-    }
-
     public boolean isIgnored(TabPlayer p, TabPlayer viewer) {
         return tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase());
     }

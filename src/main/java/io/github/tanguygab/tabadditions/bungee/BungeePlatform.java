@@ -8,10 +8,12 @@ import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.List;
@@ -50,9 +52,9 @@ public class BungeePlatform extends Platform {
 	@Override
 	public void registerCommand(String cmd, boolean bool, String... aliases) {
 		if (bool) {
-			if (aliases == null)
-				plugin.getProxy().getPluginManager().registerCommand(plugin, new TabPlusCmds(cmd));
-			else plugin.getProxy().getPluginManager().registerCommand(plugin, new TabPlusCmds(cmd, null, aliases));
+			plugin.getProxy().getPluginManager().registerCommand(plugin, new Command(cmd,null,aliases) {
+				@Override public void execute(CommandSender sender, String[] args) {}
+			});
 		}
 	}
 

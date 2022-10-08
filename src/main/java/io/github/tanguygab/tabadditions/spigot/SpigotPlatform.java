@@ -24,7 +24,6 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.List;
@@ -36,7 +35,6 @@ public class SpigotPlatform extends Platform {
 	private final TABAdditionsSpigot plugin;
 	private final boolean chatSuggestions;
 
-	private Field mapField;
 	private Method getCommandMap;
 
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
@@ -44,8 +42,6 @@ public class SpigotPlatform extends Platform {
 		chatSuggestions = TabAPI.getInstance().getServerVersion().getMinorVersion() >= 19;
 
 		try {
-			mapField = SimpleCommandMap.class.getDeclaredField("knownCommands");
-			mapField.setAccessible(true);
 			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
 		} catch (Exception e) {e.printStackTrace();}
 	}
@@ -107,22 +103,10 @@ public class SpigotPlatform extends Platform {
 	public void registerCommand(String cmd, boolean bool, String... aliases) {
 		if (!bool) return;
 		try {
-			Map<String, Command> map = (Map<String, Command>) mapField.get(getCommandMap.invoke(plugin.getServer()));
-
-			if (map.containsKey(cmd)) return;
 			Command command = new BukkitCommand(cmd,"","/"+cmd,Arrays.asList(aliases)) {
-				@Override public boolean execute(CommandSender sender, String commandLabel, String[] args) {return true;}
-
-
-				@NotNull
-				@Override
-				public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
-					if (sender instanceof Player && TabAPI.getInstance().getFeatureManager().isFeatureEnabled("Chat"))
-						return ((ChatManager)TabAPI.getInstance().getFeatureManager().getFeature("Chat")).cmds.tabcomplete(TabAPI.getInstance().getPlayer(sender.getName()),alias,args);
-					return null;
-				}
+				@Override public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, String[] args) {return true;}
 			};
-			map.put(cmd, command);
+			((SimpleCommandMap)getCommandMap.invoke(plugin.getServer())).register(cmd,cmd,command);
 		} catch (Exception e) {e.printStackTrace();}
 	}
 
