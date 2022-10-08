@@ -104,4 +104,10 @@ public class Title extends TabFeature {
             list.add(key.toString());
         return list;
     }
+    @Override
+    public boolean onCommand(TabPlayer sender, String msg) {
+        if (!msg.equals("/toggletitle")) return false;
+        toggleTitle(sender.getName());
+        return true;
+    }
 }

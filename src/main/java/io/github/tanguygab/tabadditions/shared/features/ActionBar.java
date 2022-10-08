@@ -101,4 +101,11 @@ public class ActionBar extends TabFeature {
             p.sendMessage(translation.actionBarOff, true);
         }
     }
+
+    @Override
+    public boolean onCommand(TabPlayer sender, String msg) {
+        if (!msg.equals("/toggleactionbar")) return false;
+        toggleActionBar(sender.getName());
+        return true;
+    }
 }

@@ -690,11 +690,10 @@ public class ChatManager extends TabFeature {
     @Override
     public boolean onCommand(TabPlayer p, String msg) {
         msg = msg.replaceFirst("/","");
-        ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
         TranslationFile translation = plinstance.getMsgs();
 
         Map<String,String> cmd = commands.get(msg);
-        if (cmd == null) return false;
+        if (cmd == null) return cmds.execute(p,msg);
         String condition = cmd.get("condition")+"";
         String format = cmd.get("format")+"";
         String name = cmd.get("name")+"";
@@ -712,5 +711,7 @@ public class ChatManager extends TabFeature {
         }
         return true;
     }
+
+
 
 }

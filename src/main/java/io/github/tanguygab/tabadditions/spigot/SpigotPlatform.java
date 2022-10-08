@@ -22,6 +22,7 @@ import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -109,7 +110,18 @@ public class SpigotPlatform extends Platform {
 			Map<String, Command> map = (Map<String, Command>) mapField.get(getCommandMap.invoke(plugin.getServer()));
 
 			if (map.containsKey(cmd)) return;
-			Command command = new BukkitCommand(cmd,"","/"+cmd,Arrays.asList(aliases)) {@Override public boolean execute(CommandSender sender, String commandLabel, String[] args) {return true;}};
+			Command command = new BukkitCommand(cmd,"","/"+cmd,Arrays.asList(aliases)) {
+				@Override public boolean execute(CommandSender sender, String commandLabel, String[] args) {return true;}
+
+
+				@NotNull
+				@Override
+				public List<String> tabComplete(@NotNull CommandSender sender, @NotNull String alias, @NotNull String[] args) throws IllegalArgumentException {
+					if (sender instanceof Player && TabAPI.getInstance().getFeatureManager().isFeatureEnabled("Chat"))
+						return ((ChatManager)TabAPI.getInstance().getFeatureManager().getFeature("Chat")).cmds.tabcomplete(TabAPI.getInstance().getPlayer(sender.getName()),alias,args);
+					return null;
+				}
+			};
 			map.put(cmd, command);
 		} catch (Exception e) {e.printStackTrace();}
 	}
