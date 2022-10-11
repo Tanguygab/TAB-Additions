@@ -63,6 +63,7 @@ public class ChatManager extends TabFeature {
     public boolean emojiUntranslate;
     public String emojiOutput;
     public boolean emojisAutoComplete;
+    private final Map<TabPlayer,List<String>> emojisAutoCompleteList = new HashMap<>();
     public Map<String,Map<String,Object>> emojis = new HashMap<>();
     public int emojiTotalCount;
     public Map<String,Integer> emojiCounts = new HashMap<>();
@@ -232,6 +233,11 @@ public class ChatManager extends TabFeature {
             tab.getPlayerCache().set("togglemention", mentionDisabled);
         if (cmds.toggleEmojiEnabled)
             tab.getPlayerCache().set("toggleemoji", toggleEmoji);
+        if (emojisAutoComplete)
+            for (TabPlayer p : tab.getOnlinePlayers()) {
+                if (emojisAutoCompleteList.containsKey(p))
+                    plinstance.getPlatform().removeFromChatComplete(p, emojisAutoCompleteList.get(p));
+            }
     }
 
     public void onChat(TabPlayer p, String msg) {
@@ -670,7 +676,7 @@ public class ChatManager extends TabFeature {
         p.loadPropertyFromConfig(this,"customchatname",p.getName());
         p.loadPropertyFromConfig(this,"chatsuffix");
 
-        if (plinstance.getPlatform().supportsChatSuggestions()) {
+        if (plinstance.getPlatform().supportsChatSuggestions() && emojisAutoComplete) {
             List<String> list = new ArrayList<>();
             for (String category : emojis.keySet()) {
                 Map<String,String> categoryEmojis = (Map<String,String>)emojis.get(category).get("list");
@@ -682,9 +688,14 @@ public class ChatManager extends TabFeature {
                     if (cmds.canUseEmoji(p,category,emoji))
                         list.add(emoji);
             }
-            if (emojisAutoComplete)
-                plinstance.getPlatform().addToChatComplete(p,list);
+            emojisAutoCompleteList.put(p,list);
+            plinstance.getPlatform().addToChatComplete(p,list);
         }
+    }
+
+    @Override
+    public void onQuit(TabPlayer p) {
+        if (emojisAutoComplete) emojisAutoCompleteList.remove(p);
     }
 
     @Override

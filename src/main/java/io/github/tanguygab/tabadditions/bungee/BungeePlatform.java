@@ -103,7 +103,8 @@ public class BungeePlatform extends Platform {
 
 	@Override
 	public void addToChatComplete(TabPlayer p, List<String> emojis) {}
-
+	@Override
+	public void removeFromChatComplete(TabPlayer p, List<String> emojis) {}
 	@Override
 	public boolean supportsChatSuggestions() {
 		return false;

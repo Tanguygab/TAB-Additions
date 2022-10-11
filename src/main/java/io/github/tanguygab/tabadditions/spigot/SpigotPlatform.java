@@ -24,24 +24,26 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
 	private final boolean chatSuggestions;
-
 	private Method getCommandMap;
+	private Constructor<?> chatCompleteConstructor;
+	private Class<?> actionEnum;
 
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
 		chatSuggestions = TabAPI.getInstance().getServerVersion().getMinorVersion() >= 19;
 
 		try {
+			Class<?> chatCompleteClass = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket");
+			actionEnum = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket$a");
+			chatCompleteConstructor = chatCompleteClass.getConstructor(actionEnum,List.class);
 			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
 		} catch (Exception e) {e.printStackTrace();}
 	}
@@ -167,16 +169,20 @@ public class SpigotPlatform extends Platform {
 	public void addToChatComplete(TabPlayer p, List<String> emojis) {
 		NMSStorage nms = NMSStorage.getInstance();
 		try {
-			Class<?> chatCompleteClass = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket");
-			Class<?> actionEnum = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket$a");
-			Object packet = chatCompleteClass.getConstructor(actionEnum,List.class).newInstance(actionEnum.getEnumConstants()[0],emojis);
+			Object addAction = actionEnum.getEnumConstants()[0];
+			Object packet = chatCompleteConstructor.newInstance(addAction,emojis);
 			nms.sendPacket.invoke(nms.PLAYER_CONNECTION.get(nms.getHandle.invoke(p.getPlayer())),packet);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
+		} catch (Exception e) {e.printStackTrace();}
 	}
-
+	@Override
+	public void removeFromChatComplete(TabPlayer p, List<String> emojis) {
+		NMSStorage nms = NMSStorage.getInstance();
+		try {
+			Object removeAction = actionEnum.getEnumConstants()[1];
+			Object packet = chatCompleteConstructor.newInstance(removeAction,emojis);
+			nms.sendPacket.invoke(nms.PLAYER_CONNECTION.get(nms.getHandle.invoke(p.getPlayer())),packet);
+		} catch (Exception e) {e.printStackTrace();}
+	}
 	@Override
 	public boolean supportsChatSuggestions() {
 		return chatSuggestions;
