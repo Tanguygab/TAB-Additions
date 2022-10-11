@@ -91,8 +91,6 @@ public class SpigotPlatform extends Platform {
 
 	@Override
 	public void reload() {
-		TABAdditions.getInstance().reload();
-
 		HandlerList.unregisterAll((Plugin) plugin);
 		plugin.getServer().getPluginManager().registerEvents(plugin, plugin);
 

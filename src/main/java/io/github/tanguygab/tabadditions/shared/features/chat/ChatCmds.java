@@ -304,7 +304,7 @@ public class ChatCmds {
 
         for (String emoji : emojis.keySet()) {
             if (!canUseEmoji(p,category,emoji)) continue;
-            IChatBaseComponent comp = cm.createComponent("\n" + EnumChatFormat.color(translation.getEmoji(emoji,emojis.get(emoji))),p);
+            IChatBaseComponent comp = cm.createComponent("\n" + TABAdditions.getInstance().parsePlaceholders(translation.getEmoji(emoji,emojis.get(emoji)),p),p);
             comp.getModifier().onClickSuggestCommand(emoji);
             list.add(comp);
         }

@@ -76,7 +76,6 @@ public class BungeePlatform extends Platform {
 
 	@Override
 	public void reload() {
-		TABAdditions.getInstance().reload();
 		plugin.getProxy().getPluginManager().unregisterListeners(plugin);
 		plugin.getProxy().getPluginManager().registerListener(plugin, new BungeeEvents());
 	}

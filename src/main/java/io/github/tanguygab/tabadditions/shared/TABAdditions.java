@@ -94,7 +94,7 @@ public class TABAdditions {
     public void load() {
         enabled = true;
         loadFiles();
-        TabAPI.getInstance().getEventBus().register(TabLoadEvent.class,e->platform.reload());
+        TabAPI.getInstance().getEventBus().register(TabLoadEvent.class,e->reload());
         platform.reload();
     }
 
@@ -130,6 +130,7 @@ public class TABAdditions {
     }
 
     public void reload() {
+        platform.reload();
         loadFiles();
         loadFeatures();
         loadPlaceholders();
