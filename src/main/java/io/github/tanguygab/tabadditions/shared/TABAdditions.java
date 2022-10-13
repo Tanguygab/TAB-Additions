@@ -94,8 +94,8 @@ public class TABAdditions {
     public void load() {
         enabled = true;
         loadFiles();
+        reload();
         TabAPI.getInstance().getEventBus().register(TabLoadEvent.class,e->reload());
-        platform.reload();
     }
 
     public void loadFiles() {
