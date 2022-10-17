@@ -41,11 +41,12 @@ public class SpigotPlatform extends Platform {
 		chatSuggestions = TabAPI.getInstance().getServerVersion().getMinorVersion() >= 19;
 
 		try {
+			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
+
 			Class<?> chatCompleteClass = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket");
 			actionEnum = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket$a");
 			chatCompleteConstructor = chatCompleteClass.getConstructor(actionEnum,List.class);
-			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
-		} catch (Exception e) {e.printStackTrace();}
+		} catch (Exception ignored) {}
 	}
 
 	@Override
