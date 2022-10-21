@@ -137,11 +137,10 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, Map<String,Boolean> cfg) {
-
-		Player p = plugin.getServer().getPlayer(uuid);
-		if (cfg.getOrDefault("DiscordSRV",false) && isPluginEnabled("DiscordSRV")) sendDiscordSRV(p,msg,channel,viewCondition);
-		if (cfg.getOrDefault("EssentialsX",false) && isPluginEnabled("EssentialsDiscord") && !viewCondition) sendEssentialsX(p,msg);
+	public void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, String plugin) {
+		Player p = this.plugin.getServer().getPlayer(uuid);
+		if (plugin.equalsIgnoreCase("DiscordSRV") && isPluginEnabled("DiscordSRV")) sendDiscordSRV(p,msg,channel,viewCondition);
+		if (plugin.equalsIgnoreCase("EssentialsX") && isPluginEnabled("EssentialsDiscord") && !viewCondition) sendEssentialsX(p,msg);
 	}
 
 	public void sendDiscordSRV(Player p, String msg, String channel, boolean viewCondition) {

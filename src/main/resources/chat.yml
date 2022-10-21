@@ -1,9 +1,8 @@
 default-format: default
 discord:
   enabled: false
-  format-message: false
-  DiscordSRV: false
-  EssentialsX: false
+  format: "%msg%"
+  plugin: DiscordSRV # DiscordSRV or EssentialsX
 message-cooldown: 0
 item:
   enabled: true

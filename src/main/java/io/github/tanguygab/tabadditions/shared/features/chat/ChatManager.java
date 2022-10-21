@@ -93,6 +93,10 @@ public class ChatManager extends TabFeature {
     public List<String> filterExempt;
     public Map<String,Map<String,String>> commands;
 
+    public boolean discordEnabled;
+    public String discordPlugin;
+    public String discordFormat;
+
 
     public ChatManager() {
         super("Chat","&aChat&r");
@@ -188,6 +192,9 @@ public class ChatManager extends TabFeature {
         config.getStringList("char-filter.filter", new ArrayList<>()).forEach(filter->filterPatterns.add(Pattern.compile(filter)));
         filterExempt = config.getStringList("char-filter.exempt", new ArrayList<>());
 
+        discordEnabled = config.getBoolean("discord.enabled",false);
+        discordPlugin = config.getString("discord.plugin","DiscordSRV");
+        discordFormat = config.getString("discord.format","%msg%");
 
         commands = config.getConfigurationSection("commands");
         commands.forEach((cmd,cfg)->plinstance.getPlatform().registerCommand(cmd,true));
@@ -272,13 +279,12 @@ public class ChatManager extends TabFeature {
             });
         }
 
-        Map<String, Boolean> cfg = plinstance.getConfig(ConfigType.CHAT).getConfigurationSection("discord");
-        if (cfg.getOrDefault("enabled",false)) {
-            String msgToDiscord = cfg.getOrDefault("format-message",false) ? msgFormatted : msg;
+        if (discordEnabled) {
+            String msgToDiscord = createmsg(p,msg,discordFormat,null).toLegacyText();
             if (canSee(p,null))
-                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),false, cfg);
+                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),false,discordPlugin);
             else if (getFormat(p).isViewConditionMet(p,null))
-                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),true, cfg);
+                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),true,discordPlugin);
         }
     }
 

@@ -91,13 +91,13 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition, Map<String, Boolean> cfg) {
+	public void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition, String plugin) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF("DiscordSRV");
 		out.writeUTF(msg);
 		out.writeUTF(channel);
 		out.writeUTF(viewCondition+"");
-		plugin.getProxy().getPlayer(UUID.randomUUID()).sendData("tabadditions:channel",out.toByteArray());
+		this.plugin.getProxy().getPlayer(UUID.randomUUID()).sendData("tabadditions:channel",out.toByteArray());
 	}
 
 	@Override

@@ -29,7 +29,7 @@ public abstract class Platform {
 
 	public abstract void disable();
 
-    public abstract void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition, Map<String, Boolean> cfg);
+    public abstract void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition, String plugin);
 
 	public abstract void addToChatComplete(TabPlayer p, List<String> emojis);
 	public abstract void removeFromChatComplete(TabPlayer p, List<String> emojis);
