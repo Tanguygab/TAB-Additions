@@ -1,6 +1,7 @@
 default-format: default
 discord:
   enabled: false
+  format-message: false
   DiscordSRV: false
   EssentialsX: false
 message-cooldown: 0

@@ -254,8 +254,8 @@ public class ChatManager extends TabFeature {
             cooldown.put(p,LocalDateTime.now());
 
         ChatFormat chatFormat = getFormat(p);
-
-        tab.sendConsoleMessage(createmsg(p,msg,chatFormat.getText(),null).toLegacyText(), true);
+        String msgFormatted = createmsg(p,msg,chatFormat.getText(),null).toLegacyText();
+        tab.sendConsoleMessage(msgFormatted, true);
 
         for (TabPlayer viewer : tab.getOnlinePlayers()) {
             IChatBaseComponent comp = null;
@@ -264,20 +264,21 @@ public class ChatManager extends TabFeature {
             else if (isSpying(p,viewer).equals("view-condition")) comp = createmsg(p, msg, spyViewConditionsOutput,viewer);
             if (comp == null) continue;
             viewer.sendMessage(comp);
-            chatPlaceholder.updateValue(viewer,p,msg);
+            chatPlaceholder.updateValue(viewer,p,msgFormatted);
 
             tab.getThreadManager().runTaskLater(msgPlaceholderStay,this,"update %rel_chat% for "+viewer.getName()+" viewing "+p.getName(),()->{
-                if ((chatPlaceholder).getLastValue(viewer,p).equals(msg))
+                if ((chatPlaceholder).getLastValue(viewer,p).equals(msgFormatted))
                     chatPlaceholder.updateValue(viewer,p,"");
             });
         }
 
         Map<String, Boolean> cfg = plinstance.getConfig(ConfigType.CHAT).getConfigurationSection("discord");
         if (cfg.getOrDefault("enabled",false)) {
+            String msgToDiscord = cfg.getOrDefault("format-message",false) ? msgFormatted : msg;
             if (canSee(p,null))
-                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msg,chatFormat.getChannel(),false, cfg);
+                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),false, cfg);
             else if (getFormat(p).isViewConditionMet(p,null))
-                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msg,chatFormat.getChannel(),true, cfg);
+                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),true, cfg);
         }
     }
 
