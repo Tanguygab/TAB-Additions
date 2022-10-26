@@ -300,7 +300,6 @@ public class ChatManager extends TabFeature {
         String format = removeSpaces(chatFormat);
 
         msg = msg.replace("{","<bracketleft>").replace("}","<bracketright>").replace("|","<bar>");
-
         return compcheck(msg,format,p,viewer);
     }
 
@@ -351,8 +350,8 @@ public class ChatManager extends TabFeature {
             list.add(comp);
         }
         IChatBaseComponent finalcomp = new IChatBaseComponent("");
-
-        finalcomp.setExtra(list);
+        if (!list.isEmpty())
+            finalcomp.setExtra(list);
         return finalcomp;
     }
 
@@ -369,7 +368,6 @@ public class ChatManager extends TabFeature {
             try {click = m.group("click");}
             catch (Exception ignored) {}
             String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
-
 
             if (mentionEnabled)
                 txt = replaceInput(txt,"%msg%",pingcheck(p,msg,viewer,hoverclick));
@@ -470,6 +468,10 @@ public class ChatManager extends TabFeature {
                 String output1 = emojis.get(category).containsKey("output") ? emojis.get(category).get("output")+"" : emojiOutput;
                 output1 = output1.replace("%emojiraw%", emoji).replace("%emoji%", list.get(emoji));
                 String output = hoverclick + plinstance.parsePlaceholders(removeSpaces(output1),p) + "{";
+                if (list2.isEmpty()) {
+                    for (int i = 0; i < count; i++) msg+=output;
+                    return msg;
+                }
                 for (String part : list2) {
                     if (list2.indexOf(part) + 1 == list2.size() && counted == count)
                         msg += part;
