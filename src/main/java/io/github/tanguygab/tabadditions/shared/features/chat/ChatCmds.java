@@ -292,7 +292,7 @@ public class ChatCmds {
         }
         IChatBaseComponent comp = cm.createComponent("\n"+EnumChatFormat.color(translation
                 .getEmojiCategoryHeader(list.size(),cm.ownedEmojis(p),cm.emojiTotalCount)),p);
-        comp.setExtra(list);
+        if (!list.isEmpty()) comp.setExtra(list);
         p.sendMessage(comp);
     }
 
