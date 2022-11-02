@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
+import com.loohp.interactivechat.api.InteractiveChatAPI;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
@@ -96,7 +97,6 @@ public class ChatManager extends TabFeature {
     public boolean discordEnabled;
     public String discordPlugin;
     public String discordFormat;
-
 
     public ChatManager() {
         super("Chat","&aChat&r");
@@ -298,6 +298,10 @@ public class ChatManager extends TabFeature {
         msg = new RGBUtils().applyFormats(msg);
 
         String format = removeSpaces(chatFormat);
+
+        if (plinstance.getPlatform().isPluginEnabled("InteractiveChat"))
+            try {msg = InteractiveChatAPI.markSender(msg,p.getUniqueId());}
+            catch (IllegalStateException ignored) {}
 
         msg = msg.replace("{","<bracketleft>").replace("}","<bracketright>").replace("|","<bar>");
         return compcheck(msg,format,p,viewer);

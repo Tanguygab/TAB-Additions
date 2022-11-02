@@ -36,6 +36,18 @@ repositories {
         name = 'ess-repo'
         url = 'https://repo.essentialsx.net/releases/'
     }
+    maven {
+        name = 'loohp-repo'
+        url = 'https://repo.loohpjames.com/repository'
+    }
+    maven {
+        name = 'jitpack.io'
+        url = 'https://jitpack.io'
+    }
+    maven {
+        name = 'CodeMC'
+        url = 'https://repo.codemc.org/repository/maven-public/'
+    }
 
 }
 
@@ -45,6 +57,7 @@ dependencies {
     compileOnly 'me.clip:placeholderapi:2.11.1'
     compileOnly 'com.discordsrv:discordsrv:1.25.0'
     compileOnly 'net.essentialsx:EssentialsXDiscord:2.19.4'
+    compileOnly 'com.loohp:InteractiveChat:4.2.3.13'
     compileOnly files('../../dependencies/TAB-3.1.5.jar','../../dependencies/AdvancedBan.jar')
 
 }
