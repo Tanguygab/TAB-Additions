@@ -4,7 +4,6 @@ import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.*;
 
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
@@ -145,12 +144,6 @@ public class SpigotPlatform extends Platform {
 
 	public void sendDiscordSRV(Player p, String msg, String channel, boolean viewCondition) {
 		DiscordSRV discord = DiscordSRV.getPlugin();
-		if (msg.contains("[item]")) {
-			ChatManager chat = (ChatManager) TabAPI.getInstance().getFeatureManager().getFeature("Chat");
-			TabPlayer player = TabAPI.getInstance().getPlayer(p.getUniqueId());
-			msg = msg.replace("[item]",chat.hovercheck(chat.createComponent("",player),"item:mainhand",player,null,null).toFlatText());
-		}
-
 		if (!viewCondition)
 			discord.processChatMessage(p, msg, discord.getMainChatChannel(), false);
 		else if (!discord.getOptionalChannel(channel).equals(discord.getMainChatChannel()))
