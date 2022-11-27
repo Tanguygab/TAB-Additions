@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+import java.util.regex.Pattern;
 
 public class ChatCmds {
 
@@ -227,7 +228,7 @@ public class ChatCmds {
                 }
                 else {
                     player = msg.split(" ")[0];
-                    msg = msg.replaceFirst(player+"( )?", "");
+                    msg = msg.replaceFirst(Pattern.quote(player)+"( )?", "");
                     p2 = plugin.getPlayer(player);
                 }
                 if (player.equals(""))
