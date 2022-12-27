@@ -58,6 +58,6 @@ dependencies {
     compileOnly 'com.discordsrv:discordsrv:1.25.0'
     compileOnly 'net.essentialsx:EssentialsXDiscord:2.19.4'
     compileOnly 'com.loohp:InteractiveChat:4.2.3.13'
-    compileOnly files('../../dependencies/TAB-3.1.5.jar','../../dependencies/AdvancedBan.jar')
+    compileOnly files('../../dependencies/TAB-3.2.2.jar','../../dependencies/AdvancedBan.jar')
 
 }
