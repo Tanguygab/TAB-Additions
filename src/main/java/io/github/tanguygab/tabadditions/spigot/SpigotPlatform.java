@@ -7,7 +7,7 @@ import io.github.tanguygab.tabadditions.shared.features.*;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
-import me.neznamy.tab.platforms.bukkit.nms.NMSStorage;
+import me.neznamy.tab.platforms.bukkit.nms.storage.NMSStorage;
 import net.essentialsx.api.v2.services.discord.DiscordService;
 import org.bukkit.Location;
 import org.bukkit.Sound;
