@@ -209,6 +209,7 @@ public class ChatCmds {
             case "reply":
                 if (!replyEnabled) return false;
             case "msg": {
+                if (plugin.isMuted(p)) return true;
                 if (msgCooldown.containsKey(p)) {
                     long time = ChronoUnit.SECONDS.between(msgCooldown.get(p), LocalDateTime.now());
                     if (time < msgCooldownTime) {
