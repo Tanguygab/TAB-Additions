@@ -139,7 +139,8 @@ public class ChatCmds {
                 String linebreaks = "";
                 for (int i = 0; i < clearChatAmount; i++)
                     linebreaks+="\n"+clearChatLine;
-                p.sendMessage(linebreaks,false);
+                for (TabPlayer all : tab.getOnlinePlayers())
+                    all.sendMessage(linebreaks,false);
                 p.sendMessage(translation.getChatCleared(p),true);
                 return true;
             }
