@@ -158,20 +158,18 @@ public class SpigotPlatform extends Platform {
 
 	@Override
 	public void addToChatComplete(TabPlayer p, List<String> emojis) {
-		NMSStorage nms = NMSStorage.getInstance();
 		try {
 			Object addAction = actionEnum.getEnumConstants()[0];
 			Object packet = chatCompleteConstructor.newInstance(addAction,emojis);
-			nms.sendPacket.invoke(nms.PLAYER_CONNECTION.get(nms.getHandle.invoke(p.getPlayer())),packet);
+			p.sendPacket(packet);
 		} catch (Exception e) {e.printStackTrace();}
 	}
 	@Override
 	public void removeFromChatComplete(TabPlayer p, List<String> emojis) {
-		NMSStorage nms = NMSStorage.getInstance();
 		try {
 			Object removeAction = actionEnum.getEnumConstants()[1];
 			Object packet = chatCompleteConstructor.newInstance(removeAction,emojis);
-			nms.sendPacket.invoke(nms.PLAYER_CONNECTION.get(nms.getHandle.invoke(p.getPlayer())),packet);
+			p.sendPacket(packet);
 		} catch (Exception e) {e.printStackTrace();}
 	}
 	@Override
