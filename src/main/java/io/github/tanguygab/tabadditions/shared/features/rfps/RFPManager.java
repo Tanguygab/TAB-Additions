@@ -51,8 +51,8 @@ public class RFPManager extends TabFeature {
         rfps.put(name,rfp);
         for (TabPlayer p : tab.getOnlinePlayers()) {
             p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()),this);
-            String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[0],p,this);
-            String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[1],p,this);
+            String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[0],p);
+            String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[1],p);
             registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix, rfp.getName());
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, rfp.get(p)),this);
 
@@ -93,8 +93,8 @@ public class RFPManager extends TabFeature {
             for (RFP rfp : rfps) {
                 fps.add(rfp.get(p));
                 p.sendCustomPacket(new PacketPlayOutScoreboardTeam(rfp.getSortingTeam()),this);
-                String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[0],p,this);
-                String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[1],p,this);
+                String prefix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[0],p);
+                String suffix = TABAdditions.getInstance().parsePlaceholders(rfp.getProps(p)[1],p);
                 registerScoreboardTeam(p,rfp.getSortingTeam(),prefix,suffix,rfp.getName());
             }
             p.sendCustomPacket(new PacketPlayOutPlayerInfo(PacketPlayOutPlayerInfo.EnumPlayerInfoAction.ADD_PLAYER, fps),this);

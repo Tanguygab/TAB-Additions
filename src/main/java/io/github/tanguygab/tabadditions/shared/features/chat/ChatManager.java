@@ -308,7 +308,7 @@ public class ChatManager extends TabFeature {
     }
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
-        text = plinstance.parsePlaceholders(text,p,viewer,this)
+        text = plinstance.parsePlaceholders(text,p,viewer)
                 .replace("%channel%",getFormat(p).getChannel())
                 .replace("%condition%",getFormat(p).getViewCondition());
         if (!text.startsWith("{")) text = "{"+text;
@@ -392,7 +392,7 @@ public class ChatManager extends TabFeature {
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
                     if (!customInteractions.get(interaction).get("input").equals(""))
-                        txt = replaceInput(txt,customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer,this))+"{");
+                        txt = replaceInput(txt,customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer))+"{");
                 }
             }
             text = text.replace(txtold,txt);
@@ -425,7 +425,7 @@ public class ChatManager extends TabFeature {
 
             if (comp.toFlatText().replaceAll("^\\s+","").equals("[item]")) {
                 String color = lastcolor == null ? "" : "#"+lastcolor.getHexCode();
-                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer,this)+color,viewer);
+                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer)+color,viewer);
             }
             comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
             return comp;
@@ -561,8 +561,8 @@ public class ChatManager extends TabFeature {
         } else check = pingcheck2(p,msg,viewer);
 
         if (check) {
-            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,p2,this)+"{");
-            String input = plinstance.parsePlaceholders(mentionInput,p2,this);
+            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,p2)+"{");
+            String input = plinstance.parsePlaceholders(mentionInput,p2);
             if (regexInputs)
                 msg = msg.replaceAll(input,Matcher.quoteReplacement(output));
             else msg = msg.replaceAll("(?i)"+Pattern.quote(input), output);
@@ -574,7 +574,7 @@ public class ChatManager extends TabFeature {
     }
 
     public boolean pingcheck2(TabPlayer p, String msg, TabPlayer viewer) {
-        String input = plinstance.parsePlaceholders(mentionInput,viewer,this);
+        String input = plinstance.parsePlaceholders(mentionInput,viewer);
         if (input.equals("") || viewer == null) return false;
         if (!p.hasPermission("tabadditions.chat.bypass.togglemention") && mentionDisabled.contains(viewer.getName().toLowerCase())) return false;
         if (!p.hasPermission("tabadditions.chat.bypass.ignore") && cmds.isIgnored(p,viewer)) return false;

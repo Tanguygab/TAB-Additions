@@ -15,10 +15,10 @@ import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
-import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import me.neznamy.tab.api.placeholder.*;
+import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
 import org.bukkit.entity.Player;
 
-import me.neznamy.tab.shared.DynamicText;
 import me.neznamy.tab.shared.features.layout.skin.SkinManager;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
@@ -130,6 +130,7 @@ public class TABAdditions {
     }
 
     public void reload() {
+        tab.getEventBus().unregister(TabPlaceholderRegisterEvent.class);
         platform.reload();
         loadFiles();
         loadFeatures();
@@ -228,37 +229,42 @@ public class TABAdditions {
                 return count+"";
         });
         platform.registerPlaceholders(pm);
+        tab.getEventBus().register(TabPlaceholderRegisterEvent.class,this::onPlaceholderRegister);
+    }
+
+    private void onPlaceholderRegister(TabPlaceholderRegisterEvent e) {
+        String identifier = e.getIdentifier();
+        PlaceholderManager pm = tab.getPlaceholderManager();
+        if (identifier.startsWith("%rel_viewer:")) {
+            Placeholder placeholder = pm.getPlaceholder("%"+identifier.substring(12));
+            if (placeholder instanceof RelationalPlaceholder) {
+                RelationalPlaceholder rel = (RelationalPlaceholder) placeholder;
+                pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer,target)->rel.getLastValue(target,viewer));
+            }
+            if (placeholder instanceof PlayerPlaceholder) {
+                PlayerPlaceholder player = (PlayerPlaceholder) placeholder;
+                pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer,target)->player.getLastValue(viewer));
+            }
+            e.setPlaceholder(placeholder);
+        }
     }
 
     public String parsePlaceholders(String str, TabPlayer p) {
-        return parsePlaceholders(str,p,null);
-    }
-
-    public static DynamicText newDynamicTextBecauseISuckAtUsingTheseThings(TabPlayer p, String str, TabFeature feature) {
-        return new DynamicText("",feature,p,str,"ARMenu");
-    }
-
-    public String parsePlaceholders(String str, TabPlayer p, TabFeature feature) {
         if (str == null) return "";
         if (!str.contains("%")) return EnumChatFormat.color(str);
-        str = newDynamicTextBecauseISuckAtUsingTheseThings(p,str,feature).get();
+        str = parsePlaceholders(str,p,null);
         return EnumChatFormat.color(str);
     }
 
-    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, TabFeature f) {
+    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer) {
         List<String> list = TabAPI.getInstance().getPlaceholderManager().detectPlaceholders(str);
         for (String pl : list) {
-            if (pl.startsWith("%sender:") && sender != null) {
-                String pl2 = pl.replace("%sender:", "%");
-                str = str.replace(pl,newDynamicTextBecauseISuckAtUsingTheseThings(sender,pl2,f).getFormat(viewer));
-                continue;
-            }
-            else if (pl.startsWith("%viewer:") && viewer != null) {
-                String pl2 = pl.replace("%viewer:", "%");
-                str = str.replace(pl,newDynamicTextBecauseISuckAtUsingTheseThings(viewer,pl2,f).getFormat(sender));
-                continue;
-            }
-            str = str.replace(pl,newDynamicTextBecauseISuckAtUsingTheseThings(sender,pl,f).getFormat(viewer));
+            Placeholder placeholder = tab.getPlaceholderManager().getPlaceholder(pl);
+            String output = pl;
+            if (placeholder instanceof PlayerPlaceholder) pl = ((PlayerPlaceholder) placeholder).getLastValue(sender);
+            if (placeholder instanceof ServerPlaceholder) pl = ((ServerPlaceholder) placeholder).getLastValue();
+            if (placeholder instanceof RelationalPlaceholder) pl = ((RelationalPlaceholder) placeholder).getLastValue(viewer,sender);
+            str = str.replace(pl, output);
         }
         return EnumChatFormat.color(str);
     }
@@ -279,9 +285,10 @@ public class TABAdditions {
         return true;
     }
 
-    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, boolean checkForViewer, TabFeature feature) {
+    //so, I have no clue what I did here, but don't worry, I'll change it, someday...
+    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, boolean checkForViewer) {
         if (sender == null || viewer == null) return false;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer,feature);
+        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer);
         for (String cond : conditionname.split(";")) {
             if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
                 try {

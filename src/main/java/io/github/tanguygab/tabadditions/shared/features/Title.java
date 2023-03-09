@@ -95,7 +95,7 @@ public class Title extends TabFeature {
     }
 
     private String parseText(String str, TabPlayer p) {
-        return TABAdditions.getInstance().parsePlaceholders(str,p,this).replace("_"," ");
+        return TABAdditions.getInstance().parsePlaceholders(str,p).replace("_"," ");
     }
 
     public List<String> getLists() {
