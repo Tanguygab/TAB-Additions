@@ -7,6 +7,7 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.team.TeamManager;
+import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
 import java.util.concurrent.Future;
 
@@ -46,7 +47,7 @@ public class ConditionalNametags extends TabFeature {
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
         if (cond.equals("")) return def;
-        return TABAdditions.getInstance().isConditionMet(cond,p);
+        return Condition.getCondition(cond).isMet(p);
     }
 
     @Override

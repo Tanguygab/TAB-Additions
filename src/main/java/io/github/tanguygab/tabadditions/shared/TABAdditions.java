@@ -17,6 +17,7 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import me.neznamy.tab.api.placeholder.*;
 import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
+import me.neznamy.tab.shared.placeholders.TabPlaceholder;
 import org.bukkit.entity.Player;
 
 import me.neznamy.tab.shared.features.layout.skin.SkinManager;
@@ -237,14 +238,6 @@ public class TABAdditions {
         PlaceholderManager pm = tab.getPlaceholderManager();
         if (identifier.startsWith("%rel_viewer:")) {
             Placeholder placeholder = pm.getPlaceholder("%"+identifier.substring(12));
-            if (placeholder instanceof RelationalPlaceholder) {
-                RelationalPlaceholder rel = (RelationalPlaceholder) placeholder;
-                pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer,target)->rel.getLastValue(target,viewer));
-            }
-            if (placeholder instanceof PlayerPlaceholder) {
-                PlayerPlaceholder player = (PlayerPlaceholder) placeholder;
-                pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer,target)->player.getLastValue(viewer));
-            }
             e.setPlaceholder(placeholder);
         }
     }
@@ -269,21 +262,7 @@ public class TABAdditions {
         return EnumChatFormat.color(str);
     }
 
-    public boolean isConditionMet(String str, TabPlayer p) {
-        if (str == null || str.equals("null")) return true;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,p);
-        for (String cond : conditionname.split(";")) {
-            String fcond = cond;
-            if (fcond.startsWith("!"))
-                fcond = fcond.replaceFirst("!", "");
-            Condition condition = Condition.getCondition(fcond);
-            if (condition != null) {
-                if (cond.startsWith("!") && condition.isMet(p)) return false;
-                if (!cond.startsWith("!") && !condition.isMet(p)) return false;
-            }
-        }
-        return true;
-    }
+
 
     //so, I have no clue what I did here, but don't worry, I'll change it, someday...
     public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, boolean checkForViewer) {
@@ -298,12 +277,9 @@ public class TABAdditions {
                     if (!cond.startsWith("!") && !result) return false;
                 } catch (NumberFormatException ignored) {}
             } else {
-                Condition condition = Condition.getCondition(cond.replace("!",""));
-                if (condition != null) {
-                    boolean result = condition.isMet(checkForViewer ? viewer : sender);
-                    if (cond.startsWith("!") && result) return false;
-                    if (!cond.startsWith("!") && !result) return false;
-                }
+                Condition condition = Condition.getCondition(cond);
+                if (condition != null && !condition.isMet(checkForViewer ? viewer : sender))
+                    return false;
             }
         }
         return true;

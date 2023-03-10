@@ -3,6 +3,8 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.placeholders.conditions.Condition;
+
 import java.util.Map;
 
 public class ChatFormat {
@@ -25,7 +27,7 @@ public class ChatFormat {
     }
     public boolean isConditionMet(TabPlayer p) {
         if (!config.containsKey("condition")) return true;
-        return TABAdditions.getInstance().isConditionMet(config.get("condition"),p);
+        return Condition.getCondition(config.get("condition")).isMet(p);
     }
 
     public String getChannel() {

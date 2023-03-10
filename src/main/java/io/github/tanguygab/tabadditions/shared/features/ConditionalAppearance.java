@@ -6,6 +6,7 @@ import me.neznamy.tab.api.Property;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
@@ -67,7 +68,7 @@ public class ConditionalAppearance extends TabFeature {
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
         if (cond.equals("")) return def;
-        return TABAdditions.getInstance().isConditionMet(cond,p);
+        return Condition.getCondition(cond).isMet(p);
     }
 
     @Override

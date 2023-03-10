@@ -17,6 +17,7 @@ import me.neznamy.tab.api.chat.rgb.RGBUtils;
 import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.placeholder.RelationalPlaceholder;
+import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -721,7 +722,7 @@ public class ChatManager extends TabFeature {
         String condition = cmd.get("condition")+"";
         String format = cmd.get("format")+"";
         String name = cmd.get("name")+"";
-        if (!plinstance.isConditionMet(condition,p))
+        if (!Condition.getCondition(condition).isMet(p))
             p.sendMessage(translation.NO_PERMISSIONS,true);
         else {
             if (defformats.containsKey(p)) {
