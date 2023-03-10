@@ -17,6 +17,7 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import me.neznamy.tab.api.placeholder.*;
 import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
+import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
 import me.neznamy.tab.shared.placeholders.TabPlaceholder;
 import org.bukkit.entity.Player;
 
@@ -237,7 +238,22 @@ public class TABAdditions {
         String identifier = e.getIdentifier();
         PlaceholderManager pm = tab.getPlaceholderManager();
         if (identifier.startsWith("%rel_viewer:")) {
-            Placeholder placeholder = pm.getPlaceholder("%"+identifier.substring(12));
+            Placeholder placeholder = pm.getPlaceholder("%" + identifier.substring(12));
+            Placeholder viewerPlaceholder = null;
+            if (placeholder instanceof RelationalPlaceholder) {
+                RelationalPlaceholder rel = (RelationalPlaceholder) placeholder;
+                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> rel.getLastValue(target, viewer));
+            }
+            if (placeholder instanceof PlayerPlaceholder) {
+                PlayerPlaceholder player = (PlayerPlaceholder) placeholder;
+                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> player.getLastValue(viewer));
+            }
+            e.setPlaceholder(viewerPlaceholder);
+        }
+        if (identifier.startsWith("%rel_condition:")) {
+            String cond = identifier.substring(15,identifier.length()-1);
+            Condition condition = Condition.getCondition(cond);
+            TabPlaceholder placeholder = (TabPlaceholder) pm.registerRelationalPlaceholder(identifier, ((PlaceholderManagerImpl)pm).getDefaultRefresh(), (viewer, target) -> condition.getText(viewer));
             e.setPlaceholder(placeholder);
         }
     }
