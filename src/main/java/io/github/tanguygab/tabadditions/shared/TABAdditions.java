@@ -253,7 +253,7 @@ public class TABAdditions {
         if (identifier.startsWith("%rel_condition:")) {
             String cond = identifier.substring(15,identifier.length()-1);
             Condition condition = Condition.getCondition(cond);
-            TabPlaceholder placeholder = (TabPlaceholder) pm.registerRelationalPlaceholder(identifier, ((PlaceholderManagerImpl)pm).getDefaultRefresh(), (viewer, target) -> condition.getText(viewer));
+            TabPlaceholder placeholder = (TabPlaceholder) pm.registerRelationalPlaceholder(identifier, ((PlaceholderManagerImpl)pm).getDefaultRefresh(), (viewer, target) -> parsePlaceholders(condition.getText(viewer),target,viewer));
             e.setPlaceholder(placeholder);
         }
     }
