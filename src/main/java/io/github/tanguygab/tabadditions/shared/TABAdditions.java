@@ -266,13 +266,13 @@ public class TABAdditions {
     }
 
     public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer) {
-        List<String> list = TabAPI.getInstance().getPlaceholderManager().detectPlaceholders(str);
+        List<String> list = tab.getPlaceholderManager().detectPlaceholders(str);
         for (String pl : list) {
             Placeholder placeholder = tab.getPlaceholderManager().getPlaceholder(pl);
             String output = pl;
-            if (placeholder instanceof PlayerPlaceholder) pl = ((PlayerPlaceholder) placeholder).getLastValue(sender);
-            if (placeholder instanceof ServerPlaceholder) pl = ((ServerPlaceholder) placeholder).getLastValue();
-            if (placeholder instanceof RelationalPlaceholder) pl = ((RelationalPlaceholder) placeholder).getLastValue(viewer,sender);
+            if (placeholder instanceof PlayerPlaceholder) output = ((PlayerPlaceholder) placeholder).getLastValue(sender);
+            if (placeholder instanceof ServerPlaceholder) output = ((ServerPlaceholder) placeholder).getLastValue();
+            if (placeholder instanceof RelationalPlaceholder) output = ((RelationalPlaceholder) placeholder).getLastValue(viewer,sender);
             str = str.replace(pl, output);
         }
         return EnumChatFormat.color(str);
