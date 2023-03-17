@@ -222,11 +222,11 @@ public class TABAdditions {
             Placeholder viewerPlaceholder = null;
             if (placeholder instanceof RelationalPlaceholder) {
                 RelationalPlaceholder rel = (RelationalPlaceholder) placeholder;
-                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> rel.getLastValue(target, viewer));
+                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> viewer == null ? "" : rel.getLastValue(target, viewer));
             }
             if (placeholder instanceof PlayerPlaceholder) {
                 PlayerPlaceholder player = (PlayerPlaceholder) placeholder;
-                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> player.getLastValue(viewer));
+                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> viewer == null ? "" : player.getLastValue(viewer));
             }
             e.setPlaceholder(viewerPlaceholder);
         }
@@ -252,7 +252,7 @@ public class TABAdditions {
             String output = pl;
             if (placeholder instanceof PlayerPlaceholder) output = ((PlayerPlaceholder) placeholder).getLastValue(sender);
             if (placeholder instanceof ServerPlaceholder) output = ((ServerPlaceholder) placeholder).getLastValue();
-            if (placeholder instanceof RelationalPlaceholder && sender != null && viewer != null) output = ((RelationalPlaceholder) placeholder).getLastValue(viewer,sender);
+            if (placeholder instanceof RelationalPlaceholder) output = ((RelationalPlaceholder) placeholder).getLastValue(viewer,sender);
             str = str.replace(pl, output);
         }
         return EnumChatFormat.color(str);
