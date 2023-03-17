@@ -252,7 +252,7 @@ public class TABAdditions {
             String output = pl;
             if (placeholder instanceof PlayerPlaceholder) output = ((PlayerPlaceholder) placeholder).getLastValue(sender);
             if (placeholder instanceof ServerPlaceholder) output = ((ServerPlaceholder) placeholder).getLastValue();
-            if (placeholder instanceof RelationalPlaceholder) output = ((RelationalPlaceholder) placeholder).getLastValue(viewer,sender);
+            if (placeholder instanceof RelationalPlaceholder && sender != null && viewer != null) output = ((RelationalPlaceholder) placeholder).getLastValue(viewer,sender);
             str = str.replace(pl, output);
         }
         return EnumChatFormat.color(str);
