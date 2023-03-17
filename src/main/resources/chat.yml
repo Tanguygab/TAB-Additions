@@ -16,7 +16,7 @@ mention:
   enabled: true
   input: '@%player%'
   output: '{
-  &b@%viewer:player%
+  &b@%rel_viewer:player%
   ||
   Mentioned!
   ||
@@ -69,11 +69,11 @@ custom-interactions:
 msg:
   enabled: true
   sender: "{
-  &7[&6&lMe &e➠ &6&l%viewer:prop-customchatname%&7] %msg%
+  &7[&6&lMe &e➠ &6&l%rel_viewer:prop-customchatname%&7] %msg%
   ||
   %time%
   \n
-  \n&fClick to reply to &6%viewer:prop-customchatname%&f.
+  \n&fClick to reply to &6%rel_viewer:prop-customchatname%&f.
   ||
   suggest:/r  }"
   viewer: "{
@@ -152,7 +152,7 @@ socialspy:
   msgs:
     spy: true
     output: '{
-    &b&l[SocialSpy-Msg] &7[&6&l%prop-customchatname% &e➠ &6&l%viewer:prop-customchatname%&7] %msg%
+    &b&l[SocialSpy-Msg] &7[&6&l%prop-customchatname% &e➠ &6&l%rel_viewer:prop-customchatname%&7] %msg%
     ||
     %time%
     }'
