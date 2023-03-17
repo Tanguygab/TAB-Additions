@@ -93,8 +93,7 @@ public class ChatManager extends TabFeature {
     public String filterOutput;
     public List<Pattern> filterPatterns = new ArrayList<>();
     public List<String> filterExempt;
-    public Map<String,Map<String,String>> commands;
-
+    public Map<String,FormatCommand> commands;
     public boolean discordEnabled;
     public String discordPlugin;
     public String discordFormat;
@@ -206,8 +205,9 @@ public class ChatManager extends TabFeature {
         discordPlugin = config.getString("discord.plugin","DiscordSRV");
         discordFormat = config.getString("discord.format","%msg%");
 
-        commands = config.getConfigurationSection("commands");
-        commands.forEach((cmd,cfg)->plinstance.getPlatform().registerCommand(cmd,true));
+        commands = new HashMap<>();
+        Map<String,Map<String,String>> commandsMap = config.getConfigurationSection("commands");
+        commandsMap.forEach((cmd,cfg)-> commands.put(cfg.get("name"),new FormatCommand(cfg.get("name"),cmd,formats.get(cfg.get("format")),Condition.getCondition(cfg.get("condition")),cfg.get("prefix"))));
 
 
         PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
@@ -271,11 +271,12 @@ public class ChatManager extends TabFeature {
             cooldown.put(p,LocalDateTime.now());
 
         ChatFormat prefixFormat = null;
-        for (Map<String,String> cmd : commands.values()){
-            String prefix = cmd.get("prefix");
-            if (prefix != null && !prefix.equals("") && msg.startsWith(prefix)) {
-                prefixFormat = cmd.containsKey("format") ? formats.get(cmd.get("format")) : null;
-                msg = msg.substring(1);
+        for (FormatCommand format : commands.values()) {
+            if (msg.startsWith(format.getPrefix())) {
+                if (format.getCondition().isMet(p)) {
+                    prefixFormat = format.getFormat();
+                    msg = msg.substring(1);
+                }
                 break;
             }
         }
@@ -735,20 +736,18 @@ public class ChatManager extends TabFeature {
         msg = msg.replaceFirst("/","");
         TranslationFile translation = plinstance.getMsgs();
 
-        Map<String,String> cmd = commands.get(msg);
+        FormatCommand cmd = commands.get(msg);
         if (cmd == null) return cmds.execute(p,msg);
-        String condition = cmd.get("condition")+"";
-        String format = cmd.get("format")+"";
-        String name = cmd.get("name")+"";
-        if (!Condition.getCondition(condition).isMet(p))
+        if (!cmd.getCondition().isMet(p))
             p.sendMessage(translation.NO_PERMISSIONS,true);
         else {
+            String name = cmd.getName();
             if (defformats.containsKey(p)) {
                 defformats.remove(p);
                 p.sendMessage(translation.getCmdLeave(name), true);
             }
             else {
-                defformats.put(p, format);
+                defformats.put(p, cmd.getFormat().getName());
                 p.sendMessage(translation.getCmdJoin(name), true);
             }
         }
