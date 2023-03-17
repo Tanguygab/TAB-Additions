@@ -12,9 +12,17 @@ public class OnlyYou extends TabFeature {
     private final Plugin plugin;
 
     public OnlyYou() {
-        super("Only You","&aOnly You&r");
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
         load();
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Only You";
+    }
+    @Override
+    public String getRefreshDisplayName() {
+        return "&aOnly You&r";
     }
 
     @Override

@@ -5,9 +5,10 @@ import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
-import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
@@ -67,6 +68,11 @@ public class BungeePlatform extends Platform {
 				.stay(stay)
 				.fadeOut(fadeout);
 		((ProxiedPlayer)p.getPlayer()).sendTitle(t);
+	}
+
+	@Override
+	public void sendActionbar(TabPlayer p, String text) {
+		((ProxiedPlayer)p.getPlayer()).sendMessage(ChatMessageType.ACTION_BAR,TextComponent.fromLegacyText(text));
 	}
 
 	@Override

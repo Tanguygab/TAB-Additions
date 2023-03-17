@@ -15,9 +15,17 @@ public class NametagInRange extends TabFeature {
     private Future<?> task;
 
     public NametagInRange() {
-        super("Nametag In Range","&aNametag in Range&r");
         tab = TabAPI.getInstance();
         load();
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Nametag In Range";
+    }
+    @Override
+    public String getRefreshDisplayName() {
+        return "&aNametag In Range&r";
     }
 
     @Override

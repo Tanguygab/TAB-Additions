@@ -15,7 +15,6 @@ public class TablistNamesRadius extends TabFeature {
     private boolean enabled = true;
 
     public TablistNamesRadius() {
-        super("Tablist Names Radius","&aTablist Names Radius&r");
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
@@ -24,6 +23,15 @@ public class TablistNamesRadius extends TabFeature {
             }
         }
         load();
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Tablist Names Radius";
+    }
+    @Override
+    public String getRefreshDisplayName() {
+        return "&aTablist Names Radius&r";
     }
 
     @Override

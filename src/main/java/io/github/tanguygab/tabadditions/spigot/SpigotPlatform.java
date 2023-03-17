@@ -7,8 +7,9 @@ import io.github.tanguygab.tabadditions.shared.features.*;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
-import me.neznamy.tab.platforms.bukkit.nms.storage.NMSStorage;
 import net.essentialsx.api.v2.services.discord.DiscordService;
+import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.command.Command;
@@ -80,6 +81,11 @@ public class SpigotPlatform extends Platform {
 		} catch (Exception e) {
 			((Player) p.getPlayer()).sendTitle(title,subtitle);
 		}
+	}
+
+	@Override
+	public void sendActionbar(TabPlayer p, String text) {
+		((Player)p.getPlayer()).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(text));
 	}
 
 	@Override

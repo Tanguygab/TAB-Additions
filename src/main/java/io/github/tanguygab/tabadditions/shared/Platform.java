@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared;
 
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 
 import java.util.List;
@@ -21,6 +22,8 @@ public abstract class Platform {
 
 	public abstract void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout);
 
+	public abstract void sendActionbar(TabPlayer p, String text);
+
 	public abstract void sendSound(TabPlayer p, String sound);
 
 	public abstract void reload();
@@ -30,7 +33,6 @@ public abstract class Platform {
 	public abstract void disable();
 
     public abstract void sendToDiscord(UUID uniqueId, String msg, String channel, boolean viewCondition, String plugin);
-
 	public abstract void addToChatComplete(TabPlayer p, List<String> emojis);
 	public abstract void removeFromChatComplete(TabPlayer p, List<String> emojis);
 	public abstract boolean supportsChatSuggestions();

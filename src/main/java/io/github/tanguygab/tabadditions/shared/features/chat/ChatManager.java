@@ -100,10 +100,19 @@ public class ChatManager extends TabFeature {
     public String discordFormat;
 
     public ChatManager() {
-        super("Chat","&aChat&r");
         tab = TabAPI.getInstance();
         load();
     }
+
+    @Override
+    public String getFeatureName() {
+        return "Chat";
+    }
+    @Override
+    public String getRefreshDisplayName() {
+        return "&aChat&r";
+    }
+
     public ChatFormat getFormat(TabPlayer p) {
         String format;
         if (defformats.containsKey(p))

@@ -14,8 +14,16 @@ import java.util.Map;
 public class Title extends TabFeature {
 
     public Title() {
-        super("Title","&aTitle&r");
         load();
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Title";
+    }
+    @Override
+    public String getRefreshDisplayName() {
+        return "&aTitle&r";
     }
 
     public List<String> toggleTitle = new ArrayList<>();

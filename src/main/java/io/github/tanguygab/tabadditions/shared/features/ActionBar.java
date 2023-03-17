@@ -8,7 +8,6 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
-import me.neznamy.tab.api.protocol.PacketPlayOutChat;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,14 +15,22 @@ import java.util.concurrent.Future;
 
 public class ActionBar extends TabFeature {
 
-    public ActionBar() {
-        super("ActionBar","&aActionBar&r");
-        load();
-    }
-
     public List<String> toggleActionBar = new ArrayList<>();
     public List<TabPlayer> noBar = new ArrayList<>();
+
     public Future<?> task;
+
+    public ActionBar() {
+        load();
+    }
+    @Override
+    public String getFeatureName() {
+        return "ActionBar";
+    }
+    @Override
+    public String getRefreshDisplayName() {
+        return "&aActionBar&r";
+    }
 
     @Override
     public void load() {
@@ -78,10 +85,7 @@ public class ActionBar extends TabFeature {
             actionbar = TABAdditions.getInstance().parsePlaceholders(actionbar.replace("custom:",""),p).replace("_"," ");
         else actionbar = TABAdditions.getInstance().parsePlaceholders(TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getString("bars." + actionbar,""),p);
 
-
-
-        p.sendCustomPacket(new PacketPlayOutChat(IChatBaseComponent.optimizedComponent(actionbar), PacketPlayOutChat.ChatMessageType.GAME_INFO),this);
-
+        TABAdditions.getInstance().getPlatform().sendActionbar(p,IChatBaseComponent.optimizedComponent(actionbar).toFlatText());
     }
 
     public void addToNoBar(TabPlayer p) {

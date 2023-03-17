@@ -18,12 +18,20 @@ public class ConditionalAppearance extends TabFeature {
     private final boolean def;
 
     public ConditionalAppearance() {
-        super("Conditional Appearance","&aConditional Appearance&r");
         tab = TabAPI.getInstance();
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
         for (TabPlayer p : tab.getOnlinePlayers()) p.loadPropertyFromConfig(this,"appearance-condition");
         def = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("appearance-nametags.show-by-default",true);
         load();
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Conditional Appearance";
+    }
+    @Override
+    public String getRefreshDisplayName() {
+        return "&aConditional Appearance&r";
     }
 
     @Override

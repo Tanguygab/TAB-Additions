@@ -19,8 +19,16 @@ public class SneakHideNametag extends TabFeature implements Listener {
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
 
     public SneakHideNametag() {
-        super("Sneak Hide Nametag","&aSneak Hide Nametag&r");
         load();
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Sneak Hide Nametag";
+    }
+    @Override
+    public String getRefreshDisplayName() {
+        return "&aSneak Hide Nametag&r";
     }
 
     @Override
