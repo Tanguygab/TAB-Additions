@@ -4,8 +4,6 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.ActionBar;
 import io.github.tanguygab.tabadditions.shared.features.Title;
-import io.github.tanguygab.tabadditions.shared.features.rfps.RFP;
-import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.neznamy.tab.api.TabAPI;
 
 import java.util.*;
@@ -56,18 +54,6 @@ public class Cmd {
                     }
                     break;
                 }
-                case "fp": {
-                    if (TABAdditions.getInstance().rfpEnabled) {
-                        if (args.length < 2)
-                            instance.sendMessage(name,"You have to provide add, remove, edit, info or list.");
-                        else if (!args[1].equalsIgnoreCase("list") && args.length < 3)
-                            instance.sendMessage(name,"You have to provide a fake player name.");
-                        else if (args[1].equalsIgnoreCase("edit") && args.length < 4)
-                            instance.sendMessage(name,"You have to provide an action.");
-                        else new RealFakePlayerCmd(name, args);
-                    }
-                    break;
-                }
                 case "tags": {
                     new TagsCmd(name, args);
                     break;
@@ -95,25 +81,6 @@ public class Cmd {
                 case "tags": {
                     if (args.length == 2)
                         return new ArrayList<>(Arrays.asList("hide","show","toggle"));
-                    break;
-                }
-                case "fp": {
-                    RFPManager rfpm = (RFPManager) tab.getFeatureManager().getFeature("Real Fake Players");
-                    if (rfpm == null)
-                        return null;
-                    if (args.length == 2)
-                        return new ArrayList<>(Arrays.asList("add","remove","edit","list","info"));
-                    if (!args[1].equalsIgnoreCase("list") && args.length == 3) {
-                        List<RFP> rfps = rfpm.getRFPS();
-                        List<String> rfpnames = new ArrayList<>();
-                        for (RFP rfp : rfps)
-                            rfpnames.add(rfp.getConfigName());
-                        if (args[1].equalsIgnoreCase("remove"))
-                            rfpnames.add("_ALL_");
-                        return rfpnames;
-                    }
-                    if (args[1].equalsIgnoreCase("edit") && args.length == 4)
-                        return new ArrayList<>(Arrays.asList("name","skin","latency","group","prefix","suffix"));
                     break;
                 }
                 case "title": {

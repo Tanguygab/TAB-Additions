@@ -6,7 +6,6 @@ import java.util.*;
 
 import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
-import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.api.*;
@@ -167,9 +166,6 @@ public class TABAdditions {
         //Chat
         if (chatEnabled)
             registerFeature(new ChatManager());
-        //RFP
-        if (rfpEnabled)
-            registerFeature(new RFPManager());
         //ConditionalNametags
         if (condNametagsEnabled)
             registerFeature(new ConditionalNametags());
@@ -200,20 +196,6 @@ public class TABAdditions {
                     return "";
             });
         }
-        pm.registerServerPlaceholder("%onlinerfp%",1000,()->{
-                int count = tab.getOnlinePlayers().length;
-                if (tab.getFeatureManager().isFeatureEnabled("Real Fake Players"))
-                    count = count+((RFPManager)tab.getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
-                return count+"";
-        });
-        pm.registerPlayerPlaceholder("%canseeonlinerfp%",1000,p->{
-                int count = tab.getOnlinePlayers().length;
-                try {count = Integer.parseInt(parsePlaceholders("%canseeonline%",p));}
-                catch (NumberFormatException ignored) {}
-                if (tab.getFeatureManager().isFeatureEnabled("Real Fake Players"))
-                    count = count + ((RFPManager) tab.getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
-                return count+"";
-        });
         String world = platform.getType() == PlatformType.SPIGOT ? "world" : "server";
         pm.registerPlayerPlaceholder("%cansee"+world+"online%", 1000,p->{
                 int count = 0;
@@ -226,8 +208,6 @@ public class TABAdditions {
                 int count = 0;
                 try {count = Integer.parseInt(parsePlaceholders("%cansee"+world+"online%",p));}
                 catch (NumberFormatException ignored) {}
-                if (tab.getFeatureManager().isFeatureEnabled("Real Fake Players"))
-                    count = count + ((RFPManager) tab.getFeatureManager().getFeature("Real Fake Players")).getRFPS().size();
                 return count+"";
         });
         platform.registerPlaceholders(pm);

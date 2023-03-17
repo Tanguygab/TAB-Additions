@@ -1,8 +1,6 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
-import io.github.tanguygab.tabadditions.shared.features.rfps.RFPManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -53,9 +51,6 @@ public class TABAdditionsExpansion extends PlaceholderExpansion {
 
     @Override
     public String onPlaceholderRequest(Player player, String identifier){
-
-        if (identifier.equals("fakeplayers_amount") && TABAdditions.getInstance().rfpEnabled)
-            return ((RFPManager)tab.getFeatureManager().getFeature("Real Fake Players")).getRFPS().size()+"";
 
         if (player == null) return "";
         TabPlayer p = tab.getPlayer(player.getUniqueId());

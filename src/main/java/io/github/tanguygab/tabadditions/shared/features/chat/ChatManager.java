@@ -270,7 +270,16 @@ public class ChatManager extends TabFeature {
         if (cooldownTime != 0 && !p.hasPermission("tabadditions.chat.bypass.cooldown"))
             cooldown.put(p,LocalDateTime.now());
 
-        ChatFormat chatFormat = getFormat(p);
+        ChatFormat prefixFormat = null;
+        for (Map<String,String> cmd : commands.values()){
+            String prefix = cmd.get("prefix");
+            if (prefix != null && !prefix.equals("") && msg.startsWith(prefix)) {
+                prefixFormat = cmd.containsKey("format") ? formats.get(cmd.get("format")) : null;
+                msg = msg.substring(1);
+                break;
+            }
+        }
+        ChatFormat chatFormat = prefixFormat == null ? getFormat(p) : prefixFormat;
         String msgFormatted = createmsg(p,msg,chatFormat.getText(),null).toLegacyText();
         tab.sendConsoleMessage(msgFormatted, true);
 
