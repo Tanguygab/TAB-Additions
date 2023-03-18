@@ -10,47 +10,45 @@ import java.util.Map;
 public class ChatFormat {
 
     private final String name;
-    private final Map<String, String> config;
+    private final Condition condition;
+    private final String child;
+    private final String channel;
+    private final String viewCondition;
+    private final String text;
 
-    public ChatFormat(String name, Map<String,String> config) {
+    public ChatFormat(String name, Condition condition, String child, String channel, String viewCondition, String text) {
         this.name = name;
-        this.config = config;
+        this.condition = condition;
+        this.child = child;
+        this.channel = channel;
+        this.viewCondition = viewCondition;
+        this.text = text;
     }
 
     public String getName() {
         return name;
     }
     public String getChildLayout() {
-        String child = config.get("if-condition-not-met");
-        if (child == null) child = "";
         return child;
     }
     public boolean isConditionMet(TabPlayer p) {
-        if (!config.containsKey("condition")) return true;
-        return Condition.getCondition(config.get("condition")).isMet(p);
+        return condition == null || condition.isMet(p);
     }
 
     public String getChannel() {
-        if (!config.containsKey("channel")) return "";
-        return config.get("channel")+"";
-    }
-    public String getViewCondition() {
-        if (!config.containsKey("view-condition")) return "";
-        return config.get("view-condition")+"";
+        return channel;
     }
 
     public boolean hasViewCondition() {
-        return config.containsKey("view-condition") && !config.get("view-condition").equals("");
+        return viewCondition != null;
     }
 
     public boolean isViewConditionMet(TabPlayer sender, TabPlayer viewer) {
-        if (!config.containsKey("view-condition") || config.get("view-condition").equals("")) return true;
-        return TABAdditions.getInstance().isConditionMet(config.get("view-condition"),sender,viewer,true);
-
+        return !hasViewCondition() || TABAdditions.getInstance().isConditionMet(viewCondition,sender,viewer,true);
     }
 
     public String getText() {
-        return config.get("text");
+        return text;
     }
 
 

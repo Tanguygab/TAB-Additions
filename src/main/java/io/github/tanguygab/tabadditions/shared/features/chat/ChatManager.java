@@ -33,6 +33,7 @@ public class ChatManager extends TabFeature {
     private TABAdditions plinstance;
     private final TabAPI tab;
     private final Map<String,ChatFormat> formats = new HashMap<>();
+    private ChatFormat defaultFormat;
     public final Map<TabPlayer,String> defformats = new HashMap<>();
     public boolean regexInputs;
     public boolean forceColors;
@@ -117,30 +118,32 @@ public class ChatManager extends TabFeature {
         if (defformats.containsKey(p))
             format = defformats.get(p);
         else format = plinstance.getConfig(ConfigType.CHAT).getString("default-format","default");
-        if (format.equalsIgnoreCase("")) return defFormat();
+        if (format.equalsIgnoreCase("")) return defaultFormat;
 
         ChatFormat f = formats.get(format);
         while (f != null && !f.isConditionMet(p)) {
             f = formats.get(f.getChildLayout());
 
-            if (f == null)
-                return defFormat();
+            if (f == null) return defaultFormat;
         }
         return f;
-    }
-    public ChatFormat defFormat() {
-        Map<String,String> map = new HashMap<>();
-
-        map.put("text","{%prop-chatprefix% %prop-customchatname% %prop-chatsuffix%&7\u00bb &r%msg%||%time%}");
-        return new ChatFormat("default", map);
     }
 
     @Override
     public void load() {
         plinstance = TABAdditions.getInstance();
         ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
-        for (Object format : config.getConfigurationSection("chat-formats").keySet())
-            formats.put(format+"",new ChatFormat(format+"", config.getConfigurationSection("chat-formats."+format)));
+
+        defaultFormat = new ChatFormat("default", null, null, null, null, "{%prop-chatprefix% %prop-customchatname% %prop-chatsuffix%&7\u00bb &r%msg%||%time%}");
+        Map<String,Map<String,String>> chatFormats = config.getConfigurationSection("chat-formats");
+        chatFormats.forEach((format,cfg)-> formats.put(format + "", new ChatFormat(format,
+                cfg.containsKey("condition") ? Condition.getCondition(cfg.get("condition")) : null,
+                cfg.getOrDefault("if-condition-not-met",""),
+                cfg.getOrDefault("channel",""),
+                cfg.get("view-condition"),
+                cfg.get("text")
+        )));
+
 
         regexInputs = config.getBoolean("regex-inputs",false);
         forceColors = config.getBoolean("force-fix-colors",false);
@@ -207,7 +210,7 @@ public class ChatManager extends TabFeature {
 
         commands = new HashMap<>();
         Map<String,Map<String,String>> commandsMap = config.getConfigurationSection("commands");
-        commandsMap.forEach((cmd,cfg)-> commands.put(cfg.get("name"),new FormatCommand(cfg.get("name"),cmd,formats.get(cfg.get("format")),Condition.getCondition(cfg.get("condition")),cfg.get("prefix"))));
+        commandsMap.forEach((cmd,cfg)-> commands.put(cmd,new FormatCommand(cfg.get("name"),cmd,formats.get(cfg.get("format")),Condition.getCondition(cfg.get("condition")),cfg.get("prefix"))));
 
 
         PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
@@ -286,7 +289,7 @@ public class ChatManager extends TabFeature {
 
         for (TabPlayer viewer : tab.getOnlinePlayers()) {
             IChatBaseComponent comp = null;
-            if (canSee(p,viewer)) comp = createmsg(p, msg, chatFormat.getText(), viewer);
+            if (canSee(p,viewer,chatFormat)) comp = createmsg(p, msg, chatFormat.getText(), viewer);
             else if (isSpying(p,viewer).equals("channel")) comp = createmsg(p, msg, spyChannelsOutput,viewer);
             else if (isSpying(p,viewer).equals("view-condition")) comp = createmsg(p, msg, spyViewConditionsOutput,viewer);
             if (comp == null) continue;
@@ -301,7 +304,7 @@ public class ChatManager extends TabFeature {
 
         if (discordEnabled) {
             String msgToDiscord = createmsg(p,msg,discordFormat,null).toLegacyText();
-            if (canSee(p,null))
+            if (canSee(p,null,chatFormat))
                 plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),false,discordPlugin);
             else if (getFormat(p).isViewConditionMet(p,null))
                 plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),true,discordPlugin);
@@ -328,9 +331,7 @@ public class ChatManager extends TabFeature {
     }
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
-        text = plinstance.parsePlaceholders(text,p,viewer)
-                .replace("%channel%",getFormat(p).getChannel())
-                .replace("%condition%",getFormat(p).getViewCondition());
+        text = plinstance.parsePlaceholders(text,p,viewer).replace("%channel%",getFormat(p).getChannel());
         if (!text.startsWith("{")) text = "{"+text;
         if (!text.endsWith("}")) text = text+"}";
         text = textcheck(text,p,viewer,msg);
@@ -670,9 +671,8 @@ public class ChatManager extends TabFeature {
         return component.getModifier().getColor();
     }
 
-    public boolean canSee(TabPlayer sender, TabPlayer viewer) {
+    public boolean canSee(TabPlayer sender, TabPlayer viewer, ChatFormat f) {
         if (sender == viewer) return true;
-        ChatFormat f = getFormat(sender);
         if (viewer == null) return f.getChannel().equals("") && !f.hasViewCondition();
         if (!f.getChannel().equals(f.getChannel())) return false;
         return f.isViewConditionMet(sender, viewer);
@@ -738,9 +738,8 @@ public class ChatManager extends TabFeature {
 
         FormatCommand cmd = commands.get(msg);
         if (cmd == null) return cmds.execute(p,msg);
-        if (!cmd.getCondition().isMet(p))
-            p.sendMessage(translation.NO_PERMISSIONS,true);
-        else {
+
+        if (cmd.getCondition().isMet(p)) {
             String name = cmd.getName();
             if (defformats.containsKey(p)) {
                 defformats.remove(p);
@@ -750,7 +749,7 @@ public class ChatManager extends TabFeature {
                 defformats.put(p, cmd.getFormat().getName());
                 p.sendMessage(translation.getCmdJoin(name), true);
             }
-        }
+        } else p.sendMessage(translation.NO_PERMISSIONS, true);
         return true;
     }
 
