@@ -4,6 +4,8 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
+import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiCategory;
+import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -109,7 +111,8 @@ public class ChatCmds {
 
         switch (cmd) {
             case "emojis": {
-                if (!cm.emojiEnabled) return false;
+                EmojiManager emojis = cm.getEmojiManager();
+                if (emojis == null) return false;
 
                 if (msg.equals("")) {
                     getEmojisCategories(p);
@@ -117,11 +120,12 @@ public class ChatCmds {
                 }
 
                 String cat = msg.split(" ")[0];
-                if (!canUseEmojiCategory(p,cat)) {
+                EmojiCategory category = emojis.getEmojiCategory(cat);
+                if (category == null || !category.canUse(p)) {
                     p.sendMessage(translation.emojiCategoryNotFound,true);
                     return true;
                 }
-                getEmojiCategory(p,cat);
+                getEmojiCategory(p,category);
                 return true;
             }
             case "socialspy": {
@@ -283,58 +287,42 @@ public class ChatCmds {
         return false;
     }
 
-    public boolean canUseEmojiCategory(TabPlayer p, String category) {
-        if (!cm.emojiCounts.containsKey(category)) return false;
-        String permOn = cm.emojis.get(category).containsKey("permission") ? cm.emojis.get(category).get("permission")+"" : "";
-        return !permOn.equalsIgnoreCase("category") || p.hasPermission("tabadditions.chat.emoji.category."+category);
-
-    }
-    public boolean canUseEmoji(TabPlayer p, String category, String emoji) {
-        if (!cm.emojiCounts.containsKey(category)) return false;
-        String permOn = cm.emojis.get(category).containsKey("permission") ? cm.emojis.get(category).get("permission")+"" : "";
-        if (permOn.equalsIgnoreCase("emoji"))
-            return p.hasPermission("tabadditions.chat.emoji."+emoji);
-        return !permOn.equalsIgnoreCase("category") || p.hasPermission("tabadditions.chat.emoji.category."+category);
-    }
-
     public void getEmojisCategories(TabPlayer p) {
         List<IChatBaseComponent> list = new ArrayList<>();
         TranslationFile translation = TABAdditions.getInstance().getMsgs();
+        EmojiManager emojis = cm.getEmojiManager();
 
-        for (String emojiCategory : cm.emojis.keySet()) {
-            if (canUseEmojiCategory(p,emojiCategory)) {
-                int owned = cm.ownedEmojis(p,emojiCategory);
-                if (owned == 0) continue;
-                IChatBaseComponent subcomp = cm.createComponent("\n"+EnumChatFormat.color(translation
-                        .getEmojiCategory(emojiCategory,owned,cm.emojiCounts.get(emojiCategory))),p);
-                subcomp.getModifier().onClickRunCommand("/emojis "+emojiCategory);
-                list.add(subcomp);
-            }
-        }
-        IChatBaseComponent comp = cm.createComponent("\n"+EnumChatFormat.color(translation
-                .getEmojiCategoryHeader(list.size(),cm.ownedEmojis(p),cm.emojiTotalCount)),p);
+        emojis.getEmojiCategories().forEach(((categoryName, category) -> {
+            if (!category.canUse(p)) return;
+            int owned = category.ownedEmojis(p);
+            if (owned == 0) return;
+            IChatBaseComponent subcomp = cm.createComponent("\n"+EnumChatFormat.color(translation.getEmojiCategory(p,category)),p);
+            subcomp.getModifier().onClickRunCommand("/emojis "+categoryName);
+            list.add(subcomp);
+
+        }));
+        IChatBaseComponent comp = cm.createComponent("\n"+EnumChatFormat.color(translation.getEmojiCategoryHeader(list.size(),p,emojis)),p);
         if (!list.isEmpty()) comp.setExtra(list);
         p.sendMessage(comp);
     }
 
-    public void getEmojiCategory(TabPlayer p, String category) {
+    public void getEmojiCategory(TabPlayer p, EmojiCategory category) {
         List<IChatBaseComponent> list = new ArrayList<>();
         TranslationFile translation = TABAdditions.getInstance().getMsgs();
 
-        Map<String,String> emojis = (Map<String,String>)cm.emojis.get(category).get("list");
-
-        for (String emoji : emojis.keySet()) {
-            if (!canUseEmoji(p,category,emoji)) continue;
-            IChatBaseComponent comp = cm.createComponent("\n" + TABAdditions.getInstance().parsePlaceholders(translation.getEmoji(emoji,emojis.get(emoji)),p),p);
+        Map<String,String> emojis = category.getEmojis();
+        emojis.forEach((emoji,output)->{
+            if (!category.canUse(p,emoji)) return;
+            IChatBaseComponent comp = cm.createComponent("\n" + TABAdditions.getInstance().parsePlaceholders(translation.getEmoji(emoji,output),p),p);
             comp.getModifier().onClickSuggestCommand(emoji);
             list.add(comp);
-        }
+        });
 
         if (list.isEmpty()) {
             p.sendMessage(translation.emojiCategoryNotFound, true);
             return;
         }
-        IChatBaseComponent comp = cm.createComponent(EnumChatFormat.color(translation.getEmojiHeader(list.size(),cm.emojiCounts.get(category))),p);
+        IChatBaseComponent comp = cm.createComponent(EnumChatFormat.color(translation.getEmojiHeader(list.size(),category.getEmojis().size())),p);
         comp.setExtra(list);
         p.sendMessage(comp);
 

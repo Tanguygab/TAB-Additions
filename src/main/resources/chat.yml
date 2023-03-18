@@ -119,10 +119,9 @@ emojis:
         ':grr:': ლ(ಠ益ಠლ)
         ':sword:': ╰(⇀︿⇀)つ-]═───
     paid:
-      permission: "permission"
       output: |-
         {%emoji%%lastcolor%
-          ||&eEmote &7◆ &f&lShop
+        ||&eEmote &7◆ &f&lShop
 
           &7This emote is obtainable in our shop.
 
@@ -141,7 +140,6 @@ emojis:
         ':sad:': (︶︹︺)
         ':argh:': ヽ(‵﹏´)ノ
     staff:
-      permission: "category"
       list:
         ":cross:": '&c&l✘'
         ":check:": '&2&l✔'

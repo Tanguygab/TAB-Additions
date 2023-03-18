@@ -1,5 +1,7 @@
 package io.github.tanguygab.tabadditions.shared;
 
+import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiCategory;
+import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 
@@ -100,18 +102,18 @@ public class TranslationFile extends YamlConfigurationFile {
         return chatCleared.replace("%name%",p.getName());
     }
 
-    public String getEmojiCategory(String category, int owned, int max) {
+    public String getEmojiCategory(TabPlayer p, EmojiCategory category) {
         return emojiCategory
-                .replace("%category%",category)
-                .replace("%owned%",owned+"")
-                .replace("%max%",max+"");
+                .replace("%category%",category.getName())
+                .replace("%owned%",category.ownedEmojis(p)+"")
+                .replace("%max%",category.getEmojis().size()+"");
     }
 
-    public String getEmojiCategoryHeader(int amount, int owned, int max) {
+    public String getEmojiCategoryHeader(int amount, TabPlayer p, EmojiManager emojis) {
         return emojiCategoryHeader
                 .replace("%amount%",amount+"")
-                .replace("%owned%",owned+"")
-                .replace("%max%",max+"");
+                .replace("%owned%",emojis.ownedEmojis(p)+"")
+                .replace("%max%",emojis.getTotalEmojiCount()+"");
     }
 
     public String getIgnoreOn(String ignoredP) {

@@ -5,6 +5,8 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
+import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiCategory;
+import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabFeature;
@@ -15,7 +17,6 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.chat.TextColor;
 import me.neznamy.tab.api.chat.rgb.RGBUtils;
 import me.neznamy.tab.api.config.ConfigurationFile;
-import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.placeholder.RelationalPlaceholder;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.Material;
@@ -32,6 +33,9 @@ public class ChatManager extends TabFeature {
 
     private TABAdditions plinstance;
     private final TabAPI tab;
+    private EmojiManager emojiManager;
+
+
     private final Map<String,ChatFormat> formats = new HashMap<>();
     private ChatFormat defaultFormat;
     public final Map<TabPlayer,String> defformats = new HashMap<>();
@@ -62,14 +66,6 @@ public class ChatManager extends TabFeature {
 
     public ChatCmds cmds;
 
-    public boolean emojiEnabled;
-    public boolean emojiUntranslate;
-    public String emojiOutput;
-    public boolean emojisAutoComplete;
-    private final Map<TabPlayer,List<String>> emojisAutoCompleteList = new HashMap<>();
-    public Map<String,Map<String,Object>> emojis = new HashMap<>();
-    public int emojiTotalCount;
-    public Map<String,Integer> emojiCounts = new HashMap<>();
     public List<String> toggleEmoji = new ArrayList<>();
     public List<String> toggleChat = new ArrayList<>();
     public boolean spySave;
@@ -145,6 +141,13 @@ public class ChatManager extends TabFeature {
         )));
 
 
+        if (config.getBoolean("emojis.enabled",true))
+            emojiManager = new EmojiManager(config.getString("emojis.output","{%emoji%%lastcolor%|| %emoji% &7%emojiraw% &d/emojis||command:/emojis}"),
+                    config.getBoolean("emojis.block-without-permission",false),
+                    config.getBoolean("emojis.auto-complete",true),
+                    config.getConfigurationSection("emojis.categories"));
+
+
         regexInputs = config.getBoolean("regex-inputs",false);
         forceColors = config.getBoolean("force-fix-colors",false);
         msgPlaceholderStay = config.getInt("msg-placeholder-stay",3000);
@@ -171,15 +174,10 @@ public class ChatManager extends TabFeature {
         }
         mentionOutputEveryone = config.getBoolean("mention.output-for-everyone",true);
 
-        emojiEnabled = config.getBoolean("emojis.enabled",true);
-        emojiOutput = config.getString("emojis.output","");
-        emojiUntranslate = config.getBoolean("emojis.block-without-permission",false);
-        emojis = config.getConfigurationSection("emojis.categories");
         if (cmds.toggleEmojiEnabled) {
             spies.addAll(tab.getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
             tab.getPlayerCache().set("toggleemoji",null);
         }
-        emojisAutoComplete = config.getBoolean("emojis.auto-complete",true);
 
         spySave = config.getBoolean("socialspy.keep-after-reload",true);
         if (cmds.socialSpyEnabled && spySave) {
@@ -219,36 +217,17 @@ public class ChatManager extends TabFeature {
         commandsMap.forEach((cmd,cfg)-> commands.put(cmd,new FormatCommand(cfg.get("name"),cmd,formats.get(cfg.get("format")),Condition.getCondition(cfg.get("condition")),cfg.get("prefix"))));
 
 
-        PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
-        chatPlaceholder = pm.registerRelationalPlaceholder("%rel_chat%",-1,(viewer,target)->"");
-        int i=0;
-        for (String category : emojis.keySet()) {
-            Map<String,String> list = (Map<String, String>) emojis.get(category).get("list");
-            emojiCounts.put(category,list.size());
-            i += list.size();
-        }
-        emojiTotalCount = i;
-        pm.registerServerPlaceholder("%chat-emoji-total%",500000000, ()-> emojiTotalCount +"");
 
-        pm.registerPlayerPlaceholder("%chat-emoji-owned%",3000,p->ownedEmojis(p)+"");
+        chatPlaceholder = TabAPI.getInstance().getPlaceholderManager().registerRelationalPlaceholder("%rel_chat%",-1,(viewer,target)->"");
+
 
         for (TabPlayer p : tab.getOnlinePlayers()) onJoin(p);
     }
 
-    public int ownedEmojis(TabPlayer p) {
-        int amt=0;
-        for (String category : emojis.keySet())
-            amt+=ownedEmojis(p,category);
-        return amt;
-    }
 
-    public int ownedEmojis(TabPlayer p, String category) {
-        int amt=0;
-        for (String emoji : ((Map<String,String>)emojis.get(category).get("list")).keySet()) {
-            if (cmds.canUseEmoji(p, category, emoji))
-                amt++;
-        }
-        return amt;
+
+    public EmojiManager getEmojiManager() {
+        return emojiManager;
     }
 
     @Override
@@ -261,11 +240,8 @@ public class ChatManager extends TabFeature {
             tab.getPlayerCache().set("toggleemoji", toggleEmoji);
         if (cmds.toggleChatEnabled)
             tab.getPlayerCache().set("togglechat", toggleChat);
-        if (emojisAutoComplete)
-            for (TabPlayer p : tab.getOnlinePlayers()) {
-                if (emojisAutoCompleteList.containsKey(p))
-                    plinstance.getPlatform().removeFromChatComplete(p, emojisAutoCompleteList.get(p));
-            }
+        if (emojiManager != null)
+            emojiManager.unload();
     }
 
     public void onChat(TabPlayer p, String msg) {
@@ -417,7 +393,7 @@ public class ChatManager extends TabFeature {
                     txt = replaceInput(txt,itemOffHand, hoverclick+"{[item]||item:offhand}{");
             }
 
-            if (emojiEnabled) txt = emojicheck(p,txt,hoverclick);
+            if (emojiManager != null) txt = emojicheck(p,txt,hoverclick);
 
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
@@ -483,23 +459,23 @@ public class ChatManager extends TabFeature {
     public String emojicheck(TabPlayer p, String msg, String hoverclick) {
         if (toggleEmoji.contains(p.getName().toLowerCase())) return msg;
 
-        for (String category : emojis.keySet()) {
-            if (!cmds.canUseEmojiCategory(p, category)) continue;
-            Map<String, String> list = (Map<String, String>) emojis.get(category).get("list");
+        for (EmojiCategory category : emojiManager.getEmojiCategories().values()) {
+            if (!category.canUse(p)) continue;
+            Map<String, String> list = category.getEmojis();
             if (list == null || list.isEmpty()) continue;
 
             for (String emoji : list.keySet()) {
                 int count = countMatches(msg, emoji);
                 if (count == 0 || emoji.equals("")) continue;
-                if (!cmds.canUseEmoji(p, category,emoji)) {
-                    if (emojiUntranslate && msg.contains(list.get(emoji)))
+                if (!category.canUse(p,emoji)) {
+                    if (emojiManager.isUntranslateEnabled() && msg.contains(list.get(emoji)))
                         msg = msg.replace(list.get(emoji), emoji);
                     continue;
                 }
                 List<String> list2 = Arrays.asList(msg.split(Pattern.quote(emoji)));
                 msg = "";
                 int counted = 0;
-                String output1 = emojis.get(category).containsKey("output") ? emojis.get(category).get("output")+"" : emojiOutput;
+                String output1 = emojiManager.getOutput(category);
                 output1 = output1.replace("%emojiraw%", emoji).replace("%emoji%", list.get(emoji));
                 String output = hoverclick + plinstance.parsePlaceholders(removeSpaces(output1),p) + "{";
                 if (list2.isEmpty()) {
@@ -718,26 +694,14 @@ public class ChatManager extends TabFeature {
         p.loadPropertyFromConfig(this,"customchatname",p.getName());
         p.loadPropertyFromConfig(this,"chatsuffix");
 
-        if (plinstance.getPlatform().supportsChatSuggestions() && emojisAutoComplete) {
-            List<String> list = new ArrayList<>();
-            for (String category : emojis.keySet()) {
-                Map<String,String> categoryEmojis = (Map<String,String>)emojis.get(category).get("list");
-                if (cmds.canUseEmojiCategory(p,category)) {
-                    list.addAll(categoryEmojis.keySet());
-                    continue;
-                }
-                for (String emoji : categoryEmojis.keySet())
-                    if (cmds.canUseEmoji(p,category,emoji))
-                        list.add(emoji);
-            }
-            emojisAutoCompleteList.put(p,list);
-            plinstance.getPlatform().addToChatComplete(p,list);
-        }
+        if (plinstance.getPlatform().supportsChatSuggestions() && emojiManager != null && emojiManager.isAutoCompleteEnabled())
+            emojiManager.loadAutoComplete(p);
     }
 
     @Override
     public void onQuit(TabPlayer p) {
-        if (emojisAutoComplete) emojisAutoCompleteList.remove(p);
+        if (emojiManager != null && emojiManager.isAutoCompleteEnabled())
+            emojiManager.unloadAutoComplete(p);
     }
 
     @Override
@@ -761,7 +725,5 @@ public class ChatManager extends TabFeature {
         } else p.sendMessage(translation.NO_PERMISSIONS, true);
         return true;
     }
-
-
 
 }
