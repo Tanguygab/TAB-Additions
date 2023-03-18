@@ -37,6 +37,7 @@ public class ChatCmds {
 
     public boolean emojisEnabled;
     public boolean toggleEmojiEnabled;
+    public boolean toggleChatEnabled;
 
     public boolean socialSpyEnabled;
     public boolean spyMsgsEnabled;
@@ -53,7 +54,8 @@ public class ChatCmds {
         msgSender = config.getString("msg.sender","{&7[&6&lMe &e➠ &6&l%viewer:prop-customchatname%&7] %msg%||%time%\\n\\n&fClick to reply to &6%viewer:prop-customchatname%&f.||suggest:/msg %player% }");
         msgViewer = config.getString("msg.viewer","{&7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%||%time%\\n\\n&fClick to reply to &6%prop-customchatname%&f.||suggest:/msg %player% }");
         msgSelf = config.getBoolean("msg.msg-self",true);
-        ignoreEnabled = config.getBoolean("msg./ignore",true);
+        ignoreEnabled = config.getBoolean("/ignore",true);
+        toggleChatEnabled = config.getBoolean("/togglechat",true);
         toggleMsgEnabled = config.getBoolean("msg./togglemsg",true);
         replyEnabled = config.getBoolean("msg./reply",true);
         msgAliases = config.getStringList("msg./msg-aliases",Arrays.asList("tell","whisper","w","m"));
@@ -76,10 +78,12 @@ public class ChatCmds {
         pm.registerPlayerPlaceholder("%chat-socialspy%",1000,p->cm.spies.contains(p.getName().toLowerCase()) ? "On" : "Off");
         pm.registerPlayerPlaceholder("%chat-messages%",1000,p->tab.getPlayerCache().getStringList("togglemsg").contains(p.getName().toLowerCase()) ? "Off" : "On");
         pm.registerPlayerPlaceholder("%chat-emojis%",1000,p->cm.toggleEmoji.contains(p.getName().toLowerCase()) ? "Off" : "On");
+        pm.registerPlayerPlaceholder("%chat-enabled%",1000,p->cm.toggleChat.contains(p.getName().toLowerCase()) ? "Off" : "On");
 
         Platform p = TABAdditions.getInstance().getPlatform();
         p.registerCommand("msg",msgEnabled,msgAliases.toArray(new String[]{}));
         p.registerCommand("reply",replyEnabled,"r");
+        p.registerCommand("togglechat",toggleChatEnabled);
         p.registerCommand("ignore",ignoreEnabled);
         p.registerCommand("togglemsg", toggleMsgEnabled);
         p.registerCommand("togglemention", toggleMentionEnabled);
@@ -170,21 +174,18 @@ public class ChatCmds {
                 }
                 return true;
             }
-        }
+            case "togglechat": {
+                if (!toggleChatEnabled) return false;
 
-        if (!msgEnabled) return false;
-        switch (cmd.toLowerCase()) {
-            case "togglemsg": {
-                if (!toggleMsgEnabled) return false;
-                List<String> list = playerdata.getStringList("togglemsg");
-                if (list.contains(p.getName().toLowerCase())) {
-                    list.remove(p.getName().toLowerCase());
-                    p.sendMessage(translation.pmOn, true);
-                } else {
-                    list.add(p.getName().toLowerCase());
-                    p.sendMessage(translation.pmOff, true);
+                if (cm.toggleChat.contains(p.getName().toLowerCase())) {
+                    cm.toggleChat.remove(p.getName().toLowerCase());
+                    p.sendMessage(translation.chatOn, true);
                 }
-                playerdata.set("togglemsg", list);
+                else {
+                    cm.toggleChat.add(p.getName().toLowerCase());
+                    p.sendMessage(translation.chatOff, true);
+                }
+
                 return true;
             }
             case "ignore": {
@@ -205,6 +206,23 @@ public class ChatCmds {
                     }
                 } else map.put(p.getName().toLowerCase(), new ArrayList<>(Collections.singletonList(p2.toLowerCase())));
                 playerdata.set("msg-ignore", map);
+                return true;
+            }
+        }
+
+        if (!msgEnabled) return false;
+        switch (cmd.toLowerCase()) {
+            case "togglemsg": {
+                if (!toggleMsgEnabled) return false;
+                List<String> list = playerdata.getStringList("togglemsg");
+                if (list.contains(p.getName().toLowerCase())) {
+                    list.remove(p.getName().toLowerCase());
+                    p.sendMessage(translation.pmOn, true);
+                } else {
+                    list.add(p.getName().toLowerCase());
+                    p.sendMessage(translation.pmOff, true);
+                }
+                playerdata.set("togglemsg", list);
                 return true;
             }
             case "reply":

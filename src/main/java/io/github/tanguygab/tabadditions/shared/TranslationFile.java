@@ -47,6 +47,9 @@ public class TranslationFile extends YamlConfigurationFile {
     private final String cmdJoin;
     private final String cmdLeave;
 
+    public final String chatOn;
+    public final String chatOff;
+
 
     public TranslationFile(InputStream source, File destination) throws IOException {
         super(source,destination);
@@ -89,7 +92,8 @@ public class TranslationFile extends YamlConfigurationFile {
         cmdJoin = getString("cmd_join","&7You joined %name%!");
         cmdLeave = getString("cmd_leave","&7You left %name%!");
 
-
+        chatOn = getString("chat_on", "&aYou will now receive chat messages!");
+        chatOff = getString("chat_off", "&cYou won't receive any new chat messages!");
     }
 
     public String getChatCleared(TabPlayer p) {

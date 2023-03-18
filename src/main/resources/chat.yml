@@ -85,7 +85,6 @@ msg:
   ||
   suggest:/r  }"
   /togglemsg: true
-  /ignore: true
   /reply: true
   msg-self: true
   /msg-aliases: [m, w, tell, whisper]
@@ -201,3 +200,6 @@ char-filter:
     - ass(hole|es)?
   exempt:
     - bypass
+
+/togglechat: true
+/ignore: true

@@ -71,7 +71,7 @@ public class ChatManager extends TabFeature {
     public int emojiTotalCount;
     public Map<String,Integer> emojiCounts = new HashMap<>();
     public List<String> toggleEmoji = new ArrayList<>();
-
+    public List<String> toggleChat = new ArrayList<>();
     public boolean spySave;
     public boolean spyChannelsEnabled;
     public String spyChannelsOutput;
@@ -208,6 +208,12 @@ public class ChatManager extends TabFeature {
         discordPlugin = config.getString("discord.plugin","DiscordSRV");
         discordFormat = config.getString("discord.format","%msg%");
 
+
+        if (cmds.toggleChatEnabled) {
+            toggleChat.addAll(tab.getPlayerCache().getStringList("togglechat", new ArrayList<>()));
+            tab.getPlayerCache().set("togglechat",null);
+        }
+
         commands = new HashMap<>();
         Map<String,Map<String,String>> commandsMap = config.getConfigurationSection("commands");
         commandsMap.forEach((cmd,cfg)-> commands.put(cmd,new FormatCommand(cfg.get("name"),cmd,formats.get(cfg.get("format")),Condition.getCondition(cfg.get("condition")),cfg.get("prefix"))));
@@ -253,6 +259,8 @@ public class ChatManager extends TabFeature {
             tab.getPlayerCache().set("togglemention", mentionDisabled);
         if (cmds.toggleEmojiEnabled)
             tab.getPlayerCache().set("toggleemoji", toggleEmoji);
+        if (cmds.toggleChatEnabled)
+            tab.getPlayerCache().set("togglechat", toggleChat);
         if (emojisAutoComplete)
             for (TabPlayer p : tab.getOnlinePlayers()) {
                 if (emojisAutoCompleteList.containsKey(p))
@@ -288,6 +296,7 @@ public class ChatManager extends TabFeature {
         tab.sendConsoleMessage(msgFormatted, true);
 
         for (TabPlayer viewer : tab.getOnlinePlayers()) {
+            if (toggleChat.contains(viewer.getName().toLowerCase()) || cmds.isIgnored(p,viewer)) continue;
             IChatBaseComponent comp = null;
             if (canSee(p,viewer,chatFormat)) comp = createmsg(p, msg, chatFormat.getText(), viewer);
             else if (isSpying(p,viewer).equals("channel")) comp = createmsg(p, msg, spyChannelsOutput,viewer);
