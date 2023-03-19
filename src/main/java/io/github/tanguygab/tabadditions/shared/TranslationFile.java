@@ -44,6 +44,7 @@ public class TranslationFile extends YamlConfigurationFile {
 
     public final String ignoreOn;
     public final String ignoreOff;
+    public final String cantIgnoreSelf;
     public final String isIgnored;
 
     private final String cmdJoin;
@@ -89,6 +90,7 @@ public class TranslationFile extends YamlConfigurationFile {
 
         ignoreOn = getString("ignore_on", "&cYou won't receive any new private messages from %name%!");
         ignoreOff = getString("ignore_off", "&aYou will now receive new private messages from %name%!");
+        cantIgnoreSelf = getString("cant_ignore_self", "&cYou can't ignore yourself!");
         isIgnored = getString("is_ignored", "&cThis player ignores you");
 
         cmdJoin = getString("cmd_join","&7You joined %name%!");

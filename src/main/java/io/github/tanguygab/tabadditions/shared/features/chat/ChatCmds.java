@@ -197,6 +197,10 @@ public class ChatCmds {
                     return true;
                 }
                 String p2 = msg.split(" ")[0];
+                if (p.getName().equalsIgnoreCase(p2)) {
+                    p.sendMessage(translation.cantIgnoreSelf,true);
+                    return true;
+                }
                 Map<String, List<String>> map = playerdata.getConfigurationSection("msg-ignore");
                 if (map.containsKey(p.getName().toLowerCase())) {
                     if (map.get(p.getName().toLowerCase()).contains(p2.toLowerCase())) {

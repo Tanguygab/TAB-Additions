@@ -25,6 +25,7 @@ pm_empty: '&7You have to provide a message!'
 has_pm_off: '&cThis player doesn''t accept private messages'
 ignore_on: '&cYou won''t receive any new messages from %name%!'
 ignore_off: '&aYou will now receive messages from %name%!'
+cant_ignore_self: "&cYou can't ignore yourself!"
 is_ignored: '&cThis player ignores you'
 cmd_join: '&7You joined %name%!'
 cmd_leave: '&7You left %name%!'
