@@ -543,7 +543,7 @@ public class ChatManager extends TabFeature {
                         if (map.get(pos).length() > word.length() && pos <= matcher.start() && pos + map.get(pos).length() > matcher.start())
                             continue;
                         StringBuilder sb = new StringBuilder(msg);
-                        sb = sb.replace(matcher.start()+posjump, matcher.end()+posjump, output);
+                        sb.replace(matcher.start() + posjump, matcher.end() + posjump, output);
                         msg = sb.toString();
 
                         posjumps.put(word,posjump+output.length()-word.length());
@@ -659,7 +659,7 @@ public class ChatManager extends TabFeature {
     public boolean canSee(TabPlayer sender, TabPlayer viewer, ChatFormat f) {
         if (sender == viewer) return true;
         if (viewer == null) return f.getChannel().equals("") && !f.hasViewCondition();
-        if (!f.getChannel().equals(f.getChannel())) return false;
+        if (!f.getChannel().equals(getFormat(viewer).getChannel())) return false;
         return f.isViewConditionMet(sender, viewer);
     }
     public String isSpying(TabPlayer sender, TabPlayer viewer) {
