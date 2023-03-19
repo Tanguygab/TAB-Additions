@@ -26,7 +26,7 @@ public class EmojiManager {
         for (String category : emojis.keySet()) {
             Map<String,String> emojisMap = (Map<String,String>) emojis.get(category).get("list");
             totalEmojiCount+=emojisMap.size();
-            emojiCategories.put(category,new EmojiCategory(category, emojisMap,emojis.get(category).get("output")+""));
+            emojiCategories.put(category,new EmojiCategory(category, emojisMap,emojis.get(category).getOrDefault("output","")+""));
         }
         PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
         pm.registerServerPlaceholder("%chat-emoji-total%",-1, ()-> totalEmojiCount +"");
@@ -39,7 +39,7 @@ public class EmojiManager {
     }
 
     public String getOutput(EmojiCategory category) {
-        return category == null || category.getOutput() == null ? output : category.getOutput();
+        return category == null || category.getOutput().equals("") ? output : category.getOutput();
     }
 
     public boolean isAutoCompleteEnabled() {
