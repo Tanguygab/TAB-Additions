@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'io.github.tanguygab'
-version = '1.7.0'
+version = '1.7.1-SNAPSHOT'
 
 
 repositories {
@@ -60,4 +60,13 @@ dependencies {
     compileOnly 'com.loohp:InteractiveChat:4.2.3.13'
     compileOnly files('../../dependencies/TAB-3.3.2.jar','../../dependencies/AdvancedBan.jar')
 
+}
+
+processResources {
+    def props = [version: version]
+    inputs.properties props
+    filteringCharset 'UTF-8'
+    filesMatching(['plugin.yml','bungee.yml']) {
+        expand props
+    }
 }
