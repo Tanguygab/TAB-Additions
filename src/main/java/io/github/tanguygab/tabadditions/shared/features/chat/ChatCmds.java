@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
-import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiCategory;
@@ -12,7 +11,6 @@ import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.chat.EnumChatFormat;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.config.ConfigurationFile;
-import org.bukkit.entity.Player;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -99,10 +97,10 @@ public class ChatCmds {
         return cm.createmsg(p,msg,chatformat,viewer);
     }
 
-    public boolean execute(TabPlayer p, String cmd) {
+    public boolean execute(TabPlayer p, String msg) {
         TABAdditions plugin = TABAdditions.getInstance();
-        String msg = cmd.contains(" ") ? cmd.replace(cmd.split(" ")[0]+" ","") : "";
-        cmd = cmd.split(" ")[0];
+        String cmd = msg.split(" ")[0];
+        msg = msg.contains(" ") ? msg.substring(cmd.length()+1) : "";
         if (cmd.equals("r")) cmd = "reply";
         if (msgAliases.contains(cmd)) cmd = "msg";
 
