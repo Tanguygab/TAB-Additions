@@ -41,6 +41,7 @@ public class ChatManager extends TabFeature {
     public final Map<TabPlayer,String> defformats = new HashMap<>();
     public boolean regexInputs;
     public boolean forceColors;
+    private final Pattern rgbPattern = Pattern.compile("#[0-9a-fA-F]{6}");
     public int msgPlaceholderStay;
 
     public RelationalPlaceholder chatPlaceholder;
@@ -303,7 +304,12 @@ public class ChatManager extends TabFeature {
                 msg = msg.replace("&" + code, "");
         }
 
-        msg = new RGBUtils().applyFormats(msg);
+        msg = RGBUtils.getInstance().applyFormats(msg);
+        if (!p.hasPermission("tabadditions.chat.color.rgb")) {
+            Matcher matcher = rgbPattern.matcher(msg);
+            while (matcher.find())
+                msg = msg.replace(matcher.group(),"");
+        }
 
         String format = removeSpaces(chatFormat);
 
