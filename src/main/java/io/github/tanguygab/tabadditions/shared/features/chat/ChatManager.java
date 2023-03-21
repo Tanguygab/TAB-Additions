@@ -176,7 +176,7 @@ public class ChatManager extends TabFeature {
         mentionOutputEveryone = config.getBoolean("mention.output-for-everyone",true);
 
         if (cmds.toggleEmojiEnabled) {
-            spies.addAll(tab.getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
+            toggleEmoji.addAll(tab.getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
             tab.getPlayerCache().set("toggleemoji",null);
         }
 
