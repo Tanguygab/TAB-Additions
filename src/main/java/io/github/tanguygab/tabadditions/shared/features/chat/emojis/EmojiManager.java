@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat.emojis;
 
+import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -18,8 +19,10 @@ public class EmojiManager {
     private final Map<String,EmojiCategory> emojiCategories = new HashMap<>();
     private int totalEmojiCount;
     private final Map<TabPlayer, List<String>> emojisAutoCompleteList = new HashMap<>();
+    private final boolean emojisCmd;
+    private final boolean toggleEmojiCmd;
 
-    public EmojiManager(String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, Map<String,Map<String,Object>> emojis) {
+    public EmojiManager(String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, Map<String,Map<String,Object>> emojis, boolean emojisCmd, boolean toggleEmojiCmd) {
         this.output = emojiOutput;
         this.untranslate = untranslateEmojis;
         this.autoComplete = autoCompleteEmojis;
@@ -28,6 +31,13 @@ public class EmojiManager {
             totalEmojiCount+=emojisMap.size();
             emojiCategories.put(category,new EmojiCategory(category, emojisMap,emojis.get(category).getOrDefault("output","")+""));
         }
+        this.emojisCmd = emojisCmd;
+        this.toggleEmojiCmd = toggleEmojiCmd;
+
+        Platform platform = TABAdditions.getInstance().getPlatform();
+        platform.registerCommand("emojis",emojisCmd);
+        platform.registerCommand("toggleemoji", toggleEmojiCmd);
+
         PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
         pm.registerServerPlaceholder("%chat-emoji-total%",-1, ()-> totalEmojiCount +"");
         pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->ownedEmojis(p)+"");
@@ -85,5 +95,13 @@ public class EmojiManager {
     public void unloadAutoComplete(TabPlayer p) {
         if (emojisAutoCompleteList.containsKey(p))
             TABAdditions.getInstance().getPlatform().removeFromChatComplete(p, emojisAutoCompleteList.get(p));
+    }
+
+    public boolean isEmojisCmdEnabled() {
+        return emojisCmd;
+    }
+
+    public boolean isToggleEmojiCmdEnabled() {
+        return toggleEmojiCmd;
     }
 }

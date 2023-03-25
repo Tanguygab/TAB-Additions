@@ -5,11 +5,11 @@ import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
 public class FormatCommand {
 
-    private String command;
-    private String name;
-    private ChatFormat format;
-    private Condition condition;
-    private String prefix;
+    private final String command;
+    private final String name;
+    private final ChatFormat format;
+    private final Condition condition;
+    private final String prefix;
 
     public FormatCommand(String name, String command, ChatFormat format, Condition condition, String prefix) {
         this.name = name;
@@ -38,5 +38,9 @@ public class FormatCommand {
 
     public String getPrefix() {
         return prefix;
+    }
+
+    public boolean checkMessage(String msg) {
+        return prefix != null && !prefix.equals("") && msg.startsWith(prefix);
     }
 }

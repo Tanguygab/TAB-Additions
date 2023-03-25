@@ -146,7 +146,10 @@ public class ChatManager extends TabFeature {
             emojiManager = new EmojiManager(config.getString("emojis.output","{%emoji%%lastcolor%|| %emoji% &7%emojiraw% &d/emojis||command:/emojis}"),
                     config.getBoolean("emojis.block-without-permission",false),
                     config.getBoolean("emojis.auto-complete",true),
-                    config.getConfigurationSection("emojis.categories"));
+                    config.getConfigurationSection("emojis.categories"),
+                    config.getBoolean("emojis./emojis",true),
+                    config.getBoolean("emojis./toggleemoji",true)
+            );
 
 
         regexInputs = config.getBoolean("regex-inputs",false);
@@ -175,7 +178,7 @@ public class ChatManager extends TabFeature {
         }
         mentionOutputEveryone = config.getBoolean("mention.output-for-everyone",true);
 
-        if (cmds.toggleEmojiEnabled) {
+        if (emojiManager != null && emojiManager.isEmojisCmdEnabled()) {
             toggleEmoji.addAll(tab.getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
             tab.getPlayerCache().set("toggleemoji",null);
         }
@@ -237,7 +240,7 @@ public class ChatManager extends TabFeature {
             tab.getPlayerCache().set("socialspy", spies);
         if (cmds.toggleMentionEnabled)
             tab.getPlayerCache().set("togglemention", mentionDisabled);
-        if (cmds.toggleEmojiEnabled)
+        if (emojiManager != null && emojiManager.isEmojisCmdEnabled())
             tab.getPlayerCache().set("toggleemoji", toggleEmoji);
         if (cmds.toggleChatEnabled)
             tab.getPlayerCache().set("togglechat", toggleChat);
@@ -260,13 +263,12 @@ public class ChatManager extends TabFeature {
 
         ChatFormat prefixFormat = null;
         for (FormatCommand format : commands.values()) {
-            if (msg.startsWith(format.getPrefix())) {
-                if (format.getCondition().isMet(p)) {
-                    prefixFormat = format.getFormat();
-                    msg = msg.substring(1);
-                }
-                break;
+            if (!format.checkMessage(msg)) continue;
+            if (format.getCondition().isMet(p)) {
+                prefixFormat = format.getFormat();
+                msg = msg.substring(1);
             }
+            break;
         }
         ChatFormat chatFormat = prefixFormat == null ? getFormat(p) : prefixFormat;
         String msgFormatted = createmsg(p,msg,chatFormat.getText(),null).toLegacyText();
