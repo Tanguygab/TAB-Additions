@@ -31,7 +31,8 @@ public class ChatCmds {
     public boolean toggleMsgEnabled;
     public boolean toggleMentionEnabled;
     public boolean replyEnabled;
-    public Map<TabPlayer, TabPlayer> replies = new HashMap<>();
+    public boolean lastSenderReply;
+    public Map<TabPlayer, String> replies = new HashMap<>();
     public long msgCooldownTime;
     public Map<TabPlayer,LocalDateTime> msgCooldown = new HashMap<>();
 
@@ -56,6 +57,7 @@ public class ChatCmds {
         toggleChatEnabled = config.getBoolean("/togglechat",true);
         toggleMsgEnabled = config.getBoolean("msg./togglemsg",true);
         replyEnabled = config.getBoolean("msg./reply",true);
+        lastSenderReply = config.getBoolean("msg.save-last-sender-for-reply",true);
         msgAliases = config.getStringList("msg./msg-aliases",Arrays.asList("tell","whisper","w","m"));
         toggleMentionEnabled = config.getBoolean("mention./togglemention",true);
         msgCooldownTime = Long.parseLong(config.getInt("msg.cooldown",0)+"");
@@ -184,33 +186,27 @@ public class ChatCmds {
                     msgCooldown.put(p,LocalDateTime.now());
 
                 String player;
-                TabPlayer p2;
-                if (cmd.equals("reply")) {
-                    p2 = replies.getOrDefault(p, null);
-                    player = p2 != null ? p2.getName() : "";
-                }
+                if (cmd.equals("reply")) player = replies.getOrDefault(p, "");
                 else {
                     player = msg.split(" ")[0];
                     msg = msg.replaceFirst(Pattern.quote(player)+"( )?", "");
-                    p2 = plugin.getPlayer(player);
                 }
-                if (player.equals(""))
+                if (player.equals("")) {
                     p.sendMessage(msgs.providePlayer,true);
-                else if (p2 == null)
-                    p.sendMessage(msgs.getPlayerNotFound(player), true);
-                else if (!msgSelf && p == p2)
-                    p.sendMessage(msgs.cantPmSelf, true);
+                    return true;
+                }
+                TabPlayer p2 = plugin.getPlayer(player);
+                if (p2 == null) p.sendMessage(msgs.getPlayerNotFound(player), true);
+                else if (!msgSelf && p == p2) p.sendMessage(msgs.cantPmSelf, true);
                 else if (!p.hasPermission("tabadditions.chat.bypass.togglemsg") && playerdata.getStringList("togglemsg", new ArrayList<>()).contains(p2.getName().toLowerCase()))
                     p.sendMessage(msgs.hasPmOff, true);
-                else if (!p.hasPermission("tabadditions.chat.bypass.ignore") && isIgnored(p,p2))
-                    p.sendMessage(msgs.isIgnored, true);
-                else if (msg.equals("") || msg.equals(" "))
-                    p.sendMessage(msgs.pmEmpty, true);
+                else if (isIgnored(p,p2)) p.sendMessage(msgs.isIgnored, true);
+                else if (msg.equals("") || msg.equals(" ")) p.sendMessage(msgs.pmEmpty, true);
                 else {
                     p.sendMessage(createmsg(p, msg, msgSender, p2));
                     p2.sendMessage(createmsg(p, msg, msgViewer, p2));
-                    replies.put(p, p2);
-                    replies.put(p2, p);
+                    replies.put(p, player);
+                    if (lastSenderReply) replies.put(p2, p.getName());
                     if (spyMsgsEnabled) {
                         List<String> list = new ArrayList<>(cm.spies);
                         for (String spy : list) {
@@ -281,6 +277,6 @@ public class ChatCmds {
     }
 
     public boolean isIgnored(TabPlayer p, TabPlayer viewer) {
-        return tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase());
+        return tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()) && !p.hasPermission("tabadditions.chat.bypass.ignore");
     }
 }

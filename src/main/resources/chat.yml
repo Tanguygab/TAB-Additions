@@ -75,7 +75,7 @@ msg:
   \n
   \n&fClick to reply to &6%rel_viewer:prop-customchatname%&f.
   ||
-  suggest:/r  }"
+  suggest:/msg %rel_viewer:player%  }"
   viewer: "{
   &7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%
   ||
@@ -83,9 +83,10 @@ msg:
   \n
   \n&fClick to reply to &6%prop-customchatname%&f.
   ||
-  suggest:/r  }"
+  suggest:/msg %player%  }"
   /togglemsg: true
   /reply: true
+  save-last-sender-for-reply: false # When receiving a private message, save the sender as the last person to reply to with /reply
   msg-self: true
   /msg-aliases: [m, w, tell, whisper]
   cooldown: 0
