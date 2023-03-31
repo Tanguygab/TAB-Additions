@@ -34,6 +34,7 @@ public class ChatManager extends TabFeature {
     private TABAdditions plinstance;
     private final TabAPI tab;
     private EmojiManager emojiManager;
+    private MsgManager msgManager;
 
 
     private final Map<String,ChatFormat> formats = new HashMap<>();
@@ -67,7 +68,6 @@ public class ChatManager extends TabFeature {
 
     public ChatCmds cmds;
 
-    public List<String> toggleEmoji = new ArrayList<>();
     public List<String> toggleChat = new ArrayList<>();
     public boolean spySave;
     public boolean spyChannelsEnabled;
@@ -150,6 +150,16 @@ public class ChatManager extends TabFeature {
                     config.getBoolean("emojis./emojis",true),
                     config.getBoolean("emojis./toggleemoji",true)
             );
+        if (config.getBoolean("msg.enabled",true))
+            msgManager = new MsgManager(config.getString("msg.sender","{&7[&6&lMe &e➠ &6&l%viewer:prop-customchatname%&7] %msg%||%time%\\n\\n&fClick to reply to &6%viewer:prop-customchatname%&f.||suggest:/msg %player% }"),
+                    config.getString("msg.viewer","{&7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%||%time%\\n\\n&fClick to reply to &6%prop-customchatname%&f.||suggest:/msg %player% }"),
+                    config.getInt("msg.cooldown",0),
+                    config.getStringList("msg./msg-aliases",Arrays.asList("tell","whisper","w","m")),
+                    config.getBoolean("msg.msg-self",true),
+                    config.getBoolean("msg./togglemsg",true),
+                    config.getBoolean("msg./reply",true),
+                    config.getBoolean("msg.save-last-sender-for-reply",true)
+            );
 
 
         regexInputs = config.getBoolean("regex-inputs",false);
@@ -177,11 +187,6 @@ public class ChatManager extends TabFeature {
             tab.getPlayerCache().set("togglemention",null);
         }
         mentionOutputEveryone = config.getBoolean("mention.output-for-everyone",true);
-
-        if (emojiManager != null && emojiManager.isEmojisCmdEnabled()) {
-            toggleEmoji.addAll(tab.getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
-            tab.getPlayerCache().set("toggleemoji",null);
-        }
 
         spySave = config.getBoolean("socialspy.keep-after-reload",true);
         if (cmds.socialSpyEnabled && spySave) {
@@ -234,14 +239,16 @@ public class ChatManager extends TabFeature {
         return emojiManager;
     }
 
+    public MsgManager getMsgManager() {
+        return msgManager;
+    }
+
     @Override
     public void unload() {
         if (cmds.socialSpyEnabled && spySave)
             tab.getPlayerCache().set("socialspy", spies);
         if (cmds.toggleMentionEnabled)
             tab.getPlayerCache().set("togglemention", mentionDisabled);
-        if (emojiManager != null && emojiManager.isEmojisCmdEnabled())
-            tab.getPlayerCache().set("toggleemoji", toggleEmoji);
         if (cmds.toggleChatEnabled)
             tab.getPlayerCache().set("togglechat", toggleChat);
         if (emojiManager != null)
@@ -465,7 +472,7 @@ public class ChatManager extends TabFeature {
 
     }
     public String emojicheck(TabPlayer p, String msg, String hoverclick) {
-        if (toggleEmoji.contains(p.getName().toLowerCase())) return msg;
+        if (emojiManager.toggleEmoji.contains(p.getName().toLowerCase())) return msg;
 
         for (EmojiCategory category : emojiManager.getEmojiCategories().values()) {
             if (!category.canUse(p)) continue;

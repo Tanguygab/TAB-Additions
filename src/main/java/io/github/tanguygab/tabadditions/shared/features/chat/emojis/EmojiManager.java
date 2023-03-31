@@ -21,6 +21,7 @@ public class EmojiManager {
     private final Map<TabPlayer, List<String>> emojisAutoCompleteList = new HashMap<>();
     private final boolean emojisCmd;
     private final boolean toggleEmojiCmd;
+    public List<String> toggleEmoji = new ArrayList<>();
 
     public EmojiManager(String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, Map<String,Map<String,Object>> emojis, boolean emojisCmd, boolean toggleEmojiCmd) {
         this.output = emojiOutput;
@@ -33,12 +34,15 @@ public class EmojiManager {
         }
         this.emojisCmd = emojisCmd;
         this.toggleEmojiCmd = toggleEmojiCmd;
+        if (toggleEmojiCmd)
+            toggleEmoji.addAll(TabAPI.getInstance().getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
 
         Platform platform = TABAdditions.getInstance().getPlatform();
         platform.registerCommand("emojis",emojisCmd);
         platform.registerCommand("toggleemoji", toggleEmojiCmd);
 
         PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
+        pm.registerPlayerPlaceholder("%chat-emojis%",1000,p->toggleEmoji.contains(p.getName().toLowerCase()) ? "Off" : "On");
         pm.registerServerPlaceholder("%chat-emoji-total%",-1, ()-> totalEmojiCount +"");
         pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->ownedEmojis(p)+"");
     }
@@ -46,6 +50,8 @@ public class EmojiManager {
     public void unload() {
         for (TabPlayer p : TabAPI.getInstance().getOnlinePlayers())
             unloadAutoComplete(p);
+        if (toggleEmojiCmd)
+            TabAPI.getInstance().getPlayerCache().set("toggleemoji",toggleEmoji);
     }
 
     public String getOutput(EmojiCategory category) {
