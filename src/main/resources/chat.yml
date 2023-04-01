@@ -22,6 +22,14 @@ mention:
   ||
   suggest:@%player%  }'
   sound: BLOCK_NOTE_BLOCK_PLING
+  output-for-everyone: true
+  /togglemention: true
+  custom-mentions:
+    staff:
+      input: "@staff"
+      output: "&4@Staff"
+      condition: permission:tab.staff
+      sound: BLOCK_NOTE_BLOCK_PLING
 chat-formats:
   default:
     text: '{
@@ -199,6 +207,5 @@ char-filter:
     - ass(hole|es)?
   exempt:
     - bypass
-
 /togglechat: true
 /ignore: true
