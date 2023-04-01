@@ -6,19 +6,18 @@ import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import me.neznamy.tab.api.Property;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
+import me.neznamy.tab.api.feature.*;
+import me.neznamy.tab.shared.TAB;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Future;
 
-public class ActionBar extends TabFeature {
+public class ActionBar extends TabFeature implements Refreshable, Loadable, UnLoadable, CommandListener, JoinListener {
 
     public List<String> toggleActionBar = new ArrayList<>();
     public List<TabPlayer> noBar = new ArrayList<>();
 
-    public Future<?> task;
 
     public ActionBar() {
         load();
@@ -27,10 +26,17 @@ public class ActionBar extends TabFeature {
     public String getFeatureName() {
         return "ActionBar";
     }
+
+    @Override
+    public void refresh(TabPlayer tabPlayer, boolean b) {
+
+    }
+
     @Override
     public String getRefreshDisplayName() {
         return "&aActionBar&r";
     }
+
 
     @Override
     public void load() {
@@ -45,7 +51,7 @@ public class ActionBar extends TabFeature {
         for (TabPlayer p : tab.getOnlinePlayers())
             p.loadPropertyFromConfig(this,"actionbar");
 
-        task = tab.getThreadManager().startRepeatingMeasuredTask(1000,this,"handling permanent ActionBars",()->{
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(1000,this,"handling permanent ActionBars",()->{
             for (TabPlayer p : tab.getOnlinePlayers()) {
                 if (noBar.contains(p)) continue;
                 Property prop = p.getProperty("actionbar");
@@ -57,7 +63,6 @@ public class ActionBar extends TabFeature {
 
     @Override
     public void unload() {
-        task.cancel(true);
         if (TABAdditions.getInstance().getConfig(ConfigType.TITLE).getBoolean("toggleactionbar",true))
             TabAPI.getInstance().getPlayerCache().set("toggleactionbar", toggleActionBar);
     }
@@ -90,7 +95,7 @@ public class ActionBar extends TabFeature {
 
     public void addToNoBar(TabPlayer p) {
         noBar.add(p);
-        TabAPI.getInstance().getThreadManager().runTaskLater(2000,this,"handling ActionBar "+p.getName(),()-> noBar.remove(p));
+        TAB.getInstance().getCPUManager().runTaskLater(2000,this,"handling ActionBar "+p.getName(),()-> noBar.remove(p));
     }
 
     public void toggleActionBar(String name) {

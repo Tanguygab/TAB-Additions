@@ -4,14 +4,14 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.Property;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabFeature;
+import me.neznamy.tab.api.feature.*;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class ConditionalAppearance extends TabFeature {
+public class ConditionalAppearance extends TabFeature implements Refreshable, Loadable, UnLoadable, JoinListener {
 
     private final TabAPI tab;
     private final Plugin plugin;

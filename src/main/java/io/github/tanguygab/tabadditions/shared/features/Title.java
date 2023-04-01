@@ -4,14 +4,14 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabFeature;
+import me.neznamy.tab.api.feature.*;
 import me.neznamy.tab.api.TabPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Title extends TabFeature {
+public class Title extends TabFeature implements Loadable, UnLoadable, JoinListener, CommandListener, Refreshable {
 
     public Title() {
         load();
@@ -118,4 +118,7 @@ public class Title extends TabFeature {
         toggleTitle(sender.getName());
         return true;
     }
+
+    @Override
+    public void refresh(TabPlayer tabPlayer, boolean b) {}
 }

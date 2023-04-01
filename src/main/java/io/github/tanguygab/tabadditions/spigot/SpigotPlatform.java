@@ -99,10 +99,6 @@ public class SpigotPlatform extends Platform {
 	public void reload() {
 		HandlerList.unregisterAll((Plugin) plugin);
 		plugin.getServer().getPluginManager().registerEvents(plugin, plugin);
-
-		if (plugin.getServer().getPluginManager().getPlugin("PlaceholderAPI") != null)
-			new TABAdditionsExpansion(plugin).register();
-
 	}
 
 	@Override

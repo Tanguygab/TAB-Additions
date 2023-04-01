@@ -21,7 +21,7 @@ public class ChatCmds {
     private final ChatManager cm;
 
     public boolean ignoreEnabled;
-    public boolean toggleMentionEnabled;
+    public Map<String,List<String>> ignored;
 
     public boolean toggleChatEnabled;
 
@@ -38,8 +38,9 @@ public class ChatCmds {
         cm = manager;
 
         ignoreEnabled = config.getBoolean("/ignore",true);
+        ignored = tab.getPlayerCache().getConfigurationSection("msg-ignore");
+
         toggleChatEnabled = config.getBoolean("/togglechat",true);
-        toggleMentionEnabled = config.getBoolean("mention./togglemention",true);
 
         socialSpyEnabled = config.getBoolean("socialspy.enabled",true);
         spyMsgsEnabled = config.getBoolean("socialspy.msgs.spy",true);
@@ -50,14 +51,12 @@ public class ChatCmds {
         clearChatLine = config.getString("clearchat.line","");
 
         PlaceholderManager pm = tab.getPlaceholderManager();
-        pm.registerPlayerPlaceholder("%chat-mentions%",1000,p->cm.mentionDisabled.contains(p.getName().toLowerCase()) ? "Off" : "On");
         pm.registerPlayerPlaceholder("%chat-socialspy%",1000,p->cm.spies.contains(p.getName().toLowerCase()) ? "On" : "Off");
         pm.registerPlayerPlaceholder("%chat-enabled%",1000,p->cm.toggleChat.contains(p.getName().toLowerCase()) ? "Off" : "On");
 
         Platform p = TABAdditions.getInstance().getPlatform();
         p.registerCommand("togglechat",toggleChatEnabled);
         p.registerCommand("ignore",ignoreEnabled);
-        p.registerCommand("togglemention", toggleMentionEnabled);
         p.registerCommand("socialspy", socialSpyEnabled);
         p.registerCommand("clearchat", clearChatEnabled);
     }
@@ -107,7 +106,7 @@ public class ChatCmds {
                 return true;
             }
             case "socialspy": return toggleCmd(!socialSpyEnabled || !p.hasPermission("tabadditions.chat.socialspy"),p,cm.spies,msgs.socialSpyOff,msgs.socialSpyOn);
-            case "togglemention": return toggleCmd(toggleMentionEnabled,p,cm.mentionDisabled,msgs.mentionOn,msgs.mentionOff);
+            case "togglemention": return toggleCmd(cm.getMentionManager() != null && cm.getMentionManager().isToggleMentionCmd(),p,cm.getMentionManager().toggleMention,msgs.mentionOn,msgs.mentionOff);
             case "toggleemoji": return toggleCmd(cm.getEmojiManager() != null && cm.getEmojiManager().isToggleEmojiCmdEnabled(),p,cm.getEmojiManager().toggleEmoji,msgs.emojiOn,msgs.emojiOff);
             case "togglechat": return toggleCmd(toggleChatEnabled,p,cm.toggleChat,msgs.chatOn,msgs.chatOff);
             case "ignore": {
@@ -121,17 +120,14 @@ public class ChatCmds {
                     p.sendMessage(msgs.cantIgnoreSelf,true);
                     return true;
                 }
-                List<String> list = new ArrayList<>(playerdata.getStringList(p.getName().toLowerCase()));
-
-                if (list.contains(p2.toLowerCase())) {
-                    list.remove(p2.toLowerCase());
+                List<String> ignoredPlayers = ignored.computeIfAbsent(p.getName().toLowerCase(), k -> new ArrayList<>());
+                if (ignoredPlayers.contains(p2.toLowerCase())) {
+                    ignoredPlayers.remove(p2.toLowerCase());
                     p.sendMessage(msgs.getIgnoreOff(p2), true);
                     return true;
                 }
-                list.add(p2.toLowerCase());
+                ignoredPlayers.add(p2.toLowerCase());
                 p.sendMessage(msgs.getIgnoreOn(p2), true);
-
-                playerdata.set("msg-ignore."+p.getName().toLowerCase(), list);
                 return true;
             }
         }
@@ -214,12 +210,12 @@ public class ChatCmds {
             if (!category.canUse(p)) return;
             int owned = category.ownedEmojis(p);
             if (owned == 0) return;
-            IChatBaseComponent subcomp = cm.createComponent("\n"+EnumChatFormat.color(translation.getEmojiCategory(p,category)),p);
+            IChatBaseComponent subcomp = cm.createComponent("\n"+EnumChatFormat.color(translation.getEmojiCategory(p,category)));
             subcomp.getModifier().onClickRunCommand("/emojis "+categoryName);
             list.add(subcomp);
 
         }));
-        IChatBaseComponent comp = cm.createComponent("\n"+EnumChatFormat.color(translation.getEmojiCategoryHeader(list.size(),p,emojis)),p);
+        IChatBaseComponent comp = cm.createComponent("\n"+EnumChatFormat.color(translation.getEmojiCategoryHeader(list.size(),p,emojis)));
         if (!list.isEmpty()) comp.setExtra(list);
         p.sendMessage(comp);
     }
@@ -231,7 +227,7 @@ public class ChatCmds {
         Map<String,String> emojis = category.getEmojis();
         emojis.forEach((emoji,output)->{
             if (!category.canUse(p,emoji)) return;
-            IChatBaseComponent comp = cm.createComponent("\n" + TABAdditions.getInstance().parsePlaceholders(translation.getEmoji(emoji,output),p),p);
+            IChatBaseComponent comp = cm.createComponent("\n" + TABAdditions.getInstance().parsePlaceholders(translation.getEmoji(emoji,output),p));
             comp.getModifier().onClickSuggestCommand(emoji);
             list.add(comp);
         });
@@ -240,7 +236,7 @@ public class ChatCmds {
             p.sendMessage(translation.emojiCategoryNotFound, true);
             return;
         }
-        IChatBaseComponent comp = cm.createComponent(EnumChatFormat.color(translation.getEmojiHeader(list.size(),category.getEmojis().size())),p);
+        IChatBaseComponent comp = cm.createComponent(EnumChatFormat.color(translation.getEmojiHeader(list.size(),category.getEmojis().size())));
         comp.setExtra(list);
         p.sendMessage(comp);
 

@@ -2,13 +2,16 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabFeature;
+import me.neznamy.tab.api.feature.JoinListener;
+import me.neznamy.tab.api.feature.Loadable;
+import me.neznamy.tab.api.feature.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.feature.UnLoadable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class TablistNamesRadius extends TabFeature {
+public class TablistNamesRadius extends TabFeature implements Loadable, UnLoadable, JoinListener {
 
     private final Plugin plugin;
     private int task = -1;
@@ -28,10 +31,6 @@ public class TablistNamesRadius extends TabFeature {
     @Override
     public String getFeatureName() {
         return "Tablist Names Radius";
-    }
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aTablist Names Radius&r";
     }
 
     @Override

@@ -2,12 +2,15 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.TabFeature;
+import me.neznamy.tab.api.feature.JoinListener;
+import me.neznamy.tab.api.feature.Loadable;
+import me.neznamy.tab.api.feature.TabFeature;
+import me.neznamy.tab.api.feature.UnLoadable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class OnlyYou extends TabFeature {
+public class OnlyYou extends TabFeature implements Loadable, UnLoadable, JoinListener {
 
     private final Plugin plugin;
 
@@ -19,10 +22,6 @@ public class OnlyYou extends TabFeature {
     @Override
     public String getFeatureName() {
         return "Only You";
-    }
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aOnly You&r";
     }
 
     @Override
@@ -58,18 +57,12 @@ public class OnlyYou extends TabFeature {
     }
 
     private void show(Player p, Player target) {
-        try {
-            p.showPlayer(plugin, target);
-        } catch (NoSuchMethodError e) {
-            p.showPlayer(target);
-        }
+        try {p.showPlayer(plugin, target);}
+        catch (NoSuchMethodError e) {p.showPlayer(target);}
     }
     private void hide(Player p, Player target) {
-        try {
-            p.hidePlayer(plugin, target);
-        } catch (NoSuchMethodError e) {
-            p.hidePlayer(target);
-        }
+        try {p.hidePlayer(plugin, target);}
+        catch (NoSuchMethodError e) {p.hidePlayer(target);}
     }
 
 }

@@ -3,13 +3,14 @@ package io.github.tanguygab.tabadditions.shared.features;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabFeature;
+import me.neznamy.tab.api.feature.*;
+import me.neznamy.tab.shared.TAB;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
 import java.util.concurrent.Future;
 
-public class NametagInRange extends TabFeature {
+public class NametagInRange extends TabFeature implements JoinListener, Loadable, UnLoadable {
 
     private final TabAPI tab;
     private Future<?> task;
@@ -23,10 +24,6 @@ public class NametagInRange extends TabFeature {
     public String getFeatureName() {
         return "Nametag In Range";
     }
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aNametag In Range&r";
-    }
 
     @Override
     public void onJoin(TabPlayer p) {
@@ -38,7 +35,7 @@ public class NametagInRange extends TabFeature {
 
     @Override
     public void load() {
-        task = tab.getThreadManager().startRepeatingMeasuredTask(500,this,"handling Nametag In Range",()->{
+        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,this,"handling Nametag In Range",()->{
             int zone = (int) Math.pow(TABAdditions.getInstance().nametagInRange, 2);
             for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 TabPlayer p = tab.getPlayer(player.getUniqueId());
@@ -58,7 +55,6 @@ public class NametagInRange extends TabFeature {
 
     @Override
     public void unload() {
-        task.cancel(true);
         for (TabPlayer p : tab.getOnlinePlayers()) {
             for (TabPlayer p2 : tab.getOnlinePlayers()) {
                 if (p != p2)

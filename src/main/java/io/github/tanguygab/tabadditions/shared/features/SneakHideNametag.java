@@ -2,8 +2,10 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabFeature;
+import me.neznamy.tab.api.feature.Loadable;
+import me.neznamy.tab.api.feature.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.api.feature.UnLoadable;
 import me.neznamy.tab.api.team.TeamManager;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -14,7 +16,7 @@ import org.bukkit.plugin.Plugin;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SneakHideNametag extends TabFeature implements Listener {
+public class SneakHideNametag extends TabFeature implements Listener, Loadable, UnLoadable {
 
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
 
@@ -25,10 +27,6 @@ public class SneakHideNametag extends TabFeature implements Listener {
     @Override
     public String getFeatureName() {
         return "Sneak Hide Nametag";
-    }
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aSneak Hide Nametag&r";
     }
 
     @Override

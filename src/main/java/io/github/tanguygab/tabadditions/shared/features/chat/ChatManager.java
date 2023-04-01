@@ -5,11 +5,10 @@ import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
-import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiCategory;
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
+import io.github.tanguygab.tabadditions.shared.features.chat.mentions.MentionManager;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.chat.ChatClickable;
 import me.neznamy.tab.api.chat.EnumChatFormat;
@@ -17,7 +16,9 @@ import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.chat.TextColor;
 import me.neznamy.tab.api.chat.rgb.RGBUtils;
 import me.neznamy.tab.api.config.ConfigurationFile;
+import me.neznamy.tab.api.feature.*;
 import me.neznamy.tab.api.placeholder.RelationalPlaceholder;
+import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -29,13 +30,13 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ChatManager extends TabFeature {
+public class ChatManager extends TabFeature implements JoinListener, CommandListener, Loadable, UnLoadable, Refreshable {
 
     private TABAdditions plinstance;
     private final TabAPI tab;
     private EmojiManager emojiManager;
     private MsgManager msgManager;
-
+    private MentionManager mentionManager;
 
     private final Map<String,ChatFormat> formats = new HashMap<>();
     private ChatFormat defaultFormat;
@@ -57,12 +58,6 @@ public class ChatManager extends TabFeature {
     public String itemOutputAir ;
     public boolean itemPermssion;
 
-    public boolean mentionEnabled;
-    public String mentionInput;
-    public String mentionSound;
-    public String mentionOutput;
-    public List<String> mentionDisabled = new ArrayList<>();
-    public boolean mentionOutputEveryone;
 
     public Map<String,Map<String,Object>> customInteractions;
 
@@ -105,6 +100,7 @@ public class ChatManager extends TabFeature {
     public String getFeatureName() {
         return "Chat";
     }
+
     @Override
     public String getRefreshDisplayName() {
         return "&aChat&r";
@@ -143,7 +139,7 @@ public class ChatManager extends TabFeature {
 
 
         if (config.getBoolean("emojis.enabled",true))
-            emojiManager = new EmojiManager(config.getString("emojis.output","{%emoji%%lastcolor%|| %emoji% &7%emojiraw% &d/emojis||command:/emojis}"),
+            emojiManager = new EmojiManager(this,config.getString("emojis.output","{%emoji%%lastcolor%|| %emoji% &7%emojiraw% &d/emojis||command:/emojis}"),
                     config.getBoolean("emojis.block-without-permission",false),
                     config.getBoolean("emojis.auto-complete",true),
                     config.getConfigurationSection("emojis.categories"),
@@ -151,7 +147,7 @@ public class ChatManager extends TabFeature {
                     config.getBoolean("emojis./toggleemoji",true)
             );
         if (config.getBoolean("msg.enabled",true))
-            msgManager = new MsgManager(config.getString("msg.sender","{&7[&6&lMe &e➠ &6&l%viewer:prop-customchatname%&7] %msg%||%time%\\n\\n&fClick to reply to &6%viewer:prop-customchatname%&f.||suggest:/msg %player% }"),
+            msgManager = new MsgManager(this,config.getString("msg.sender","{&7[&6&lMe &e➠ &6&l%viewer:prop-customchatname%&7] %msg%||%time%\\n\\n&fClick to reply to &6%viewer:prop-customchatname%&f.||suggest:/msg %player% }"),
                     config.getString("msg.viewer","{&7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%||%time%\\n\\n&fClick to reply to &6%prop-customchatname%&f.||suggest:/msg %player% }"),
                     config.getInt("msg.cooldown",0),
                     config.getStringList("msg./msg-aliases",Arrays.asList("tell","whisper","w","m")),
@@ -160,7 +156,16 @@ public class ChatManager extends TabFeature {
                     config.getBoolean("msg./reply",true),
                     config.getBoolean("msg.save-last-sender-for-reply",true)
             );
+        if (config.getBoolean("mention.enabled",true))
+            mentionManager = new MentionManager(this,config.getString("mention.input","@%player%"),
+                    config.getString("mention.output","&b@%player%"),
+                    config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING"),
+                    config.getBoolean("mention./togglemention",true),
+                    config.getBoolean("mention.output-for-everyone",true),
+                    config.getConfigurationSection("mention.custom-mentions")
+            );
 
+        cmds = new ChatCmds(this,config);
 
         regexInputs = config.getBoolean("regex-inputs",false);
         forceColors = config.getBoolean("force-fix-colors",false);
@@ -176,17 +181,6 @@ public class ChatManager extends TabFeature {
 
         customInteractions = config.getConfigurationSection("custom-interactions");
 
-        cmds = new ChatCmds(this,config);
-
-        mentionEnabled = config.getBoolean("mention.enabled",true);
-        mentionInput = config.getString("mention.input","@%player%");
-        mentionOutput = config.getString("mention.output","&b@%player%");
-        mentionSound = config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING");
-        if (cmds.toggleMentionEnabled) {
-            mentionDisabled.addAll(tab.getPlayerCache().getStringList("togglemention", new ArrayList<>()));
-            tab.getPlayerCache().set("togglemention",null);
-        }
-        mentionOutputEveryone = config.getBoolean("mention.output-for-everyone",true);
 
         spySave = config.getBoolean("socialspy.keep-after-reload",true);
         if (cmds.socialSpyEnabled && spySave) {
@@ -242,17 +236,17 @@ public class ChatManager extends TabFeature {
     public MsgManager getMsgManager() {
         return msgManager;
     }
+    public MentionManager getMentionManager() {
+        return mentionManager;
+    }
 
-    @Override
+
     public void unload() {
-        if (cmds.socialSpyEnabled && spySave)
-            tab.getPlayerCache().set("socialspy", spies);
-        if (cmds.toggleMentionEnabled)
-            tab.getPlayerCache().set("togglemention", mentionDisabled);
-        if (cmds.toggleChatEnabled)
-            tab.getPlayerCache().set("togglechat", toggleChat);
-        if (emojiManager != null)
-            emojiManager.unload();
+        if (mentionManager != null) mentionManager.unload();
+        if (emojiManager != null) emojiManager.unload();
+        if (cmds.socialSpyEnabled && spySave) tab.getPlayerCache().set("socialspy", spies);
+        if (cmds.toggleChatEnabled) tab.getPlayerCache().set("togglechat", toggleChat);
+        if (cmds.ignoreEnabled) tab.getPlayerCache().set("msg-ignore", cmds.ignored);
     }
 
     public void onChat(TabPlayer p, String msg) {
@@ -291,7 +285,7 @@ public class ChatManager extends TabFeature {
             viewer.sendMessage(comp);
             chatPlaceholder.updateValue(viewer,p,msgFormatted);
 
-            tab.getThreadManager().runTaskLater(msgPlaceholderStay,this,"update %rel_chat% for "+viewer.getName()+" viewing "+p.getName(),()->{
+            TAB.getInstance().getCPUManager().runTaskLater(msgPlaceholderStay,this,"update %rel_chat% for "+viewer.getName()+" viewing "+p.getName(),()->{
                 if ((chatPlaceholder).getLastValue(viewer,p).equals(msgFormatted))
                     chatPlaceholder.updateValue(viewer,p,"");
             });
@@ -351,7 +345,7 @@ public class ChatManager extends TabFeature {
             try {click = m.group("click");}
             catch (Exception e) {click = null;}
 
-            IChatBaseComponent comp = createComponent(txt,viewer);
+            IChatBaseComponent comp = createComponent(txt);
 
             if (hover != null) comp = hovercheck(comp,hover.replace("%msg%",msg),p,viewer,lastcolor);
             if (click != null) clickcheck(comp,click.replace("%msg%",msg));
@@ -394,8 +388,8 @@ public class ChatManager extends TabFeature {
             catch (Exception ignored) {}
             String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
 
-            if (mentionEnabled)
-                txt = replaceInput(txt,"%msg%",pingcheck(p,msg,viewer,hoverclick));
+            if (mentionManager != null)
+                txt = replaceInput(txt,"%msg%", mentionManager.process(msg,p,viewer,hoverclick));
             else txt = replaceInput(txt,"%msg%",msg);
 
             if (embedURLs) txt = urlcheck(txt,hoverclick);
@@ -408,7 +402,7 @@ public class ChatManager extends TabFeature {
                     txt = replaceInput(txt,itemOffHand, hoverclick+"{[item]||item:offhand}{");
             }
 
-            if (emojiManager != null) txt = emojicheck(p,txt,hoverclick);
+            if (emojiManager != null) txt = emojiManager.process(p,txt,hoverclick);
 
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
@@ -446,12 +440,12 @@ public class ChatManager extends TabFeature {
 
             if (comp.toFlatText().replaceAll("^\\s+","").equals("[item]")) {
                 String color = lastcolor == null ? "" : "#"+lastcolor.getHexCode();
-                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer)+color,viewer);
+                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer)+color);
             }
             comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
             return comp;
         }
-        comp.getModifier().onHoverShowText(createComponent(hover,viewer));
+        comp.getModifier().onHoverShowText(createComponent(hover));
         return comp;
     }
     public void clickcheck(IChatBaseComponent comp, String click) {
@@ -470,44 +464,6 @@ public class ChatManager extends TabFeature {
         if (click.startsWith("copy:"))
             comp.getModifier().onClick(ChatClickable.EnumClickAction.COPY_TO_CLIPBOARD,click.replace("copy:",""));
 
-    }
-    public String emojicheck(TabPlayer p, String msg, String hoverclick) {
-        if (emojiManager.toggleEmoji.contains(p.getName().toLowerCase())) return msg;
-
-        for (EmojiCategory category : emojiManager.getEmojiCategories().values()) {
-            if (!category.canUse(p)) continue;
-            Map<String, String> list = category.getEmojis();
-            if (list == null || list.isEmpty()) continue;
-
-            for (String emoji : list.keySet()) {
-                int count = countMatches(msg, emoji);
-                if (count == 0 || emoji.equals("")) continue;
-                if (!category.canUse(p,emoji)) {
-                    if (emojiManager.isUntranslateEnabled() && msg.contains(list.get(emoji)))
-                        msg = msg.replace(list.get(emoji), emoji);
-                    continue;
-                }
-                List<String> list2 = Arrays.asList(msg.split(Pattern.quote(emoji)));
-                msg = "";
-                int counted = 0;
-                String output1 = emojiManager.getOutput(category);
-                output1 = output1.replace("%emojiraw%", emoji).replace("%emoji%", list.get(emoji));
-                String output = hoverclick + plinstance.parsePlaceholders(removeSpaces(output1),p) + "{";
-                if (list2.isEmpty()) {
-                    for (int i = 0; i < count; i++) msg+=output;
-                    return msg;
-                }
-                for (String part : list2) {
-                    if (list2.indexOf(part) + 1 == list2.size() && counted == count)
-                        msg += part;
-                    else {
-                        msg += part + output;
-                        counted++;
-                    }
-                }
-            }
-        }
-        return msg;
     }
     public String urlcheck(String msg, String hoverclick) {
         String msg2 = msg.replaceAll("#[A-Fa-f0-9]{6}"," "); // removing RGB colors to avoid IPV4 check from killing them
@@ -567,39 +523,6 @@ public class ChatManager extends TabFeature {
             }
         }
         return msg;
-    }
-
-    public String pingcheck(TabPlayer p, String msg, TabPlayer viewer, String hoverclick) {
-        boolean check = false;
-        TabPlayer p2 = viewer;
-        if (mentionOutputEveryone) {
-            for (TabPlayer all : tab.getOnlinePlayers()) {
-                if (pingcheck2(p,msg,all)) {
-                    check = true;
-                    p2 = all;
-                }
-            }
-        } else check = pingcheck2(p,msg,viewer);
-
-        if (check) {
-            String output = Matcher.quoteReplacement(hoverclick+plinstance.parsePlaceholders(removeSpaces(mentionOutput),p,p2)+"{");
-            String input = plinstance.parsePlaceholders(mentionInput,p2);
-            if (regexInputs)
-                msg = msg.replaceAll(input,Matcher.quoteReplacement(output));
-            else msg = msg.replaceAll("(?i)"+Pattern.quote(input), output);
-
-            if (viewer == p2)
-                plinstance.getPlatform().sendSound(viewer,mentionSound);
-        }
-        return msg;
-    }
-
-    public boolean pingcheck2(TabPlayer p, String msg, TabPlayer viewer) {
-        String input = plinstance.parsePlaceholders(mentionInput,viewer);
-        if (input.equals("") || viewer == null) return false;
-        if (!p.hasPermission("tabadditions.chat.bypass.togglemention") && mentionDisabled.contains(viewer.getName().toLowerCase())) return false;
-        if (!p.hasPermission("tabadditions.chat.bypass.ignore") && cmds.isIgnored(p,viewer)) return false;
-        return msg.toLowerCase().contains(input.toLowerCase());
     }
 
     public Object getItem(String str, TabPlayer p) {
@@ -693,10 +616,8 @@ public class ChatManager extends TabFeature {
     public String removeSpaces(String str) {
         return str.replace("{ ","{").replace(" }","}").replace(" || ","||");
     }
-    public IChatBaseComponent createComponent(String str, TabPlayer p) {
-        str = str.replace("<bracketleft>","{").replace("<bracketright>","}").replace("<bar>","|");
-        if (forceColors) return IChatBaseComponent.fromColoredText(str);
-        return p != null && p.getVersion().getMinorVersion() < 16 ? IChatBaseComponent.fromColoredText(str) : IChatBaseComponent.optimizedComponent(str);
+    public IChatBaseComponent createComponent(String str) {
+        return IChatBaseComponent.fromColoredText(str.replace("<bracketleft>","{").replace("<bracketright>","}").replace("<bar>","|"));
     }
 
     public String replaceInput(String str, String input, String output) {
@@ -714,10 +635,7 @@ public class ChatManager extends TabFeature {
     }
 
     @Override
-    public void onQuit(TabPlayer p) {
-        if (emojiManager != null && emojiManager.isAutoCompleteEnabled())
-            emojiManager.unloadAutoComplete(p);
-    }
+    public void refresh(TabPlayer tabPlayer, boolean b) {}
 
     @Override
     public boolean onCommand(TabPlayer p, String msg) {

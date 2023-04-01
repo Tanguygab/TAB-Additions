@@ -1,9 +1,11 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TabFeature;
+import me.neznamy.tab.api.feature.Loadable;
+import me.neznamy.tab.api.feature.TabFeature;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.api.feature.UnLoadable;
 import me.neznamy.tab.api.team.TeamManager;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -16,7 +18,7 @@ import org.spigotmc.event.entity.EntityMountEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SitHideNametag extends TabFeature implements Listener {
+public class SitHideNametag extends TabFeature implements Listener, Loadable, UnLoadable {
 
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
 
@@ -27,10 +29,6 @@ public class SitHideNametag extends TabFeature implements Listener {
     @Override
     public String getFeatureName() {
         return "Site Hide Nametag";
-    }
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aSite Hide Nametag&r";
     }
 
     @Override

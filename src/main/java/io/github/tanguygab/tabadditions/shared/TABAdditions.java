@@ -14,6 +14,8 @@ import me.neznamy.tab.api.config.ConfigurationFile;
 import me.neznamy.tab.api.config.YamlConfigurationFile;
 import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
+import me.neznamy.tab.api.feature.TabFeature;
+import me.neznamy.tab.api.feature.UnLoadable;
 import me.neznamy.tab.api.placeholder.*;
 import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
@@ -142,8 +144,8 @@ public class TABAdditions {
         FeatureManager fm = tab.getFeatureManager();
 
         features.forEach(feature->{
-            if (fm.isFeatureEnabled(feature))
-                fm.getFeature(feature).unload();
+            if (fm.isFeatureEnabled(feature) && fm.getFeature(feature) instanceof UnLoadable)
+                ((UnLoadable)fm.getFeature(feature)).unload();
             fm.unregisterFeature(feature);
         });
 

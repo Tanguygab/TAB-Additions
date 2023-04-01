@@ -1,8 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
-import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 
@@ -12,7 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class MsgManager {
+public class MsgManager extends Manager {
 
     private final String senderOutput;
     private final String viewerOutput;
@@ -26,7 +24,8 @@ public class MsgManager {
     private final Map<TabPlayer, String> replies = new HashMap<>();
     private final Map<TabPlayer, LocalDateTime> msgCooldown = new HashMap<>();
 
-    public MsgManager(String senderOutput, String viewerOutput, long cooldown, List<String> aliases, boolean msgSelf, boolean toggleMsgCmd, boolean replyCmd, boolean saveLastSenderForReply) {
+    public MsgManager(ChatManager cm, String senderOutput, String viewerOutput, long cooldown, List<String> aliases, boolean msgSelf, boolean toggleMsgCmd, boolean replyCmd, boolean saveLastSenderForReply) {
+        super(cm);
         this.senderOutput = senderOutput;
         this.viewerOutput = viewerOutput;
         this.cooldown = cooldown;
@@ -36,13 +35,13 @@ public class MsgManager {
         this.replyCmd = replyCmd;
         this.saveLastSenderForReply = saveLastSenderForReply;
 
-        Platform platform = TABAdditions.getInstance().getPlatform();
+        Platform platform = instance.getPlatform();
         platform.registerCommand("msg",true,aliases.toArray(new String[]{}));
         platform.registerCommand("reply",replyCmd,"r");
         platform.registerCommand("togglemsg",toggleMsgCmd);
 
-        PlaceholderManager pm = TabAPI.getInstance().getPlaceholderManager();
-        pm.registerPlayerPlaceholder("%chat-messages%",1000,p->TabAPI.getInstance().getPlayerCache().getStringList("togglemsg").contains(p.getName().toLowerCase()) ? "Off" : "On");
+        PlaceholderManager pm = tab.getPlaceholderManager();
+        pm.registerPlayerPlaceholder("%chat-messages%",1000,p->tab.getPlayerCache().getStringList("togglemsg").contains(p.getName().toLowerCase()) ? "Off" : "On");
     }
 
     public void setCooldown(TabPlayer p) {
