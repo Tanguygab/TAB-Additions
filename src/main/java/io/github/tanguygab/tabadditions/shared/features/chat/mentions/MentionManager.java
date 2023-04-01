@@ -67,12 +67,9 @@ public class MentionManager extends Manager {
         //checking custom mentions
         String finalMsg = msg;
         List<CustomMention> mentions = this.mentions.values().stream().filter(mention->mention.matches(finalMsg)).collect(Collectors.toList());
-        List<TabPlayer> mentioned = new ArrayList<>();
         for (TabPlayer p : tab.getOnlinePlayers()) {
             CustomMention mention = mentions.stream().findFirst().orElse(null);
-            if (mention == null || !mention.isConditionMet(p)) continue;
-            mentioned.add(p);
-            if (mention.getSound() != null)
+            if (mention != null && mention.isConditionMet(p) && mention.getSound() != null)
                 instance.getPlatform().sendSound(p,mention.getSound());
         }
         for (CustomMention mention : mentions) msg = mention.replace(msg);
@@ -80,17 +77,17 @@ public class MentionManager extends Manager {
         //checking player mentions
         boolean check = false;
         if (outputForEveryone)
-            for (TabPlayer p : tab.getOnlinePlayers())
-                if (isMentioned(msg,sender,p)) {
+            for (TabPlayer p : tab.getOnlinePlayers()) {
+                if (isMentioned(msg, sender, p)) {
                     check = true;
                     break;
                 }
+            }
         else if (isMentioned(msg,sender,viewer)) {
                     check = true;
-                    instance.getPlatform().sendSound(p,sound);
+                    instance.getPlatform().sendSound(viewer,sound);
                 }
-
-        return check ? msg
+        return !check ? msg
                 : msg.replaceAll("(?i)"+ Pattern.quote(instance.parsePlaceholders(input,viewer)),
                     Matcher.quoteReplacement(hoverclick+instance.parsePlaceholders(cm.removeSpaces(this.output),sender,viewer)+"{"));
     }
