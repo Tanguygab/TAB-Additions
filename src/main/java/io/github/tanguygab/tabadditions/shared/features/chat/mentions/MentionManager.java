@@ -72,7 +72,8 @@ public class MentionManager extends Manager {
             CustomMention mention = mentions.stream().findFirst().orElse(null);
             if (mention == null || !mention.isConditionMet(p)) continue;
             mentioned.add(p);
-            instance.getPlatform().sendSound(p,mention.getSound());
+            if (mention.getSound() != null)
+                instance.getPlatform().sendSound(p,mention.getSound());
         }
         for (CustomMention mention : mentions) msg = mention.replace(msg);
 

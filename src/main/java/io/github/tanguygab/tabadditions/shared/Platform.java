@@ -36,4 +36,6 @@ public abstract class Platform {
 	public abstract void addToChatComplete(TabPlayer p, List<String> emojis);
 	public abstract void removeFromChatComplete(TabPlayer p, List<String> emojis);
 	public abstract boolean supportsChatSuggestions();
+
+	public abstract void runTask(Runnable run);
 }

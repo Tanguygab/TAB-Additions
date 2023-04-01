@@ -114,4 +114,9 @@ public class BungeePlatform extends Platform {
 	public boolean supportsChatSuggestions() {
 		return false;
 	}
+
+	@Override
+	public void runTask(Runnable run) {
+		plugin.getProxy().getScheduler().runAsync(plugin,run);
+	}
 }

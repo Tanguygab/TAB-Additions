@@ -178,4 +178,9 @@ public class SpigotPlatform extends Platform {
 	public boolean supportsChatSuggestions() {
 		return chatSuggestions;
 	}
+
+	@Override
+	public void runTask(Runnable run) {
+		plugin.getServer().getScheduler().runTask(plugin,run);
+	}
 }

@@ -12,7 +12,6 @@ public abstract class Manager {
     public Manager(ChatManager chatManager) {
         instance = TABAdditions.getInstance();
         tab = TabAPI.getInstance();
-        System.out.println(tab.getFeatureManager().getFeature("Chat")+" "+tab.getFeatureManager().isFeatureEnabled("Chat"));
         cm = chatManager;
     }
 
