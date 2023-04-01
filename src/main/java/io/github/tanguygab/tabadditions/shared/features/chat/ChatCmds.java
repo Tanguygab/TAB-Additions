@@ -105,7 +105,7 @@ public class ChatCmds {
                 p.sendMessage(msgs.getChatCleared(p),true);
                 return true;
             }
-            case "socialspy": return toggleCmd(!socialSpyEnabled || !p.hasPermission("tabadditions.chat.socialspy"),p,cm.spies,msgs.socialSpyOff,msgs.socialSpyOn);
+            case "socialspy": return toggleCmd(socialSpyEnabled && p.hasPermission("tabadditions.chat.socialspy"),p,cm.spies,msgs.socialSpyOff,msgs.socialSpyOn);
             case "togglemention": return toggleCmd(cm.getMentionManager() != null && cm.getMentionManager().isToggleMentionCmd(),p,cm.getMentionManager().toggleMention,msgs.mentionOn,msgs.mentionOff);
             case "toggleemoji": return toggleCmd(cm.getEmojiManager() != null && cm.getEmojiManager().isToggleEmojiCmdEnabled(),p,cm.getEmojiManager().toggleEmoji,msgs.emojiOn,msgs.emojiOff);
             case "togglechat": return toggleCmd(toggleChatEnabled,p,cm.toggleChat,msgs.chatOn,msgs.chatOff);
