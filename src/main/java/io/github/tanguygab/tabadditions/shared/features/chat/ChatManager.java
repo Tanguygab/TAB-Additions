@@ -41,8 +41,6 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
     private final Map<String,ChatFormat> formats = new HashMap<>();
     private ChatFormat defaultFormat;
     public final Map<TabPlayer,String> defformats = new HashMap<>();
-    public boolean regexInputs;
-    public boolean forceColors;
     private final Pattern rgbPattern = Pattern.compile("#[0-9a-fA-F]{6}");
     public int msgPlaceholderStay;
 
@@ -167,8 +165,6 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
 
         cmds = new ChatCmds(this,config);
 
-        regexInputs = config.getBoolean("regex-inputs",false);
-        forceColors = config.getBoolean("force-fix-colors",false);
         msgPlaceholderStay = config.getInt("msg-placeholder-stay",3000);
 
         itemEnabled = config.getBoolean("item.enabled",true);
@@ -389,17 +385,17 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
             String hoverclick = (hover != null ? "||"+hover : "") + (click != null ? "||"+click : "")+"}";
 
             if (mentionManager != null)
-                txt = replaceInput(txt,"%msg%", mentionManager.process(msg,p,viewer,hoverclick));
-            else txt = replaceInput(txt,"%msg%",msg);
+                txt = txt.replace("%msg%", mentionManager.process(msg,p,viewer,hoverclick));
+            else txt = txt.replace("%msg%",msg);
 
             if (embedURLs) txt = urlcheck(txt,hoverclick);
             if (filterEnabled) txt = filtercheck(p,txt,hoverclick);
 
             if (itemEnabled && (!itemPermssion || p.hasPermission("tabadditions.chat.item"))) {
                 if (!itemMainHand.equals(""))
-                    txt = replaceInput(txt,itemMainHand, hoverclick+"{[item]||item:mainhand}{");
+                    txt = txt.replace(itemMainHand, hoverclick+"{[item]||item:mainhand}{");
                 if (!itemOffHand.equals(""))
-                    txt = replaceInput(txt,itemOffHand, hoverclick+"{[item]||item:offhand}{");
+                    txt = txt.replace(itemOffHand, hoverclick+"{[item]||item:offhand}{");
             }
 
             if (emojiManager != null) txt = emojiManager.process(p,txt,hoverclick);
@@ -407,7 +403,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
                     if (!customInteractions.get(interaction).get("input").equals(""))
-                        txt = replaceInput(txt,customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer))+"{");
+                        txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer))+"{");
                 }
             }
             text = text.replace(txtold,txt);
@@ -618,10 +614,6 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
     }
     public IChatBaseComponent createComponent(String str) {
         return IChatBaseComponent.fromColoredText(str.replace("<bracketleft>","{").replace("<bracketright>","}").replace("<bar>","|"));
-    }
-
-    public String replaceInput(String str, String input, String output) {
-        return regexInputs ? str.replaceAll(input,output) : str.replace(input,output);
     }
 
     @Override
