@@ -5,6 +5,7 @@ plugins {
 group = 'io.github.tanguygab'
 version = '1.7.1-SNAPSHOT'
 
+compileJava.options.encoding = 'UTF-8'
 
 repositories {
     mavenCentral()

@@ -75,7 +75,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
     public boolean embedURLs;
     public boolean embedURLsAutoAddHttp;
     public String urlsOutput;
-    public Pattern urlPattern = Pattern.compile("([&\u00A7][a-fA-Fk-oK-OrR0-9])?(?<url>(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*))");
+    public Pattern urlPattern = Pattern.compile("([&§][a-fA-Fk-oK-OrR0-9])?(?<url>(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*))");
     public Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}\\.){3}[0-9]{1,3}");
 
     public boolean filterEnabled;
@@ -125,7 +125,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         plinstance = TABAdditions.getInstance();
         ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
 
-        defaultFormat = new ChatFormat("default", null, null, null, null, "{%prop-chatprefix% %prop-customchatname% %prop-chatsuffix%&7\u00bb &r%msg%||%time%}");
+        defaultFormat = new ChatFormat("default", null, null, null, null, "{%prop-chatprefix% %prop-customchatname% %prop-chatsuffix%&7» &r%msg%||%time%}");
         Map<String,Map<String,String>> chatFormats = config.getConfigurationSection("chat-formats");
         chatFormats.forEach((format,cfg)-> formats.put(format + "", new ChatFormat(format,
                 cfg.containsKey("condition") ? Condition.getCondition(cfg.get("condition")) : null,
@@ -496,12 +496,11 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
             Map<String, Integer> posjumps = new HashMap<>();
             while (matcher.find()) {
                 String word = matcher.group();
-                String wordreplaced = "";
+                StringBuilder wordreplaced = new StringBuilder();
                 int i = filterFakeLength < 1 ? word.length() : filterFakeLength;
-                for (int j = 0; j < i; j++)
-                    wordreplaced+=filterChar;
+                wordreplaced.append(filterChar.repeat(i));
                 int posjump = posjumps.getOrDefault(word,0);
-                String output = hoverclick+removeSpaces(filterOutput.replace("%word%",word).replace("%replacement%",wordreplaced))+"{";
+                String output = hoverclick+removeSpaces(filterOutput.replace("%word%",word).replace("%replacement%", wordreplaced.toString()))+"{";
 
                 if (map.isEmpty()) {
                     msg = msg.replace(word,output);
@@ -551,13 +550,13 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) return item.getItemMeta().getDisplayName();
 
         String type = item.getType().toString().replace("_", " ").toLowerCase();
-        String type2 = "";
+        StringBuilder type2 = new StringBuilder();
         List<String> typelist = new ArrayList<>(Arrays.asList(type.split(" ")));
         for (String str : typelist) {
-            type2 = type2 + str.substring(0, 1).toUpperCase() + str.substring(1);
-            if (typelist.indexOf(str) != typelist.size() - 1) type2 = type2 + " ";
+            type2.append(str.substring(0, 1).toUpperCase()).append(str.substring(1));
+            if (typelist.indexOf(str) != typelist.size() - 1) type2.append(" ");
         }
-        return type2;
+        return type2.toString();
     }
     public TextColor getLastColor(IChatBaseComponent component) {
         if (component.getExtra() != null && !component.getExtra().isEmpty()) {
@@ -570,16 +569,16 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         return getLastColor2(component);
     }
     public TextColor getLastColor2(IChatBaseComponent component) {
-        if (component.getText().contains("\u00A7")) {
-            int i = component.getText().lastIndexOf("\u00A7");
+        if (component.getText().contains("§")) {
+            int i = component.getText().lastIndexOf("§");
             if (component.getText().toCharArray().length == i+1) return null;
             char c = component.getText().charAt(i+1);
             if (EnumChatFormat.getByChar(c) != null && EnumChatFormat.getByChar(c).getHexCode() != null)
                 return new TextColor(EnumChatFormat.getByChar(c));
             if ("KkLlMmNnOoRrXxRr".contains(c+"")) {
                 StringBuilder sb = new StringBuilder(component.getText());
-                sb.setCharAt(sb.lastIndexOf("\u00A7"),' ');
-                int i2 = sb.lastIndexOf("\u00A7");
+                sb.setCharAt(sb.lastIndexOf("§"),' ');
+                int i2 = sb.lastIndexOf("§");
                 if (sb.toString().toCharArray().length == i2+1) return null;
                 char c2 = sb.charAt(i2+1);
                 if (EnumChatFormat.getByChar(c) != null && EnumChatFormat.getByChar(c).getHexCode() != null)
