@@ -268,8 +268,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
             break;
         }
         ChatFormat chatFormat = prefixFormat == null ? getFormat(p) : prefixFormat;
-        String msgFormatted = createmsg(p,msg,chatFormat.getText(),null).toLegacyText();
-        tab.sendConsoleMessage(msgFormatted, true);
+        tab.sendConsoleMessage(createmsg(p,msg,chatFormat.getText(),null).toLegacyText(), true);
 
         for (TabPlayer viewer : tab.getOnlinePlayers()) {
             if (toggleChat.contains(viewer.getName().toLowerCase()) || cmds.isIgnored(p,viewer)) continue;
@@ -279,6 +278,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
             else if (isSpying(p,viewer).equals("view-condition")) comp = createmsg(p, msg, spyViewConditionsOutput,viewer);
             if (comp == null) continue;
             viewer.sendMessage(comp);
+            String msgFormatted = comp.toFlatText();
             chatPlaceholder.updateValue(viewer,p,msgFormatted);
 
             TAB.getInstance().getCPUManager().runTaskLater(msgPlaceholderStay,this,"update %rel_chat% for "+viewer.getName()+" viewing "+p.getName(),()->{
