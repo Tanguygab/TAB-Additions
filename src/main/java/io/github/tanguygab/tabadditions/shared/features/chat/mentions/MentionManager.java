@@ -2,9 +2,9 @@ package io.github.tanguygab.tabadditions.shared.features.chat.mentions;
 
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.Manager;
-import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,9 +32,9 @@ public class MentionManager extends Manager {
         this.toggleMentionCmd = toggleMentionCmd;
         PlaceholderManager pm = tab.getPlaceholderManager();
         if (toggleMentionCmd) {
-            toggleMention.addAll(tab.getPlayerCache().getStringList("togglemention", new ArrayList<>()));
-            pm.registerPlayerPlaceholder("%chat-mentions%",1000,p->hasMentionsToggled(p) ? "Off" : "On");
-            instance.getPlatform().registerCommand("togglemention",true);
+            toggleMention.addAll(plugin.getPlayerData().getStringList("togglemention", new ArrayList<>()));
+            pm.registerPlayerPlaceholder("%chat-mentions%",1000,p->hasMentionsToggled((TabPlayer) p) ? "Off" : "On");
+            plugin.getPlatform().registerCommand("togglemention",true);
         }
         this.outputForEveryone = outputForEveryone;
         if (customMentions != null)
@@ -43,7 +43,7 @@ public class MentionManager extends Manager {
 
     public void unload() {
         if (toggleMentionCmd)
-            tab.getPlayerCache().set("togglemention", toggleMention);
+            plugin.getPlayerData().set("togglemention", toggleMention);
     }
 
     public boolean isToggleMentionCmd() {
@@ -55,7 +55,7 @@ public class MentionManager extends Manager {
     }
 
     public boolean isMentioned(String msg, TabPlayer sender, TabPlayer viewer) {
-        String input = instance.parsePlaceholders(this.input,viewer);
+        String input = plugin.parsePlaceholders(this.input,viewer);
         if (input.equals("") || viewer == null) return false;
         if (!sender.hasPermission("tabadditions.chat.bypass.togglemention") && hasMentionsToggled(viewer)) return false;
         if (!sender.hasPermission("tabadditions.chat.bypass.ignore") && cm.cmds.isIgnored(sender,viewer)) return false;
@@ -70,7 +70,7 @@ public class MentionManager extends Manager {
         for (TabPlayer p : tab.getOnlinePlayers()) {
             CustomMention mention = mentions.stream().findFirst().orElse(null);
             if (mention != null && mention.isConditionMet(p) && mention.getSound() != null)
-                instance.getPlatform().sendSound(p,mention.getSound());
+                plugin.getPlatform().sendSound(p,mention.getSound());
         }
         for (CustomMention mention : mentions) msg = mention.replace(msg);
 
@@ -85,10 +85,10 @@ public class MentionManager extends Manager {
             }
         else if (isMentioned(msg,sender,viewer)) {
                     check = true;
-                    instance.getPlatform().sendSound(viewer,sound);
+                    plugin.getPlatform().sendSound(viewer,sound);
                 }
         return !check ? msg
-                : msg.replaceAll("(?i)"+ Pattern.quote(instance.parsePlaceholders(input,viewer)),
-                    Matcher.quoteReplacement(hoverclick+instance.parsePlaceholders(cm.removeSpaces(this.output),sender,viewer)+"{"));
+                : msg.replaceAll("(?i)"+ Pattern.quote(plugin.parsePlaceholders(input,viewer)),
+                    Matcher.quoteReplacement(hoverclick+ plugin.parsePlaceholders(cm.removeSpaces(this.output),sender,viewer)+"{"));
     }
 }

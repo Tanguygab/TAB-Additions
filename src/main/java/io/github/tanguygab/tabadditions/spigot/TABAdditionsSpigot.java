@@ -2,7 +2,7 @@ package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
-import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.shared.TAB;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -22,7 +22,7 @@ public class TABAdditionsSpigot extends JavaPlugin implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void onChat(AsyncPlayerChatEvent e) {
-        TabAPI tab = TabAPI.getInstance();
+        TAB tab = TAB.getInstance();
         if (!tab.getFeatureManager().isFeatureEnabled("Chat")) return;
         e.setCancelled(true);
         ((ChatManager)tab.getFeatureManager().getFeature("Chat")).onChat(tab.getPlayer(e.getPlayer().getUniqueId()),e.getMessage());

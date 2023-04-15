@@ -1,6 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features.chat.emojis;
 
-import me.neznamy.tab.api.TabPlayer;
+
+import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.HashMap;
 import java.util.Map;

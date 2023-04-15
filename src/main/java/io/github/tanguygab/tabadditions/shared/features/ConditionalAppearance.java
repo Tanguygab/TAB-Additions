@@ -2,27 +2,29 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.Property;
-import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.feature.*;
-import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.Property;
+import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import me.neznamy.tab.shared.platform.TabPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class ConditionalAppearance extends TabFeature implements Refreshable, Loadable, UnLoadable, JoinListener {
+public class ConditionalAppearance extends TabFeature implements Refreshable, UnLoadable, JoinListener {
 
-    private final TabAPI tab;
+    private final TAB tab;
     private final Plugin plugin;
     private final boolean def;
 
     public ConditionalAppearance() {
-        tab = TabAPI.getInstance();
+        tab = TAB.getInstance();
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
-        for (TabPlayer p : tab.getOnlinePlayers()) p.loadPropertyFromConfig(this,"appearance-condition");
         def = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("appearance-nametags.show-by-default",true);
-        load();
+        for (TabPlayer p : tab.getOnlinePlayers()) {
+            p.loadPropertyFromConfig(this,"appearance-condition");
+            refresh(p,true);
+        }
     }
 
     @Override
@@ -41,11 +43,6 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Lo
             refresh(p(p),all);
             refresh(all,p(p));
         }
-    }
-
-    @Override
-    public void load() {
-        for (TabPlayer p : tab.getOnlinePlayers()) refresh(p,true);
     }
 
     @Override
@@ -89,18 +86,12 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Lo
     }
 
     private void show(Player p, Player target) {
-        try {
-            p.showPlayer(plugin, target);
-        } catch (NoSuchMethodError e) {
-            p.showPlayer(target);
-        }
+        try {p.showPlayer(plugin, target);}
+        catch (NoSuchMethodError e) {p.showPlayer(target);}
     }
     private void hide(Player p, Player target) {
-        try {
-            p.hidePlayer(plugin, target);
-        } catch (NoSuchMethodError e) {
-            p.hidePlayer(target);
-        }
+        try {p.hidePlayer(plugin, target);}
+        catch (NoSuchMethodError e) {p.hidePlayer(target);}
     }
 
 }

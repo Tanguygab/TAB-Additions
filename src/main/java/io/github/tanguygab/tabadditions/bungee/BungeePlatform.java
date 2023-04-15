@@ -6,7 +6,6 @@ import com.google.common.io.ByteStreams;
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.CommandSender;
@@ -18,7 +17,6 @@ import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class BungeePlatform extends Platform {

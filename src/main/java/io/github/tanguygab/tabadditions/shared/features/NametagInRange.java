@@ -1,41 +1,19 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.feature.*;
+import me.neznamy.tab.shared.platform.TabPlayer;
+import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.TAB;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 
-import java.util.concurrent.Future;
+public class NametagInRange extends TabFeature implements JoinListener, UnLoadable {
 
-public class NametagInRange extends TabFeature implements JoinListener, Loadable, UnLoadable {
-
-    private final TabAPI tab;
-    private Future<?> task;
+    private final TAB tab;
 
     public NametagInRange() {
-        tab = TabAPI.getInstance();
-        load();
-    }
-
-    @Override
-    public String getFeatureName() {
-        return "Nametag In Range";
-    }
-
-    @Override
-    public void onJoin(TabPlayer p) {
-        for (TabPlayer p2 : tab.getOnlinePlayers()) {
-            tab.getTeamManager().hideNametag(p,p2);
-            tab.getTeamManager().hideNametag(p2,p);
-        }
-    }
-
-    @Override
-    public void load() {
-        TAB.getInstance().getCPUManager().startRepeatingMeasuredTask(500,this,"handling Nametag In Range",()->{
+        tab = TAB.getInstance();
+        tab.getCPUManager().startRepeatingMeasuredTask(500,this,"handling Nametag In Range",()->{
             int zone = (int) Math.pow(TABAdditions.getInstance().nametagInRange, 2);
             for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 TabPlayer p = tab.getPlayer(player.getUniqueId());
@@ -51,6 +29,19 @@ public class NametagInRange extends TabFeature implements JoinListener, Loadable
                 }
             }
         });
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Nametag In Range";
+    }
+
+    @Override
+    public void onJoin(TabPlayer p) {
+        for (TabPlayer p2 : tab.getOnlinePlayers()) {
+            tab.getTeamManager().hideNametag(p,p2);
+            tab.getTeamManager().hideNametag(p2,p);
+        }
     }
 
     @Override

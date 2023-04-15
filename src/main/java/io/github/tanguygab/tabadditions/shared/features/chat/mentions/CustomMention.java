@@ -1,7 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features.chat.mentions;
 
-import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import me.neznamy.tab.shared.platform.TabPlayer;
 
 public class CustomMention {
 

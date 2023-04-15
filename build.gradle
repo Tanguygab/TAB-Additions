@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'io.github.tanguygab'
-version = '1.7.1'
+version = '1.8.0-SNAPSHOT'
 
 compileJava.options.encoding = 'UTF-8'
 
@@ -54,7 +54,7 @@ dependencies {
     compileOnly 'com.discordsrv:discordsrv:1.25.0'
     compileOnly 'net.essentialsx:EssentialsXDiscord:2.19.4'
     compileOnly 'com.loohp:InteractiveChat:4.2.3.13'
-    compileOnly files('../../dependencies/TAB-3.3.2.jar','../../dependencies/AdvancedBan.jar')
+    compileOnly files('../../dependencies/TAB-4.0.0-SNAPSHOT.jar','../../dependencies/AdvancedBan.jar')
 
 }
 

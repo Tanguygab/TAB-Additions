@@ -2,8 +2,8 @@ package io.github.tanguygab.tabadditions.shared;
 
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiCategory;
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.config.YamlConfigurationFile;
+import me.neznamy.tab.shared.config.YamlConfigurationFile;
+import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.io.File;
 import java.io.IOException;

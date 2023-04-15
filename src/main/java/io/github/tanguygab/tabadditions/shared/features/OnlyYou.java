@@ -1,37 +1,32 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.feature.JoinListener;
-import me.neznamy.tab.api.feature.Loadable;
-import me.neznamy.tab.api.feature.TabFeature;
-import me.neznamy.tab.api.feature.UnLoadable;
+import me.neznamy.tab.shared.platform.TabPlayer;
+import me.neznamy.tab.shared.features.types.JoinListener;
+import me.neznamy.tab.shared.features.types.TabFeature;
+import me.neznamy.tab.shared.features.types.UnLoadable;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class OnlyYou extends TabFeature implements Loadable, UnLoadable, JoinListener {
+public class OnlyYou extends TabFeature implements UnLoadable, JoinListener {
 
     private final Plugin plugin;
 
     public OnlyYou() {
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
-        load();
-    }
 
-    @Override
-    public String getFeatureName() {
-        return "Only You";
-    }
-
-    @Override
-    public void load() {
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
                 if (p != p2)
                     hide(p, p2);
             }
         }
+    }
+
+    @Override
+    public String getFeatureName() {
+        return "Only You";
     }
 
     @Override
@@ -46,7 +41,7 @@ public class OnlyYou extends TabFeature implements Loadable, UnLoadable, JoinLis
 
     @Override
     public void onJoin(TabPlayer tabPlayer) {
-        Player p = Bukkit.getServer().getPlayer(tabPlayer.getUniqueId());
+        Player p = (Player) tabPlayer.getPlayer();
         Bukkit.getServer().getScheduler().runTask(plugin, ()->{
                 for (Player p2 : Bukkit.getServer().getOnlinePlayers())
                     if (p != p2) {

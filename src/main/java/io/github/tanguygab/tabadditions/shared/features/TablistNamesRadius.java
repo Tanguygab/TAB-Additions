@@ -1,17 +1,16 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.feature.JoinListener;
-import me.neznamy.tab.api.feature.Loadable;
-import me.neznamy.tab.api.feature.TabFeature;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.feature.UnLoadable;
+import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.features.types.JoinListener;
+import me.neznamy.tab.shared.features.types.TabFeature;
+import me.neznamy.tab.shared.features.types.UnLoadable;
+import me.neznamy.tab.shared.platform.TabPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class TablistNamesRadius extends TabFeature implements Loadable, UnLoadable, JoinListener {
+public class TablistNamesRadius extends TabFeature implements UnLoadable, JoinListener {
 
     private final Plugin plugin;
     private int task = -1;
@@ -25,16 +24,7 @@ public class TablistNamesRadius extends TabFeature implements Loadable, UnLoadab
                     hide(p,p2);
             }
         }
-        load();
-    }
 
-    @Override
-    public String getFeatureName() {
-        return "Tablist Names Radius";
-    }
-
-    @Override
-    public void load() {
         task = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,() -> {
             int zone = (int) Math.pow(TABAdditions.getInstance().tablistNamesRadius, 2);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
@@ -42,7 +32,7 @@ public class TablistNamesRadius extends TabFeature implements Loadable, UnLoadab
                     if (p != player
                             && p.getWorld().equals(player.getWorld())
                             && player.getLocation().distanceSquared(p.getLocation()) < zone
-                            && !TabAPI.getInstance().getPlayer(p.getUniqueId()).isVanished()
+                            && !TAB.getInstance().getPlayer(p.getUniqueId()).isVanished()
                     ) show(p,player);
                     else if (p != player) hide(p,player);
                 }
@@ -56,8 +46,13 @@ public class TablistNamesRadius extends TabFeature implements Loadable, UnLoadab
                 }
             }
         },0,10);
-
     }
+
+    @Override
+    public String getFeatureName() {
+        return "Tablist Names Radius";
+    }
+
 
     @Override
     public void unload() {
@@ -77,17 +72,11 @@ public class TablistNamesRadius extends TabFeature implements Loadable, UnLoadab
     }
 
     private void show(Player p, Player target) {
-        try {
-            p.showPlayer(plugin, target);
-        } catch (NoSuchMethodError e) {
-            p.showPlayer(target);
-        }
+        try {p.showPlayer(plugin, target);}
+        catch (NoSuchMethodError e) {p.showPlayer(target);}
     }
     private void hide(Player p, Player target) {
-        try {
-            p.hidePlayer(plugin, target);
-        } catch (NoSuchMethodError e) {
-            p.hidePlayer(target);
-        }
+        try {p.hidePlayer(plugin, target);}
+        catch (NoSuchMethodError e) {p.hidePlayer(target);}
     }
 }

@@ -5,24 +5,28 @@ import java.io.IOException;
 import java.util.*;
 
 import io.github.tanguygab.tabadditions.shared.features.*;
+import io.github.tanguygab.tabadditions.shared.features.actionbar.ActionBarManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
-import me.neznamy.tab.api.*;
-import me.neznamy.tab.api.chat.EnumChatFormat;
-import me.neznamy.tab.api.config.ConfigurationFile;
-import me.neznamy.tab.api.config.YamlConfigurationFile;
-import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
-import me.neznamy.tab.api.feature.TabFeature;
-import me.neznamy.tab.api.feature.UnLoadable;
-import me.neznamy.tab.api.placeholder.*;
+import me.neznamy.tab.api.placeholder.Placeholder;
+import me.neznamy.tab.shared.FeatureManager;
+import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.chat.EnumChatFormat;
+import me.neznamy.tab.shared.chat.IChatBaseComponent;
+import me.neznamy.tab.shared.config.ConfigurationFile;
+import me.neznamy.tab.shared.config.YamlConfigurationFile;
 import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
-import me.neznamy.tab.shared.placeholders.TabPlaceholder;
+import me.neznamy.tab.shared.features.types.TabFeature;
+import me.neznamy.tab.shared.features.types.UnLoadable;
+import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
+import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
+import me.neznamy.tab.shared.placeholders.ServerPlaceholderImpl;
+import me.neznamy.tab.shared.platform.TabPlayer;
 import org.bukkit.entity.Player;
 
-import me.neznamy.tab.shared.features.layout.skin.SkinManager;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
 public class TABAdditions {
@@ -31,25 +35,21 @@ public class TABAdditions {
     private final Object plugin;
     private final Platform platform;
     public final File dataFolder;
-    private final TabAPI tab;
+    private final TAB tab;
     public final List<String> features = new ArrayList<>();
     public boolean enabled;
 
     private ConfigurationFile config;
     private ConfigurationFile titleConfig;
-    private ConfigurationFile actionbarConfig;
     private ConfigurationFile chatConfig;
     private TranslationFile translation;
-    private SkinManager skins;
 
     public boolean titlesEnabled;
-    public boolean actionbarsEnabled;
     public boolean chatEnabled;
     public boolean sithideEnabled = false;
     public boolean sneakhideEnabled = false;
     public int nametagInRange = 0;
     public int tablistNamesRadius = 0;
-    public boolean rfpEnabled;
     public boolean onlyyou = false;
     public boolean condNametagsEnabled;
     private boolean condAppearenceEnabled;
@@ -58,7 +58,7 @@ public class TABAdditions {
         this.dataFolder = dataFolder;
     	this.platform = platform;
     	this.plugin = plugin;
-    	tab = TabAPI.getInstance();
+    	tab = TAB.getInstance();
     }
     
     public static void setInstance(TABAdditions instance) {
@@ -77,14 +77,9 @@ public class TABAdditions {
         return plugin;
     }
 
-    public SkinManager getSkins() {
-        return skins;
-    }
-
     public ConfigurationFile getConfig(ConfigType cfg) {
         switch (cfg) {
             case TITLE: return titleConfig;
-            case ACTIONBAR: return actionbarConfig;
             case CHAT: return chatConfig;
             default: return config;
         }
@@ -98,7 +93,7 @@ public class TABAdditions {
         enabled = true;
         loadFiles();
         reload();
-        TabAPI.getInstance().getEventBus().register(TabLoadEvent.class,e->platform.runTask(this::reload));
+        tab.getEventBus().register(TabLoadEvent.class,e->platform.runTask(this::reload));
     }
 
     public void loadFiles() {
@@ -108,14 +103,10 @@ public class TABAdditions {
             else
                 config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
             titleConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("titles.yml"), new File(dataFolder, "titles.yml"));
-            actionbarConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("actionbars.yml"), new File(dataFolder, "actionbars.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
             translation = new TranslationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml"));
-            skins = new SkinManager("texture:f3d5e43de5d4177c4baf2f44161554473a3b0be5430998b5fcd826af943afe3");
 
             titlesEnabled = config.getBoolean("features.titles",false);
-            actionbarsEnabled = config.getBoolean("features.actionbars",false);
-            rfpEnabled = config.getBoolean("features.real-fake-players",false);
             chatEnabled = config.getBoolean("features.chat",false);
             condNametagsEnabled = config.getBoolean("features.conditional-nametags",false);
             if (platform.getType() == PlatformType.SPIGOT) {
@@ -160,8 +151,8 @@ public class TABAdditions {
 
     private void loadFeatures() {
         //ActionBar
-        if (actionbarsEnabled)
-            registerFeature(new ActionBar());
+        if (config.getBoolean("actionbars.enabled",false))
+            registerFeature(new ActionBarManager());
         //Title
         if (titlesEnabled)
             registerFeature(new Title());
@@ -180,62 +171,31 @@ public class TABAdditions {
     }
 
     private void loadPlaceholders() {
-        Set<Object> props = new HashSet<>(Arrays.asList("tabprefix","tabsuffix","customtabname",
-                "tagprefix","tagsuffix","customtagname",
-                "chatprefix","chatsuffix","customchatname",
-                "abovename","belowname","title","actionbar"));
-        ConfigurationFile cfg = tab.getConfig();
-        if (cfg.getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines") != null)
-            props.addAll(cfg.getStringList("scoreboard-teams.unlimited-nametag-mode.dynamic-lines"));
-        if (cfg.getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines") != null)
-            props.addAll(cfg.getConfigurationSection("scoreboard-teams.unlimited-nametag-mode.static-lines").keySet());
-        PlaceholderManager pm = tab.getPlaceholderManager();
-        for (Object prop : props) {
-            pm.registerPlayerPlaceholder("%prop-"+prop+"%", 100,p->{
-                    Property property = p.getProperty(prop+"");
-                    if (property != null)
-                        return property.updateAndGet();
-                    return "";
-            });
-        }
-        String world = platform.getType() == PlatformType.SPIGOT ? "world" : "server";
-        pm.registerPlayerPlaceholder("%cansee"+world+"online%", 1000,p->{
-                int count = 0;
-                for (TabPlayer all : tab.getOnlinePlayers())
-                    if (all.getWorld().equals(p.getWorld()) && ((Player) p.getPlayer()).canSee((Player) all.getPlayer()))
-                        count++;
-                return count+"";
-        });
-        pm.registerPlayerPlaceholder("%cansee"+world+"onlinerfp%",1000,p->{
-                int count = 0;
-                try {count = Integer.parseInt(parsePlaceholders("%cansee"+world+"online%",p));}
-                catch (NumberFormatException ignored) {}
-                return count+"";
-        });
+        PlaceholderManagerImpl pm = tab.getPlaceholderManager();
         platform.registerPlaceholders(pm);
         tab.getEventBus().register(TabPlaceholderRegisterEvent.class,this::onPlaceholderRegister);
     }
 
     private void onPlaceholderRegister(TabPlaceholderRegisterEvent e) {
         String identifier = e.getIdentifier();
-        PlaceholderManager pm = tab.getPlaceholderManager();
+        PlaceholderManagerImpl pm = tab.getPlaceholderManager();
         if (identifier.startsWith("%rel_viewer:")) {
             Placeholder placeholder = pm.getPlaceholder("%" + identifier.substring(12));
             Placeholder viewerPlaceholder = null;
-            if (placeholder instanceof RelationalPlaceholder) {
-                RelationalPlaceholder rel = (RelationalPlaceholder) placeholder;
-                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> rel.getLastValue(target, viewer));
+            if (placeholder instanceof RelationalPlaceholderImpl) {
+                RelationalPlaceholderImpl rel = (RelationalPlaceholderImpl) placeholder;
+                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> rel.getLastValue((TabPlayer) target, (TabPlayer) viewer));
             }
-            if (placeholder instanceof PlayerPlaceholder) {
-                PlayerPlaceholder player = (PlayerPlaceholder) placeholder;
-                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> player.getLastValue(viewer));
+            if (placeholder instanceof PlayerPlaceholderImpl) {
+                PlayerPlaceholderImpl player = (PlayerPlaceholderImpl) placeholder;
+                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> player.getLastValue((TabPlayer) viewer));
             }
             e.setPlaceholder(viewerPlaceholder);
         }
         if (identifier.startsWith("%rel_condition:")) {
             String cond = identifier.substring(15,identifier.length()-1);
             Condition condition = Condition.getCondition(cond);
-            TabPlaceholder placeholder = (TabPlaceholder) pm.registerRelationalPlaceholder(identifier, ((PlaceholderManagerImpl)pm).getDefaultRefresh(), (viewer, target) -> viewer == null ? "" : parsePlaceholders(condition.getText(viewer),target,viewer));
+            Placeholder placeholder = pm.registerRelationalPlaceholder(identifier, pm.getDefaultRefresh(), (viewer, target) -> viewer == null ? "" : parsePlaceholders(condition.getText((TabPlayer) viewer), (TabPlayer) target, (TabPlayer) viewer));
             e.setPlaceholder(placeholder);
         }
     }
@@ -252,9 +212,9 @@ public class TABAdditions {
         for (String pl : list) {
             Placeholder placeholder = tab.getPlaceholderManager().getPlaceholder(pl);
             String output = pl;
-            if (placeholder instanceof PlayerPlaceholder) output = ((PlayerPlaceholder) placeholder).getLastValue(sender);
-            if (placeholder instanceof ServerPlaceholder) output = ((ServerPlaceholder) placeholder).getLastValue();
-            if (placeholder instanceof RelationalPlaceholder) output = viewer == null ? "" : ((RelationalPlaceholder) placeholder).getLastValue(viewer,sender);
+            if (placeholder instanceof PlayerPlaceholderImpl) output = ((PlayerPlaceholderImpl) placeholder).getLastValue(sender);
+            if (placeholder instanceof ServerPlaceholderImpl) output = ((ServerPlaceholderImpl) placeholder).getLastValue();
+            if (placeholder instanceof RelationalPlaceholderImpl) output = viewer == null ? "" : ((RelationalPlaceholderImpl) placeholder).getLastValue(viewer, sender);
             str = str.replace(pl, output);
         }
         return EnumChatFormat.color(str);
@@ -276,7 +236,7 @@ public class TABAdditions {
                 } catch (NumberFormatException ignored) {}
             } else {
                 Condition condition = Condition.getCondition(cond);
-                if (condition != null && !condition.isMet(checkForViewer ? viewer : sender))
+                if (condition != null && !condition.isMet((me.neznamy.tab.shared.platform.TabPlayer) (checkForViewer ? viewer : sender)))
                     return false;
             }
         }
@@ -317,5 +277,18 @@ public class TABAdditions {
                 return p;
         }
         return null;
+    }
+
+    public ConfigurationFile getPlayerData() {
+        return tab.getConfiguration().getPlayerDataFile();
+    }
+
+    public String toFlatText(IChatBaseComponent component) {
+        StringBuilder builder = new StringBuilder();
+        if (component.getModifier().getColor() != null) builder.append("#").append(component.getModifier().getColor().getHexCode());
+        builder.append(component.getModifier().getMagicCodes());
+        if (component.getText() != null) builder.append(component.getText());
+        component.getExtra().forEach(child->builder.append(toFlatText(child)));
+        return builder.toString();
     }
 }

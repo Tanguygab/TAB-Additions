@@ -8,15 +8,15 @@ import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.mentions.MentionManager;
 import io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot;
-import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.chat.ChatClickable;
-import me.neznamy.tab.api.chat.EnumChatFormat;
-import me.neznamy.tab.api.chat.IChatBaseComponent;
-import me.neznamy.tab.api.chat.TextColor;
-import me.neznamy.tab.api.chat.rgb.RGBUtils;
-import me.neznamy.tab.api.config.ConfigurationFile;
-import me.neznamy.tab.api.feature.*;
+import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
+import me.neznamy.tab.shared.platform.TabPlayer;
+import me.neznamy.tab.shared.chat.ChatClickable;
+import me.neznamy.tab.shared.chat.EnumChatFormat;
+import me.neznamy.tab.shared.chat.IChatBaseComponent;
+import me.neznamy.tab.shared.chat.TextColor;
+import me.neznamy.tab.shared.chat.rgb.RGBUtils;
+import me.neznamy.tab.shared.config.ConfigurationFile;
+import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.api.placeholder.RelationalPlaceholder;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
@@ -30,10 +30,10 @@ import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ChatManager extends TabFeature implements JoinListener, CommandListener, Loadable, UnLoadable, Refreshable {
+public class ChatManager extends TabFeature implements JoinListener, CommandListener, Loadable, UnLoadable {
 
-    private TABAdditions plinstance;
-    private final TabAPI tab;
+    private TABAdditions plugin;
+    private final TAB tab;
     private EmojiManager emojiManager;
     private MsgManager msgManager;
     private MentionManager mentionManager;
@@ -44,7 +44,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
     private final Pattern rgbPattern = Pattern.compile("#[0-9a-fA-F]{6}");
     public int msgPlaceholderStay;
 
-    public RelationalPlaceholder chatPlaceholder;
+    public RelationalPlaceholderImpl chatPlaceholder;
 
     private final Pattern chatPartPattern = Pattern.compile("\\{(?<text>[^}|]+)((\\|\\|(?<hover>[^}|]+)?)(\\|\\|(?<click>[^}|]+))?)?}");
 
@@ -90,7 +90,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
     public String discordFormat;
 
     public ChatManager() {
-        tab = TabAPI.getInstance();
+        tab = TAB.getInstance();
         load();
     }
 
@@ -99,16 +99,11 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         return "Chat";
     }
 
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aChat&r";
-    }
-
     public ChatFormat getFormat(TabPlayer p) {
         String format;
         if (defformats.containsKey(p))
             format = defformats.get(p);
-        else format = plinstance.getConfig(ConfigType.CHAT).getString("default-format","default");
+        else format = plugin.getConfig(ConfigType.CHAT).getString("default-format","default");
         if (format.equalsIgnoreCase("")) return defaultFormat;
 
         ChatFormat f = formats.get(format);
@@ -122,8 +117,8 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
 
     @Override
     public void load() {
-        plinstance = TABAdditions.getInstance();
-        ConfigurationFile config = plinstance.getConfig(ConfigType.CHAT);
+        plugin = TABAdditions.getInstance();
+        ConfigurationFile config = plugin.getConfig(ConfigType.CHAT);
 
         defaultFormat = new ChatFormat("default", null, null, null, null, "{%prop-chatprefix% %prop-customchatname% %prop-chatsuffix%&7» &r%msg%||%time%}");
         Map<String,Map<String,String>> chatFormats = config.getConfigurationSection("chat-formats");
@@ -180,8 +175,8 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
 
         spySave = config.getBoolean("socialspy.keep-after-reload",true);
         if (cmds.socialSpyEnabled && spySave) {
-            spies.addAll(tab.getPlayerCache().getStringList("socialspy", new ArrayList<>()));
-            tab.getPlayerCache().set("socialspy",null);
+            spies.addAll(plugin.getPlayerData().getStringList("socialspy", new ArrayList<>()));
+            plugin.getPlayerData().set("socialspy",null);
         }
         spyChannelsEnabled = config.getBoolean("socialspy.channels.spy",true);
         spyChannelsOutput = config.getString("socialspy.channels.output","{SocialSpy-Channel: %prop-customchatname% &8» %msg%||Channel: %channel%\n%time%}");
@@ -207,8 +202,8 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
 
 
         if (cmds.toggleChatEnabled) {
-            toggleChat.addAll(tab.getPlayerCache().getStringList("togglechat", new ArrayList<>()));
-            tab.getPlayerCache().set("togglechat",null);
+            toggleChat.addAll(plugin.getPlayerData().getStringList("togglechat", new ArrayList<>()));
+            plugin.getPlayerData().set("togglechat",null);
         }
 
         commands = new HashMap<>();
@@ -217,7 +212,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
 
 
 
-        chatPlaceholder = TabAPI.getInstance().getPlaceholderManager().registerRelationalPlaceholder("%rel_chat%",-1,(viewer,target)->"");
+        chatPlaceholder = (RelationalPlaceholderImpl) tab.getPlaceholderManager().registerRelationalPlaceholder("%rel_chat%",-1,(viewer, target)->"");
 
 
         for (TabPlayer p : tab.getOnlinePlayers()) onJoin(p);
@@ -240,17 +235,18 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
     public void unload() {
         if (mentionManager != null) mentionManager.unload();
         if (emojiManager != null) emojiManager.unload();
-        if (cmds.socialSpyEnabled && spySave) tab.getPlayerCache().set("socialspy", spies);
-        if (cmds.toggleChatEnabled) tab.getPlayerCache().set("togglechat", toggleChat);
-        if (cmds.ignoreEnabled) tab.getPlayerCache().set("msg-ignore", cmds.ignored);
+        ConfigurationFile data = plugin.getPlayerData();
+        if (cmds.socialSpyEnabled && spySave) data.set("socialspy", spies);
+        if (cmds.toggleChatEnabled) data.set("togglechat", toggleChat);
+        if (cmds.ignoreEnabled) data.set("msg-ignore", cmds.ignored);
     }
 
     public void onChat(TabPlayer p, String msg) {
-        if (plinstance.isMuted(p)) return;
+        if (plugin.isMuted(p)) return;
         if (cooldown.containsKey(p)) {
             long time = ChronoUnit.SECONDS.between(cooldown.get(p),LocalDateTime.now());
             if (time < cooldownTime) {
-                p.sendMessage(plinstance.getMsgs().getCooldown(cooldownTime-time), true);
+                p.sendMessage(plugin.getMsgs().getCooldown(cooldownTime-time), true);
                 return;
             }
             cooldown.remove(p);
@@ -278,11 +274,11 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
             else if (isSpying(p,viewer).equals("view-condition")) comp = createmsg(p, msg, spyViewConditionsOutput,viewer);
             if (comp == null) continue;
             viewer.sendMessage(comp);
-            String msgFormatted = comp.toFlatText();
+            String msgFormatted = plugin.toFlatText(comp);
             chatPlaceholder.updateValue(viewer,p,msgFormatted);
 
             TAB.getInstance().getCPUManager().runTaskLater(msgPlaceholderStay,this,"update %rel_chat% for "+viewer.getName()+" viewing "+p.getName(),()->{
-                if ((chatPlaceholder).getLastValue(viewer,p).equals(msgFormatted))
+                if (chatPlaceholder.getLastValue(viewer,p).equals(msgFormatted))
                     chatPlaceholder.updateValue(viewer,p,"");
             });
         }
@@ -290,9 +286,9 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         if (discordEnabled) {
             String msgToDiscord = createmsg(p,msg,discordFormat,null).toLegacyText();
             if (canSee(p,null,chatFormat))
-                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),false,discordPlugin);
+                plugin.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),false,discordPlugin);
             else if (getFormat(p).isViewConditionMet(p,null))
-                plinstance.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),true,discordPlugin);
+                plugin.getPlatform().sendToDiscord(p.getUniqueId(),msgToDiscord,chatFormat.getChannel(),true,discordPlugin);
         }
     }
 
@@ -312,7 +308,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
 
         String format = removeSpaces(chatFormat);
 
-        if (plinstance.getPlatform().isPluginEnabled("InteractiveChat"))
+        if (plugin.getPlatform().isPluginEnabled("InteractiveChat"))
             try {msg = InteractiveChatAPI.markSender(msg,p.getUniqueId());}
             catch (IllegalStateException ignored) {}
 
@@ -321,7 +317,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
     }
 
     public IChatBaseComponent compcheck(String msg, String text, TabPlayer p, TabPlayer viewer) {
-        text = plinstance.parsePlaceholders(text,p,viewer).replace("%channel%",getFormat(p).getChannel());
+        text = plugin.parsePlaceholders(text,p,viewer).replace("%channel%",getFormat(p).getChannel());
         if (!text.startsWith("{")) text = "{"+text;
         if (!text.endsWith("}")) text = text+"}";
         text = textcheck(text,p,viewer,msg);
@@ -403,7 +399,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
             for (String interaction : customInteractions.keySet()) {
                 if (!customInteractions.get(interaction).containsKey("permission") || ((boolean) customInteractions.get(interaction).get("permission") && p.hasPermission("tabadditions.chat.interaction." + interaction))) {
                     if (!customInteractions.get(interaction).get("input").equals(""))
-                        txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plinstance.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer))+"{");
+                        txt = txt.replace(customInteractions.get(interaction).get("input")+"", hoverclick+removeSpaces(plugin.parsePlaceholders(customInteractions.get(interaction).get("output")+"",p,viewer))+"{");
                 }
             }
             text = text.replace(txtold,txt);
@@ -414,16 +410,16 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         if (hover == null || hover.equals("")) return comp;
 
         if (hover.startsWith("material:")) {
-            if (plinstance.getPlatform().getType() != PlatformType.SPIGOT) return comp;
+            if (plugin.getPlatform().getType() != PlatformType.SPIGOT) return comp;
             Material mat = Material.getMaterial(hover.replace("material:", ""));
             if (mat == null) return comp;
             ItemStack item = new ItemStack(mat);
-            comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
+            comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plugin.getPlugin()).itemStack(item));
             return comp;
         }
 
         if (hover.startsWith("item:")) {
-            if (plinstance.getPlatform().getType() != PlatformType.SPIGOT) return comp;
+            if (plugin.getPlatform().getType() != PlatformType.SPIGOT) return comp;
             ItemStack item = (ItemStack) getItem(hover,p);
 
             String itemtxt;
@@ -434,11 +430,11 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
                 else itemtxt = itemOutputSingle.replace("%name%",name);
             } else itemtxt = itemOutputAir;
 
-            if (comp.toFlatText().replaceAll("^\\s+","").equals("[item]")) {
+            if (plugin.toFlatText(comp).replaceAll("^\\s+","").equals("[item]")) {
                 String color = lastcolor == null ? "" : "#"+lastcolor.getHexCode();
-                comp = createComponent(color+ plinstance.parsePlaceholders(itemtxt,p,viewer)+color);
+                comp = createComponent(color+ plugin.parsePlaceholders(itemtxt,p,viewer)+color);
             }
-            comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plinstance.getPlugin()).itemStack(item));
+            comp.getModifier().onHoverShowItem(((TABAdditionsSpigot) plugin.getPlugin()).itemStack(item));
             return comp;
         }
         comp.getModifier().onHoverShowText(createComponent(hover));
@@ -617,21 +613,14 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
 
     @Override
     public void onJoin(TabPlayer p) {
-        p.loadPropertyFromConfig(this,"chatprefix");
-        p.loadPropertyFromConfig(this,"customchatname",p.getName());
-        p.loadPropertyFromConfig(this,"chatsuffix");
-
-        if (plinstance.getPlatform().supportsChatSuggestions() && emojiManager != null && emojiManager.isAutoCompleteEnabled())
+        if (plugin.getPlatform().supportsChatSuggestions() && emojiManager != null && emojiManager.isAutoCompleteEnabled())
             emojiManager.loadAutoComplete(p);
     }
 
     @Override
-    public void refresh(TabPlayer tabPlayer, boolean b) {}
-
-    @Override
     public boolean onCommand(TabPlayer p, String msg) {
         msg = msg.replaceFirst("/","");
-        TranslationFile translation = plinstance.getMsgs();
+        TranslationFile translation = plugin.getMsgs();
 
         FormatCommand cmd = commands.get(msg);
         if (cmd == null) return cmds.execute(p,msg);

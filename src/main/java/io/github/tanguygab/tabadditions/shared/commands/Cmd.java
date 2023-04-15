@@ -2,9 +2,8 @@ package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.ActionBar;
 import io.github.tanguygab.tabadditions.shared.features.Title;
-import me.neznamy.tab.api.TabAPI;
+import me.neznamy.tab.shared.TAB;
 
 import java.util.*;
 
@@ -18,20 +17,6 @@ public class Cmd {
         else
             switch (args[0].toLowerCase()) {
 
-                case "actionbar": {
-                    if (!TABAdditions.getInstance().actionbarsEnabled)
-                        instance.sendMessage(name,"&cActionbar feature is not enabled, therefore this command cannot be used");
-                    else if (args.length < 2)
-                        instance.sendMessage(name,"&cYou have to provide an actionbar!");
-                    else {
-                        Map<String,String> section = TABAdditions.getInstance().getConfig(ConfigType.ACTIONBAR).getConfigurationSection("bars");
-                        if (!section.containsKey(args[1]) && !args[1].startsWith("custom:"))
-                            instance.sendMessage(name,"&cThis actionbar doesn't exist!");
-                        else
-                            new ActionBarCmd(name, args, args[1]);
-                    }
-                    break;
-                }
                 case "title": {
                     if (!TABAdditions.getInstance().titlesEnabled)
                         instance.sendMessage(name,"&cTitle feature is not enabled, therefore this command cannot be used");
@@ -65,26 +50,17 @@ public class Cmd {
     }
 
     public static List<String> getTabComplete(String[] args) {
-        TabAPI tab = TabAPI.getInstance();
         if (args.length == 1)
-            return new ArrayList<>(Arrays.asList("help","actionbar","title","tags","fp"));
+            return new ArrayList<>(Arrays.asList("help","title","tags","fp"));
         if (args.length >= 2) {
             switch (args[0]) {
-                case "actionbar":
-                    ActionBar actionbar = (ActionBar) tab.getFeatureManager().getFeature("ActionBar");
-                    if (args.length == 2 && actionbar != null) {
-                        List<String> list = new ArrayList<>(actionbar.getLists());
-                        list.add("custom:<text>");
-                        return list;
-                    }
-                    break;
                 case "tags": {
                     if (args.length == 2)
                         return new ArrayList<>(Arrays.asList("hide","show","toggle"));
                     break;
                 }
                 case "title": {
-                    Title title = (Title) tab.getFeatureManager().getFeature("Title");
+                    Title title = TAB.getInstance().getFeatureManager().getFeature("Title");
                     if (args.length == 2 && title != null) {
                         List<String> list = new ArrayList<>(title.getLists());
                         list.add("custom:<title>||<subtitle>||<fadein>||<stay>||<fadeout>");

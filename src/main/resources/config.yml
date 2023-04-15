@@ -1,6 +1,5 @@
 features:
   titles: false
-  actionbars: false
   chat: false
   real-fake-players: false
   only-you: false
@@ -16,3 +15,12 @@ conditional-nametags:
 appearance-nametags:
   show-by-default: true
 
+actionbars:
+  enabled: true
+  /toggleactionbar: true
+  bars:
+    staff:
+      condition: "permission:tab.staff"
+      text: "&aEpic &bActionbar &cfor &depic &epeople&f!"
+    welcome:
+      text: "&2Welcome &a%player%&2!"

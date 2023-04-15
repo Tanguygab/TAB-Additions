@@ -1,11 +1,9 @@
 package io.github.tanguygab.tabadditions.shared;
 
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.chat.IChatBaseComponent;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public abstract class Platform {

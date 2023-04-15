@@ -4,9 +4,10 @@ import github.scarsz.discordsrv.DiscordSRV;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.*;
 
+import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import me.neznamy.tab.platforms.bukkit.BukkitTabPlayer;
 import net.essentialsx.api.v2.services.discord.DiscordService;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -67,10 +68,22 @@ public class SpigotPlatform extends Platform {
 	@Override
 	public void registerPlaceholders(PlaceholderManager pm) {
 		pm.registerRelationalPlaceholder("%rel_distance%",1000,(viewer, target) -> {
-			if (!viewer.getWorld().equals(target.getWorld())) return "-1";
-			Location vLoc = ((Player)viewer.getPlayer()).getLocation();
-			Location tLoc = ((Player)target.getPlayer()).getLocation();
+			Player viewer0 = (Player) viewer.getPlayer();
+			Player target0 = (Player) target.getPlayer();
+			if (!viewer0.getWorld().equals(target0.getWorld())) return "-1";
+			Location vLoc = viewer0.getLocation();
+			Location tLoc = target0.getLocation();
 			return vLoc.distanceSquared(tLoc);
+		});
+		pm.registerPlayerPlaceholder("%canseeworldonline%", 1000,viewer->{
+			int count = 0;
+			Player viewer0 = (Player) viewer.getPlayer();
+			for (TabPlayer all : TabAPI.getInstance().getOnlinePlayers()) {
+				Player all0 = (Player) all.getPlayer();
+				if (viewer0.getWorld().equals(all0.getWorld()) && viewer0.canSee(all0))
+					count++;
+			}
+			return count;
 		});
 	}
 
@@ -163,7 +176,7 @@ public class SpigotPlatform extends Platform {
 		try {
 			Object addAction = actionEnum.getEnumConstants()[0];
 			Object packet = chatCompleteConstructor.newInstance(addAction,emojis);
-			p.sendPacket(packet);
+			((BukkitTabPlayer)p).sendPacket(packet);
 		} catch (Exception e) {e.printStackTrace();}
 	}
 	@Override
@@ -171,7 +184,7 @@ public class SpigotPlatform extends Platform {
 		try {
 			Object removeAction = actionEnum.getEnumConstants()[1];
 			Object packet = chatCompleteConstructor.newInstance(removeAction,emojis);
-			p.sendPacket(packet);
+			((BukkitTabPlayer)p).sendPacket(packet);
 		} catch (Exception e) {e.printStackTrace();}
 	}
 	@Override

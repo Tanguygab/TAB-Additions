@@ -1,8 +1,8 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
-import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -35,13 +35,13 @@ public class MsgManager extends Manager {
         this.replyCmd = replyCmd;
         this.saveLastSenderForReply = saveLastSenderForReply;
 
-        Platform platform = instance.getPlatform();
+        Platform platform = plugin.getPlatform();
         platform.registerCommand("msg",true,aliases.toArray(new String[]{}));
         platform.registerCommand("reply",replyCmd,"r");
         platform.registerCommand("togglemsg",toggleMsgCmd);
 
         PlaceholderManager pm = tab.getPlaceholderManager();
-        pm.registerPlayerPlaceholder("%chat-messages%",1000,p->tab.getPlayerCache().getStringList("togglemsg").contains(p.getName().toLowerCase()) ? "Off" : "On");
+        pm.registerPlayerPlaceholder("%chat-messages%",1000,p->plugin.getPlayerData().getStringList("togglemsg").contains(p.getName().toLowerCase()) ? "Off" : "On");
     }
 
     public void setCooldown(TabPlayer p) {

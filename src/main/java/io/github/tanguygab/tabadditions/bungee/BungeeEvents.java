@@ -6,9 +6,9 @@ import com.google.common.io.ByteStreams;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
-import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.Property;
+import me.neznamy.tab.shared.Property;
+import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.platform.TabPlayer;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.event.ChatEvent;
 import net.md_5.bungee.api.event.PluginMessageEvent;
@@ -22,7 +22,7 @@ public class BungeeEvents implements Listener {
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onChat(ChatEvent e) {
         if (e.isCommand() || e.isCancelled()) return;
-        TabAPI tab = TabAPI.getInstance();
+        TAB tab = TAB.getInstance();
         if (!tab.getFeatureManager().isFeatureEnabled("Chat")) return;
         if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("chat-from-bukkit-bridge",false))
             return;
@@ -35,7 +35,7 @@ public class BungeeEvents implements Listener {
         if (!e.getTag().equalsIgnoreCase("tabadditions:channel")) return;
         ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());
         String subChannel = in.readUTF();
-        TabAPI tab = TabAPI.getInstance();
+        TAB tab = TAB.getInstance();
         TabPlayer p = tab.getPlayer(((ProxiedPlayer) e.getReceiver()).getUniqueId());
         if (subChannel.equalsIgnoreCase("Chat")) {
             String msg = in.readUTF();

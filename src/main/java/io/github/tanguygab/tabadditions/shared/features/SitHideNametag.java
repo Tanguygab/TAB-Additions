@@ -1,12 +1,11 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.feature.Loadable;
-import me.neznamy.tab.api.feature.TabFeature;
-import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.feature.UnLoadable;
+import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.team.TeamManager;
+import me.neznamy.tab.shared.features.types.TabFeature;
+import me.neznamy.tab.shared.features.types.UnLoadable;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
@@ -18,12 +17,15 @@ import org.spigotmc.event.entity.EntityMountEvent;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SitHideNametag extends TabFeature implements Listener, Loadable, UnLoadable {
+public class SitHideNametag extends TabFeature implements Listener, UnLoadable {
 
+    private final TabAPI tab;
     private final Map<TabPlayer, Boolean> tag = new HashMap<>();
 
     public SitHideNametag() {
-        load();
+        tab = TabAPI.getInstance();
+        Plugin plugin = (Plugin) TABAdditions.getInstance().getPlugin();
+        plugin.getServer().getScheduler().runTask(plugin,()->plugin.getServer().getPluginManager().registerEvents(this,plugin));
     }
 
     @Override
@@ -31,18 +33,12 @@ public class SitHideNametag extends TabFeature implements Listener, Loadable, Un
         return "Site Hide Nametag";
     }
 
-    @Override
-    public void load() {
-        Plugin plugin = (Plugin) TABAdditions.getInstance().getPlugin();
-        plugin.getServer().getScheduler().runTask(plugin,()->plugin.getServer().getPluginManager().registerEvents(this,plugin));
-    }
-
     @EventHandler
     public void onMount(EntityMountEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
-        TabPlayer p = TabAPI.getInstance().getPlayer(e.getEntity().getUniqueId());
+        TabPlayer p = tab.getPlayer(e.getEntity().getUniqueId());
         if (p == null) return;
-        TeamManager tm = TabAPI.getInstance().getTeamManager();
+        TeamManager tm = tab.getTeamManager();
         tag.put(p, tm.hasHiddenNametag(p));
         tm.hideNametag(p);
     }
@@ -50,10 +46,10 @@ public class SitHideNametag extends TabFeature implements Listener, Loadable, Un
     @EventHandler
     public void onDismount(EntityDismountEvent e) {
         if (!(e.getEntity() instanceof Player)) return;
-        TabPlayer p = TabAPI.getInstance().getPlayer(e.getEntity().getUniqueId());
+        TabPlayer p = tab.getPlayer(e.getEntity().getUniqueId());
         if (p == null) return;
         if (tag.containsKey(p) && !tag.get(p))
-            TabAPI.getInstance().getTeamManager().showNametag(p);
+            tab.getTeamManager().showNametag(p);
     }
 
     @Override

@@ -3,8 +3,8 @@ package io.github.tanguygab.tabadditions.shared.features.chat.emojis;
 import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.Manager;
-import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -32,26 +32,26 @@ public class EmojiManager extends Manager {
             emojiCategories.put(category,new EmojiCategory(category, emojisMap,emojis.get(category).getOrDefault("output","")+""));
         }
         PlaceholderManager pm = tab.getPlaceholderManager();
-        Platform platform = instance.getPlatform();
+        Platform platform = plugin.getPlatform();
 
         this.emojisCmd = emojisCmd;
         if (emojisCmd) platform.registerCommand("emojis",true);
 
         this.toggleEmojiCmd = toggleEmojiCmd;
         if (toggleEmojiCmd) {
-            toggleEmoji.addAll(tab.getPlayerCache().getStringList("toggleemoji", new ArrayList<>()));
+            toggleEmoji.addAll(plugin.getPlayerData().getStringList("toggleemoji", new ArrayList<>()));
             platform.registerCommand("toggleemoji", true);
-            pm.registerPlayerPlaceholder("%chat-emojis%",1000,p->hasEmojisToggled(p) ? "Off" : "On");
+            pm.registerPlayerPlaceholder("%chat-emojis%",1000,p->hasEmojisToggled((TabPlayer) p) ? "Off" : "On");
         }
 
 
         pm.registerServerPlaceholder("%chat-emoji-total%",-1, ()-> totalEmojiCount +"");
-        pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->ownedEmojis(p)+"");
+        pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->ownedEmojis((TabPlayer) p)+"");
     }
 
     public void unload() {
         for (TabPlayer p : tab.getOnlinePlayers()) unloadAutoComplete(p);
-        if (toggleEmojiCmd) tab.getPlayerCache().set("toggleemoji",toggleEmoji);
+        if (toggleEmojiCmd) plugin.getPlayerData().set("toggleemoji",toggleEmoji);
     }
 
     public String process(TabPlayer p, String msg, String hoverclick) {
@@ -75,7 +75,7 @@ public class EmojiManager extends Manager {
                 int counted = 0;
                 String output1 = getOutput(category);
                 output1 = output1.replace("%emojiraw%", emoji).replace("%emoji%", list.get(emoji));
-                String output = hoverclick + instance.parsePlaceholders(cm.removeSpaces(output1),p) + "{";
+                String output = hoverclick + plugin.parsePlaceholders(cm.removeSpaces(output1),p) + "{";
                 if (list2.isEmpty()) {
                     for (int i = 0; i < count; i++) msg+=output;
                     return msg;
@@ -131,11 +131,11 @@ public class EmojiManager extends Manager {
                     list.add(emoji);
         }
         emojisAutoCompleteList.put(p,list);
-        instance.getPlatform().addToChatComplete(p,list);
+        plugin.getPlatform().addToChatComplete(p,list);
     }
     public void unloadAutoComplete(TabPlayer p) {
         if (emojisAutoCompleteList.containsKey(p))
-            instance.getPlatform().removeFromChatComplete(p, emojisAutoCompleteList.get(p));
+            plugin.getPlatform().removeFromChatComplete(p, emojisAutoCompleteList.get(p));
     }
 
     public boolean isEmojisCmdEnabled() {

@@ -3,18 +3,25 @@ package io.github.tanguygab.tabadditions.shared.features;
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
-import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.feature.*;
-import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.features.types.*;
+import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Title extends TabFeature implements Loadable, UnLoadable, JoinListener, CommandListener, Refreshable {
+public class Title extends TabFeature implements UnLoadable, JoinListener, CommandListener, Refreshable {
+
+    private final TABAdditions plugin;
+    private final TAB tab;
 
     public Title() {
-        load();
+        this.plugin = TABAdditions.getInstance();
+        this.tab = TAB.getInstance();
+        boolean toggleEnabled = plugin.getConfig(ConfigType.TITLE).getBoolean("toggletitle",true);
+        plugin.getPlatform().registerCommand("toggletitle",toggleEnabled);
+        if (toggleEnabled) toggleTitle.addAll(plugin.getPlayerData().getStringList("toggletitle", new ArrayList<>()));
     }
 
     @Override
@@ -28,20 +35,11 @@ public class Title extends TabFeature implements Loadable, UnLoadable, JoinListe
 
     public List<String> toggleTitle = new ArrayList<>();
 
-    @Override
-    public void load() {
-        boolean toggleEnabled = TABAdditions.getInstance().getConfig(ConfigType.TITLE).getBoolean("toggletitle",true);
-        TABAdditions.getInstance().getPlatform().registerCommand("toggletitle",toggleEnabled);
-        if (toggleEnabled) {
-            toggleTitle.addAll(TabAPI.getInstance().getPlayerCache().getStringList("toggletitle", new ArrayList<>()));
-            TabAPI.getInstance().getPlayerCache().set("toggletitle",null);
-        }
-    }
 
     @Override
     public void unload() {
-        if (TABAdditions.getInstance().getConfig(ConfigType.TITLE).getBoolean("toggletitle",true))
-            TabAPI.getInstance().getPlayerCache().set("toggletitle", toggleTitle);
+        if (plugin.getConfig(ConfigType.TITLE).getBoolean("toggletitle",true))
+            plugin.getPlayerData().set("toggletitle", toggleTitle);
     }
 
     public void sendTitle(List<Object> properties, String[] args, TabPlayer p) {
@@ -82,7 +80,7 @@ public class Title extends TabFeature implements Loadable, UnLoadable, JoinListe
     }
 
     public void toggleTitle(String name) {
-        TabPlayer p = TabAPI.getInstance().getPlayer(name);
+        TabPlayer p = tab.getPlayer(name);
         TranslationFile translation = TABAdditions.getInstance().getMsgs();
 
         if (toggleTitle.contains(name.toLowerCase())) {

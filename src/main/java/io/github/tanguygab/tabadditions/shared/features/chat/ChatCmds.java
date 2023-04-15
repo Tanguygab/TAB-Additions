@@ -6,18 +6,19 @@ import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiCategory;
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
-import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.api.chat.EnumChatFormat;
-import me.neznamy.tab.api.chat.IChatBaseComponent;
-import me.neznamy.tab.api.config.ConfigurationFile;
+import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.platform.TabPlayer;
+import me.neznamy.tab.shared.chat.EnumChatFormat;
+import me.neznamy.tab.shared.chat.IChatBaseComponent;
+import me.neznamy.tab.shared.config.ConfigurationFile;
 
 import java.util.*;
 import java.util.regex.Pattern;
 
 public class ChatCmds {
 
-    private final TabAPI tab;
+    private final TAB tab;
+    private final TABAdditions plugin;
     private final ChatManager cm;
 
     public boolean ignoreEnabled;
@@ -34,11 +35,12 @@ public class ChatCmds {
     public int clearChatAmount;
 
     public ChatCmds(ChatManager manager, ConfigurationFile config) {
-        tab = TabAPI.getInstance();
+        tab = TAB.getInstance();
+        plugin = TABAdditions.getInstance();
         cm = manager;
 
         ignoreEnabled = config.getBoolean("/ignore",true);
-        ignored = tab.getPlayerCache().getConfigurationSection("msg-ignore");
+        ignored = plugin.getPlayerData().getConfigurationSection("msg-ignore");
 
         toggleChatEnabled = config.getBoolean("/togglechat",true);
 
@@ -54,7 +56,7 @@ public class ChatCmds {
         pm.registerPlayerPlaceholder("%chat-socialspy%",1000,p->cm.spies.contains(p.getName().toLowerCase()) ? "On" : "Off");
         pm.registerPlayerPlaceholder("%chat-enabled%",1000,p->cm.toggleChat.contains(p.getName().toLowerCase()) ? "Off" : "On");
 
-        Platform p = TABAdditions.getInstance().getPlatform();
+        Platform p = plugin.getPlatform();
         p.registerCommand("togglechat",toggleChatEnabled);
         p.registerCommand("ignore",ignoreEnabled);
         p.registerCommand("socialspy", socialSpyEnabled);
@@ -66,13 +68,12 @@ public class ChatCmds {
     }
 
     public boolean execute(TabPlayer p, String msg) {
-        TABAdditions plugin = TABAdditions.getInstance();
         String cmd = msg.split(" ")[0];
         msg = msg.contains(" ") ? msg.substring(cmd.length()+1) : "";
         if (cmd.equals("r")) cmd = "reply";
         if (cm.getMsgManager() != null && cm.getMsgManager().isAlias(cmd)) cmd = "msg";
 
-        ConfigurationFile playerdata = tab.getPlayerCache();
+        ConfigurationFile playerdata = plugin.getPlayerData();
         TranslationFile msgs = plugin.getMsgs();
 
         switch (cmd) {
@@ -97,11 +98,11 @@ public class ChatCmds {
             case "clearchat": {
                 if (!clearChatEnabled || !p.hasPermission("tabadditions.chat.clearchat")) return false;
 
-                String linebreaks = "";
+                StringBuilder linebreaks = new StringBuilder();
                 for (int i = 0; i < clearChatAmount; i++)
-                    linebreaks+="\n"+clearChatLine;
+                    linebreaks.append("\n").append(clearChatLine);
                 for (TabPlayer all : tab.getOnlinePlayers())
-                    all.sendMessage(linebreaks,false);
+                    all.sendMessage(linebreaks.toString(),false);
                 p.sendMessage(msgs.getChatCleared(p),true);
                 return true;
             }
@@ -203,7 +204,7 @@ public class ChatCmds {
 
     public void getEmojisCategories(TabPlayer p) {
         List<IChatBaseComponent> list = new ArrayList<>();
-        TranslationFile translation = TABAdditions.getInstance().getMsgs();
+        TranslationFile translation = plugin.getMsgs();
         EmojiManager emojis = cm.getEmojiManager();
 
         emojis.getEmojiCategories().forEach(((categoryName, category) -> {
@@ -222,12 +223,12 @@ public class ChatCmds {
 
     public void getEmojiCategory(TabPlayer p, EmojiCategory category) {
         List<IChatBaseComponent> list = new ArrayList<>();
-        TranslationFile translation = TABAdditions.getInstance().getMsgs();
+        TranslationFile translation = plugin.getMsgs();
 
         Map<String,String> emojis = category.getEmojis();
         emojis.forEach((emoji,output)->{
             if (!category.canUse(p,emoji)) return;
-            IChatBaseComponent comp = cm.createComponent("\n" + TABAdditions.getInstance().parsePlaceholders(translation.getEmoji(emoji,output),p));
+            IChatBaseComponent comp = cm.createComponent("\n" + plugin.parsePlaceholders(translation.getEmoji(emoji,output),p));
             comp.getModifier().onClickSuggestCommand(emoji);
             list.add(comp);
         });
@@ -243,6 +244,6 @@ public class ChatCmds {
     }
 
     public boolean isIgnored(TabPlayer p, TabPlayer viewer) {
-        return tab.getPlayerCache().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()) && !p.hasPermission("tabadditions.chat.bypass.ignore");
+        return plugin.getPlayerData().getStringList("msg-ignore." + viewer.getName().toLowerCase(), new ArrayList<>()).contains(p.getName().toLowerCase()) && !p.hasPermission("tabadditions.chat.bypass.ignore");
     }
 }

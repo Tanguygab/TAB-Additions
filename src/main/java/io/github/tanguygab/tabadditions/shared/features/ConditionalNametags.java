@@ -2,20 +2,20 @@ package io.github.tanguygab.tabadditions.shared.features;
 
 import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.Property;
-import me.neznamy.tab.api.TabAPI;
-import me.neznamy.tab.api.feature.*;
-import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.team.TeamManager;
+import me.neznamy.tab.shared.Property;
+import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.features.types.*;
+import me.neznamy.tab.shared.platform.TabPlayer;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
 public class ConditionalNametags extends TabFeature implements JoinListener, Refreshable, UnLoadable {
 
-    private final TabAPI tab;
+    private final TAB tab;
     private final boolean def;
 
     public ConditionalNametags() {
-        tab = TabAPI.getInstance();
+        tab = TAB.getInstance();
         def = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("conditional-nametags.show-by-default",true);
         for (TabPlayer p : tab.getOnlinePlayers()) {
             p.loadPropertyFromConfig(this,"nametag-condition");
