@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'io.github.tanguygab'
-version = '1.8.0-SNAPSHOT'
+version = '2.0.0-SNAPSHOT'
 
 compileJava.options.encoding = 'UTF-8'
 

@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features.actionbar;
 
-import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.ActionBarCmd;
 import me.neznamy.tab.shared.chat.IChatBaseComponent;
@@ -26,9 +25,12 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         TAB tab = TAB.getInstance();
         tab.getCommand().registerSubCommand(new ActionBarCmd(this));
 
-        ConfigurationFile config = plugin.getConfig(ConfigType.MAIN);
+        ConfigurationFile config = plugin.getConfig();
         toggleCmd = config.getBoolean("actionbars./toggleactionbar",true);
-        if (toggleCmd) toggled.addAll(plugin.getPlayerData().getStringList("actionbar-off", new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toList()));
+        if (toggleCmd) {
+            toggled.addAll(plugin.getPlayerData().getStringList("actionbar-off", new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toList()));
+            plugin.getPlatform().registerCommand("toggleactionbar",true);
+        }
 
         Map<String,Map<String,String>> barsConfig = config.getConfigurationSection("actionbars.bars");
         barsConfig.forEach((bar,cfg)->{
@@ -45,7 +47,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
 
     @Override
     public void unload() {
-        if (toggleCmd) plugin.getPlayerData().set("toggleactionbar", toggled);
+        if (toggleCmd) plugin.getPlayerData().set("actionbar-off", toggled.stream().map(UUID::toString).collect(Collectors.toList()));
     }
 
     @Override
@@ -75,6 +77,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
     }
 
     public void announceBar(TabPlayer player, String actionbar) {
+        addUsedPlaceholders(TAB.getInstance().getPlaceholderManager().detectPlaceholders(actionbar));
         announcedBars.put(player,actionbar);
         refresh(player,true);
         TAB.getInstance().getCPUManager().runTaskLater(2000,this,"handling ActionBar on join for "+player.getName(),()->{
@@ -93,7 +96,10 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
     @Override
     public boolean onCommand(TabPlayer player, String msg) {
         if (!toggleCmd || !msg.equals("/toggleactionbar")) return false;
-        toggled.add(player.getUniqueId());
+        if (toggled.contains(player.getUniqueId()))
+            toggled.remove(player.getUniqueId());
+        else toggled.add(player.getUniqueId());
+        player.sendMessage(toggled.contains(player.getUniqueId()) ? plugin.getMsgs().actionBarOff : plugin.getMsgs().actionBarOn,true);
         refresh(player,true);
         return true;
     }

@@ -1,40 +1,42 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.Title;
+import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.command.SubCommand;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
-import java.util.List;
+public class TitleCmd extends SubCommand {
 
-public class TitleCmd {
+    private final TitleManager manager;
 
-
-    public TitleCmd(String name, String[] args, List<Object> properties) {
-
-        TABAdditions instance = TABAdditions.getInstance();
-        Title feature = (Title) TAB.getInstance().getFeatureManager().getFeature("Title");
-
-
-        if (args.length > 2 && args[2].equals("*")) {
-            for (TabPlayer p : TAB.getInstance().getOnlinePlayers())
-                feature.sendTitle(properties, args,p);
-            return;
-        }
-
-        TabPlayer p = null;
-        if (args.length > 2)
-            p = instance.getPlayer(args[2]);
-        else if (!name.equals("~Console~"))
-            p = instance.getPlayer(name);
-
-        if (p == null) {
-            instance.sendMessage(name, "&cThis player isn't connected!");
-            return;
-        }
-        feature.sendTitle(properties, args,p);
+    public TitleCmd(TitleManager manager) {
+        super("title",null);
+        this.manager = manager;
     }
 
 
+    @Override
+    public void execute(TabPlayer sender, String[] args) {
+        TABAdditions instance = TABAdditions.getInstance();
+        if (args.length < 1) {
+            sendMessage(sender,"&cYou have to provide a title!");
+            return;
+        }
+        String title = args[0].replace("_"," ");
+
+        if (args.length > 1 && args[1].equals("*")) {
+            for (TabPlayer player : TAB.getInstance().getOnlinePlayers())
+                manager.announceTitle(player,title);
+            return;
+        }
+
+        TabPlayer player = args.length > 1 ? instance.getPlayer(args[1]) : sender;
+        if (player == null) {
+            sendMessage(sender,args.length > 1 ? getMessages().getPlayerNotFound(args[1]) : getMessages().getCommandOnlyFromGame());
+            return;
+        }
+        manager.announceTitle(player,title);
+    }
 
 }

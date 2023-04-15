@@ -7,6 +7,7 @@ import java.util.*;
 import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.actionbar.ActionBarManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
+import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager;
 import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
@@ -40,11 +41,9 @@ public class TABAdditions {
     public boolean enabled;
 
     private ConfigurationFile config;
-    private ConfigurationFile titleConfig;
     private ConfigurationFile chatConfig;
     private TranslationFile translation;
 
-    public boolean titlesEnabled;
     public boolean chatEnabled;
     public boolean sithideEnabled = false;
     public boolean sneakhideEnabled = false;
@@ -77,12 +76,8 @@ public class TABAdditions {
         return plugin;
     }
 
-    public ConfigurationFile getConfig(ConfigType cfg) {
-        switch (cfg) {
-            case TITLE: return titleConfig;
-            case CHAT: return chatConfig;
-            default: return config;
-        }
+    public ConfigurationFile getConfig() {
+        return config;
     }
 
     public TranslationFile getMsgs() {
@@ -102,11 +97,9 @@ public class TABAdditions {
                 config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("bungeeconfig.yml"), new File(dataFolder, "config.yml"));
             else
                 config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
-            titleConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("titles.yml"), new File(dataFolder, "titles.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
             translation = new TranslationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml"));
 
-            titlesEnabled = config.getBoolean("features.titles",false);
             chatEnabled = config.getBoolean("features.chat",false);
             condNametagsEnabled = config.getBoolean("features.conditional-nametags",false);
             if (platform.getType() == PlatformType.SPIGOT) {
@@ -154,11 +147,11 @@ public class TABAdditions {
         if (config.getBoolean("actionbars.enabled",false))
             registerFeature(new ActionBarManager());
         //Title
-        if (titlesEnabled)
-            registerFeature(new Title());
+        if (config.getBoolean("titles.enabled",false))
+            registerFeature(new TitleManager());
         //Chat
         if (chatEnabled)
-            registerFeature(new ChatManager());
+            registerFeature(new ChatManager(chatConfig));
         //ConditionalNametags
         if (condNametagsEnabled)
             registerFeature(new ConditionalNametags());

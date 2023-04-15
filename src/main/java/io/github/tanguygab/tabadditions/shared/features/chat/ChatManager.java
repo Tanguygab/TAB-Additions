@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import com.loohp.interactivechat.api.InteractiveChatAPI;
-import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
@@ -32,8 +31,9 @@ import java.util.regex.Pattern;
 
 public class ChatManager extends TabFeature implements JoinListener, CommandListener, Loadable, UnLoadable {
 
-    private TABAdditions plugin;
+    private final TABAdditions plugin;
     private final TAB tab;
+    private final ConfigurationFile config;
     private EmojiManager emojiManager;
     private MsgManager msgManager;
     private MentionManager mentionManager;
@@ -88,9 +88,12 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
     public boolean discordEnabled;
     public String discordPlugin;
     public String discordFormat;
+    private boolean chatFromBukkitBridge;
 
-    public ChatManager() {
+    public ChatManager(ConfigurationFile config) {
         tab = TAB.getInstance();
+        plugin = TABAdditions.getInstance();
+        this.config = config;
         load();
     }
 
@@ -103,7 +106,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         String format;
         if (defformats.containsKey(p))
             format = defformats.get(p);
-        else format = plugin.getConfig(ConfigType.CHAT).getString("default-format","default");
+        else format = config.getString("default-format","default");
         if (format.equalsIgnoreCase("")) return defaultFormat;
 
         ChatFormat f = formats.get(format);
@@ -117,9 +120,6 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
 
     @Override
     public void load() {
-        plugin = TABAdditions.getInstance();
-        ConfigurationFile config = plugin.getConfig(ConfigType.CHAT);
-
         defaultFormat = new ChatFormat("default", null, null, null, null, "{%prop-chatprefix% %prop-customchatname% %prop-chatsuffix%&7» &r%msg%||%time%}");
         Map<String,Map<String,String>> chatFormats = config.getConfigurationSection("chat-formats");
         chatFormats.forEach((format,cfg)-> formats.put(format + "", new ChatFormat(format,
@@ -200,6 +200,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         discordPlugin = config.getString("discord.plugin","DiscordSRV");
         discordFormat = config.getString("discord.format","%msg%");
 
+        chatFromBukkitBridge = config.getBoolean("chat-from-bukkit-bridge",false);
 
         if (cmds.toggleChatEnabled) {
             toggleChat.addAll(plugin.getPlayerData().getStringList("togglechat", new ArrayList<>()));
@@ -231,6 +232,9 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         return mentionManager;
     }
 
+    public boolean isBukkitBridgeChatEnabled() {
+        return chatFromBukkitBridge;
+    }
 
     public void unload() {
         if (mentionManager != null) mentionManager.unload();

@@ -3,7 +3,6 @@ package io.github.tanguygab.tabadditions.bungee;
 import com.google.common.io.ByteArrayDataInput;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import me.neznamy.tab.shared.Property;
@@ -24,10 +23,10 @@ public class BungeeEvents implements Listener {
         if (e.isCommand() || e.isCancelled()) return;
         TAB tab = TAB.getInstance();
         if (!tab.getFeatureManager().isFeatureEnabled("Chat")) return;
-        if (TABAdditions.getInstance().getConfig(ConfigType.CHAT).getBoolean("chat-from-bukkit-bridge",false))
-            return;
+        ChatManager chat = tab.getFeatureManager().getFeature("Chat");
+        if (chat.isBukkitBridgeChatEnabled()) return;
         e.setCancelled(true);
-        ((ChatManager)tab.getFeatureManager().getFeature("Chat")).onChat(tab.getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()),e.getMessage());
+        chat.onChat(tab.getPlayer(((ProxiedPlayer)e.getSender()).getUniqueId()),e.getMessage());
     }
 
     @EventHandler

@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
-import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
@@ -20,7 +19,7 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
     public ConditionalAppearance() {
         tab = TAB.getInstance();
         plugin = (Plugin) TABAdditions.getInstance().getPlugin();
-        def = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("appearance-nametags.show-by-default",true);
+        def = TABAdditions.getInstance().getConfig().getBoolean("appearance-nametags.show-by-default",true);
         for (TabPlayer p : tab.getOnlinePlayers()) {
             p.loadPropertyFromConfig(this,"appearance-condition");
             refresh(p,true);

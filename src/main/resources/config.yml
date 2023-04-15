@@ -1,5 +1,4 @@
 features:
-  titles: false
   chat: false
   real-fake-players: false
   only-you: false
@@ -16,7 +15,7 @@ appearance-nametags:
   show-by-default: true
 
 actionbars:
-  enabled: true
+  enabled: false
   /toggleactionbar: true
   bars:
     staff:
@@ -24,3 +23,11 @@ actionbars:
       text: "&aEpic &bActionbar &cfor &depic &epeople&f!"
     welcome:
       text: "&2Welcome &a%player%&2!"
+
+titles:
+  enabled: false
+  /toggletitle: true
+  titles:
+    welcome:
+      title: "&2Welcome &a%player%&2,"
+      subtitle: "&2on &aplay.servername.com&2!"

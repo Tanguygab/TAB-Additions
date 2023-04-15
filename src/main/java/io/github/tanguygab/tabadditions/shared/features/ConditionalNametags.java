@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
-import io.github.tanguygab.tabadditions.shared.ConfigType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.api.team.TeamManager;
 import me.neznamy.tab.shared.Property;
@@ -16,7 +15,7 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
 
     public ConditionalNametags() {
         tab = TAB.getInstance();
-        def = TABAdditions.getInstance().getConfig(ConfigType.MAIN).getBoolean("conditional-nametags.show-by-default",true);
+        def = TABAdditions.getInstance().getConfig().getBoolean("conditional-nametags.show-by-default",true);
         for (TabPlayer p : tab.getOnlinePlayers()) {
             p.loadPropertyFromConfig(this,"nametag-condition");
             refresh(p,true);
