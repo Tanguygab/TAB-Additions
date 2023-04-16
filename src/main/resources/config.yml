@@ -1,9 +1,6 @@
 features:
-  real-fake-players: false
-  only-you: false
   nametag-in-range: 0
   tablist-names-radius: 0
-  sit-hide-nametag: false
   sneak-hide-nametags: false
   conditional-nametags: false
   conditional-appearance: false

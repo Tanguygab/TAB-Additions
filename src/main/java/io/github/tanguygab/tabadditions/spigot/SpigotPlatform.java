@@ -132,9 +132,6 @@ public class SpigotPlatform extends Platform {
 		//Sneak Hide Nametag
 		if (instance.sneakhideEnabled)
 			instance.registerFeature(new SneakHideNametag());
-		//Sneak Hide Nametag
-		if (instance.sithideEnabled)
-			instance.registerFeature(new SitHideNametag());
 		//Nametag in Range
 		if (instance.nametagInRange != 0)
 			instance.registerFeature(new NametagInRange());

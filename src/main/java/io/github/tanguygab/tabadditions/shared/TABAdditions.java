@@ -45,11 +45,9 @@ public class TABAdditions {
     private ConfigurationFile chatConfig;
     private TranslationFile translation;
 
-    public boolean sithideEnabled = false;
     public boolean sneakhideEnabled = false;
     public int nametagInRange = 0;
     public int tablistNamesRadius = 0;
-    public boolean onlyyou = false;
     public boolean condNametagsEnabled;
     private boolean condAppearenceEnabled;
 
@@ -93,17 +91,15 @@ public class TABAdditions {
 
     public void loadFiles() {
         try {
-            config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream(platform.isProxy() ? "bungeeconfig.yml" : "config.yml"), new File(dataFolder, "config.yml"));
+            config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
             translation = new TranslationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml"));
 
             condNametagsEnabled = config.getBoolean("features.conditional-nametags",false);
             if (platform.isProxy()) return;
-            sithideEnabled = config.getBoolean("features.sit-hide-nametags", false);
             sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
             nametagInRange = config.getInt("features.nametag-in-range", 0);
             tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
-            onlyyou = config.getBoolean("features.only-you",false);
             condAppearenceEnabled = config.getBoolean("features.conditional-appearance",false);
         } catch (IOException e) {
             platform.disable();
@@ -213,7 +209,7 @@ public class TABAdditions {
                 } catch (NumberFormatException ignored) {}
             } else {
                 Condition condition = Condition.getCondition(cond);
-                if (condition != null && !condition.isMet((me.neznamy.tab.shared.platform.TabPlayer) (checkForViewer ? viewer : sender)))
+                if (condition != null && !condition.isMet(checkForViewer ? viewer : sender))
                     return false;
             }
         }
@@ -224,17 +220,6 @@ public class TABAdditions {
         if (platform.isProxy()) return true;
         int zone = (int) Math.pow(range, 2);
         return sender.getWorld().equals(viewer.getWorld()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
-    }
-
-    public void sendMessage(String name,String msg) {
-        if (name.equals("~Console~"))
-            tab.sendConsoleMessage(msg,true);
-        else tab.getPlayer(name).sendMessage(msg,true);
-    }
-    public void sendMessage(String name, IChatBaseComponent msg) {
-        if (name.equals("~Console~"))
-            tab.sendConsoleMessage(msg.getText(),true);
-        else tab.getPlayer(name).sendMessage(msg);
     }
 
     public boolean isMuted(TabPlayer p) {
