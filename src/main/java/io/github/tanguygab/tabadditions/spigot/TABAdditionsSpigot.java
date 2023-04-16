@@ -1,30 +1,16 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
-import me.neznamy.tab.shared.TAB;
-import org.bukkit.event.EventHandler;
-import org.bukkit.event.EventPriority;
-import org.bukkit.event.Listener;
-import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
-public class TABAdditionsSpigot extends JavaPlugin implements Listener {
+public class TABAdditionsSpigot extends JavaPlugin {
 
     @Override
     public void onEnable() {
         TABAdditions.setInstance(new TABAdditions(new SpigotPlatform(this), this,getDataFolder()));
         TABAdditions.getInstance().load();
-    }
-
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
-    public void onChat(AsyncPlayerChatEvent e) {
-        TAB tab = TAB.getInstance();
-        if (!tab.getFeatureManager().isFeatureEnabled("Chat")) return;
-        e.setCancelled(true);
-        ((ChatManager)tab.getFeatureManager().getFeature("Chat")).onChat(tab.getPlayer(e.getPlayer().getUniqueId()),e.getMessage());
     }
 
     @Override

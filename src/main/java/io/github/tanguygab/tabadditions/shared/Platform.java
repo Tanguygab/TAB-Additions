@@ -12,8 +12,6 @@ public abstract class Platform {
 
 	public abstract boolean isPluginEnabled(String plugin);
 
-	public abstract String getVersion();
-
 	public abstract void registerPlaceholders(PlaceholderManager pm);
 
 	public abstract void registerCommand(String cmd, boolean bool, String... aliases);
@@ -25,8 +23,6 @@ public abstract class Platform {
 	public abstract void sendSound(TabPlayer p, String sound);
 
 	public abstract void reload();
-
-	public abstract void loadFeatures();
 
 	public abstract void disable();
 

@@ -44,8 +44,6 @@ public class TABAdditions {
     private ConfigurationFile config;
     private ConfigurationFile chatConfig;
     private TranslationFile translation;
-
-    public boolean sneakhideEnabled = false;
     public int nametagInRange = 0;
     public int tablistNamesRadius = 0;
     public boolean condNametagsEnabled;
@@ -97,7 +95,6 @@ public class TABAdditions {
 
             condNametagsEnabled = config.getBoolean("features.conditional-nametags",false);
             if (platform.isProxy()) return;
-            sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
             nametagInRange = config.getInt("features.nametag-in-range", 0);
             tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
             condAppearenceEnabled = config.getBoolean("features.conditional-appearance",false);
@@ -140,7 +137,10 @@ public class TABAdditions {
         if (condNametagsEnabled) registerFeature(new ConditionalNametags());
         if (condAppearenceEnabled) registerFeature(new ConditionalAppearance());
         if (tab.getTeamManager() != null) tab.getCommand().registerSubCommand(new NametagCmd(tab.getTeamManager()));
-        platform.loadFeatures();
+
+        if (platform.isProxy()) return;
+        if (nametagInRange != 0) registerFeature(new NametagInRange());
+        if (tablistNamesRadius != 0) registerFeature(new TablistNamesRadius());
     }
 
     private void loadPlaceholders() {

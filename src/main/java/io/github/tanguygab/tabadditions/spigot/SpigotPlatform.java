@@ -1,8 +1,6 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import github.scarsz.discordsrv.DiscordSRV;
-import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import io.github.tanguygab.tabadditions.shared.features.*;
 
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
@@ -19,7 +17,6 @@ import org.bukkit.command.SimpleCommandMap;
 import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 import org.jetbrains.annotations.NotNull;
@@ -62,11 +59,6 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public String getVersion() {
-		return plugin.getDescription().getVersion();
-	}
-
-	@Override
 	public void registerPlaceholders(PlaceholderManager pm) {
 		pm.registerRelationalPlaceholder("%rel_distance%",1000,(viewer, target) -> {
 			Player viewer0 = (Player) viewer.getPlayer();
@@ -86,6 +78,7 @@ public class SpigotPlatform extends Platform {
 			}
 			return count;
 		});
+		pm.registerPlayerPlaceholder("%sneak%",-1,player->((Player)player.getPlayer()).isSneaking());
 	}
 
 	@Override
@@ -111,8 +104,8 @@ public class SpigotPlatform extends Platform {
 
 	@Override
 	public void reload() {
-		HandlerList.unregisterAll((Plugin) plugin);
-		plugin.getServer().getPluginManager().registerEvents(plugin, plugin);
+		HandlerList.unregisterAll(plugin);
+		plugin.getServer().getPluginManager().registerEvents(new SpigotListener(), plugin);
 	}
 
 	@Override
@@ -124,20 +117,6 @@ public class SpigotPlatform extends Platform {
 			};
 			((SimpleCommandMap)getCommandMap.invoke(plugin.getServer())).register(cmd,"chat",command);
 		} catch (Exception e) {e.printStackTrace();}
-	}
-
-	@Override
-	public void loadFeatures() {
-		TABAdditions instance = TABAdditions.getInstance();
-		//Sneak Hide Nametag
-		if (instance.sneakhideEnabled)
-			instance.registerFeature(new SneakHideNametag());
-		//Nametag in Range
-		if (instance.nametagInRange != 0)
-			instance.registerFeature(new NametagInRange());
-		//Tablist Names Radius
-		if (instance.tablistNamesRadius != 0)
-			instance.registerFeature(new TablistNamesRadius());
 	}
 
 	@Override

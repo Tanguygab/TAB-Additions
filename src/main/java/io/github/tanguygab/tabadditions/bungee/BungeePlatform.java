@@ -37,11 +37,6 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public String getVersion() {
-		return ProxyServer.getInstance().getPluginManager().getPlugin("TAB-Additions").getDescription().getVersion();
-	}
-
-	@Override
 	public void registerPlaceholders(PlaceholderManager pm) {
 		for (String server : ProxyServer.getInstance().getServers().keySet())
 			pm.registerServerPlaceholder("%server-status:" + server + "%",10000,()->((TABAdditionsBungeeCord)plugin).getServerStatus(server));
@@ -82,9 +77,6 @@ public class BungeePlatform extends Platform {
 		plugin.getProxy().getPluginManager().unregisterListeners(plugin);
 		plugin.getProxy().getPluginManager().registerListener(plugin, new BungeeEvents());
 	}
-
-	@Override
-	public void loadFeatures() {}
 
 	@Override
 	public void disable() {

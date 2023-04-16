@@ -1,7 +1,6 @@
 features:
   nametag-in-range: 0
   tablist-names-radius: 0
-  sneak-hide-nametags: false
   conditional-nametags: false
   conditional-appearance: false
 
