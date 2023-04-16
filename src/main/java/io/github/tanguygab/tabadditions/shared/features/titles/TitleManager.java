@@ -62,6 +62,10 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
     @Override
     public void refresh(TabPlayer player, boolean force) {
         if (!announcedTitles.containsKey(player) || toggled.contains(player.getUniqueId())) return;
+        sendTitle(player, true);
+    }
+
+    private void sendTitle(TabPlayer player, boolean refresh) {
         String name = announcedTitles.get(player);
         String title,subtitle;
         if (titles.containsKey(name)) {
@@ -72,16 +76,17 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
             title = str[0];
             subtitle = str.length > 1 ? str[1] : "";
         }
-        plugin.getPlatform().sendTitle(player, parse(player,title),parse(player,subtitle),20, 60, 20);
+        plugin.getPlatform().sendTitle(player, parse(player,title),parse(player,subtitle),refresh ? 0 : 20, 60, 20);
     }
 
     private String parse(TabPlayer player, String text) {
         return plugin.toFlatText(IChatBaseComponent.optimizedComponent(plugin.parsePlaceholders(text,player)));
     }
     public void announceTitle(TabPlayer player, String title) {
+        if (toggled.contains(player.getUniqueId())) return;
         addUsedPlaceholders(TAB.getInstance().getPlaceholderManager().detectPlaceholders(title));
         announcedTitles.put(player,title);
-        refresh(player,true);
+        sendTitle(player,false);
         TAB.getInstance().getCPUManager().runTaskLater(2000,this,"handling Title on join for "+player.getName(),()->{
             if (title.equals(announcedTitles.get(player))) announcedTitles.remove(player);
         });
