@@ -60,6 +60,6 @@ public class NametagCmd extends SubCommand {
 
     @Override
     public List<String> complete(TabPlayer sender, String[] arguments) {
-        return arguments.length == 1 ? Arrays.asList("hide", "show", "toggle") : super.complete(sender,arguments);
+        return arguments.length == 1 ? getStartingArgument(List.of("hide", "show", "toggle"),arguments[0]) : getOnlinePlayers(arguments[1]);
     }
 }
