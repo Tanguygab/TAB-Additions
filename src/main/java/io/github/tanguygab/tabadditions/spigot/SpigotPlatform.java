@@ -141,9 +141,6 @@ public class SpigotPlatform extends Platform {
 		//Tablist Names Radius
 		if (instance.tablistNamesRadius != 0)
 			instance.registerFeature(new TablistNamesRadius());
-		//Only You
-		if (instance.onlyyou)
-			instance.registerFeature(new OnlyYou());
 	}
 
 	@Override
