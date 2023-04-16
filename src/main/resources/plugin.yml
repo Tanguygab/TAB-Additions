@@ -6,8 +6,3 @@ depend: [TAB]
 softdepend: [floodgate-bukkit,DiscordSRV,AdvancedBan,InteractiveChat]
 author: Tanguygab
 description: More features for the plugin TAB !
-commands:
-  tabadditions:
-    usage: /command
-    permission: tabadditions.admin
-    aliases: [taba,tabaddon,tab+,tabaddition]

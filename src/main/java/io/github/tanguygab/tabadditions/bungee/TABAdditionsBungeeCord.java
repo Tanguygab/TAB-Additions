@@ -27,7 +27,6 @@ public final class TABAdditionsBungeeCord extends Plugin {
         TABAdditions.setInstance(new TABAdditions(new BungeePlatform(this), this,getDataFolder()));
         TABAdditions.getInstance().load();
         getProxy().registerChannel("tabadditions:channel");
-        getProxy().getPluginManager().registerCommand(this, new MainCmd("btabadditions","tabadditions.admin","btab+","btaba","btabaddon","btabaddition"));
     }
 
     @Override

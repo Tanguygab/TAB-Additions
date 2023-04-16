@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import io.github.tanguygab.tabadditions.shared.commands.NametagCmd;
 import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.actionbar.ActionBarManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
@@ -143,24 +144,13 @@ public class TABAdditions {
     }
 
     private void loadFeatures() {
-        //ActionBar
-        if (config.getBoolean("actionbars.enabled",false))
-            registerFeature(new ActionBarManager());
-        //Title
-        if (config.getBoolean("titles.enabled",false))
-            registerFeature(new TitleManager());
-        //Chat
-        if (chatEnabled)
-            registerFeature(new ChatManager(chatConfig));
-        //ConditionalNametags
-        if (condNametagsEnabled)
-            registerFeature(new ConditionalNametags());
-        //ConditionalAppearance
-        if (condAppearenceEnabled)
-            registerFeature(new ConditionalAppearance());
-
+        if (config.getBoolean("actionbars.enabled",false)) registerFeature(new ActionBarManager());
+        if (config.getBoolean("titles.enabled",false)) registerFeature(new TitleManager());
+        if (chatEnabled) registerFeature(new ChatManager(chatConfig));
+        if (condNametagsEnabled) registerFeature(new ConditionalNametags());
+        if (condAppearenceEnabled) registerFeature(new ConditionalAppearance());
+        if (tab.getTeamManager() != null) tab.getCommand().registerSubCommand(new NametagCmd(tab.getTeamManager()));
         platform.loadFeatures();
-
     }
 
     private void loadPlaceholders() {

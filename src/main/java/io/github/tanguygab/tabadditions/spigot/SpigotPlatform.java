@@ -121,7 +121,7 @@ public class SpigotPlatform extends Platform {
 			Command command = new BukkitCommand(cmd,"","/"+cmd,Arrays.asList(aliases)) {
 				@Override public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, String[] args) {return true;}
 			};
-			((SimpleCommandMap)getCommandMap.invoke(plugin.getServer())).register(cmd,plugin.getName(),command);
+			((SimpleCommandMap)getCommandMap.invoke(plugin.getServer())).register(cmd,"chat",command);
 		} catch (Exception e) {e.printStackTrace();}
 	}
 

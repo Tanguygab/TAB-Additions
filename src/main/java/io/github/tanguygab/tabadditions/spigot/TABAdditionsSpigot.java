@@ -17,7 +17,6 @@ public class TABAdditionsSpigot extends JavaPlugin implements Listener {
     public void onEnable() {
         TABAdditions.setInstance(new TABAdditions(new SpigotPlatform(this), this,getDataFolder()));
         TABAdditions.getInstance().load();
-        getCommand("tabadditions").setExecutor(new MainCmd());
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
