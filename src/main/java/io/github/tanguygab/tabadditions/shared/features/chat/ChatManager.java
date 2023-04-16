@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import com.loohp.interactivechat.api.InteractiveChatAPI;
-import io.github.tanguygab.tabadditions.shared.PlatformType;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
@@ -16,7 +15,6 @@ import me.neznamy.tab.shared.chat.TextColor;
 import me.neznamy.tab.shared.chat.rgb.RGBUtils;
 import me.neznamy.tab.shared.config.ConfigurationFile;
 import me.neznamy.tab.shared.features.types.*;
-import me.neznamy.tab.api.placeholder.RelationalPlaceholder;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import org.bukkit.Material;
@@ -414,7 +412,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         if (hover == null || hover.equals("")) return comp;
 
         if (hover.startsWith("material:")) {
-            if (plugin.getPlatform().getType() != PlatformType.SPIGOT) return comp;
+            if (plugin.getPlatform().isProxy()) return comp;
             Material mat = Material.getMaterial(hover.replace("material:", ""));
             if (mat == null) return comp;
             ItemStack item = new ItemStack(mat);
@@ -423,7 +421,7 @@ public class ChatManager extends TabFeature implements JoinListener, CommandList
         }
 
         if (hover.startsWith("item:")) {
-            if (plugin.getPlatform().getType() != PlatformType.SPIGOT) return comp;
+            if (plugin.getPlatform().isProxy()) return comp;
             ItemStack item = (ItemStack) getItem(hover,p);
 
             String itemtxt;

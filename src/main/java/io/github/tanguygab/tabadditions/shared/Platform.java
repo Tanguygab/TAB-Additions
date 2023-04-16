@@ -8,7 +8,7 @@ import java.util.UUID;
 
 public abstract class Platform {
 
-	public abstract PlatformType getType();
+	public abstract boolean isProxy();
 
 	public abstract boolean isPluginEnabled(String plugin);
 

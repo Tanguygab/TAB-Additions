@@ -94,23 +94,19 @@ public class TABAdditions {
 
     public void loadFiles() {
         try {
-            if (platform.getType() == PlatformType.BUNGEE)
-                config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("bungeeconfig.yml"), new File(dataFolder, "config.yml"));
-            else
-                config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
+            config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream(platform.isProxy() ? "bungeeconfig.yml" : "config.yml"), new File(dataFolder, "config.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
             translation = new TranslationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml"));
 
             chatEnabled = config.getBoolean("features.chat",false);
             condNametagsEnabled = config.getBoolean("features.conditional-nametags",false);
-            if (platform.getType() == PlatformType.SPIGOT) {
-                sithideEnabled = config.getBoolean("features.sit-hide-nametags", false);
-                sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
-                nametagInRange = config.getInt("features.nametag-in-range", 0);
-                tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
-                onlyyou = config.getBoolean("features.only-you",false);
-                condAppearenceEnabled = config.getBoolean("features.conditional-appearance",false);
-            }
+            if (platform.isProxy()) return;
+            sithideEnabled = config.getBoolean("features.sit-hide-nametags", false);
+            sneakhideEnabled = config.getBoolean("features.sneak-hide-nametags", false);
+            nametagInRange = config.getInt("features.nametag-in-range", 0);
+            tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
+            onlyyou = config.getBoolean("features.only-you",false);
+            condAppearenceEnabled = config.getBoolean("features.conditional-appearance",false);
         } catch (IOException e) {
             platform.disable();
             e.printStackTrace();
@@ -227,7 +223,7 @@ public class TABAdditions {
     }
 
     public boolean isInRange(TabPlayer sender,TabPlayer viewer,int range) {
-        if (TABAdditions.getInstance().getPlatform().getType() == PlatformType.BUNGEE) return true;
+        if (platform.isProxy()) return true;
         int zone = (int) Math.pow(range, 2);
         return sender.getWorld().equals(viewer.getWorld()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
     }

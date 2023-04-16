@@ -4,7 +4,6 @@ package io.github.tanguygab.tabadditions.bungee;
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
 import io.github.tanguygab.tabadditions.shared.Platform;
-import io.github.tanguygab.tabadditions.shared.PlatformType;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import net.md_5.bungee.api.ChatMessageType;
@@ -28,8 +27,8 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public PlatformType getType() {
-		return PlatformType.BUNGEE;
+	public boolean isProxy() {
+		return true;
 	}
 
 	@Override

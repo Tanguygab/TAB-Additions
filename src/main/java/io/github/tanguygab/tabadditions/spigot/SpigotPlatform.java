@@ -22,7 +22,6 @@ import org.bukkit.event.HandlerList;
 import org.bukkit.plugin.Plugin;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
-import io.github.tanguygab.tabadditions.shared.PlatformType;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
@@ -51,8 +50,8 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public PlatformType getType() {
-		return PlatformType.SPIGOT;
+	public boolean isProxy() {
+		return false;
 	}
 
 	@Override
