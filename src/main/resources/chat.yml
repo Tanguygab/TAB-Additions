@@ -1,3 +1,4 @@
+enabled: false
 default-format: default
 discord:
   enabled: false

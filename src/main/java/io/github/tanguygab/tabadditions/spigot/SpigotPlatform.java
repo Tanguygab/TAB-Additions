@@ -31,22 +31,24 @@ import java.util.*;
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
-	private final boolean chatSuggestions;
+	private boolean chatSuggestions;
 	private Method getCommandMap;
 	private Constructor<?> chatCompleteConstructor;
 	private Class<?> actionEnum;
 
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
-		chatSuggestions = TabAPI.getInstance().getServerVersion().getMinorVersion() >= 19;
 
 		try {
 			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
 
 			Class<?> chatCompleteClass = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket");
-			actionEnum = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket$a");
+			actionEnum = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket$Action");
 			chatCompleteConstructor = chatCompleteClass.getConstructor(actionEnum,List.class);
-		} catch (Exception ignored) {}
+			chatSuggestions = true;
+		} catch (Exception ignored) {
+			chatSuggestions = false;
+		}
 	}
 
 	@Override

@@ -45,7 +45,6 @@ public class TABAdditions {
     private ConfigurationFile chatConfig;
     private TranslationFile translation;
 
-    public boolean chatEnabled;
     public boolean sithideEnabled = false;
     public boolean sneakhideEnabled = false;
     public int nametagInRange = 0;
@@ -98,7 +97,6 @@ public class TABAdditions {
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
             translation = new TranslationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml"));
 
-            chatEnabled = config.getBoolean("features.chat",false);
             condNametagsEnabled = config.getBoolean("features.conditional-nametags",false);
             if (platform.isProxy()) return;
             sithideEnabled = config.getBoolean("features.sit-hide-nametags", false);
@@ -142,7 +140,7 @@ public class TABAdditions {
     private void loadFeatures() {
         if (config.getBoolean("actionbars.enabled",false)) registerFeature(new ActionBarManager());
         if (config.getBoolean("titles.enabled",false)) registerFeature(new TitleManager());
-        if (chatEnabled) registerFeature(new ChatManager(chatConfig));
+        if (chatConfig.getBoolean("enabled",false)) registerFeature(new ChatManager(chatConfig));
         if (condNametagsEnabled) registerFeature(new ConditionalNametags());
         if (condAppearenceEnabled) registerFeature(new ConditionalAppearance());
         if (tab.getTeamManager() != null) tab.getCommand().registerSubCommand(new NametagCmd(tab.getTeamManager()));

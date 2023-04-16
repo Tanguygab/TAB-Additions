@@ -1,5 +1,4 @@
 features:
-  chat: false
   real-fake-players: false
   only-you: false
   nametag-in-range: 0

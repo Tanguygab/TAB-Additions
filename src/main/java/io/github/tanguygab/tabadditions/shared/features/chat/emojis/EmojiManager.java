@@ -50,7 +50,7 @@ public class EmojiManager extends Manager {
     }
 
     public void unload() {
-        for (TabPlayer p : tab.getOnlinePlayers()) unloadAutoComplete(p);
+        if (autoComplete) for (TabPlayer p : tab.getOnlinePlayers()) unloadAutoComplete(p);
         if (toggleEmojiCmd) plugin.getPlayerData().set("toggleemoji",toggleEmoji);
     }
 
