@@ -11,9 +11,12 @@ import org.bukkit.event.HandlerList;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
 
+import java.text.DecimalFormat;
+
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
+	private static final DecimalFormat format = new DecimalFormat("#.##");
 
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
@@ -27,12 +30,10 @@ public class SpigotPlatform extends Platform {
 	@Override
 	public void registerPlaceholders(PlaceholderManager pm) {
 		pm.registerRelationalPlaceholder("%rel_distance%",1000,(viewer, target) -> {
-			Player viewer0 = (Player) viewer.getPlayer();
-			Player target0 = (Player) target.getPlayer();
+			Player viewer0 = (Player) viewer.getPlayer(), target0 = (Player) target.getPlayer();
 			if (!viewer0.getWorld().equals(target0.getWorld())) return "-1";
-			Location vLoc = viewer0.getLocation();
-			Location tLoc = target0.getLocation();
-			return vLoc.distanceSquared(tLoc);
+			Location vLoc = viewer0.getLocation(), tLoc = target0.getLocation();
+			return format.format(Math.round(Math.sqrt(vLoc.distanceSquared(tLoc))));
 		});
 		pm.registerPlayerPlaceholder("%canseeworldonline%", 1000,viewer->{
 			int count = 0;
