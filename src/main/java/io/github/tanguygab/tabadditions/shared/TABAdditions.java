@@ -96,11 +96,6 @@ public class TABAdditions {
             registerFeature(new ConditionalAppearance(plugin,config.getBoolean("conditional-appearance.show-by-default",true)));
         if (tab.getTeamManager() != null) tab.getCommand().registerSubCommand(new NametagCmd(tab.getTeamManager()));
 
-        AdvancedConditions.clearConditions();
-        Map<String, Map<String, String>> conditions = config.getConfigurationSection("advanced-conditions");
-        conditions.forEach(AdvancedConditions::new);
-        AdvancedConditions.finishSetups();
-
         if (platform.isProxy()) return;
         int nametagInRange = config.getInt("nametag-in-range", 0);
         if (nametagInRange != 0 && tab.getTeamManager() != null) registerFeature(new NametagInRange(nametagInRange));
@@ -112,6 +107,11 @@ public class TABAdditions {
         PlaceholderManagerImpl pm = tab.getPlaceholderManager();
         platform.registerPlaceholders(pm);
         tab.getEventBus().register(TabPlaceholderRegisterEvent.class,this::onPlaceholderRegister);
+
+        AdvancedConditions.clearConditions();
+        Map<String, Map<String, String>> conditions = config.getConfigurationSection("advanced-conditions");
+        conditions.forEach(AdvancedConditions::new);
+        AdvancedConditions.finishSetups();
     }
 
     private void onPlaceholderRegister(TabPlaceholderRegisterEvent e) {

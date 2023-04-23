@@ -118,10 +118,8 @@ public class AdvancedConditions {
     }
 
     public BiFunction<TabPlayer,TabPlayer,Boolean> check(TabPlayer viewer, TabPlayer target) {
-        for (BiFunction<TabPlayer, TabPlayer, Boolean> condition : subConditions.keySet()) {
-            viewer.sendMessage(condition == null ? "null" : condition.apply(viewer,target)+"",false);
+        for (BiFunction<TabPlayer, TabPlayer, Boolean> condition : subConditions.keySet())
             if (condition == null || condition.apply(viewer,target)) return condition;
-        }
         return null;
     }
 
