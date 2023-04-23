@@ -8,10 +8,7 @@ import org.bukkit.event.player.PlayerToggleSneakEvent;
 
 public class SpigotListener implements Listener {
 
-    private final TAB tab;
-    public SpigotListener() {
-        tab = TAB.getInstance();
-    }
+    private final TAB tab = TAB.getInstance();
 
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent e) {

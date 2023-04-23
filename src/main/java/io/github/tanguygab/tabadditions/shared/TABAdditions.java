@@ -9,6 +9,8 @@ import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.actionbar.ActionBarManager;
 import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions;
 import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager;
+import lombok.Getter;
+import lombok.Setter;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.FeatureManager;
@@ -29,45 +31,20 @@ import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
 public class TABAdditions {
 
-    private static TABAdditions instance;
-    private final Object plugin;
-    private final Platform platform;
-    public final File dataFolder;
-    private final TAB tab;
+    @Getter @Setter private static TABAdditions instance;
+    private final TAB tab = TAB.getInstance();
+    @Getter private final Object plugin;
+    @Getter private final Platform platform;
+    private final File dataFolder;
+    @Getter private ConfigurationFile config;
+    @Getter  private TranslationFile translation;
     public final List<String> features = new ArrayList<>();
 
-    private ConfigurationFile config;
-    private TranslationFile translation;
 
     public TABAdditions(Platform platform, Object plugin, File dataFolder) {
         this.dataFolder = dataFolder;
     	this.platform = platform;
     	this.plugin = plugin;
-    	tab = TAB.getInstance();
-    }
-    
-    public static void setInstance(TABAdditions instance) {
-    	TABAdditions.instance = instance;
-    }
-    
-    public static TABAdditions getInstance() {
-        return instance;
-    }
-    
-    public Platform getPlatform() {
-        return platform;
-    }
-    
-    public Object getPlugin() {
-        return plugin;
-    }
-
-    public ConfigurationFile getConfig() {
-        return config;
-    }
-
-    public TranslationFile getMsgs() {
-        return translation;
     }
 
     public void load() {

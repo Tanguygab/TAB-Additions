@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.spigot;
 
+import lombok.AllArgsConstructor;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
@@ -13,14 +14,11 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 
 import java.text.DecimalFormat;
 
+@AllArgsConstructor
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
 	private static final DecimalFormat format = new DecimalFormat("#.##");
-
-	public SpigotPlatform(TABAdditionsSpigot plugin) {
-		this.plugin = plugin;
-	}
 
 	@Override
 	public boolean isProxy() {

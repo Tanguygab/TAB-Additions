@@ -33,7 +33,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
             String subtitle = cfg.get("subtitle");
             if (title != null) addUsedPlaceholders(tab.getPlaceholderManager().detectPlaceholders(title));
             if (subtitle != null) addUsedPlaceholders(tab.getPlaceholderManager().detectPlaceholders(subtitle));
-            titles.put(title,new Title(name,title,subtitle));
+            titles.put(title,new Title(title,subtitle));
         });
 
         tab.getCPUManager().startRepeatingMeasuredTask(2000,this,"handling Title",()->{
@@ -103,7 +103,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
         if (toggled.contains(player.getUniqueId()))
             toggled.remove(player.getUniqueId());
         else toggled.add(player.getUniqueId());
-        player.sendMessage(toggled.contains(player.getUniqueId()) ? plugin.getMsgs().titleOff : plugin.getMsgs().titleOn,true);
+        player.sendMessage(toggled.contains(player.getUniqueId()) ? plugin.getTranslation().titleOff : plugin.getTranslation().titleOn,true);
         refresh(player,true);
         return true;
     }

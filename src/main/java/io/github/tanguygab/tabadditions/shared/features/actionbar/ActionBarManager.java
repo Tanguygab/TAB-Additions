@@ -33,7 +33,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         barsConfig.forEach((bar,cfg)->{
             String text = cfg.get("text");
             if (text != null) addUsedPlaceholders(tab.getPlaceholderManager().detectPlaceholders(text));
-            bars.put(bar,new ActionBarLine(bar,text,cfg.containsKey("condition") ? Condition.getCondition(cfg.get("condition")) : null));
+            bars.put(bar,new ActionBarLine(text,cfg.containsKey("condition") ? Condition.getCondition(cfg.get("condition")) : null));
         });
 
         tab.getCPUManager().startRepeatingMeasuredTask(2000,this,"handling ActionBar",()->{
@@ -96,7 +96,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         if (toggled.contains(player.getUniqueId()))
             toggled.remove(player.getUniqueId());
         else toggled.add(player.getUniqueId());
-        player.sendMessage(toggled.contains(player.getUniqueId()) ? plugin.getMsgs().actionBarOff : plugin.getMsgs().actionBarOn,true);
+        player.sendMessage(toggled.contains(player.getUniqueId()) ? plugin.getTranslation().actionBarOff : plugin.getTranslation().actionBarOn,true);
         refresh(player,true);
         return true;
     }
