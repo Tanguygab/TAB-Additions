@@ -7,13 +7,13 @@ import java.util.*;
 import io.github.tanguygab.tabadditions.shared.commands.NametagCmd;
 import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.actionbar.ActionBarManager;
+import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions;
 import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.chat.EnumChatFormat;
-import me.neznamy.tab.shared.chat.IChatBaseComponent;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile;
 import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
@@ -119,6 +119,11 @@ public class TABAdditions {
             registerFeature(new ConditionalAppearance(plugin,config.getBoolean("conditional-appearance.show-by-default",true)));
         if (tab.getTeamManager() != null) tab.getCommand().registerSubCommand(new NametagCmd(tab.getTeamManager()));
 
+        AdvancedConditions.clearConditions();
+        Map<String, Map<String, String>> conditions = config.getConfigurationSection("advanced-conditions");
+        conditions.forEach(AdvancedConditions::new);
+        AdvancedConditions.finishSetups();
+
         if (platform.isProxy()) return;
         int nametagInRange = config.getInt("nametag-in-range", 0);
         if (nametagInRange != 0 && tab.getTeamManager() != null) registerFeature(new NametagInRange(nametagInRange));
@@ -160,7 +165,7 @@ public class TABAdditions {
         if (str == null) return "";
         if (!str.contains("%")) return EnumChatFormat.color(str);
         str = parsePlaceholders(str,p,null);
-        return EnumChatFormat.color(str);
+        return str;
     }
 
     public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer) {
@@ -190,12 +195,4 @@ public class TABAdditions {
         return tab.getConfiguration().getPlayerDataFile();
     }
 
-    public String toFlatText(IChatBaseComponent component) {
-        StringBuilder builder = new StringBuilder();
-        if (component.getModifier().getColor() != null) builder.append("#").append(component.getModifier().getColor().getHexCode());
-        builder.append(component.getModifier().getMagicCodes());
-        if (component.getText() != null) builder.append(component.getText());
-        component.getExtra().forEach(child->builder.append(toFlatText(child)));
-        return builder.toString();
-    }
 }
