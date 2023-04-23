@@ -5,7 +5,6 @@ import me.neznamy.tab.api.team.TeamManager;
 import me.neznamy.tab.shared.command.SubCommand;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
-import java.util.Arrays;
 import java.util.List;
 
 public class NametagCmd extends SubCommand {

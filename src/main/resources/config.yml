@@ -1,13 +1,13 @@
-features:
-  nametag-in-range: 0
-  tablist-names-radius: 0
-  conditional-nametags: false
-  conditional-appearance: false
+nametag-in-range: 0
+tabname-in-range: 0
 
 conditional-nametags:
+  enabled: false
   show-by-default: false
-appearance-nametags:
+conditional-appearance:
+  enabled: false
   show-by-default: true
+
 
 actionbars:
   enabled: false

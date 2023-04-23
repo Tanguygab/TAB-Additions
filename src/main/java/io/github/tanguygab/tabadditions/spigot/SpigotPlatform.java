@@ -1,61 +1,27 @@
 package io.github.tanguygab.tabadditions.spigot;
 
-import github.scarsz.discordsrv.DiscordSRV;
-
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.platforms.bukkit.BukkitTabPlayer;
-import net.essentialsx.api.v2.services.discord.DiscordService;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
-import org.bukkit.Sound;
-import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.SimpleCommandMap;
-import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
-import org.jetbrains.annotations.NotNull;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Method;
-import java.util.*;
 
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
-	private boolean chatSuggestions;
-	private Method getCommandMap;
-	private Constructor<?> chatCompleteConstructor;
-	private Class<?> actionEnum;
 
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
-
-		try {
-			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
-
-			Class<?> chatCompleteClass = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket");
-			actionEnum = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket$Action");
-			chatCompleteConstructor = chatCompleteClass.getConstructor(actionEnum,List.class);
-			chatSuggestions = true;
-		} catch (Exception ignored) {
-			chatSuggestions = false;
-		}
 	}
 
 	@Override
 	public boolean isProxy() {
 		return false;
-	}
-
-	@Override
-	public boolean isPluginEnabled(String plugin) {
-		return this.plugin.getServer().getPluginManager().isPluginEnabled(plugin);
 	}
 
 	@Override
@@ -96,74 +62,14 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public void sendSound(TabPlayer p, String sound) {
-		Player player = (Player) p.getPlayer();
-		try {player.playSound(player.getLocation(), Sound.valueOf(sound), 1, 1);}
-		catch (Exception ignored) {}
-	}
-
-	@Override
 	public void reload() {
 		HandlerList.unregisterAll(plugin);
 		plugin.getServer().getPluginManager().registerEvents(new SpigotListener(), plugin);
 	}
 
 	@Override
-	public void registerCommand(String cmd, boolean bool, String... aliases) {
-		if (!bool) return;
-		try {
-			Command command = new BukkitCommand(cmd,"","/"+cmd,Arrays.asList(aliases)) {
-				@Override public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, String[] args) {return true;}
-			};
-			((SimpleCommandMap)getCommandMap.invoke(plugin.getServer())).register(cmd,"chat",command);
-		} catch (Exception e) {e.printStackTrace();}
-	}
-
-	@Override
 	public void disable() {
 		plugin.getPluginLoader().disablePlugin(plugin);
-	}
-
-	@Override
-	public void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, String plugin) {
-		Player p = this.plugin.getServer().getPlayer(uuid);
-		if (plugin.equalsIgnoreCase("DiscordSRV") && isPluginEnabled("DiscordSRV")) sendDiscordSRV(p,msg,channel,viewCondition);
-		if (plugin.equalsIgnoreCase("EssentialsX") && isPluginEnabled("EssentialsDiscord") && !viewCondition) sendEssentialsX(p,msg);
-	}
-
-	public void sendDiscordSRV(Player p, String msg, String channel, boolean viewCondition) {
-		DiscordSRV discord = DiscordSRV.getPlugin();
-		if (!viewCondition)
-			discord.processChatMessage(p, msg, discord.getMainChatChannel(), false);
-		else if (!discord.getOptionalChannel(channel).equals(discord.getMainChatChannel()))
-			discord.processChatMessage(p, msg, discord.getOptionalChannel(channel),false);
-	}
-
-	public void sendEssentialsX(Player p, String msg) {
-		DiscordService api = plugin.getServer().getServicesManager().load(DiscordService.class);
-		assert api != null;
-		api.sendChatMessage(p, msg);
-	}
-
-	@Override
-	public void addToChatComplete(TabPlayer p, List<String> emojis) {
-		try {
-			Object addAction = actionEnum.getEnumConstants()[0];
-			Object packet = chatCompleteConstructor.newInstance(addAction,emojis);
-			((BukkitTabPlayer)p).sendPacket(packet);
-		} catch (Exception e) {e.printStackTrace();}
-	}
-	@Override
-	public void removeFromChatComplete(TabPlayer p, List<String> emojis) {
-		try {
-			Object removeAction = actionEnum.getEnumConstants()[1];
-			Object packet = chatCompleteConstructor.newInstance(removeAction,emojis);
-			((BukkitTabPlayer)p).sendPacket(packet);
-		} catch (Exception e) {e.printStackTrace();}
-	}
-	@Override
-	public boolean supportsChatSuggestions() {
-		return chatSuggestions;
 	}
 
 	@Override

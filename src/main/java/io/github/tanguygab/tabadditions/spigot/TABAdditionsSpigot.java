@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.spigot;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 
@@ -18,35 +17,4 @@ public class TABAdditionsSpigot extends JavaPlugin {
         TABAdditions.getInstance().disable();
     }
 
-    public String itemStack(ItemStack item) {
-        String pack = getServer().getClass().getPackage().getName().split("\\.")[3];
-        try {
-            return Class.forName("net.minecraft.server." + pack + ".ItemStack")
-                    .getMethod("save", Class.forName("net.minecraft.server." + pack + ".NBTTagCompound"))
-                    .invoke(Class.forName("org.bukkit.craftbukkit." + pack + ".inventory.CraftItemStack")
-                                    .getMethod("asNMSCopy", ItemStack.class).invoke(null, item),
-                            Class.forName("net.minecraft.server." + pack + ".NBTTagCompound")
-                                    .getConstructor().newInstance()).toString();
-        } catch (Exception e) {
-            try {
-                return Class.forName("net.minecraft.world.item.ItemStack")
-                        .getMethod("save", Class.forName("net.minecraft.nbt.NBTTagCompound"))
-                        .invoke(Class.forName("org.bukkit.craftbukkit." + pack + ".inventory.CraftItemStack")
-                                        .getMethod("asNMSCopy", ItemStack.class).invoke(null, item),
-                                Class.forName("net.minecraft.nbt.NBTTagCompound")
-                                        .getConstructor().newInstance()).toString();
-            } catch (Exception e2) {
-                try {
-                    return Class.forName("net.minecraft.world.item.ItemStack")
-                            .getMethod("b", Class.forName("net.minecraft.nbt.NBTTagCompound"))
-                            .invoke(Class.forName("org.bukkit.craftbukkit." + pack + ".inventory.CraftItemStack")
-                                            .getMethod("asNMSCopy", ItemStack.class).invoke(null, item),
-                                    Class.forName("net.minecraft.nbt.NBTTagCompound")
-                                            .getConstructor().newInstance()).toString();
-                } catch (Exception e3) {
-                    return null;
-                }
-            }
-        }
-    }
 }

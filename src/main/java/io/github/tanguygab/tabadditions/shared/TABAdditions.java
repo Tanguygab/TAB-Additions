@@ -7,18 +7,15 @@ import java.util.*;
 import io.github.tanguygab.tabadditions.shared.commands.NametagCmd;
 import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.actionbar.ActionBarManager;
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager;
-import me.leoko.advancedban.manager.PunishmentManager;
-import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.chat.EnumChatFormat;
 import me.neznamy.tab.shared.chat.IChatBaseComponent;
-import me.neznamy.tab.shared.config.ConfigurationFile;
-import me.neznamy.tab.shared.config.YamlConfigurationFile;
+import me.neznamy.tab.shared.config.file.ConfigurationFile;
+import me.neznamy.tab.shared.config.file.YamlConfigurationFile;
 import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
 import me.neznamy.tab.shared.features.types.TabFeature;
@@ -27,7 +24,6 @@ import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
 import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
 import me.neznamy.tab.shared.placeholders.ServerPlaceholderImpl;
 import me.neznamy.tab.shared.platform.TabPlayer;
-import org.bukkit.entity.Player;
 
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
@@ -39,17 +35,11 @@ public class TABAdditions {
     public final File dataFolder;
     private final TAB tab;
     public final List<String> features = new ArrayList<>();
-    public boolean enabled;
 
     private ConfigurationFile config;
-    private ConfigurationFile chatConfig;
     private TranslationFile translation;
-    public int nametagInRange = 0;
-    public int tablistNamesRadius = 0;
-    public boolean condNametagsEnabled;
-    private boolean condAppearenceEnabled;
 
-    public TABAdditions(Platform platform, Object plugin,File dataFolder) {
+    public TABAdditions(Platform platform, Object plugin, File dataFolder) {
         this.dataFolder = dataFolder;
     	this.platform = platform;
     	this.plugin = plugin;
@@ -81,7 +71,6 @@ public class TABAdditions {
     }
 
     public void load() {
-        enabled = true;
         loadFiles();
         reload();
         tab.getEventBus().register(TabLoadEvent.class,e->platform.runTask(this::reload));
@@ -90,14 +79,7 @@ public class TABAdditions {
     public void loadFiles() {
         try {
             config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
-            chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
             translation = new TranslationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml"));
-
-            condNametagsEnabled = config.getBoolean("features.conditional-nametags",false);
-            if (platform.isProxy()) return;
-            nametagInRange = config.getInt("features.nametag-in-range", 0);
-            tablistNamesRadius = config.getInt("features.tablist-names-radius", 0);
-            condAppearenceEnabled = config.getBoolean("features.conditional-appearance",false);
         } catch (IOException e) {
             platform.disable();
             e.printStackTrace();
@@ -120,8 +102,6 @@ public class TABAdditions {
                 ((UnLoadable)fm.getFeature(feature)).unload();
             fm.unregisterFeature(feature);
         });
-
-        enabled = false;
     }
 
     public void registerFeature(TabFeature feature) {
@@ -133,14 +113,17 @@ public class TABAdditions {
     private void loadFeatures() {
         if (config.getBoolean("actionbars.enabled",false)) registerFeature(new ActionBarManager());
         if (config.getBoolean("titles.enabled",false)) registerFeature(new TitleManager());
-        if (chatConfig.getBoolean("enabled",false)) registerFeature(new ChatManager(chatConfig));
-        if (condNametagsEnabled) registerFeature(new ConditionalNametags());
-        if (condAppearenceEnabled) registerFeature(new ConditionalAppearance());
+        if (config.getBoolean("conditional-nametags.enabled",false) && tab.getTeamManager() != null)
+            registerFeature(new ConditionalNametags(config.getBoolean("appearance-nametags.show-by-default",true)));
+        if (config.getBoolean("conditional-appearance.enabled",false))
+            registerFeature(new ConditionalAppearance(plugin,config.getBoolean("conditional-appearance.show-by-default",true)));
         if (tab.getTeamManager() != null) tab.getCommand().registerSubCommand(new NametagCmd(tab.getTeamManager()));
 
         if (platform.isProxy()) return;
-        if (nametagInRange != 0) registerFeature(new NametagInRange());
-        if (tablistNamesRadius != 0) registerFeature(new TablistNamesRadius());
+        int nametagInRange = config.getInt("nametag-in-range", 0);
+        if (nametagInRange != 0 && tab.getTeamManager() != null) registerFeature(new NametagInRange(nametagInRange));
+        int tablistInRange = config.getInt("tabname-in-range", 0);
+        if (tablistInRange != 0) registerFeature(new TabnameInRange(plugin,tablistInRange));
     }
 
     private void loadPlaceholders() {
@@ -181,8 +164,10 @@ public class TABAdditions {
     }
 
     public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer) {
-        List<String> list = tab.getPlaceholderManager().detectPlaceholders(str);
-        for (String pl : list) {
+        return parsePlaceholders(str,sender,viewer,tab.getPlaceholderManager().detectPlaceholders(str));
+    }
+    public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, List<String> placeholders) {
+        for (String pl : placeholders) {
             Placeholder placeholder = tab.getPlaceholderManager().getPlaceholder(pl);
             String output = pl;
             if (placeholder instanceof PlayerPlaceholderImpl) output = ((PlayerPlaceholderImpl) placeholder).getLastValue(sender);
@@ -191,46 +176,6 @@ public class TABAdditions {
             str = str.replace(pl, output);
         }
         return EnumChatFormat.color(str);
-    }
-
-
-
-    //so, I have no clue what I did here, but don't worry, I'll change it, someday...
-    public boolean isConditionMet(String str, TabPlayer sender, TabPlayer viewer, boolean checkForViewer) {
-        if (sender == null || viewer == null) return false;
-        String conditionname = TABAdditions.getInstance().parsePlaceholders(str,sender,viewer);
-        for (String cond : conditionname.split(";")) {
-            if (cond.startsWith("!inRange:") || cond.startsWith("inRange:")) {
-                try {
-                    int range = Integer.parseInt(cond.replace("!", "").replace("inRange:", ""));
-                    boolean result = isInRange(sender, viewer, range);
-                    if (cond.startsWith("!") && result) return false;
-                    if (!cond.startsWith("!") && !result) return false;
-                } catch (NumberFormatException ignored) {}
-            } else {
-                Condition condition = Condition.getCondition(cond);
-                if (condition != null && !condition.isMet(checkForViewer ? viewer : sender))
-                    return false;
-            }
-        }
-        return true;
-    }
-
-    public boolean isInRange(TabPlayer sender,TabPlayer viewer,int range) {
-        if (platform.isProxy()) return true;
-        int zone = (int) Math.pow(range, 2);
-        return sender.getWorld().equals(viewer.getWorld()) && ((Player) sender.getPlayer()).getLocation().distanceSquared(((Player) viewer.getPlayer()).getLocation()) < zone;
-    }
-
-    public boolean isMuted(TabPlayer p) {
-        if (platform.isPluginEnabled("AdvancedBan")) {
-            PunishmentManager punish = PunishmentManager.get();
-
-            if (UUIDManager.get().getMode() != UUIDManager.FetcherMode.DISABLED)
-                return punish.isMuted(p.getUniqueId().toString().replace("-", ""));
-            return punish.isMuted(p.getName().toLowerCase());
-        }
-        return false;
     }
 
     public TabPlayer getPlayer(String name) {

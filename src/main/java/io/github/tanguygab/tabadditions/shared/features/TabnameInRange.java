@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
-import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.types.JoinListener;
 import me.neznamy.tab.shared.features.types.TabFeature;
@@ -10,14 +9,14 @@ import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
-public class TablistNamesRadius extends TabFeature implements UnLoadable, JoinListener {
+public class TabnameInRange extends TabFeature implements UnLoadable, JoinListener {
 
     private final Plugin plugin;
-    private int task = -1;
+    private int task;
     private boolean enabled = true;
 
-    public TablistNamesRadius() {
-        plugin = (Plugin) TABAdditions.getInstance().getPlugin();
+    public TabnameInRange(Object plugin, int range) {
+        this.plugin = (Plugin) plugin;
         for (Player p : Bukkit.getServer().getOnlinePlayers()) {
             for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
                 if (p != p2)
@@ -25,8 +24,8 @@ public class TablistNamesRadius extends TabFeature implements UnLoadable, JoinLi
             }
         }
 
-        task = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(plugin,() -> {
-            int zone = (int) Math.pow(TABAdditions.getInstance().tablistNamesRadius, 2);
+        task = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(this.plugin,() -> {
+            int zone = (int) Math.pow(range, 2);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                     if (p != player

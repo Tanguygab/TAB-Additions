@@ -1,6 +1,8 @@
 package io.github.tanguygab.tabadditions.bungee;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import net.md_5.bungee.api.CommandSender;
+import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.HashMap;
@@ -26,7 +28,14 @@ public final class TABAdditionsBungeeCord extends Plugin {
     public void onEnable() {
         TABAdditions.setInstance(new TABAdditions(new BungeePlatform(this), this,getDataFolder()));
         TABAdditions.getInstance().load();
-        getProxy().registerChannel("tabadditions:channel");
+        getProxy().getPluginManager().registerCommand(this, new Command("toggletitle") {
+            @Override
+            public void execute(CommandSender sender, String[] args) {}
+        });
+        getProxy().getPluginManager().registerCommand(this, new Command("toggleactionbar") {
+            @Override
+            public void execute(CommandSender sender, String[] args) {}
+        });
     }
 
     @Override

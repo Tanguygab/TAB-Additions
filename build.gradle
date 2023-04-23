@@ -51,10 +51,7 @@ repositories {
 dependencies {
     compileOnly 'net.md-5:bungeecord-api:1.19-R0.1-SNAPSHOT'
     compileOnly 'org.spigotmc:spigot-api:1.19-R0.1-SNAPSHOT'
-    compileOnly 'com.discordsrv:discordsrv:1.25.0'
-    compileOnly 'net.essentialsx:EssentialsXDiscord:2.19.4'
-    compileOnly 'com.loohp:InteractiveChat:4.2.3.13'
-    compileOnly files('../../dependencies/TAB-4.0.0-SNAPSHOT.jar','../../dependencies/AdvancedBan.jar')
+    compileOnly files('../../dependencies/TAB-4.0.0-SNAPSHOT.jar')
 
 }
 

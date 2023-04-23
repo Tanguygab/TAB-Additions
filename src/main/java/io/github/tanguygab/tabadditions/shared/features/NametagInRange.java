@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
-import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.TAB;
@@ -11,10 +10,10 @@ public class NametagInRange extends TabFeature implements JoinListener, UnLoadab
 
     private final TAB tab;
 
-    public NametagInRange() {
+    public NametagInRange(int range) {
         tab = TAB.getInstance();
         tab.getCPUManager().startRepeatingMeasuredTask(500,this,"handling Nametag In Range",()->{
-            int zone = (int) Math.pow(TABAdditions.getInstance().nametagInRange, 2);
+            int zone = (int) Math.pow(range, 2);
             for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 TabPlayer p = tab.getPlayer(player.getUniqueId());
                 for (Player player2 : Bukkit.getServer().getOnlinePlayers()) {

@@ -4,7 +4,7 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.TitleCmd;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.chat.IChatBaseComponent;
-import me.neznamy.tab.shared.config.ConfigurationFile;
+import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
@@ -25,10 +25,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
 
         ConfigurationFile config = plugin.getConfig();
         toggleCmd = config.getBoolean("titles./toggletitle",true);
-        if (toggleCmd) {
-            toggled.addAll(plugin.getPlayerData().getStringList("title-off", new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toList()));
-            plugin.getPlatform().registerCommand("toggletitle",true);
-        }
+        if (toggleCmd) toggled.addAll(plugin.getPlayerData().getStringList("title-off", new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toList()));
 
         Map<String, Map<String,String>> titlesConfig = config.getConfigurationSection("titles.titles");
         titlesConfig.forEach((name,cfg)->{

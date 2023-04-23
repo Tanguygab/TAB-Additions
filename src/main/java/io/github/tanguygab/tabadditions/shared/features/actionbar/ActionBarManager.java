@@ -3,7 +3,7 @@ package io.github.tanguygab.tabadditions.shared.features.actionbar;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.ActionBarCmd;
 import me.neznamy.tab.shared.chat.IChatBaseComponent;
-import me.neznamy.tab.shared.config.ConfigurationFile;
+import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
@@ -27,10 +27,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
 
         ConfigurationFile config = plugin.getConfig();
         toggleCmd = config.getBoolean("actionbars./toggleactionbar",true);
-        if (toggleCmd) {
-            toggled.addAll(plugin.getPlayerData().getStringList("actionbar-off", new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toList()));
-            plugin.getPlatform().registerCommand("toggleactionbar",true);
-        }
+        if (toggleCmd) toggled.addAll(plugin.getPlayerData().getStringList("actionbar-off", new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toList()));
 
         Map<String,Map<String,String>> barsConfig = config.getConfigurationSection("actionbars.bars");
         barsConfig.forEach((bar,cfg)->{
