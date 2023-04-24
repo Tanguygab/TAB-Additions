@@ -3,6 +3,7 @@ package io.github.tanguygab.tabadditions.shared;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import io.github.tanguygab.tabadditions.shared.commands.NametagCmd;
 import io.github.tanguygab.tabadditions.shared.features.*;
@@ -170,6 +171,12 @@ public class TABAdditions {
 
     public ConfigurationFile getPlayerData() {
         return tab.getConfiguration().getPlayerDataFile();
+    }
+    public List<UUID> loadData(String data, boolean enabled) {
+        return enabled ? getPlayerData().getStringList(data, new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toCollection(ArrayList::new)) : List.of();
+    }
+    public void unloadData(String data, List<UUID> list, boolean enabled) {
+        if (enabled) getPlayerData().set(data, list.stream().map(UUID::toString).collect(Collectors.toList()));
     }
 
 }

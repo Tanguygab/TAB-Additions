@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
+import lombok.Getter;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.types.JoinListener;
 import me.neznamy.tab.shared.features.types.TabFeature;
@@ -11,8 +12,9 @@ import org.bukkit.plugin.Plugin;
 
 public class TabnameInRange extends TabFeature implements UnLoadable, JoinListener {
 
+    @Getter private final String featureName = "Tabname In Range";
     private final Plugin plugin;
-    private int task;
+    private final int task;
     private boolean enabled = true;
 
     public TabnameInRange(Object plugin, int range) {
@@ -46,12 +48,6 @@ public class TabnameInRange extends TabFeature implements UnLoadable, JoinListen
             }
         },0,10);
     }
-
-    @Override
-    public String getFeatureName() {
-        return "Tablist Names Radius";
-    }
-
 
     @Override
     public void unload() {

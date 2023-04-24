@@ -1,0 +1,76 @@
+enabled: false
+cooldown: 0
+/togglechat: true
+/ignore: true
+
+formats:
+  vip:
+    name: "&eVIP"
+    condition: "permission:group.vip"
+    view-condition: "permission:group.vip"
+    display:
+      prefix:
+        text: "%format-name% %player% &8»"
+        hover:
+          - "&7VIP only format!"
+          - ""
+          - "Click to open our store"
+          - "and buy VIP!"
+        click: "url:https://my.serverstore.com"
+      message:
+        text: "&f%message%"
+        hover: "%date%"
+  default:
+    display:
+      prefix:
+        text: "&7%player% &8»"
+      message:
+        text: "&f%message%"
+        hover: "%date%"
+commands-formats:
+  localchat:
+    name: "&2LocalChat"
+    view-condition: "inRange"
+    channel: "local"
+    display:
+      prefix:
+        text: "%chat-format% &a%player% &8»"
+        hover: "Only players within 10 blocks can see this message!"
+      message:
+        text: "&f%message%"
+        hover: "%date%"
+  staffchat:
+    name: "&4StaffChat"
+    condition: "permission:tab.staff"
+    view-condition: "permission:tab.staff"
+    display:
+      prefix:
+        text: "%chat-format% &c%player% &8»"
+        hover: "&7Only staff members can see this message!"
+        click: "suggest:/staffchat"
+      message:
+        text: "&f%message%"
+        hover: "%date%"
+
+
+
+embed-urls:
+  enabled: true
+  auto-add-http: false
+  output:
+    text: "&8&l[&4Link&8&l]"
+    hover:
+      - "&7URL: %url%"
+      - "\n"
+      - "&7Click to open"
+    click: "url:%url%"
+
+clearchat:
+  enabled: true
+  amount: 100
+  line: ""
+
+discord-support:
+  format: "%msg%"
+  DiscordSRV: false
+  EssentialsX: false

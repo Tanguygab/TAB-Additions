@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
+import lombok.Getter;
 import me.neznamy.tab.api.team.TeamManager;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
@@ -9,6 +10,8 @@ import me.neznamy.tab.shared.placeholders.conditions.Condition;
 
 public class ConditionalNametags extends TabFeature implements JoinListener, Refreshable, UnLoadable {
 
+    @Getter private final String featureName = "Conditional Nametags";
+    @Getter private final String refreshDisplayName = "&aConditional Nametags&r";
     private final TAB tab;
     private final boolean def;
 
@@ -19,15 +22,6 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
             p.loadPropertyFromConfig(this,"nametag-condition");
             refresh(p,true);
         }
-    }
-
-    @Override
-    public String getFeatureName() {
-        return "Conditional Nametags";
-    }
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aConditional Nametags&r";
     }
 
     @Override

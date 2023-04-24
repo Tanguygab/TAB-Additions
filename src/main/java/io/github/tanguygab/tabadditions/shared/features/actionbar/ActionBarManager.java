@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.actionbar;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.ActionBarCmd;
+import lombok.Getter;
 import me.neznamy.tab.shared.chat.IChatBaseComponent;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.features.types.*;
@@ -10,14 +11,16 @@ import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class ActionBarManager extends TabFeature implements UnLoadable, CommandListener, JoinListener, Refreshable {
+
+    @Getter private final String featureName = "ActionBar";
+    @Getter private final String refreshDisplayName = "&aActionBar&r";
 
     private final TABAdditions plugin;
     private final Map<String, ActionBarLine> bars = new LinkedHashMap<>();
     private final Map<TabPlayer, String> announcedBars = new HashMap<>();
-    private final List<UUID> toggled = new ArrayList<>();
+    private final List<UUID> toggled;
     private final boolean toggleCmd;
 
     public ActionBarManager() {
@@ -27,7 +30,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
 
         ConfigurationFile config = plugin.getConfig();
         toggleCmd = config.getBoolean("actionbars./toggleactionbar",true);
-        if (toggleCmd) toggled.addAll(plugin.getPlayerData().getStringList("actionbar-off", new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toList()));
+        toggled = plugin.loadData("actionbar-off",toggleCmd);
 
         Map<String,Map<String,String>> barsConfig = config.getConfigurationSection("actionbars.bars");
         barsConfig.forEach((bar,cfg)->{
@@ -44,17 +47,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
 
     @Override
     public void unload() {
-        if (toggleCmd) plugin.getPlayerData().set("actionbar-off", toggled.stream().map(UUID::toString).collect(Collectors.toList()));
-    }
-
-    @Override
-    public String getFeatureName() {
-        return "ActionBar";
-    }
-
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aActionBar&r";
+        plugin.unloadData("actionbar-off",toggled,toggleCmd);
     }
 
     @Override

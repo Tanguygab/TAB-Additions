@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared;
 
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import net.kyori.adventure.audience.Audience;
 
 public abstract class Platform {
 
@@ -18,4 +19,6 @@ public abstract class Platform {
 	public abstract void disable();
 
 	public abstract void runTask(Runnable run);
+
+	public abstract Audience getAudience(TabPlayer p);
 }

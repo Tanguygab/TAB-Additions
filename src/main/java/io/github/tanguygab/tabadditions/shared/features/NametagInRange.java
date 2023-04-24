@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
+import lombok.Getter;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.TAB;
@@ -8,6 +9,7 @@ import org.bukkit.entity.Player;
 
 public class NametagInRange extends TabFeature implements JoinListener, UnLoadable {
 
+    @Getter private final String featureName = "Nametag In Range";
     private final TAB tab;
 
     public NametagInRange(int range) {
@@ -28,11 +30,6 @@ public class NametagInRange extends TabFeature implements JoinListener, UnLoadab
                 }
             }
         });
-    }
-
-    @Override
-    public String getFeatureName() {
-        return "Nametag In Range";
     }
 
     @Override

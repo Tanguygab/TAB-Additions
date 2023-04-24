@@ -2,6 +2,7 @@ package io.github.tanguygab.tabadditions.shared.features.titles;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.TitleCmd;
+import lombok.Getter;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.chat.IChatBaseComponent;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
@@ -9,14 +10,16 @@ import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class TitleManager extends TabFeature implements UnLoadable, Refreshable, CommandListener, JoinListener {
+
+    @Getter private final String featureName = "Title";
+    @Getter private final String refreshDisplayName = "&aTitle&r";
 
     private final TABAdditions plugin;
     private final Map<String, Title> titles = new HashMap<>();
     private final Map<TabPlayer, String> announcedTitles = new HashMap<>();
-    private final List<UUID> toggled = new ArrayList<>();
+    private final List<UUID> toggled;
     private final boolean toggleCmd;
     public TitleManager() {
         plugin = TABAdditions.getInstance();
@@ -25,7 +28,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
 
         ConfigurationFile config = plugin.getConfig();
         toggleCmd = config.getBoolean("titles./toggletitle",true);
-        if (toggleCmd) toggled.addAll(plugin.getPlayerData().getStringList("title-off", new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toList()));
+        toggled = plugin.loadData("title-off",toggleCmd);
 
         Map<String, Map<String,String>> titlesConfig = config.getConfigurationSection("titles.titles");
         titlesConfig.forEach((name,cfg)->{
@@ -43,17 +46,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
     }
     @Override
     public void unload() {
-        if (toggleCmd) plugin.getPlayerData().set("title-off", toggled.stream().map(UUID::toString).collect(Collectors.toList()));
-    }
-
-    @Override
-    public String getFeatureName() {
-        return "Title";
-    }
-
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aTitle&r";
+        plugin.unloadData("title-off",toggled,toggleCmd);
     }
 
     @Override

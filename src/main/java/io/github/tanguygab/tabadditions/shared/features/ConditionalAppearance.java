@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
+import lombok.Getter;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.types.*;
@@ -11,9 +12,11 @@ import org.bukkit.plugin.Plugin;
 
 public class ConditionalAppearance extends TabFeature implements Refreshable, UnLoadable, JoinListener {
 
+    @Getter private final String featureName = "Conditional Appearance";
     private final TAB tab;
     private final Plugin plugin;
     private final boolean def;
+
 
     public ConditionalAppearance(Object plugin, boolean def) {
         tab = TAB.getInstance();
@@ -23,11 +26,6 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
             p.loadPropertyFromConfig(this,"appearance-condition");
             refresh(p,true);
         }
-    }
-
-    @Override
-    public String getFeatureName() {
-        return "Conditional Appearance";
     }
     @Override
     public String getRefreshDisplayName() {

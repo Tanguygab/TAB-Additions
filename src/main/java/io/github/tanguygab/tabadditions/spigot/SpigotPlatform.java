@@ -1,9 +1,10 @@
 package io.github.tanguygab.tabadditions.spigot;
 
-import lombok.AllArgsConstructor;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
@@ -14,11 +15,16 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 
 import java.text.DecimalFormat;
 
-@AllArgsConstructor
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
+	private final BukkitAudiences kyori;
 	private static final DecimalFormat format = new DecimalFormat("#.##");
+
+	public SpigotPlatform(TABAdditionsSpigot plugin) {
+		this.plugin = plugin;
+		kyori = BukkitAudiences.create(plugin);
+	}
 
 	@Override
 	public boolean isProxy() {
@@ -74,5 +80,10 @@ public class SpigotPlatform extends Platform {
 	@Override
 	public void runTask(Runnable run) {
 		plugin.getServer().getScheduler().runTask(plugin,run);
+	}
+
+	@Override
+	public Audience getAudience(TabPlayer p) {
+		return kyori.player(p.getUniqueId());
 	}
 }
