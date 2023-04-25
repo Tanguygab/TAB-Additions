@@ -30,6 +30,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
 
         ConfigurationFile config = plugin.getConfig();
         toggleCmd = config.getBoolean("actionbars./toggleactionbar",true);
+        if (toggleCmd) plugin.getPlatform().registerCommand("toggleactionbar");
         toggled = plugin.loadData("actionbar-off",toggleCmd);
 
         Map<String,Map<String,String>> barsConfig = config.getConfigurationSection("actionbars.bars");

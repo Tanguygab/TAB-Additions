@@ -1,4 +1,6 @@
 actionbars_on: '&aYou will now receive new actionbars!'
-actionbars_off: '&cYou won''t receive any new actionbars!'
+actionbars_off: '&cYou won''t receive any new actionbar!'
 titles_on: '&aYou will now receive new titles!'
-titles_off: '&cYou won''t receive any new titles!'
+titles_off: '&cYou won''t receive any new title!'
+emojis_on: '&aYou will now see emojis in chat!'
+emojis_off: '&cYou won''t see any emojis in chat!'

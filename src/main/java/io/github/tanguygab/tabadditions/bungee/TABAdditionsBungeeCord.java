@@ -28,14 +28,6 @@ public final class TABAdditionsBungeeCord extends Plugin {
     public void onEnable() {
         TABAdditions.setInstance(new TABAdditions(new BungeePlatform(this), this,getDataFolder()));
         TABAdditions.getInstance().load();
-        getProxy().getPluginManager().registerCommand(this, new Command("toggletitle") {
-            @Override
-            public void execute(CommandSender sender, String[] args) {}
-        });
-        getProxy().getPluginManager().registerCommand(this, new Command("toggleactionbar") {
-            @Override
-            public void execute(CommandSender sender, String[] args) {}
-        });
     }
 
     @Override

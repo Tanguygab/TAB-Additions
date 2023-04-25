@@ -1,29 +1,59 @@
 package io.github.tanguygab.tabadditions.spigot;
 
+import github.scarsz.discordsrv.DiscordSRV;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
+import me.neznamy.tab.platforms.bukkit.BukkitTabPlayer;
+import net.essentialsx.api.v2.services.discord.DiscordService;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
 import org.bukkit.Location;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.SimpleCommandMap;
+import org.bukkit.command.defaults.BukkitCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
 
 import io.github.tanguygab.tabadditions.shared.Platform;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.text.DecimalFormat;
+import java.util.List;
+import java.util.UUID;
 
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
-	private final BukkitAudiences kyori;
+	private BukkitAudiences kyori;
 	private static final DecimalFormat format = new DecimalFormat("#.##");
+
+	private boolean chatSuggestions;
+	private Method getCommandMap;
+	private Constructor<?> chatCompleteConstructor;
+	private Class<?> actionEnum;
 
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
-		kyori = BukkitAudiences.create(plugin);
+		try {
+			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
+
+			Class<?> chatCompleteClass = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket");
+			actionEnum = Class.forName("net.minecraft.network.protocol.game.ClientboundCustomChatCompletionsPacket$Action");
+			chatCompleteConstructor = chatCompleteClass.getConstructor(actionEnum,List.class);
+			chatSuggestions = true;
+		} catch (Exception ignored) {
+			chatSuggestions = false;
+		}
 	}
 
 	@Override
@@ -53,6 +83,21 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
+	public void registerCommand(String cmd, String... aliases) {
+		try {
+			Command command = new BukkitCommand(cmd,"","/"+cmd,List.of(aliases)) {
+				@Override public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, String[] args) {return true;}
+			};
+			((SimpleCommandMap)getCommandMap.invoke(plugin.getServer())).register(cmd,"chat",command);
+		} catch (Exception e) {e.printStackTrace();}
+	}
+
+	@Override
+	public boolean isPluginEnabled(String plugin) {
+		return this.plugin.getServer().getPluginManager().isPluginEnabled(plugin);
+	}
+
+	@Override
 	public void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout) {
 		try {
 			((Player) p.getPlayer()).sendTitle(title, subtitle, fadein, stay, fadeout);
@@ -69,6 +114,7 @@ public class SpigotPlatform extends Platform {
 	@Override
 	public void reload() {
 		HandlerList.unregisterAll(plugin);
+		kyori = BukkitAudiences.create(plugin);
 		plugin.getServer().getPluginManager().registerEvents(new SpigotListener(), plugin);
 	}
 
@@ -86,4 +132,56 @@ public class SpigotPlatform extends Platform {
 	public Audience getAudience(TabPlayer p) {
 		return kyori.player(p.getUniqueId());
 	}
+
+	@Override
+	public void playSound(TabPlayer p, String sound) {
+		Player player = (Player) p.getPlayer();
+		player.playSound(player.getLocation(), sound, 1, 1);
+	}
+
+	@Override
+	public void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, List<String> plugins) {
+		Player p = this.plugin.getServer().getPlayer(uuid);
+		if (plugins.contains("DiscordSRV") && isPluginEnabled("DiscordSRV")) sendDiscordSRV(p,msg,channel,viewCondition);
+		if (plugins.contains("EssentialsX") && isPluginEnabled("EssentialsDiscord") && !viewCondition) sendEssentialsX(p,msg);
+	}
+	private void sendDiscordSRV(Player p, String msg, String channel, boolean viewCondition) {
+		DiscordSRV discord = DiscordSRV.getPlugin();
+		if (!viewCondition)
+			discord.processChatMessage(p, msg, discord.getMainChatChannel(), false);
+		else if (!discord.getOptionalChannel(channel).equals(discord.getMainChatChannel()))
+			discord.processChatMessage(p, msg, discord.getOptionalChannel(channel),false);
+	}
+	private void sendEssentialsX(Player p, String msg) {
+		DiscordService api = plugin.getServer().getServicesManager().load(DiscordService.class);
+		assert api != null;
+		api.sendChatMessage(p, msg);
+	}
+
+	@Override
+	public boolean supportsChatSuggestions() {
+		return chatSuggestions;
+	}
+
+	@Override
+	public void updateChatComplete(TabPlayer p, List<String> emojis, boolean add) {
+		try {
+			Object action = actionEnum.getEnumConstants()[add ? 0 : 1];
+			Object packet = chatCompleteConstructor.newInstance(action,emojis);
+			((BukkitTabPlayer)p).sendPacket(packet);
+		} catch (Exception e) {e.printStackTrace();}
+	}
+
+	@Override
+	public ChatItem getItem(TabPlayer p, boolean offhand) {
+		PlayerInventory inv = ((Player)p.getPlayer()).getInventory();
+		ItemStack item;
+		try {item = offhand ? inv.getItemInOffHand() : inv.getItemInMainHand();}
+		catch (Exception e) {item = inv.getItemInHand();}
+		return new ChatItem(item.getType().getKey().toString(),
+				getItemName(item.hasItemMeta() && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : null,item.getType().toString()),
+				item.getAmount(),
+				item.hasItemMeta() ? item.getItemMeta().getAsString() : null);
+	}
+
 }

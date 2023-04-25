@@ -9,6 +9,7 @@ import io.github.tanguygab.tabadditions.shared.commands.NametagCmd;
 import io.github.tanguygab.tabadditions.shared.features.*;
 import io.github.tanguygab.tabadditions.shared.features.actionbar.ActionBarManager;
 import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions;
+import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager;
 import lombok.Getter;
 import lombok.Setter;
@@ -38,6 +39,7 @@ public class TABAdditions {
     @Getter private final Platform platform;
     private final File dataFolder;
     @Getter private ConfigurationFile config;
+    @Getter private ConfigurationFile chatConfig;
     @Getter  private TranslationFile translation;
     public final List<String> features = new ArrayList<>();
 
@@ -57,6 +59,7 @@ public class TABAdditions {
     public void loadFiles() {
         try {
             config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
+            chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
             translation = new TranslationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml"));
         } catch (IOException e) {
             platform.disable();
@@ -91,6 +94,7 @@ public class TABAdditions {
     private void loadFeatures() {
         if (config.getBoolean("actionbars.enabled",false)) registerFeature(new ActionBarManager());
         if (config.getBoolean("titles.enabled",false)) registerFeature(new TitleManager());
+        if (chatConfig.getBoolean("enabled",false)) registerFeature(new Chat(chatConfig));
         if (config.getBoolean("conditional-nametags.enabled",false) && tab.getTeamManager() != null)
             registerFeature(new ConditionalNametags(config.getBoolean("appearance-nametags.show-by-default",true)));
         if (config.getBoolean("conditional-appearance.enabled",false))

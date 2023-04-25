@@ -117,6 +117,15 @@ public class AdvancedConditions {
         return check(viewer,target) != null;
     }
 
+    /**
+     * Returns {@code true} if condition is met for player, {@code false} if not
+     *
+     * @return  {@code true} if met, {@code false} if not
+     */
+    public boolean isMet(TabPlayer viewer) {
+        return check(viewer,null) != null;
+    }
+
     public BiFunction<TabPlayer,TabPlayer,Boolean> check(TabPlayer viewer, TabPlayer target) {
         for (BiFunction<TabPlayer, TabPlayer, Boolean> condition : subConditions.keySet())
             if (condition == null || condition.apply(viewer,target)) return condition;
@@ -133,7 +142,7 @@ public class AdvancedConditions {
      * @return  condition from string
      */
     public static AdvancedConditions getCondition(String string) {
-        if (string == null) return null;
+        if (string == null || string.equals("")) return null;
         if (registeredConditions.containsKey(string))
             return registeredConditions.get(string);
 

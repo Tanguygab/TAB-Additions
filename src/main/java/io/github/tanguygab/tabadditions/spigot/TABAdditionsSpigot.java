@@ -3,7 +3,6 @@ package io.github.tanguygab.tabadditions.spigot;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import org.bukkit.plugin.java.JavaPlugin;
 
-
 public class TABAdditionsSpigot extends JavaPlugin {
 
     @Override

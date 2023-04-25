@@ -28,6 +28,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
 
         ConfigurationFile config = plugin.getConfig();
         toggleCmd = config.getBoolean("titles./toggletitle",true);
+        if (toggleCmd) plugin.getPlatform().registerCommand("toggletitle");
         toggled = plugin.loadData("title-off",toggleCmd);
 
         Map<String, Map<String,String>> titlesConfig = config.getConfigurationSection("titles.titles");

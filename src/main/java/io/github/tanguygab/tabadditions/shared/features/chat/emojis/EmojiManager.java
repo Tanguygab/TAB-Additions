@@ -21,14 +21,14 @@ public class EmojiManager extends ChatManager {
     @Getter private int totalEmojiCount;
     private final Map<TabPlayer, List<String>> emojisAutoCompleteList = new HashMap<>();
     @Getter private final boolean emojisCmdEnabled;
-    @Getter private final boolean toggleCmd;
-    public final List<UUID> toggled;
+    private final boolean toggleCmd;
+    private final List<UUID> toggled;
 
     public EmojiManager(Chat cm, String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, Map<String,Map<String,Object>> emojis, boolean emojisCmdEnabled, boolean toggleCmd) {
         super(cm);
         this.output = emojiOutput;
         this.untranslate = untranslateEmojis;
-        autoCompleteEnabled = autoCompleteEmojis;
+        autoCompleteEnabled = plugin.getPlatform().supportsChatSuggestions() && autoCompleteEmojis;
         for (String category : emojis.keySet()) {
             Map<String,String> emojisMap = (Map<String,String>) emojis.get(category).get("list");
             totalEmojiCount+=emojisMap.size();
@@ -38,14 +38,18 @@ public class EmojiManager extends ChatManager {
         Platform platform = plugin.getPlatform();
 
         this.emojisCmdEnabled = emojisCmdEnabled;
-        //if (emojisCmdEnabled) platform.registerCommand("emojis",true);
+        if (emojisCmdEnabled) platform.registerCommand("emojis");
 
         this.toggleCmd = toggleCmd;
         toggled = plugin.loadData("emojis-off",toggleCmd);
         if (toggleCmd) {
-            //platform.registerCommand("toggleemojis", true);
+            platform.registerCommand("toggleemojis");
             pm.registerPlayerPlaceholder("%chat-emojis%",1000,p->hasEmojisToggled((TabPlayer) p) ? "Off" : "On");
         }
+
+        for (TabPlayer p : tab.getOnlinePlayers())
+            if (autoCompleteEmojis && !hasEmojisToggled(p))
+                loadAutoComplete(p);
 
         pm.registerServerPlaceholder("%chat-emoji-total%",-1, ()-> totalEmojiCount +"");
         pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->ownedEmojis((TabPlayer) p)+"");
@@ -55,46 +59,49 @@ public class EmojiManager extends ChatManager {
         if (autoCompleteEnabled) for (TabPlayer p : tab.getOnlinePlayers()) unloadAutoComplete(p);
         plugin.unloadData("emojis-off",toggled,toggleCmd);
     }
-/*
-    public String process(TabPlayer p, String msg, String hoverclick) {
-        if (hasEmojisToggled(p)) return msg;
+
+    public String process(String msg, TabPlayer sender, TabPlayer viewer) {
+        if (hasEmojisToggled(viewer) || hasEmojisToggled(sender)) return msg;
 
         for (EmojiCategory category : emojiCategories.values()) {
-            if (!category.canUse(p)) continue;
-            Map<String, String> list = category.getEmojis();
-            if (list == null || list.isEmpty()) continue;
+            if (!category.canUse(sender)) continue;
+            Map<String, String> emojis = category.getEmojis();
+            if (emojis == null || emojis.isEmpty()) continue;
 
-            for (String emoji : list.keySet()) {
+            for (String emoji : emojis.keySet()) {
                 int count = ChatUtils.countMatches(msg, emoji);
                 if (count == 0 || emoji.equals("")) continue;
-                if (!category.canUse(p,emoji)) {
-                    if (untranslate && msg.contains(list.get(emoji)))
-                        msg = msg.replace(list.get(emoji), emoji);
+                if (!category.canUse(sender,emoji)) {
+                    if (untranslate && msg.contains(emojis.get(emoji)))
+                        msg = msg.replace(emojis.get(emoji), emoji);
                     continue;
                 }
-                List<String> list2 = Arrays.asList(msg.split(Pattern.quote(emoji)));
+                List<String> list = Arrays.asList(msg.split(Pattern.quote(emoji)));
                 msg = "";
                 int counted = 0;
-                String output1 = getOutput(category);
-                output1 = output1.replace("%emojiraw%", emoji).replace("%emoji%", list.get(emoji));
-                String output = hoverclick + plugin.parsePlaceholders(cm.removeSpaces(output1),p) + "{";
-                if (list2.isEmpty()) {
-                    for (int i = 0; i < count; i++) msg+=output;
+                String output = plugin.parsePlaceholders(getOutput(category)
+                        .replace("%emojiraw%",emoji)
+                        .replace("%emoji%",emojis.get(emoji)),
+                        sender,viewer);
+                if (list.isEmpty()) {
+                    StringBuilder msgBuilder = new StringBuilder(msg);
+                    msgBuilder.append(String.valueOf(output).repeat(count));
+                    msg = msgBuilder.toString();
                     return msg;
                 }
-                for (String part : list2) {
-                    if (list2.indexOf(part) + 1 == list2.size() && counted == count)
-                        msg += part;
-                    else {
-                        msg += part + output;
+                StringBuilder msgBuilder = new StringBuilder(msg);
+                for (String part : list) {
+                    if (list.indexOf(part)+1 != list.size() || counted != count) {
+                        msgBuilder.append(part).append(output);
                         counted++;
-                    }
+                    } else msgBuilder.append(part);
                 }
+                msg = msgBuilder.toString();
             }
         }
         return msg;
     }
-*/
+
     public String getOutput(EmojiCategory category) {
         return category == null || category.getOutput().equals("") ? output : category.getOutput();
     }
@@ -121,14 +128,29 @@ public class EmojiManager extends ChatManager {
                     list.add(emoji);
         }
         emojisAutoCompleteList.put(p,list);
-        //plugin.getPlatform().addToChatComplete(p,list);
+        plugin.getPlatform().updateChatComplete(p,list,true);
     }
     public void unloadAutoComplete(TabPlayer p) {
-        if (emojisAutoCompleteList.containsKey(p));
-            //plugin.getPlatform().removeFromChatComplete(p, emojisAutoCompleteList.get(p));
+        if (emojisAutoCompleteList.containsKey(p))
+            plugin.getPlatform().updateChatComplete(p, emojisAutoCompleteList.get(p),false);
     }
 
     public boolean hasEmojisToggled(TabPlayer p) {
-        return toggled.contains(p.getName().toLowerCase());
+        return toggled.contains(p.getUniqueId());
+    }
+
+    public boolean onCommand(TabPlayer player, String cmd) {
+        if (cmd.startsWith("/emojis") && emojisCmdEnabled) {
+
+            return true;
+        }
+        if (cmd.equals("/toggleemojis") && toggleCmd) {
+            if (toggled.contains(player.getUniqueId()))
+                toggled.remove(player.getUniqueId());
+            else toggled.add(player.getUniqueId());
+            player.sendMessage(toggled.contains(player.getUniqueId()) ? plugin.getTranslation().emojisOff : plugin.getTranslation().emojisOn,true);
+            return true;
+        }
+        return false;
     }
 }

@@ -10,22 +10,22 @@ formats:
     view-condition: "permission:group.vip"
     display:
       prefix:
-        text: "%format-name% %player% &8»"
+        text: "%chat-format% %player% &8» "
         hover:
           - "&7VIP only format!"
           - ""
           - "Click to open our store"
           - "and buy VIP!"
-        click: "url:https://my.serverstore.com"
+        click: "open_url:https://my.serverstore.com"
       message:
-        text: "&f%message%"
+        text: "&f%msg%"
         hover: "%date%"
   default:
     display:
       prefix:
-        text: "&7%player% &8»"
+        text: "&7%player% &8» "
       message:
-        text: "&f%message%"
+        text: "&f%msg%"
         hover: "%date%"
 commands-formats:
   localchat:
@@ -34,10 +34,10 @@ commands-formats:
     channel: "local"
     display:
       prefix:
-        text: "%chat-format% &a%player% &8»"
+        text: "%chat-format% &a%player% &8» "
         hover: "Only players within 10 blocks can see this message!"
       message:
-        text: "&f%message%"
+        text: "&f%msg%"
         hover: "%date%"
   staffchat:
     name: "&4StaffChat"
@@ -45,25 +45,98 @@ commands-formats:
     view-condition: "permission:tab.staff"
     display:
       prefix:
-        text: "%chat-format% &c%player% &8»"
+        text: "%chat-format% &c%player% &8» "
         hover: "&7Only staff members can see this message!"
-        click: "suggest:/staffchat"
+        click: "suggest_command:/staffchat"
       message:
-        text: "&f%message%"
+        text: "&f%msg%"
         hover: "%date%"
 
 
+item:
+  enabled: true
+  mainhand: '[item]'
+  offhand: '[offhand]'
+  permission: true
+  output: '&e%name% &f(&8x%amount%&f)'
+  output-single: '%name%'
+  output-air: ''
 
+emojis:
+  enabled: true
+  /emojis: true
+  /toggleemoji: true
+  auto-complete: true #only works on 1.19.4+!
+  output:
+    text: "%emoji%"
+    hover: "%emoji% &7%emojiraw% &d/emojis"
+    click: "suggest:/emojis"
+  block-without-permission: true
+  categories:
+    default:
+      list:
+        "<3": ❤
+        ":shrug:": ¯\_(ツ)_/¯
+        ':pvp:': ⚔
+        ':death:': ☠
+        ":star:": ✮
+        ":up:": ⬆
+        ':tableflip:': (╯°□°）╯︵ ┻━┻
+        ':surrender:': \("▔□▔)/
+        ':grr:': ლ(ಠ益ಠლ)
+        ':sword:': ╰(⇀︿⇀)つ-]═───
+    paid:
+      output:
+        text: "%emoji%"
+        hover:
+          - "&eEmote &7◆ &f&lShop"
+          - "&7This emote is obtainable in our shop."
+          - "&7Click to see other emojis you have access to"
+        click: "suggest:/emojis"
+      list:
+        ":cool:": (☞ﾟヮﾟ)☞
+        ":kiss:": (っ˘з(˘⌣˘ )
+        ':n:': '&c&lNO'
+        ':y:': '&a&lYES'
+        ':gun:': ︻┳═一
+        ":owo:": (o･ω･o)
+        ":happy:": (ᵔ◡ᵔ)
+        ":wow:": (✯◡✯)
+        ":love:": (❤ω❤)
+        ':sad:': (︶︹︺)
+        ':argh:': ヽ(‵﹏´)ノ
+    staff:
+      list:
+        ":cross:": '&c&l✘'
+        ":check:": '&2&l✔'
+
+char-filter:
+  enabled: true
+  char-replacement: '*'
+  fake-length: 0
+  output:
+    text: "%replacement%"
+    hover:
+      - "Someone used a bad word!"
+      - ""
+      - "Click to see it anyways"
+    click: "suggest:%word%"
+  filter:
+    - shit(s)?
+    - fuck(er(s)?)?
+    - bitch(es)?
+    - ass(hole|es)?
+  exempt:
+    - bypass
 embed-urls:
   enabled: true
-  auto-add-http: false
   output:
     text: "&8&l[&4Link&8&l]"
     hover:
       - "&7URL: %url%"
-      - "\n"
+      - ""
       - "&7Click to open"
-    click: "url:%url%"
+    click: "url:%fullurl%"
 
 clearchat:
   enabled: true
@@ -74,3 +147,79 @@ discord-support:
   format: "%msg%"
   DiscordSRV: false
   EssentialsX: false
+
+
+
+
+
+mention:
+  enabled: true
+  input: '@%player%'
+  output: '{
+  &b@%rel_viewer:player%
+  ||
+  Mentioned!
+  ||
+  suggest:@%player%  }'
+  sound: BLOCK_NOTE_BLOCK_PLING
+  output-for-everyone: true
+  /togglemention: true
+  custom-mentions:
+    staff:
+      input: "@staff"
+      output: "&4@Staff"
+      condition: permission:tab.staff
+      sound: BLOCK_NOTE_BLOCK_PLING
+socialspy:
+  enabled: true
+  keep-after-reload: true
+  msgs:
+    spy: true
+    output: '{
+    &b&l[SocialSpy-Msg] &7[&6&l%prop-customchatname% &e➠ &6&l%rel_viewer:prop-customchatname%&7] %msg%
+    ||
+    %time%
+    }'
+  channels:
+    spy: true
+    output: "{
+    &b&l[SocialSpy-Channel]&r %prop-customchatname% &8» %msg%
+    ||
+    Channel: %channel%
+    \n%time%
+    }"
+  view-conditions:
+    spy: true
+    output: "{
+    &b&l[SocialSpy-ViewCondition]&r %prop-customchatname% &8» %msg%
+    ||
+    Condition: %condition%
+    \n%time%
+    }"
+custom-interactions:
+  pos:
+    input: '[pos]'
+    output: "{
+    World: %player_world%
+    ||
+    X: %player_x%
+    \nY: %player_y%
+    \nZ: %player_z%
+    ||
+    suggest:/tpa %player%
+    }"
+  links:
+    input: '[links]'
+    output: "{
+    &8&l[&aHover for TAB's Links&8&l]
+    ||
+    &5Discord: https://discord.gg/EaSvdk6
+    \n&7GitHub: https://github.com/NEZNAMY/TAB
+    \n&9MC-Market: https://www.mc-market.org/resources/14009
+    \n&2Polymart: https://polymart.org/resource/484
+    \n&8Wiki: https://github.com/NEZNAMY/TAB/wiki
+    \n
+    \n&7Click to join our Discord server!
+    ||
+    url:https://discord.gg/EaSvdk6
+    }"

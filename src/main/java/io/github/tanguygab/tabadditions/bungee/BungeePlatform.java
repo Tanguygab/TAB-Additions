@@ -1,15 +1,31 @@
 package io.github.tanguygab.tabadditions.bungee;
 
+import com.google.common.io.ByteArrayDataOutput;
+import com.google.common.io.ByteStreams;
+import dev.simplix.protocolize.api.Hand;
+import dev.simplix.protocolize.api.Protocolize;
+import dev.simplix.protocolize.api.SoundCategory;
+import dev.simplix.protocolize.api.inventory.PlayerInventory;
+import dev.simplix.protocolize.api.item.BaseItemStack;
+import dev.simplix.protocolize.api.item.ItemStack;
+import dev.simplix.protocolize.api.player.ProtocolizePlayer;
+import dev.simplix.protocolize.data.Sound;
 import io.github.tanguygab.tabadditions.shared.Platform;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.ChatMessageType;
+import net.md_5.bungee.api.CommandSender;
 import net.md_5.bungee.api.ProxyServer;
 import net.md_5.bungee.api.Title;
 import net.md_5.bungee.api.chat.TextComponent;
 import net.md_5.bungee.api.connection.ProxiedPlayer;
+import net.md_5.bungee.api.plugin.Command;
+
+import java.util.List;
+import java.util.UUID;
 
 public class BungeePlatform extends Platform {
 
@@ -29,7 +45,19 @@ public class BungeePlatform extends Platform {
     @Override
 	public void registerPlaceholders(PlaceholderManager pm) {
 		for (String server : ProxyServer.getInstance().getServers().keySet())
-			pm.registerServerPlaceholder("%server-status:" + server + "%",10000,()->((TABAdditionsBungeeCord)plugin).getServerStatus(server));
+			pm.registerServerPlaceholder("%server-status:" + server + "%",10000,()->plugin.getServerStatus(server));
+	}
+
+	@Override
+	public void registerCommand(String cmd, String... aliases) {
+		plugin.getProxy().getPluginManager().registerCommand(plugin, new Command(cmd,null,aliases) {
+			@Override public void execute(CommandSender sender, String[] args) {}
+		});
+	}
+
+	@Override
+	public boolean isPluginEnabled(String plugin) {
+		return this.plugin.getProxy().getPluginManager().getPlugin(plugin) != null;
 	}
 
 	@Override
@@ -64,5 +92,44 @@ public class BungeePlatform extends Platform {
 	@Override
 	public Audience getAudience(TabPlayer p) {
 		return kyori.player(p.getUniqueId());
+	}
+
+	@Override
+	public void playSound(TabPlayer p, String sound) {
+		if (!isPluginEnabled("Protocolize")) return;
+		try {
+			Protocolize.playerProvider().player(p.getUniqueId()).playSound(Sound.valueOf(sound), SoundCategory.MASTER, 1f, 1f);
+		} catch (Exception e) {
+			//sound not found
+		}
+	}
+
+	@Override
+	public void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, List<String> plugins) {
+		ByteArrayDataOutput out = ByteStreams.newDataOutput();
+		out.writeUTF(String.join(",",plugins));
+		out.writeUTF(msg);
+		out.writeUTF(channel);
+		out.writeUTF(viewCondition+"");
+		this.plugin.getProxy().getPlayer(UUID.randomUUID()).sendData("tabadditions:channel",out.toByteArray());
+	}
+
+	@Override
+	public boolean supportsChatSuggestions() {
+		return false;//isPluginEnabled("Protocolize");
+	}
+
+	@Override
+	public void updateChatComplete(TabPlayer p, List<String> emojis, boolean add) {
+		//not supported, maybe with Protocolize?
+	}
+
+	@Override
+	public ChatItem getItem(TabPlayer p, boolean offhand) {
+		ProtocolizePlayer player = Protocolize.playerProvider().player(p.getUniqueId());
+		PlayerInventory inv = player.proxyInventory();
+		BaseItemStack item = inv.item(offhand ? inv.heldItem() : 45);
+		String displayName = getItemName(item.displayName(),item.itemType().toString());
+		return new ChatItem(item.itemType().toString(),displayName,item.amount(),item.nbtData().toString());
 	}
 }
