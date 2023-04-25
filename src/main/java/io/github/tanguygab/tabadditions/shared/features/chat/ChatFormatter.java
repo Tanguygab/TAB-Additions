@@ -34,7 +34,6 @@ public class ChatFormatter {
     private final Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}\\.){3}[0-9]{1,3}");
 
     public ChatFormatter(ConfigurationFile config) {
-
         filterEnabled = config.getBoolean("char-filter.enabled",true);
         filterChar = config.getString("char-filter.char-replacement","*");
         filterFakeLength = config.getInt("char-filter.fake-length",0);
@@ -55,9 +54,12 @@ public class ChatFormatter {
     }
 
 
-    public String process(TabPlayer sender, String message) {
+    public String process(String message, TabPlayer sender) {
         if (filterEnabled && !sender.hasPermission("tabadditions.chat.bypass.filter")) message = filter(message);
-        if (itemEnabled && (!itemPermssion || sender.hasPermission("tabadditions.chat.item"))) message = formatItems(sender,message);
+        if (itemEnabled && (!itemPermssion || sender.hasPermission("tabadditions.chat.item"))) {
+            message = formatItems(sender,message,false);
+            message = formatItems(sender,message,true);
+        }
         if (embedURLs) message = embedURLs(message);
 
         return message;
@@ -101,22 +103,20 @@ public class ChatFormatter {
 
         return msg;
     }
-    private String formatItems(TabPlayer sender, String message) {
-        if (!itemMainHand.equals("") && message.contains(itemMainHand))
-            message = message.replace(itemMainHand,itemToMM(sender,false));
-        if (!itemOffHand.equals("") && message.contains(itemOffHand))
-            message = message.replace(itemOffHand,itemToMM(sender,true));
-        return message;
-    }
-    private String itemToMM(TabPlayer sender, boolean offhand) {
+    private String formatItems(TabPlayer sender, String message, boolean offhand) {
+        String input = offhand ? itemOffHand : itemMainHand;
+        if (input.equals("") || !message.contains(input)) return message;
+
         ChatItem item = TABAdditions.getInstance().getPlatform().getItem(sender, offhand);
-        if (item.getType().equals("AIR")) return itemOutputAir;
+        if (item.getType().equals("AIR")) return message.replace(input,itemOutputAir);
+
         String text = "<hover:show_item:'"+item.getType()+"':"+item.getAmount()+"";
         if (item.getNbt() != null) text+=":'"+item.getNbt().replace("'","\\'")+"'";
-        return text+">"+(item.getAmount() == 1 ? itemOutputSingle : itemOutput)
+        text+=">"+(item.getAmount() == 1 ? itemOutputSingle : itemOutput)
                 .replace("%name%",item.getName())
                 .replace("%amount%",item.getAmount()+"")
                 +"</hover>";
+        return message.replace(input,text);
     }
     private String embedURLs(String message) {
         String msg2 = message.replaceAll("#[A-Fa-f0-9]{6}"," "); // removing RGB colors to avoid IPV4 check from breaking them

@@ -1,9 +1,13 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
+import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.chat.EnumChatFormat;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
+import java.util.function.Function;
 
 public class ChatUtils {
 
@@ -47,4 +51,10 @@ public class ChatUtils {
         return text;
     }
 
+    public static List<UUID> registerToggleCmd(boolean toggleCmd, String data, String cmd, String placeholder, Function<me.neznamy.tab.api.TabPlayer,Object> fun) {
+        if (!toggleCmd) return null;
+        TABAdditions.getInstance().getPlatform().registerCommand(cmd);
+        TAB.getInstance().getPlaceholderManager().registerPlayerPlaceholder("%"+placeholder+"%",1000,fun);
+        return TABAdditions.getInstance().loadData(data,true);
+    }
 }

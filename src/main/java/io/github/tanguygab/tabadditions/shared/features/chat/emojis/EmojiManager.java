@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.chat.emojis;
 
-
-import io.github.tanguygab.tabadditions.shared.Platform;
+import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatUtils;
@@ -34,23 +33,18 @@ public class EmojiManager extends ChatManager {
             totalEmojiCount+=emojisMap.size();
             emojiCategories.put(category,new EmojiCategory(category, emojisMap,emojis.get(category).getOrDefault("output","")+""));
         }
-        PlaceholderManager pm = tab.getPlaceholderManager();
-        Platform platform = plugin.getPlatform();
 
         this.emojisCmdEnabled = emojisCmdEnabled;
-        if (emojisCmdEnabled) platform.registerCommand("emojis");
+        if (emojisCmdEnabled) plugin.getPlatform().registerCommand("emojis");
 
         this.toggleCmd = toggleCmd;
-        toggled = plugin.loadData("emojis-off",toggleCmd);
-        if (toggleCmd) {
-            platform.registerCommand("toggleemojis");
-            pm.registerPlayerPlaceholder("%chat-emojis%",1000,p->hasEmojisToggled((TabPlayer) p) ? "Off" : "On");
-        }
+        toggled = ChatUtils.registerToggleCmd(toggleCmd,"emojis-off","toggleemojis","chat-emojis",p->hasEmojisToggled((TabPlayer) p) ? "Off" : "No");
 
         for (TabPlayer p : tab.getOnlinePlayers())
             if (autoCompleteEmojis && !hasEmojisToggled(p))
                 loadAutoComplete(p);
 
+        PlaceholderManager pm = tab.getPlaceholderManager();
         pm.registerServerPlaceholder("%chat-emoji-total%",-1, ()-> totalEmojiCount +"");
         pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->ownedEmojis((TabPlayer) p)+"");
     }
@@ -83,12 +77,7 @@ public class EmojiManager extends ChatManager {
                         .replace("%emojiraw%",emoji)
                         .replace("%emoji%",emojis.get(emoji)),
                         sender,viewer);
-                if (list.isEmpty()) {
-                    StringBuilder msgBuilder = new StringBuilder(msg);
-                    msgBuilder.append(String.valueOf(output).repeat(count));
-                    msg = msgBuilder.toString();
-                    return msg;
-                }
+                if (list.isEmpty()) return output.repeat(count);
                 StringBuilder msgBuilder = new StringBuilder(msg);
                 for (String part : list) {
                     if (list.indexOf(part)+1 != list.size() || counted != count) {
@@ -106,9 +95,6 @@ public class EmojiManager extends ChatManager {
         return category == null || category.getOutput().equals("") ? output : category.getOutput();
     }
 
-    public EmojiCategory getEmojiCategory(String category) {
-        return emojiCategories.get(category);
-    }
     public int ownedEmojis(TabPlayer p) {
         int amt=0;
         for (EmojiCategory category : emojiCategories.values())
@@ -139,18 +125,14 @@ public class EmojiManager extends ChatManager {
         return toggled.contains(p.getUniqueId());
     }
 
-    public boolean onCommand(TabPlayer player, String cmd) {
-        if (cmd.startsWith("/emojis") && emojisCmdEnabled) {
+    public boolean onCommand(TabPlayer player, String command) {
+        TranslationFile msgs = plugin.getTranslation();
+        if (command.startsWith("/emojis") && emojisCmdEnabled) {
 
             return true;
         }
-        if (cmd.equals("/toggleemojis") && toggleCmd) {
-            if (toggled.contains(player.getUniqueId()))
-                toggled.remove(player.getUniqueId());
-            else toggled.add(player.getUniqueId());
-            player.sendMessage(toggled.contains(player.getUniqueId()) ? plugin.getTranslation().emojisOff : plugin.getTranslation().emojisOn,true);
-            return true;
-        }
+        if (command.equals("/toggleemojis")) return plugin.toggleCmd(toggleCmd,player,toggled,msgs.emojisOn,msgs.emojisOff);
+
         return false;
     }
 }

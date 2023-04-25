@@ -60,7 +60,7 @@ public class TABAdditions {
         try {
             config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
-            translation = new TranslationFile(TABAdditions.class.getClassLoader().getResourceAsStream("translation.yml"), new File(dataFolder, "translation.yml"));
+            translation = new TranslationFile(null, new File(dataFolder, "translation.yml"));
         } catch (IOException e) {
             platform.disable();
             e.printStackTrace();
@@ -181,6 +181,15 @@ public class TABAdditions {
     }
     public void unloadData(String data, List<UUID> list, boolean enabled) {
         if (enabled) getPlayerData().set(data, list.stream().map(UUID::toString).collect(Collectors.toList()));
+    }
+
+    public boolean toggleCmd(boolean toggleCmd, TabPlayer player, List<UUID> toggled, String on, String off) {
+        if (!toggleCmd) return false;
+        if (toggled.contains(player.getUniqueId()))
+            toggled.remove(player.getUniqueId());
+        else toggled.add(player.getUniqueId());
+        player.sendMessage(toggled.contains(player.getUniqueId()) ? off : on,true);
+        return true;
     }
 
 }

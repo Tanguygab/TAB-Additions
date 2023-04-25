@@ -22,7 +22,6 @@ import org.bukkit.event.HandlerList;
 import io.github.tanguygab.tabadditions.shared.Platform;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
-import org.bukkit.inventory.meta.ItemMeta;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
@@ -131,12 +130,6 @@ public class SpigotPlatform extends Platform {
 	@Override
 	public Audience getAudience(TabPlayer p) {
 		return kyori.player(p.getUniqueId());
-	}
-
-	@Override
-	public void playSound(TabPlayer p, String sound) {
-		Player player = (Player) p.getPlayer();
-		player.playSound(player.getLocation(), sound, 1, 1);
 	}
 
 	@Override

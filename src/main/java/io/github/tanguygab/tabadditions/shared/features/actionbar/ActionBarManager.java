@@ -86,12 +86,10 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
 
     @Override
     public boolean onCommand(TabPlayer player, String msg) {
-        if (!toggleCmd || !msg.equals("/toggleactionbar")) return false;
-        if (toggled.contains(player.getUniqueId()))
-            toggled.remove(player.getUniqueId());
-        else toggled.add(player.getUniqueId());
-        player.sendMessage(toggled.contains(player.getUniqueId()) ? plugin.getTranslation().actionBarOff : plugin.getTranslation().actionBarOn,true);
-        refresh(player,true);
-        return true;
+        if (msg.equals("/toggleactionbar") && plugin.toggleCmd(toggleCmd,player,toggled,plugin.getTranslation().actionBarOn,plugin.getTranslation().actionBarOff)) {
+            refresh(player,true);
+            return true;
+        }
+        return false;
     }
 }

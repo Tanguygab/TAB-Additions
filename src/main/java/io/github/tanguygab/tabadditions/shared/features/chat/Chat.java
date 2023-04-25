@@ -2,8 +2,10 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import com.loohp.interactivechat.api.InteractiveChatAPI;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions;
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
+import io.github.tanguygab.tabadditions.shared.features.chat.mentions.MentionManager;
 import lombok.Getter;
 import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
@@ -18,8 +20,11 @@ import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Chat extends TabFeature implements UnLoadable, JoinListener, CommandListener {
 
@@ -32,6 +37,16 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     private final int msgPlaceholderStay;
     private final ChatFormatter chatFormatter;
     private final EmojiManager emojiManager;
+    private final MentionManager mentionManager;
+
+    public Double cooldownTime;
+    public Map<UUID, LocalDateTime> cooldown = new HashMap<>();
+
+    private final boolean toggleCmd;
+    private final List<UUID> toggled;
+
+    private final boolean ignoreCmd;
+    private final Map<UUID,List<UUID>> ignored = new HashMap<>();
 
     private final boolean clearchatEnabled;
     private final int clearChatAmount;
@@ -68,6 +83,27 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
                         config.getBoolean("emojis./emojis",true),
                         config.getBoolean("emojis./toggleemoji",true)
         ) : null;
+        mentionManager = config.getBoolean("mention.enabled",true)
+                ? new MentionManager(this,
+                        config.getString("mention.input","@%player%"),
+                        ChatUtils.componentToMM(config.getConfigurationSection("mention.output")),
+                        config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING"),
+                        config.getBoolean("mention./togglemention",true),
+                        config.getBoolean("mention.output-for-everyone",true),
+                        config.getConfigurationSection("mention.custom-mentions"))
+        : null;
+
+        cooldownTime = config.getDouble("cooldown",0);
+
+
+        toggleCmd = config.getBoolean("/togglechat",true);
+        toggled = ChatUtils.registerToggleCmd(toggleCmd,"chat-off","togglechat","chat-status",p->hasChatToggled((TabPlayer) p) ? "Off" : "No");
+
+        ignoreCmd = config.getBoolean("/ignore",true);
+        if (ignoreCmd) {
+            Map<String, List<String>> ignored = plugin.getPlayerData().getConfigurationSection("ignored");
+            ignored.forEach((player, ignoredList) -> this.ignored.put(UUID.fromString(player), ignoredList.stream().map(UUID::fromString).collect(Collectors.toCollection(ArrayList::new))));
+        }
 
         clearchatEnabled = config.getBoolean("clearchat.enabled",false);
         clearChatAmount = config.getInt("clearchat.amount",100);
@@ -77,6 +113,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     @Override
     public void unload() {
         if (emojiManager != null) emojiManager.unload();
+        if (mentionManager != null) mentionManager.unload();
     }
 
     public ChatFormat getFormat(TabPlayer player) {
@@ -84,6 +121,9 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
             if (format.isConditionMet(player))
                 return format;
         return null;
+    }
+    public boolean hasChatToggled(TabPlayer player) {
+        return toggled.contains(player.getUniqueId());
     }
 
     @Override
@@ -94,17 +134,38 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
 
     @Override
     public boolean onCommand(TabPlayer p, String cmd) {
-        if (cmd.startsWith("/emojis") || cmd.equals("/toggleemojis"))
-            return emojiManager != null && emojiManager.onCommand(p,cmd);
+        if (cmd.startsWith("/emojis") || cmd.equals("/toggleemojis")) return emojiManager != null && emojiManager.onCommand(p,cmd);
+        if (cmd.equals("/togglemention")) return mentionManager != null && mentionManager.onCommand(p);
 
+        TranslationFile msgs = plugin.getTranslation();
+        if (cmd.equals("/togglechat")) return plugin.toggleCmd(toggleCmd,p,toggled,msgs.chatOn,msgs.chatOff);
         if (cmd.equals("/clearchat")) {
             if (!clearchatEnabled || !p.hasPermission("tabadditions.chat.clearchat")) return false;
 
             String linebreaks = ("\n"+clearChatLine)
                     .repeat(clearChatAmount)
-                    +"\n"+plugin.getTranslation().getChatCleared(p);
+                    +"\n"+msgs.getChatCleared(p);
             for (TabPlayer all : tab.getOnlinePlayers())
                 all.sendMessage(linebreaks,false);
+            return true;
+        }
+        if (cmd.startsWith("/ignore")) {
+            if (!ignoreCmd) return false;
+            if (!cmd.startsWith("/ignore ")) {
+                p.sendMessage(msgs.providePlayer, true);
+                return true;
+            }
+            String player = cmd.substring(cmd.indexOf(8)).toLowerCase();
+            if (p.getName().equalsIgnoreCase(player)) {
+                p.sendMessage(msgs.cantIgnoreSelf,true);
+                return true;
+            }
+            UUID playerUUID = plugin.getPlayer(player).getUniqueId();
+            List<UUID> ignored = this.ignored.computeIfAbsent(p.getUniqueId(), uuid->new ArrayList<>());
+            if (ignored.contains(playerUUID))
+                ignored.remove(playerUUID);
+            else ignored.add(playerUUID);
+            p.sendMessage(msgs.getIgnore(player,ignored.contains(playerUUID)), true);
             return true;
         }
 
@@ -112,9 +173,17 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     }
 
     public void onChat(TabPlayer sender, String message) {
-        if (isMuted(sender)) {
-            return;
+        if (isMuted(sender)) return;
+
+        if (cooldown.containsKey(sender.getUniqueId())) {
+            long time = ChronoUnit.SECONDS.between(cooldown.get(sender.getUniqueId()),LocalDateTime.now());
+            if (time < cooldownTime) {
+                sender.sendMessage(plugin.getTranslation().getCooldown(cooldownTime-time), true);
+                return;
+            }
         }
+        if (cooldownTime != 0 && !sender.hasPermission("tabadditions.chat.bypass.cooldown"))
+            cooldown.put(sender.getUniqueId(),LocalDateTime.now());
 
         tab.sendConsoleMessage(sender.getName()+"» "+message,true);
         chatPlaceholder.updateValue(sender,message);
@@ -139,15 +208,20 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     }
 
     private String process(String message, TabPlayer sender, TabPlayer viewer) {
-        //comment MM tags
+        //message = commentMMTags(message);
         if (emojiManager != null) message = emojiManager.process(message,sender,viewer);
-        message = chatFormatter.process(sender,message);
+        if (mentionManager != null) message = mentionManager.process(message,sender,viewer);
+        message = chatFormatter.process(message,sender);
         return message;
     }
+
     public boolean isMuted(TabPlayer p) {
-        if (!plugin.getPlatform().isPluginEnabled("AdvancedBan")) return false;
-        return PunishmentManager.get().isMuted(UUIDManager.get().getMode() != UUIDManager.FetcherMode.DISABLED
+        return plugin.getPlatform().isPluginEnabled("AdvancedBan")
+                && PunishmentManager.get().isMuted(UUIDManager.get().getMode() != UUIDManager.FetcherMode.DISABLED
                 ? p.getUniqueId().toString().replace("-", "")
                 : p.getName().toLowerCase());
+    }
+    public boolean isIgnored(TabPlayer sender, TabPlayer viewer) {
+        return ignored.getOrDefault(viewer.getUniqueId(),List.of()).contains(sender.getUniqueId());
     }
 }

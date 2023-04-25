@@ -93,12 +93,10 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
 
     @Override
     public boolean onCommand(TabPlayer player, String msg) {
-        if (!toggleCmd || !msg.equals("/toggletitle")) return false;
-        if (toggled.contains(player.getUniqueId()))
-            toggled.remove(player.getUniqueId());
-        else toggled.add(player.getUniqueId());
-        player.sendMessage(toggled.contains(player.getUniqueId()) ? plugin.getTranslation().titleOff : plugin.getTranslation().titleOn,true);
-        refresh(player,true);
-        return true;
+        if (msg.equals("/toggletitle") && plugin.toggleCmd(toggleCmd,player,toggled,plugin.getTranslation().titleOn,plugin.getTranslation().titleOff)) {
+            refresh(player,true);
+            return true;
+        }
+        return false;
     }
 }

@@ -22,7 +22,6 @@ public abstract class Platform {
 	public abstract void sendActionbar(TabPlayer p, String text);
 
 	public abstract Audience getAudience(TabPlayer p);
-	public abstract void playSound(TabPlayer p, String sound);
 	public abstract void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, List<String> plugins);
 	public abstract boolean supportsChatSuggestions();
 	public abstract void updateChatComplete(TabPlayer p, List<String> emojis, boolean add);

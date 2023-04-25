@@ -52,7 +52,6 @@ commands-formats:
         text: "&f%msg%"
         hover: "%date%"
 
-
 item:
   enabled: true
   mainhand: '[item]'
@@ -61,6 +60,23 @@ item:
   output: '&e%name% &f(&8x%amount%&f)'
   output-single: '%name%'
   output-air: ''
+
+mention:
+  enabled: true
+  input: '@%player%'
+  output:
+    text: "&b@%rel_viewer:player%"
+    hover: "Mentioned!"
+    click: "suggest:@%player%"
+  sound: BLOCK_NOTE_BLOCK_PLING
+  output-for-everyone: true
+  /togglemention: true
+  custom-mentions:
+    staff:
+      input: "@staff"
+      output: "&4@Staff"
+      condition: permission:tab.staff
+      sound: BLOCK_NOTE_BLOCK_PLING
 
 emojis:
   enabled: true
@@ -150,26 +166,30 @@ discord-support:
 
 
 
-
-
-mention:
+msg:
   enabled: true
-  input: '@%player%'
-  output: '{
-  &b@%rel_viewer:player%
+  sender: "{
+  &7[&6&lMe &e➠ &6&l%rel_viewer:prop-customchatname%&7] %msg%
   ||
-  Mentioned!
+  %time%
+  \n
+  \n&fClick to reply to &6%rel_viewer:prop-customchatname%&f.
   ||
-  suggest:@%player%  }'
-  sound: BLOCK_NOTE_BLOCK_PLING
-  output-for-everyone: true
-  /togglemention: true
-  custom-mentions:
-    staff:
-      input: "@staff"
-      output: "&4@Staff"
-      condition: permission:tab.staff
-      sound: BLOCK_NOTE_BLOCK_PLING
+  suggest:/msg %rel_viewer:player%  }"
+  viewer: "{
+  &7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%
+  ||
+  %time%
+  \n
+  \n&fClick to reply to &6%prop-customchatname%&f.
+  ||
+  suggest:/msg %player%  }"
+  /togglemsg: true
+  /reply: true
+  save-last-sender-for-reply: false # When receiving a private message, save the sender as the last person to reply to with /reply
+  msg-self: true
+  /msg-aliases: [m, w, tell, whisper]
+  cooldown: 0
 socialspy:
   enabled: true
   keep-after-reload: true
