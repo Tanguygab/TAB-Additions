@@ -33,6 +33,7 @@ import java.util.UUID;
 public class SpigotPlatform extends Platform {
 
 	private final TABAdditionsSpigot plugin;
+	private SpigotListener listener;
 	private BukkitAudiences kyori;
 	private static final DecimalFormat format = new DecimalFormat("#.##");
 
@@ -112,9 +113,9 @@ public class SpigotPlatform extends Platform {
 
 	@Override
 	public void reload() {
-		HandlerList.unregisterAll(plugin);
+		HandlerList.unregisterAll(listener);
 		kyori = BukkitAudiences.create(plugin);
-		plugin.getServer().getPluginManager().registerEvents(new SpigotListener(), plugin);
+		plugin.getServer().getPluginManager().registerEvents(listener = new SpigotListener(), plugin);
 	}
 
 	@Override
