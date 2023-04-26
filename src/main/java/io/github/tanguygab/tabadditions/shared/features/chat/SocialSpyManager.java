@@ -22,7 +22,10 @@ public class SocialSpyManager extends ChatManager {
     }
 
     public String isSpying(TabPlayer sender, TabPlayer viewer, ChatFormat senderFormat) {
-        if (!hasCmdToggled(viewer)) return "";
+        if (!hasCmdToggled(viewer) || !viewer.hasPermission("tabadditions.chat.socialspy")) {
+            toggled.remove(viewer.getUniqueId());
+            return "";
+        }
         if (channelSpy && !senderFormat.getChannel().equals(chat.getFormat(viewer).getChannel())) return "channel";
         if (viewConditionSpy && !senderFormat.isViewConditionMet(sender,viewer)) return "view-condition";
         return "";
@@ -30,13 +33,18 @@ public class SocialSpyManager extends ChatManager {
 
     public void process(TabPlayer sender, TabPlayer viewer, String message, String type) {
         String output = type.equals("msg") && msgSpy ? msgOutput
-                : type.equals("channel") && channelSpy ? channelOutput.replace("%channel%",chat.getFormat(viewer).getChannel())
-                : type.equals("view-condition") && viewConditionSpy ? viewConditionOutput.replace("%view-condition%",chat.getFormat(viewer).getViewCondition().getName())
+                : type.equals("channel") && channelSpy ? channelOutput.replace("%channel%",chat.getFormat(sender).getChannel())
+                : type.equals("view-condition") && viewConditionSpy ? viewConditionOutput.replace("%view-condition%",chat.getFormat(sender).getViewCondition().getName())
                 : null;
         if (output == null) return;
+        if (!type.equals("msg")) {
+            chat.sendMessage(viewer,chat.createMessage(sender,viewer,message,output));
+            return;
+        }
+        toggled.removeIf(uuid -> tab.getPlayer(uuid) != null && !tab.getPlayer(uuid).hasPermission("tabadditions.chat.socialspy"));
         toggled.forEach(uuid->{
             TabPlayer spy = tab.getPlayer(uuid);
-            if (spy == null) return;
+            if (spy == null || spy == sender) return;
             chat.sendMessage(spy,chat.createMessage(sender,viewer,message,output));
         });
     }

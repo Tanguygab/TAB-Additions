@@ -166,7 +166,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (cmd.equals("/togglemention")) return mentionManager != null && mentionManager.onCommand(p,cmd);
         if (cmd.equals("/togglemsg") || cmd.startsWith("/reply") || cmd.startsWith("/r") || cmd.startsWith("/msg"))
             return msgManager != null && msgManager.onCommand(p,cmd);
-        if (cmd.equals("/socialspy")) return p.hasPermission("tabadditions.chat.clearchat") && socialSpyManager != null && socialSpyManager.onCommand(p,cmd);
+        if (cmd.equals("/socialspy")) return p.hasPermission("tabadditions.chat.socialspy") && socialSpyManager != null && socialSpyManager.onCommand(p,cmd);
 
         TranslationFile msgs = plugin.getTranslation();
         if (cmd.equals("/togglechat")) return plugin.toggleCmd(toggleCmd,p,toggled,msgs.chatOn,msgs.chatOff);
