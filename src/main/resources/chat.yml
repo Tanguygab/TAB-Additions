@@ -52,6 +52,29 @@ commands-formats:
         text: "&f%msg%"
         hover: "%date%"
 
+msg:
+  enabled: true
+  sender:
+    text: "&7[&6&lMe &e➠ &6&l%rel_viewer:player%&7] %msg%"
+    hover:
+      - "%time%"
+      - ""
+      - "&fClick to reply to &6%rel_viewer:player%&f."
+    click: "suggest:/msg %rel_viewer:player% "
+  viewer:
+    text: "&7[&6&l%player% &e➠ &6&lMe&7] %msg%"
+    hover:
+      - "%time%"
+      - ""
+      - "&fClick to reply to &6%player%&f."
+    click: "suggest:/msg %player% "
+  /togglemsg: true
+  /reply: true
+  save-last-sender-for-reply: false # When receiving a private message, save the sender as the last person to reply to with /reply
+  msg-self: true
+  /msg-aliases: [m, w, tell, whisper]
+  cooldown: 0
+
 item:
   enabled: true
   mainhand: '[item]'
@@ -164,58 +187,29 @@ discord-support:
   DiscordSRV: false
   EssentialsX: false
 
-
-
-msg:
-  enabled: true
-  sender: "{
-  &7[&6&lMe &e➠ &6&l%rel_viewer:prop-customchatname%&7] %msg%
-  ||
-  %time%
-  \n
-  \n&fClick to reply to &6%rel_viewer:prop-customchatname%&f.
-  ||
-  suggest:/msg %rel_viewer:player%  }"
-  viewer: "{
-  &7[&6&l%prop-customchatname% &e➠ &6&lMe&7] %msg%
-  ||
-  %time%
-  \n
-  \n&fClick to reply to &6%prop-customchatname%&f.
-  ||
-  suggest:/msg %player%  }"
-  /togglemsg: true
-  /reply: true
-  save-last-sender-for-reply: false # When receiving a private message, save the sender as the last person to reply to with /reply
-  msg-self: true
-  /msg-aliases: [m, w, tell, whisper]
-  cooldown: 0
 socialspy:
   enabled: true
-  keep-after-reload: true
   msgs:
     spy: true
-    output: '{
-    &b&l[SocialSpy-Msg] &7[&6&l%prop-customchatname% &e➠ &6&l%rel_viewer:prop-customchatname%&7] %msg%
-    ||
-    %time%
-    }'
+    output:
+      text: "&b&l[SocialSpy-Msg] &7[&6&l%player% &e➠ &6&l%rel_viewer:player%&7] %msg%"
+      hover: "%time%"
   channels:
     spy: true
-    output: "{
-    &b&l[SocialSpy-Channel]&r %prop-customchatname% &8» %msg%
-    ||
-    Channel: %channel%
-    \n%time%
-    }"
+    output:
+      text: "&b&l[SocialSpy-Channel]&r %player% &8» %msg%"
+      hover:
+        - "Channel: %channel%"
+        - "%time%"
   view-conditions:
     spy: true
-    output: "{
-    &b&l[SocialSpy-ViewCondition]&r %prop-customchatname% &8» %msg%
-    ||
-    Condition: %condition%
-    \n%time%
-    }"
+    output:
+      text: "&b&l[SocialSpy-ViewCondition]&r %player% &8» %msg%"
+      hover:
+        - "Condition: %condition%"
+        - "%time%"
+
+
 custom-interactions:
   pos:
     input: '[pos]'

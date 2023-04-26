@@ -38,6 +38,8 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     private final ChatFormatter chatFormatter;
     private final EmojiManager emojiManager;
     private final MentionManager mentionManager;
+    private final MsgManager msgManager;
+    protected final SocialSpyManager socialSpyManager;
 
     public Double cooldownTime;
     public Map<UUID, LocalDateTime> cooldown = new HashMap<>();
@@ -81,8 +83,8 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
                         config.getBoolean("emojis.auto-complete",true),
                         config.getConfigurationSection("emojis.categories"),
                         config.getBoolean("emojis./emojis",true),
-                        config.getBoolean("emojis./toggleemoji",true)
-        ) : null;
+                        config.getBoolean("emojis./toggleemoji",true))
+                : null;
         mentionManager = config.getBoolean("mention.enabled",true)
                 ? new MentionManager(this,
                         config.getString("mention.input","@%player%"),
@@ -91,10 +93,28 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
                         config.getBoolean("mention./togglemention",true),
                         config.getBoolean("mention.output-for-everyone",true),
                         config.getConfigurationSection("mention.custom-mentions"))
-        : null;
+            : null;
+        msgManager = config.getBoolean("msg.enabled",true)
+                ? new MsgManager(this,ChatUtils.componentToMM(config.getConfigurationSection("msg.sender")),
+                        ChatUtils.componentToMM(config.getConfigurationSection("msg.viewer")),
+                        config.getDouble("msg.cooldown",0),
+                        config.getStringList("msg./msg-aliases",Arrays.asList("tell","whisper","w","m")),
+                        config.getBoolean("msg.msg-self",true),
+                        config.getBoolean("msg./togglemsg",true),
+                        config.getBoolean("msg./reply",true),
+                        config.getBoolean("msg.save-last-sender-for-reply",true))
+                : null;
+        socialSpyManager = config.getBoolean("socialspy.enabled",true)
+                ? new SocialSpyManager(this,
+                        config.getBoolean("socialspy.msgs.spy",true),
+                ChatUtils.componentToMM(config.getConfigurationSection("socialspy.msgs.output")),
+                config.getBoolean("socialspy.channels.spy",true),
+                ChatUtils.componentToMM(config.getConfigurationSection("socialspy.channels.output")),
+                config.getBoolean("socialspy.view-conditions.spy",true),
+                ChatUtils.componentToMM(config.getConfigurationSection("socialspy.view-conditions.output")))
+                : null;
 
         cooldownTime = config.getDouble("cooldown",0);
-
 
         toggleCmd = config.getBoolean("/togglechat",true);
         toggled = ChatUtils.registerToggleCmd(toggleCmd,"chat-off","togglechat","chat-status",p->hasChatToggled((TabPlayer) p) ? "Off" : "No");
@@ -109,6 +129,12 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         clearChatAmount = config.getInt("clearchat.amount",100);
         clearChatLine = config.getString("clearchat.line","");
     }
+
+    /**
+     * TODO:
+     * /emojis
+     * Custom Interactions
+     */
 
     @Override
     public void unload() {
@@ -128,14 +154,16 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
 
     @Override
     public void onJoin(TabPlayer player) {
-        if (emojiManager != null && emojiManager.isAutoCompleteEnabled() && !emojiManager.hasEmojisToggled(player))
+        if (emojiManager != null && emojiManager.isAutoCompleteEnabled() && !emojiManager.hasCmdToggled(player))
             emojiManager.loadAutoComplete(player);
     }
 
     @Override
     public boolean onCommand(TabPlayer p, String cmd) {
         if (cmd.startsWith("/emojis") || cmd.equals("/toggleemojis")) return emojiManager != null && emojiManager.onCommand(p,cmd);
-        if (cmd.equals("/togglemention")) return mentionManager != null && mentionManager.onCommand(p);
+        if (cmd.equals("/togglemention")) return mentionManager != null && mentionManager.onCommand(p,cmd);
+        if (cmd.equals("/togglemsg") || cmd.startsWith("/reply") || cmd.startsWith("/r") || cmd.startsWith("/msg"))
+            return msgManager != null && msgManager.onCommand(p,cmd);
 
         TranslationFile msgs = plugin.getTranslation();
         if (cmd.equals("/togglechat")) return plugin.toggleCmd(toggleCmd,p,toggled,msgs.chatOn,msgs.chatOff);
@@ -193,24 +221,32 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         });
 
         ChatFormat format = getFormat(sender);
+        if (format == null) return;
         String text = format.getText();
+        if (plugin.getPlatform().isPluginEnabled("InteractiveChat"))
+            try {text = InteractiveChatAPI.markSender(text,sender.getUniqueId());}
+            catch (IllegalStateException ignored) {}
 
         for (TabPlayer viewer : tab.getOnlinePlayers()) {
-            String output = plugin.parsePlaceholders(text,sender,viewer).replace("%msg%", process(message,sender,viewer));
-            output = ChatUtils.toMMColors(output);
-            if (plugin.getPlatform().isPluginEnabled("InteractiveChat"))
-                try {output = InteractiveChatAPI.markSender(output,sender.getUniqueId());}
-                catch (IllegalStateException ignored) {}
-
-            Component c = mm.deserialize(output);
-            plugin.getPlatform().getAudience(viewer).sendMessage(c);
+            if (socialSpyManager != null) socialSpyManager.process(sender,viewer,message,socialSpyManager.isSpying(sender,viewer,format));
+            if (canSee(sender,viewer,format)) sendMessage(viewer, createMessage(sender, viewer, message, text));
         }
     }
 
-    private String process(String message, TabPlayer sender, TabPlayer viewer) {
+    public void sendMessage(TabPlayer player, Component component) {
+        plugin.getPlatform().getAudience(player).sendMessage(component);
+    }
+    public Component createMessage(TabPlayer sender, TabPlayer viewer, String message, String text) {
+        String output = plugin.parsePlaceholders(text,sender,viewer).replace("%msg%", process(sender,viewer,message));
+        output = ChatUtils.toMMColors(output);
+
+        return mm.deserialize(output);
+    }
+
+    private String process(TabPlayer sender, TabPlayer viewer, String message) {
         //message = commentMMTags(message);
-        if (emojiManager != null) message = emojiManager.process(message,sender,viewer);
-        if (mentionManager != null) message = mentionManager.process(message,sender,viewer);
+        if (emojiManager != null) message = emojiManager.process(sender,viewer,message);
+        if (mentionManager != null) message = mentionManager.process(sender,viewer,message);
         message = chatFormatter.process(message,sender);
         return message;
     }
@@ -222,6 +258,13 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
                 : p.getName().toLowerCase());
     }
     public boolean isIgnored(TabPlayer sender, TabPlayer viewer) {
-        return ignored.getOrDefault(viewer.getUniqueId(),List.of()).contains(sender.getUniqueId());
+        return !sender.hasPermission("tabadditions.chat.bypass.ignore") && ignored.getOrDefault(viewer.getUniqueId(),List.of()).contains(sender.getUniqueId());
+    }
+
+    public boolean canSee(TabPlayer sender, TabPlayer viewer, ChatFormat f) {
+        if (sender == viewer) return true;
+        if (viewer == null) return f.getChannel().equals("") && !f.hasViewCondition();
+        if (!f.getChannel().equals(getFormat(viewer).getChannel())) return false;
+        return f.isViewConditionMet(sender, viewer);
     }
 }

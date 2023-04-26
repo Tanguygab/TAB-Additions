@@ -2,7 +2,6 @@ package io.github.tanguygab.tabadditions.shared.features.chat.mentions;
 
 import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
-import io.github.tanguygab.tabadditions.shared.features.chat.ChatUtils;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import net.kyori.adventure.key.Key;
@@ -18,18 +17,14 @@ public class MentionManager extends ChatManager {
     private final String input;
     private final String output;
     private final Sound sound;
-    private final boolean toggleCmd;
     private final boolean outputForEveryone;
     private final Map<String,CustomMention> mentions = new HashMap<>();
-    private final List<UUID> toggled;
 
-    public MentionManager(Chat cm, String input, String output, String sound, boolean toggleCmd, boolean outputForEveryone, Map<String,Map<String,String>> customMentions) {
-        super(cm);
+    public MentionManager(Chat chat, String input, String output, String sound, boolean toggleCmd, boolean outputForEveryone, Map<String,Map<String,String>> customMentions) {
+        super(chat,toggleCmd,"mentions-off","togglementions","chat-mentions");
         this.input = input;
         this.output = output;
         this.sound = Sound.sound(Key.key(sound),Sound.Source.MASTER,1,1);
-        this.toggleCmd = toggleCmd;
-        toggled = ChatUtils.registerToggleCmd(toggleCmd,"mentions-off","togglementions","chat-mentions",p->hasMentionsToggled((TabPlayer) p) ? "Off" : "No");
         this.outputForEveryone = outputForEveryone;
         if (customMentions != null)
             customMentions.forEach((mention,cfg)-> mentions.put(mention,new CustomMention(cfg.get("input"),cfg.get("output"),Condition.getCondition(cfg.get("condition")),cfg.get("sound"))));
@@ -39,20 +34,16 @@ public class MentionManager extends ChatManager {
         plugin.unloadData("mentions-off", toggled,toggleCmd);
     }
 
-    public boolean hasMentionsToggled(TabPlayer p) {
-        return toggled.contains(p.getUniqueId());
-    }
-
     public boolean isMentioned(String msg, TabPlayer sender, TabPlayer viewer) {
         String input = plugin.parsePlaceholders(this.input,viewer);
         if (input.equals("") || viewer == null) return false;
-        if (!sender.hasPermission("tabadditions.chat.bypass.togglemention") && hasMentionsToggled(viewer)) return false;
-        if (!sender.hasPermission("tabadditions.chat.bypass.ignore") && chat.isIgnored(sender,viewer)) return false;
+        if (!sender.hasPermission("tabadditions.chat.bypass.togglemention") && hasCmdToggled(viewer)) return false;
+        if (chat.isIgnored(sender,viewer)) return false;
         return msg.toLowerCase().contains(input.toLowerCase());
     }
 
     //is there a better way to do this? I have no fucking clue as to what I've just done
-    public String process(String msg, TabPlayer sender, TabPlayer viewer) {
+    public String process(TabPlayer sender, TabPlayer viewer, String msg) {
         //checking custom mentions
         String finalMsg = msg;
         List<CustomMention> mentions = this.mentions.values().stream().filter(mention->mention.matches(finalMsg)).collect(Collectors.toList());
@@ -85,8 +76,8 @@ public class MentionManager extends ChatManager {
         plugin.getPlatform().getAudience(player).playSound(sound);
     }
 
-    public boolean onCommand(TabPlayer player) {
-        return plugin.toggleCmd(toggleCmd,player,toggled,plugin.getTranslation().mentionOn,plugin.getTranslation().mentionOff);
+    public boolean onCommand(TabPlayer sender, String message) {
+        return plugin.toggleCmd(toggleCmd,sender,toggled,translation.mentionOn,translation.mentionOff);
     }
 
 }

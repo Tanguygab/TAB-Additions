@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features.chat.emojis;
 
-import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatUtils;
@@ -20,11 +19,9 @@ public class EmojiManager extends ChatManager {
     @Getter private int totalEmojiCount;
     private final Map<TabPlayer, List<String>> emojisAutoCompleteList = new HashMap<>();
     @Getter private final boolean emojisCmdEnabled;
-    private final boolean toggleCmd;
-    private final List<UUID> toggled;
 
-    public EmojiManager(Chat cm, String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, Map<String,Map<String,Object>> emojis, boolean emojisCmdEnabled, boolean toggleCmd) {
-        super(cm);
+    public EmojiManager(Chat chat, String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, Map<String,Map<String,Object>> emojis, boolean emojisCmdEnabled, boolean toggleCmd) {
+        super(chat,toggleCmd,"emojis-off","toggleemojis","chat-emojis");
         this.output = emojiOutput;
         this.untranslate = untranslateEmojis;
         autoCompleteEnabled = plugin.getPlatform().supportsChatSuggestions() && autoCompleteEmojis;
@@ -37,11 +34,8 @@ public class EmojiManager extends ChatManager {
         this.emojisCmdEnabled = emojisCmdEnabled;
         if (emojisCmdEnabled) plugin.getPlatform().registerCommand("emojis");
 
-        this.toggleCmd = toggleCmd;
-        toggled = ChatUtils.registerToggleCmd(toggleCmd,"emojis-off","toggleemojis","chat-emojis",p->hasEmojisToggled((TabPlayer) p) ? "Off" : "No");
-
         for (TabPlayer p : tab.getOnlinePlayers())
-            if (autoCompleteEmojis && !hasEmojisToggled(p))
+            if (autoCompleteEmojis && !hasCmdToggled(p))
                 loadAutoComplete(p);
 
         PlaceholderManager pm = tab.getPlaceholderManager();
@@ -54,8 +48,8 @@ public class EmojiManager extends ChatManager {
         plugin.unloadData("emojis-off",toggled,toggleCmd);
     }
 
-    public String process(String msg, TabPlayer sender, TabPlayer viewer) {
-        if (hasEmojisToggled(viewer) || hasEmojisToggled(sender)) return msg;
+    public String process(TabPlayer sender, TabPlayer viewer, String msg) {
+        if (hasCmdToggled(viewer) || hasCmdToggled(sender)) return msg;
 
         for (EmojiCategory category : emojiCategories.values()) {
             if (!category.canUse(sender)) continue;
@@ -121,18 +115,11 @@ public class EmojiManager extends ChatManager {
             plugin.getPlatform().updateChatComplete(p, emojisAutoCompleteList.get(p),false);
     }
 
-    public boolean hasEmojisToggled(TabPlayer p) {
-        return toggled.contains(p.getUniqueId());
-    }
-
-    public boolean onCommand(TabPlayer player, String command) {
-        TranslationFile msgs = plugin.getTranslation();
+    public boolean onCommand(TabPlayer sender, String command) {
         if (command.startsWith("/emojis") && emojisCmdEnabled) {
 
             return true;
         }
-        if (command.equals("/toggleemojis")) return plugin.toggleCmd(toggleCmd,player,toggled,msgs.emojisOn,msgs.emojisOff);
-
-        return false;
+        return command.equals("/toggleemojis") && plugin.toggleCmd(toggleCmd,sender,toggled,translation.emojisOn,translation.emojisOff);
     }
 }

@@ -10,6 +10,7 @@ import java.io.InputStream;
 public class TranslationFile extends YamlConfigurationFile {
 
     public final String providePlayer = getString("provide_player","&cYou have to provide a player name!");
+    public final String playerNotFound = getString("player-not-online", "&cNo online player found with the name \"%player%\"");
 
     public final String actionBarOn = getString("actionbars.on", "&aYou will now receive new actionbars!");
     public final String actionBarOff = getString("actionbars.off", "&cYou won't receive any new actionbar!");
@@ -23,14 +24,24 @@ public class TranslationFile extends YamlConfigurationFile {
     private final String chatCooldown = getString("chat.cooldown", "&cYou have to wait %seconds% more seconds!");
     private final String chatCleared = getString("chat.cleared", "&aChat cleared by %name%!");
 
-    private final String ignoreOn = getString("ignore.on", "&cYou won't receive any new private message from %name%!");
-    private final String ignoreOff = getString("ignore.off", "&aYou will now receive new private messages from %name%!");
+    private final String ignoreOn = getString("ignore.on", "&cYou won't receive any new message from %name%!");
+    private final String ignoreOff = getString("ignore.off", "&aYou will now receive new messages from %name%!");
     public final String cantIgnoreSelf = getString("ignore.self", "&cYou can't ignore yourself!");
     public final String isIgnored = getString("ignored.is", "&cThis player ignores you");
 
     public final String mentionOn = getString("mentions.on", "&aMentions enabled.");
     public final String mentionOff = getString("mentions.off", "&cMentions disabled.");
 
+    public final String pmOn = getString("msg.on", "&cYou will now receive new private messages!");
+    public final String pmOff = getString("msg.off", "&aYou won't receive any new private message!");
+    private final String pmCooldown = getString("pm_cooldown", "&cYou have to wait %seconds% more seconds!");
+    public final String cantPmSelf = getString("cant_pm_self", "&cYou can't message yourself!");
+    public final String pmEmpty = getString("pm_empty", "&7You have to provide a message!");
+    public final String hasPmOff = getString("has_pm_off", "&cThis player doesn't accept private messages");
+
+
+    public final String socialSpyOn = getString("socialspy.on", "&aSocialSpy enabled.");
+    public final String socialSpyOff = getString("socialspy.off", "&cSocialSpy disabled.");
 
     public TranslationFile(InputStream source, File destination) throws IOException {
         super(source,destination);
@@ -45,5 +56,11 @@ public class TranslationFile extends YamlConfigurationFile {
     }
     public String getIgnore(String ignored, boolean on) {
         return (on ? ignoreOn : ignoreOff).replace("%name%",ignored);
+    }
+    public String getPmCooldown(double time) {
+        return pmCooldown.replace("%seconds%",time+"");
+    }
+    public String getPlayerNotFound(String player) {
+        return playerNotFound.replace("%player%", player);
     }
 }
