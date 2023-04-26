@@ -54,14 +54,14 @@ commands-formats:
 msg:
   enabled: true
   sender:
-    text: "&7[&6&lMe &e➠ &6&l%rel_viewer:player%&7] %msg%"
+    text: "&7[&6&lMe &e➠ &6&l%rel_viewer:player%&7] &r%msg%"
     hover:
       - "%time%"
       - ""
       - "&fClick to reply to &6%rel_viewer:player%&f."
     click: "suggest:/msg %rel_viewer:player% "
   viewer:
-    text: "&7[&6&l%player% &e➠ &6&lMe&7] %msg%"
+    text: "&7[&6&l%player% &e➠ &6&lMe&7] &r%msg%"
     hover:
       - "%time%"
       - ""
@@ -191,19 +191,19 @@ socialspy:
   msgs:
     spy: true
     output:
-      text: "&b&l[SocialSpy-Msg] &7[&6&l%player% &e➠ &6&l%rel_viewer:player%&7] %msg%"
+      text: "&b&l[SocialSpy-Msg] &7[&6&l%player% &e➠ &6&l%rel_viewer:player%&7] &r%msg%"
       hover: "%time%"
   channels:
     spy: true
     output:
-      text: "&b&l[SocialSpy-Channel]&r %player% &8» %msg%"
+      text: "&b&l[SocialSpy-Channel]&r %player% &8» &f%msg%"
       hover:
         - "Channel: %channel%"
         - "%time%"
   view-conditions:
     spy: true
     output:
-      text: "&b&l[SocialSpy-ViewCondition]&r %player% &8» %msg%"
+      text: "&b&l[SocialSpy-ViewCondition]&r %player% &8» &f%msg%"
       hover:
         - "Condition: %condition%"
         - "%time%"
