@@ -10,7 +10,7 @@ public class ChatFormat {
 
     @Getter private final String name;
     private final AdvancedConditions condition;
-    private final AdvancedConditions viewCondition;
+    @Getter private final AdvancedConditions viewCondition;
     @Getter private final String channel;
     @Getter private final String text;
 

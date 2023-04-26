@@ -2,9 +2,9 @@ package io.github.tanguygab.tabadditions.shared.features.chat.mentions;
 
 import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
+import io.github.tanguygab.tabadditions.shared.features.chat.ChatUtils;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import me.neznamy.tab.shared.platform.TabPlayer;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 
 import java.util.*;
@@ -24,14 +24,10 @@ public class MentionManager extends ChatManager {
         super(chat,toggleCmd,"mentions-off","togglementions","chat-mentions");
         this.input = input;
         this.output = output;
-        this.sound = Sound.sound(Key.key(sound),Sound.Source.MASTER,1,1);
+        this.sound = ChatUtils.getSound(sound);
         this.outputForEveryone = outputForEveryone;
         if (customMentions != null)
-            customMentions.forEach((mention,cfg)-> mentions.put(mention,new CustomMention(cfg.get("input"),cfg.get("output"),Condition.getCondition(cfg.get("condition")),cfg.get("sound"))));
-    }
-
-    public void unload() {
-        plugin.unloadData("mentions-off", toggled,toggleCmd);
+            customMentions.forEach((mention,cfg)-> mentions.put(mention,new CustomMention(cfg.get("input"),cfg.get("output"),Condition.getCondition(cfg.get("condition")),ChatUtils.getSound(cfg.get("sound")))));
     }
 
     public boolean isMentioned(String msg, TabPlayer sender, TabPlayer viewer) {

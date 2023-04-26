@@ -33,7 +33,6 @@ public class MsgManager extends ChatManager {
         if (replyCmd) platform.registerCommand("reply","r");
     }
 
-
     public void setCooldown(TabPlayer p) {
         if (this.cooldown != 0 && !p.hasPermission("tabadditions.chat.bypass.cooldown"))
             msgCooldown.put(p,LocalDateTime.now());

@@ -3,6 +3,9 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.chat.EnumChatFormat;
+import net.kyori.adventure.key.Key;
+import net.kyori.adventure.sound.Sound;
+import org.intellij.lang.annotations.Subst;
 
 import java.util.List;
 import java.util.Map;
@@ -27,7 +30,7 @@ public class ChatUtils {
     public static String componentToMM(Map<String,Object> component) {
         StringBuilder output = new StringBuilder();
         String text = component.get("text")+"";
-        String hover = component.get("hover") instanceof List ? String.join("\n",(List<String>)component.get("hover")) : component.get("hover")+"";
+        String hover = component.get("hover") instanceof List ? String.join("\n",(List<String>)component.get("hover")) : component.getOrDefault("hover","")+"";
         String click = component.get("click")+"";
         String clickType = click.contains(":") ? click.substring(0,click.indexOf(":")) : "";
         click = click.contains(":") ? click.substring(click.indexOf(":")+1) : "";
@@ -56,5 +59,12 @@ public class ChatUtils {
         TABAdditions.getInstance().getPlatform().registerCommand(cmd);
         TAB.getInstance().getPlaceholderManager().registerPlayerPlaceholder("%"+placeholder+"%",1000,fun);
         return TABAdditions.getInstance().loadData(data,true);
+    }
+
+    public static Sound getSound(@Subst("block.note_block.pling") String sound) {
+        Key key;
+        try {key = Key.key(sound);}
+        catch (Exception e) {key = Key.key("block.note_block.pling");}
+        return Sound.sound(key,Sound.Source.MASTER,1,1);
     }
 }

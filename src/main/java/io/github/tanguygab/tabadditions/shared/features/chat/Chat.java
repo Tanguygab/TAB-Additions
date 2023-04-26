@@ -70,7 +70,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
             this.formats.put(name,new ChatFormat(displayName,
                     AdvancedConditions.getCondition(condition),
                     AdvancedConditions.getCondition(viewCondition),
-                    channel,
+                    channel == null ? "" : channel,
                     ChatUtils.componentsToMM(display)));
         });
         PlaceholderManager pm = tab.getPlaceholderManager();
@@ -140,6 +140,8 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     public void unload() {
         if (emojiManager != null) emojiManager.unload();
         if (mentionManager != null) mentionManager.unload();
+        if (msgManager != null) msgManager.unload();
+        if (socialSpyManager != null) socialSpyManager.unload();
     }
 
     public ChatFormat getFormat(TabPlayer player) {
@@ -164,6 +166,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (cmd.equals("/togglemention")) return mentionManager != null && mentionManager.onCommand(p,cmd);
         if (cmd.equals("/togglemsg") || cmd.startsWith("/reply") || cmd.startsWith("/r") || cmd.startsWith("/msg"))
             return msgManager != null && msgManager.onCommand(p,cmd);
+        if (cmd.equals("/socialspy")) return p.hasPermission("tabadditions.chat.clearchat") && socialSpyManager != null && socialSpyManager.onCommand(p,cmd);
 
         TranslationFile msgs = plugin.getTranslation();
         if (cmd.equals("/togglechat")) return plugin.toggleCmd(toggleCmd,p,toggled,msgs.chatOn,msgs.chatOff);
@@ -239,7 +242,6 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     public Component createMessage(TabPlayer sender, TabPlayer viewer, String message, String text) {
         String output = plugin.parsePlaceholders(text,sender,viewer).replace("%msg%", process(sender,viewer,message));
         output = ChatUtils.toMMColors(output);
-
         return mm.deserialize(output);
     }
 

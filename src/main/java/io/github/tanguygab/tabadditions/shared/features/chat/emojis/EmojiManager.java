@@ -43,9 +43,10 @@ public class EmojiManager extends ChatManager {
         pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->ownedEmojis((TabPlayer) p)+"");
     }
 
+    @Override
     public void unload() {
         if (autoCompleteEnabled) for (TabPlayer p : tab.getOnlinePlayers()) unloadAutoComplete(p);
-        plugin.unloadData("emojis-off",toggled,toggleCmd);
+        super.unload();
     }
 
     public String process(TabPlayer sender, TabPlayer viewer, String msg) {
