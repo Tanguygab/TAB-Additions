@@ -32,7 +32,7 @@ public class AdvancedConditions {
                 put("-|", line -> new StringCondition(line.split("-|"), String::endsWith)::isMet);
                 put("!=", line -> new StringCondition(line.split("!="), (left, right) -> !left.equals(right))::isMet);
                 put("=", line -> new StringCondition(line.split("="), String::equals)::isMet);
-                put("permission:", line -> (p,target) -> p.hasPermission(line.split(":")[1]));
+                put("permission:", line -> (viewer,target) -> target.hasPermission(line.split(":")[1]));
             }};
 
     /** Name of this condition defined in configuration */
@@ -123,7 +123,7 @@ public class AdvancedConditions {
      * @return  {@code true} if met, {@code false} if not
      */
     public boolean isMet(TabPlayer viewer) {
-        return check(null,viewer) != null;
+        return check(viewer,viewer) != null;
     }
 
     public BiFunction<TabPlayer,TabPlayer,Boolean> check(TabPlayer viewer, TabPlayer target) {
