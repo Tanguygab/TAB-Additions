@@ -7,7 +7,6 @@ formats:
   vip:
     name: "&eVIP"
     condition: "permission:group.vip"
-    view-condition: "permission:group.vip"
     display:
       prefix:
         text: "%chat-format% %player% &8» "
@@ -30,7 +29,7 @@ formats:
 commands-formats:
   localchat:
     name: "&2LocalChat"
-    view-condition: "inRange"
+    view-condition: "inRange" # view-conditions use advanced-conditions which support relational placeholders (check TAB-Additions' config.yml)
     channel: "local"
     display:
       prefix:
@@ -91,7 +90,7 @@ mention:
     text: "&b@%rel_viewer:player%"
     hover: "Mentioned!"
     click: "suggest:@%player%"
-  sound: BLOCK_NOTE_BLOCK_PLING
+  sound: block.note_block.pling
   output-for-everyone: true
   /togglemention: true
   custom-mentions:
@@ -99,7 +98,7 @@ mention:
       input: "@staff"
       output: "&4@Staff"
       condition: permission:tab.staff
-      sound: BLOCK_NOTE_BLOCK_PLING
+      sound: block.note_block.pling
 
 emojis:
   enabled: true
