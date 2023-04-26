@@ -51,7 +51,7 @@ public class ChatUtils {
         text = text.replace("§","&");
         for (EnumChatFormat c : EnumChatFormat.values())
             text = text.replace("&"+c.getCharacter(),"<"+c.toString().toLowerCase()+">");
-        return text;
+        return text.replace("<reset>","<bold:false><italic:false><underlined:false><strikethrough:false><obfuscated:false><white>");
     }
 
     public static List<UUID> registerToggleCmd(boolean toggleCmd, String data, String cmd, String placeholder, Function<me.neznamy.tab.api.TabPlayer,Object> fun) {
