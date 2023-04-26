@@ -57,7 +57,7 @@ public abstract class SimpleCondition {
      * @return  replaced string
      */
     public String parseSide(TabPlayer viewer, TabPlayer target, String value, String[] placeholders) {
-        return TABAdditions.getInstance().parsePlaceholders(value,viewer,target, List.of(placeholders));
+        return TABAdditions.getInstance().parsePlaceholders(value,target,viewer, List.of(placeholders));
     }
 
     /**

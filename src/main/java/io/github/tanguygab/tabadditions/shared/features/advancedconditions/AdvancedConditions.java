@@ -123,7 +123,7 @@ public class AdvancedConditions {
      * @return  {@code true} if met, {@code false} if not
      */
     public boolean isMet(TabPlayer viewer) {
-        return check(viewer,null) != null;
+        return check(null,viewer) != null;
     }
 
     public BiFunction<TabPlayer,TabPlayer,Boolean> check(TabPlayer viewer, TabPlayer target) {
