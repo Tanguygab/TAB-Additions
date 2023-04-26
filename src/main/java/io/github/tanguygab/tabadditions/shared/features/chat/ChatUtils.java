@@ -3,16 +3,22 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.chat.EnumChatFormat;
+import me.neznamy.tab.shared.chat.rgb.RGBUtils;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.intellij.lang.annotations.Subst;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ChatUtils {
+
+    private static final Pattern tabRGBPattern = Pattern.compile("#[0-9a-fA-F]{6}");
 
     public static int countMatches(String str, String sub) {
         if (str == null || str.length() == 0 || sub == null || sub.length() == 0) return 0;
@@ -48,10 +54,21 @@ public class ChatUtils {
     }
 
     public static String toMMColors(String text) {
+        text = RGBUtils.getInstance().applyFormats(text);
         text = text.replace("§","&");
         for (EnumChatFormat c : EnumChatFormat.values())
             text = text.replace("&"+c.getCharacter(),"<"+c.toString().toLowerCase()+">");
-        return text.replace("<reset>","<bold:false><italic:false><underlined:false><strikethrough:false><obfuscated:false><white>");
+        text = text.replace("<reset>","<bold:false><italic:false><underlined:false><strikethrough:false><obfuscated:false><white>");
+
+        Matcher m = tabRGBPattern.matcher(text);
+        List<String> rgbs = new ArrayList<>();
+        while (m.find()) {
+            String rgb = m.group();
+            if (rgbs.contains(rgb)) continue;
+            rgbs.add(rgb);
+            text = text.replace(rgb,"<"+rgb+">");
+        }
+        return text;
     }
 
     public static List<UUID> registerToggleCmd(boolean toggleCmd, String data, String cmd, String placeholder, Function<me.neznamy.tab.api.TabPlayer,Object> fun) {
