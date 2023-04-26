@@ -40,7 +40,7 @@ public class TABAdditions {
     private final File dataFolder;
     @Getter private ConfigurationFile config;
     @Getter private ConfigurationFile chatConfig;
-    @Getter  private TranslationFile translation;
+    @Getter private TranslationFile translation;
     public final List<String> features = new ArrayList<>();
 
 
@@ -52,6 +52,7 @@ public class TABAdditions {
 
     public void load() {
         loadFiles();
+        tab.getEventBus().register(TabPlaceholderRegisterEvent.class,this::onPlaceholderRegister);
         reload();
         tab.getEventBus().register(TabLoadEvent.class,e->platform.runTask(this::reload));
     }
@@ -67,8 +68,8 @@ public class TABAdditions {
         }
     }
 
+
     public void reload() {
-        tab.getEventBus().unregister(TabPlaceholderRegisterEvent.class);
         platform.reload();
         loadFiles();
         loadFeatures();
@@ -111,7 +112,6 @@ public class TABAdditions {
     private void loadPlaceholders() {
         PlaceholderManagerImpl pm = tab.getPlaceholderManager();
         platform.registerPlaceholders(pm);
-        tab.getEventBus().register(TabPlaceholderRegisterEvent.class,this::onPlaceholderRegister);
 
         AdvancedConditions.clearConditions();
         Map<String, Map<String, String>> conditions = config.getConfigurationSection("advanced-conditions");
