@@ -74,7 +74,7 @@ public class MsgManager extends ChatManager {
                 return true;
             }
 
-            String msg = command.substring(command.startsWith("/reply ") ? 7 : command.startsWith("/r ") ? 3 : command.startsWith("/msg "+player+" ") ? 5+player.length() : command.length());
+            String msg = command.substring(command.startsWith("/reply ") ? 7 : command.startsWith("/r ") ? 3 : command.startsWith("/msg "+player+" ") ? 6+player.length() : command.length());
             if (msg.equals("")) {
                 sender.sendMessage(translation.pmEmpty, true);
                 return true;
