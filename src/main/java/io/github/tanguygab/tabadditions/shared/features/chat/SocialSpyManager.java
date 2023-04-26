@@ -30,14 +30,14 @@ public class SocialSpyManager extends ChatManager {
 
     public void process(TabPlayer sender, TabPlayer viewer, String message, String type) {
         String output = type.equals("msg") && msgSpy ? msgOutput
-                : type.equals("channel") && channelSpy ? channelOutput
-                : type.equals("view-condition") && viewConditionSpy ? viewConditionOutput
+                : type.equals("channel") && channelSpy ? channelOutput.replace("%channel%",chat.getFormat(viewer).getChannel())
+                : type.equals("view-condition") && viewConditionSpy ? viewConditionOutput.replace("%view-condition%",chat.getFormat(viewer).getViewCondition().getName())
                 : null;
         if (output == null) return;
         toggled.forEach(uuid->{
             TabPlayer spy = tab.getPlayer(uuid);
             if (spy == null) return;
-            chat.sendMessage(spy,chat.createMessage(sender,viewer,output,message));
+            chat.sendMessage(spy,chat.createMessage(sender,viewer,message,output));
         });
     }
 
