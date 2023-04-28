@@ -52,12 +52,13 @@ public class ChatFormatter {
         itemPermssion = config.getBoolean("item.permission",false);
 
         customInteractions = new HashMap<>(config.getConfigurationSection("custom-interactions"));
-        System.out.println(customInteractions);
         Map<String,String> map = new HashMap<>();
         customInteractions.forEach((key,cfg)->map.put(key,ChatUtils.componentToMM((Map<String, Object>) cfg.get("output"))));
-        System.out.println(map);
-        map.forEach((key,output)->customInteractions.get(key).put("output",output));
-        System.out.println(customInteractions);
+        map.forEach((key,output)->{
+            Map<String,Object> cfg = new HashMap<>(customInteractions.get(key));
+            cfg.put("output",output);
+            customInteractions.put(key,cfg);
+        });
 
         embedURLs = config.getBoolean("embed-urls.enabled",true);
         urlsOutput = ChatUtils.componentToMM(config.getConfigurationSection("embed-urls.output"));

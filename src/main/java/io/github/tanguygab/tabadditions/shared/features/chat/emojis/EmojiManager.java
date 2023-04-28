@@ -136,39 +136,41 @@ public class EmojiManager extends ChatManager {
         return command.equals("/toggleemojis") && plugin.toggleCmd(toggleCmd,sender,toggled,translation.emojisOn,translation.emojisOff);
     }
 
-    private void getEmojisCategories(TabPlayer p) {
+    private void getEmojisCategories(TabPlayer sender) {
         StringBuilder builder = new StringBuilder();
         AtomicInteger i = new AtomicInteger();
         AtomicInteger emojisOwned = new AtomicInteger();
         emojiCategories.forEach(((categoryName, category) -> {
-            if (!category.canUse(p)) return;
-            int owned = category.ownedEmojis(p);
+            if (!category.canUse(sender)) return;
+            int owned = category.ownedEmojis(sender);
             if (owned == 0) return;
             emojisOwned.addAndGet(owned);
-            builder.append("\n <click:run_command:\"/emojis ").append(categoryName).append("\">").append(translation.getEmojiCategory(p, category)).append("</click>");
+            builder.append("\n <click:run_command:\"/emojis ").append(categoryName).append("\">")
+                    .append(translation.getEmojiCategory(sender, category)).append("</click>");
             i.getAndIncrement();
         }));
 
-        String output = plugin.parsePlaceholders(translation.getEmojiCategoryHeader(i.get(),p,emojisOwned.get(),emojiCategories.size())+builder,p);
-        plugin.getPlatform().getAudience(p).sendMessage(chat.mm.deserialize(ChatUtils.toMMColors(output)));
+        String output = plugin.parsePlaceholders(translation.getEmojiCategoryHeader(i.get(),sender,emojisOwned.get(),emojiCategories.size())+builder,sender);
+        chat.sendMessage(sender,chat.mm.deserialize(ChatUtils.toMMColors(output)));
     }
 
-    private void getEmojiCategory(TabPlayer p, EmojiCategory category) {
+    private void getEmojiCategory(TabPlayer sender, EmojiCategory category) {
         StringBuilder builder = new StringBuilder();
         Map<String,String> emojis = category.getEmojis();
         AtomicInteger i = new AtomicInteger(0);
         emojis.forEach((emoji,output)->{
-            if (!category.canUse(p,emoji)) return;
-            builder.append("\n <click:suggest_command:\"").append(emoji).append("\">").append(translation.getEmoji(emoji, output)).append("</click>");
+            if (!category.canUse(sender,emoji)) return;
+            builder.append("\n <click:suggest_command:\"").append(emoji).append("\"><insert:\"")
+                    .append(emoji).append("\">").append(translation.getEmoji(emoji, output)).append("</insert></click>");
             i.getAndIncrement();
         });
 
         if (i.get() == 0) {
-            p.sendMessage(translation.emojiCategoryNotFound, true);
+            sender.sendMessage(translation.emojiCategoryNotFound, true);
             return;
         }
-        String output = plugin.parsePlaceholders(translation.getEmojiHeader(i.get(),emojis.size())+builder,p);
-        plugin.getPlatform().getAudience(p).sendMessage(chat.mm.deserialize(ChatUtils.toMMColors(output)));
+        String output = plugin.parsePlaceholders(translation.getEmojiHeader(i.get(),emojis.size())+builder,sender);
+        chat.sendMessage(sender,chat.mm.deserialize(ChatUtils.toMMColors(output)));
     }
 
 }
