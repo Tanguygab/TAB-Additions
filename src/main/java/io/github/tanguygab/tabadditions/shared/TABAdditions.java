@@ -61,7 +61,10 @@ public class TABAdditions {
         try {
             config = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("config.yml"), new File(dataFolder, "config.yml"));
             chatConfig = new YamlConfigurationFile(TABAdditions.class.getClassLoader().getResourceAsStream("chat.yml"), new File(dataFolder, "chat.yml"));
-            translation = new TranslationFile(null, new File(dataFolder, "translation.yml"));
+
+            File translationFile = new File(dataFolder, "translation.yml");
+            if (!translationFile.exists()) translationFile.createNewFile();
+            translation = new TranslationFile(null, translationFile);
         } catch (IOException e) {
             platform.disable();
             e.printStackTrace();

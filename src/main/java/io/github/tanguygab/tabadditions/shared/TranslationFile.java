@@ -10,8 +10,8 @@ import java.io.InputStream;
 
 public class TranslationFile extends YamlConfigurationFile {
 
-    public final String providePlayer = getString("provide_player","&cYou have to provide a player name!");
-    public final String playerNotFound = getString("player-not-online", "&cNo online player found with the name \"%player%\"");
+    public final String providePlayer = getString("player.provide","&cYou have to provide a player name!");
+    public final String playerNotFound = getString("player.offline", "&cNo online player found with the name \"%player%\"");
 
     public final String actionBarOn = getString("actionbars.on", "&aYou will now receive new actionbars!");
     public final String actionBarOff = getString("actionbars.off", "&cYou won't receive any new actionbar!");
@@ -20,11 +20,11 @@ public class TranslationFile extends YamlConfigurationFile {
 
     public final String emojisOn = getString("emojis.on", "&aYou will now see emojis in chat!");
     public final String emojisOff = getString("emojis.off", "&cYou won't see any new emoji in chat!");
-    private final String emojiCategoryHeader = getString("emojis_categories_header","&7All categories of emojis you have access to &8(%amount%, Emojis: %owned%/%max%)&7:");
-    private final String emojiCategory = getString("emojis_category","&7 - &8%category% &8(%owned%/%max%)");
-    public final String emojiCategoryNotFound = getString("emojis_category_not_found","&7This category doesn't exist.");
-    private final String emojiHeader = getString("emojis_emoji_header","&7All emojis in this category &8(%owned%/%max%)&7:");
-    private final String emoji = getString("emojis_emoji", "&7 - %emojiraw%&8: &r%emoji%");
+    private final String emojiCategoryHeader = getString("emojis.categories.header","&7All categories of emojis you have access to &8(%amount%, Emojis: %owned%/%max%)&7:");
+    private final String emojiCategory = getString("emojis.categories.category","&7 - &8%category% &8(%owned%/%max%)");
+    public final String emojiCategoryNotFound = getString("emojis.category.not_found","&7This category doesn't exist.");
+    private final String emojiHeader = getString("emojis.category.header","&7All emojis in this category &8(%owned%/%max%)&7:");
+    private final String emoji = getString("emojis.category.emoji", "&7 - %emojiraw%&8: &r%emoji%");
 
     public final String chatOn = getString("chat.on", "&cYou will now receive new chat messages!");
     public final String chatOff = getString("chat.off", "&aYou won't receive any new chat message!");
@@ -41,10 +41,10 @@ public class TranslationFile extends YamlConfigurationFile {
 
     public final String pmOn = getString("msg.on", "&cYou will now receive new private messages!");
     public final String pmOff = getString("msg.off", "&aYou won't receive any new private message!");
-    private final String pmCooldown = getString("pm_cooldown", "&cYou have to wait %seconds% more seconds!");
-    public final String cantPmSelf = getString("cant_pm_self", "&cYou can't message yourself!");
-    public final String pmEmpty = getString("pm_empty", "&7You have to provide a message!");
-    public final String hasPmOff = getString("has_pm_off", "&cThis player doesn't accept private messages");
+    private final String pmCooldown = getString("msg.cooldown", "&cYou have to wait %seconds% more seconds!");
+    public final String cantPmSelf = getString("msg.self", "&cYou can't message yourself!");
+    public final String pmEmpty = getString("msg.empty", "&7You have to provide a message!");
+    public final String hasPmOff = getString("msg.has_off", "&cThis player doesn't accept private messages");
 
 
     public final String socialSpyOn = getString("socialspy.on", "&aSocialSpy enabled.");
