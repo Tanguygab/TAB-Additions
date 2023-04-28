@@ -130,11 +130,6 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         clearChatLine = config.getString("clearchat.line","");
     }
 
-    /**
-     * TODO:
-     * Custom Interactions
-     */
-
     @Override
     public void unload() {
         if (emojiManager != null) emojiManager.unload();

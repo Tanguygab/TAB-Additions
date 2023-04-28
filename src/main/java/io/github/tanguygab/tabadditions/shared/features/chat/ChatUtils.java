@@ -34,6 +34,7 @@ public class ChatUtils {
     }
 
     public static String componentToMM(Map<String,Object> component) {
+        if (component == null) return "";
         StringBuilder output = new StringBuilder();
         String text = component.get("text")+"";
         String hover = component.get("hover") instanceof List ? String.join("\n",(List<String>)component.get("hover")) : component.getOrDefault("hover","")+"";

@@ -28,6 +28,8 @@ public class ChatFormatter {
     public String itemOutputAir;
     public boolean itemPermssion;
 
+    private final Map<String,Map<String,Object>> customInteractions;
+
     private final boolean embedURLs;
     private final String urlsOutput;
     private final Pattern urlPattern = Pattern.compile("([&§][a-fA-Fk-oK-OrR0-9])?(?<url>(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*))");
@@ -49,6 +51,14 @@ public class ChatFormatter {
         itemOutputAir = config.getString("item.output-air","No Item");
         itemPermssion = config.getBoolean("item.permission",false);
 
+        customInteractions = config.getConfigurationSection("custom-interactions");
+        System.out.println(customInteractions);
+        Map<String,String> map = new HashMap<>();
+        customInteractions.forEach((key,cfg)->map.put(key,ChatUtils.componentToMM((Map<String, Object>) cfg.get("output"))));
+        System.out.println(map);
+        map.forEach((key,output)->customInteractions.get(key).put("output",output));
+        System.out.println(customInteractions);
+
         embedURLs = config.getBoolean("embed-urls.enabled",true);
         urlsOutput = ChatUtils.componentToMM(config.getConfigurationSection("embed-urls.output"));
     }
@@ -56,11 +66,12 @@ public class ChatFormatter {
 
     public String process(String message, TabPlayer sender) {
         if (filterEnabled && !sender.hasPermission("tabadditions.chat.bypass.filter")) message = filter(message);
+        if (embedURLs) message = embedURLs(message);
         if (itemEnabled && (!itemPermssion || sender.hasPermission("tabadditions.chat.item"))) {
             message = formatItems(sender,message,false);
             message = formatItems(sender,message,true);
         }
-        if (embedURLs) message = embedURLs(message);
+        if (!customInteractions.isEmpty()) message = formatInteractions(sender,message);
 
         return message;
     }
@@ -117,6 +128,18 @@ public class ChatFormatter {
                 .replace("%amount%",item.getAmount()+"")
                 +"</hover>";
         return message.replace(input,text);
+    }
+    private String formatInteractions(TabPlayer sender, String message) {
+        for (String key : customInteractions.keySet()) {
+            Map<String,Object> interaction = customInteractions.get(key);
+            if (interaction.containsKey("permission") && (boolean) interaction.get("permission")
+                    && !sender.hasPermission("tabadditions.chat.interaction." + key)) continue;
+            if (interaction.getOrDefault("input","").equals("")) continue;
+
+            message = message.replace(interaction.get("input")+"",
+                    TABAdditions.getInstance().parsePlaceholders(interaction.get("output")+"",sender));
+        }
+        return message;
     }
     private String embedURLs(String message) {
         String msg2 = message.replaceAll("#[A-Fa-f0-9]{6}"," "); // removing RGB colors to avoid IPV4 check from breaking them

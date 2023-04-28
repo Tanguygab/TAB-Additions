@@ -2,6 +2,7 @@ enabled: false
 cooldown: 0
 /togglechat: true
 /ignore: true
+msg-placeholder-stay: 3000
 
 formats:
   vip:
@@ -76,16 +77,16 @@ msg:
 
 item:
   enabled: true
-  mainhand: '[item]'
-  offhand: '[offhand]'
+  mainhand: "[item]"
+  offhand: "[offhand]"
   permission: true
-  output: '&e%name% &f(&8x%amount%&f)'
-  output-single: '%name%'
-  output-air: ''
+  output: "&e%name% &f(&8x%amount%&f)"
+  output-single: "%name%"
+  output-air: ""
 
 mention:
   enabled: true
-  input: '@%player%'
+  input: "@%player%"
   output:
     text: "&b@%rel_viewer:player%"
     hover: "Mentioned!"
@@ -115,14 +116,14 @@ emojis:
       list:
         "<3": ❤
         ":shrug:": ¯\_(ツ)_/¯
-        ':pvp:': ⚔
-        ':death:': ☠
+        ":pvp:": ⚔
+        ":death:": ☠
         ":star:": ✮
         ":up:": ⬆
-        ':tableflip:': (╯°□°）╯︵ ┻━┻
-        ':surrender:': \("▔□▔)/
-        ':grr:': ლ(ಠ益ಠლ)
-        ':sword:': ╰(⇀︿⇀)つ-]═───
+        ":tableflip:": (╯°□°）╯︵ ┻━┻
+        ":surrender:": \("▔□▔)/
+        ":grr:": ლ(ಠ益ಠლ)
+        ":sword:": ╰(⇀︿⇀)つ-]═───
     paid:
       output:
         text: "%emoji%"
@@ -134,23 +135,23 @@ emojis:
       list:
         ":cool:": (☞ﾟヮﾟ)☞
         ":kiss:": (っ˘з(˘⌣˘ )
-        ':n:': '&c&lNO'
-        ':y:': '&a&lYES'
-        ':gun:': ︻┳═一
+        ":n:": "&c&lNO"
+        ":y:": "&a&lYES"
+        ":gun:": ︻┳═一
         ":owo:": (o･ω･o)
         ":happy:": (ᵔ◡ᵔ)
         ":wow:": (✯◡✯)
         ":love:": (❤ω❤)
-        ':sad:': (︶︹︺)
-        ':argh:': ヽ(‵﹏´)ノ
+        ":sad:": (︶︹︺)
+        ":argh:": ヽ(‵﹏´)ノ
     staff:
       list:
-        ":cross:": '&c&l✘'
-        ":check:": '&2&l✔'
+        ":cross:": "&c&l✘"
+        ":check:": "&2&l✔"
 
 char-filter:
   enabled: true
-  char-replacement: '*'
+  char-replacement: "*"
   fake-length: 0
   output:
     text: "%replacement%"
@@ -210,29 +211,31 @@ socialspy:
 
 
 custom-interactions:
+  staff:
+    input: "[staff]"
+    permission: true
+    output:
+      text: "<rainbow>[Da GOAT]"
+      hover: "Staff Only!"
   pos:
-    input: '[pos]'
-    output: "{
-    World: %player_world%
-    ||
-    X: %player_x%
-    \nY: %player_y%
-    \nZ: %player_z%
-    ||
-    suggest:/tpa %player%
-    }"
+    input: "[pos]"
+    output:
+      text: "World: %world%"
+      hover:
+        - "X: %player_x%"
+        - "Y: %player_y%"
+        - "Z: %player_z%"
+      click: "suggest:/tpa %player%"
   links:
-    input: '[links]'
-    output: "{
-    &8&l[&aHover for TAB's Links&8&l]
-    ||
-    &5Discord: https://discord.gg/EaSvdk6
-    \n&7GitHub: https://github.com/NEZNAMY/TAB
-    \n&9MC-Market: https://www.mc-market.org/resources/14009
-    \n&2Polymart: https://polymart.org/resource/484
-    \n&8Wiki: https://github.com/NEZNAMY/TAB/wiki
-    \n
-    \n&7Click to join our Discord server!
-    ||
-    url:https://discord.gg/EaSvdk6
-    }"
+    input: "[links]"
+    output:
+      text: "&8&l[&aHover for TAB's Links&8&l]"
+      hover:
+        - "&5Discord: https://discord.gg/EaSvdk6"
+        - "&7GitHub: https://github.com/NEZNAMY/TAB"
+        - "&9MC-Market: https://www.mc-market.org/resources/14009"
+        - "&2Polymart: https://polymart.org/resource/484"
+        - "&8Wiki: https://github.com/NEZNAMY/TAB/wiki"
+        - ""
+        - "&7Click to join our Discord server!"
+      click: "url:https://discord.gg/EaSvdk6"
