@@ -51,7 +51,7 @@ public class ChatFormatter {
         itemOutputAir = config.getString("item.output-air","No Item");
         itemPermssion = config.getBoolean("item.permission",false);
 
-        customInteractions = config.getConfigurationSection("custom-interactions");
+        customInteractions = new HashMap<>(config.getConfigurationSection("custom-interactions"));
         System.out.println(customInteractions);
         Map<String,String> map = new HashMap<>();
         customInteractions.forEach((key,cfg)->map.put(key,ChatUtils.componentToMM((Map<String, Object>) cfg.get("output"))));
