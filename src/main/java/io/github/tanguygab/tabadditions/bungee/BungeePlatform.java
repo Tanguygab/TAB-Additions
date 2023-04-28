@@ -10,7 +10,6 @@ import io.github.tanguygab.tabadditions.shared.Platform;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.CommandSender;
@@ -21,11 +20,11 @@ import net.md_5.bungee.api.connection.ProxiedPlayer;
 import net.md_5.bungee.api.plugin.Command;
 
 import java.util.List;
-import java.util.UUID;
 
 public class BungeePlatform extends Platform {
 
 	private final TABAdditionsBungeeCord plugin;
+	private BungeeListener listener;
 	private final BungeeAudiences kyori;
 
 	public BungeePlatform(TABAdditionsBungeeCord plugin) {
@@ -73,7 +72,10 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public void reload() {}
+	public void reload() {
+		plugin.getProxy().getPluginManager().unregisterListener(listener);
+		plugin.getProxy().getPluginManager().registerListener(plugin,listener = new BungeeListener());
+	}
 
 	@Override
 	public void disable() {
@@ -91,13 +93,13 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, List<String> plugins) {
+	public void sendToDiscord(TabPlayer player, String msg, String channel, boolean viewCondition, List<String> plugins) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF(String.join(",",plugins));
 		out.writeUTF(msg);
 		out.writeUTF(channel);
 		out.writeUTF(viewCondition+"");
-		this.plugin.getProxy().getPlayer(UUID.randomUUID()).sendData("tabadditions:channel",out.toByteArray());
+		((ProxiedPlayer)player.getPlayer()).sendData("tabadditions:channel",out.toByteArray());
 	}
 
 	@Override

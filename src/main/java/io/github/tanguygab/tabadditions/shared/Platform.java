@@ -3,10 +3,9 @@ package io.github.tanguygab.tabadditions.shared;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
-import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.platform.AudienceProvider;
 
 import java.util.List;
-import java.util.UUID;
 
 public abstract class Platform {
 
@@ -24,6 +23,7 @@ public abstract class Platform {
 	public abstract Audience getAudience(TabPlayer p);
 	public abstract void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, List<String> plugins);
 	public abstract boolean supportsChatSuggestions();
+	public abstract void sendToDiscord(TabPlayer player, String msg, String channel, boolean viewCondition, List<String> plugins);
 	public abstract void updateChatComplete(TabPlayer p, List<String> emojis, boolean add);
 	public abstract ChatItem getItem(TabPlayer p, boolean offhand);
 	protected String getItemName(String displayname, String type) {
