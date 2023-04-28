@@ -69,7 +69,7 @@ public class MentionManager extends ChatManager {
     }
 
     private void playSound(TabPlayer player, Sound sound) {
-        plugin.getPlatform().getAudience(player).playSound(sound);
+        chat.kyori.player(player.getUniqueId()).playSound(sound);
     }
 
     public boolean onCommand(TabPlayer sender, String message) {

@@ -2,7 +2,10 @@ enabled: false
 cooldown: 0
 /togglechat: true
 /ignore: true
-msg-placeholder-stay: 3000
+chat-placeholder:
+  format: "%msg%"
+  relational: false
+  stay: 3000
 
 formats:
   vip:

@@ -2,7 +2,6 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
-import lombok.AllArgsConstructor;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
@@ -31,7 +30,7 @@ public abstract class ChatManager {
     }
 
     protected boolean hasCmdToggled(TabPlayer p) {
-        return toggled.contains(p.getUniqueId());
+        return p != null && toggled.contains(p.getUniqueId());
     }
 
     public abstract boolean onCommand(TabPlayer sender, String command);

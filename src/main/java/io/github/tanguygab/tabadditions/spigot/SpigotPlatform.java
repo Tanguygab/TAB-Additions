@@ -118,8 +118,8 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public Audience getAudience(TabPlayer p) {
-		return kyori.player(p.getUniqueId());
+	public BukkitAudiences getKyori() {
+		return kyori;
 	}
 
 	@Override

@@ -17,9 +17,13 @@ import me.neznamy.tab.shared.features.types.JoinListener;
 import me.neznamy.tab.shared.features.types.TabFeature;
 import me.neznamy.tab.shared.features.types.UnLoadable;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
+import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
 import me.neznamy.tab.shared.platform.TabPlayer;
+import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -32,9 +36,18 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     private final TABAdditions plugin = TABAdditions.getInstance();
     private final TAB tab = TAB.getInstance();
     public final MiniMessage mm = MiniMessage.miniMessage();
+    public final AudienceProvider kyori = plugin.getPlatform().getKyori();
+    private final PlainTextComponentSerializer plainTextSerializer = PlainTextComponentSerializer.plainText();
+    private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacySection();
     private final Map<String,ChatFormat> formats = new LinkedHashMap<>();
-    private final PlayerPlaceholderImpl chatPlaceholder;
-    private final int msgPlaceholderStay;
+
+
+    private final String chatPlaceholderFormat;
+    private final boolean chatPlaceholderRelational;
+    private PlayerPlaceholderImpl chatPlaceholder;
+    private RelationalPlaceholderImpl relChatPlaceholder;
+    private final int chatPlaceholderStay;
+
     private final ChatFormatter chatFormatter;
     private final EmojiManager emojiManager;
     private final MentionManager mentionManager;
@@ -54,11 +67,14 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     private final int clearChatAmount;
     private final String clearChatLine;
 
+    private final String discordFormat;
+    private final boolean discordEssX;
+    private final boolean discordSRV;
+
+    private final boolean bukkitBridgeChatEnabled;
+
     public Chat(ConfigurationFile config) {
         chatFormatter = new ChatFormatter(config);
-
-        chatPlaceholder = (PlayerPlaceholderImpl) tab.getPlaceholderManager().registerPlayerPlaceholder("%chat%",-1,p->"");
-        msgPlaceholderStay = config.getInt("msg-placeholder-stay",3000);
 
         Map<String,Map<String,Object>> formats = config.getConfigurationSection("formats");
         formats.forEach((name,format)->{
@@ -128,6 +144,19 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         clearchatEnabled = config.getBoolean("clearchat.enabled",false);
         clearChatAmount = config.getInt("clearchat.amount",100);
         clearChatLine = config.getString("clearchat.line","");
+
+        discordFormat = config.getString("discord.format","%msg%");
+        discordEssX = config.getBoolean("discord.EssentialsX",true);
+        discordSRV = config.getBoolean("discord.DiscordSRV",true);
+
+        chatPlaceholderFormat = config.getString("chat-placeholder.format","%msg%");
+        chatPlaceholderRelational = config.getBoolean("chat-placeholder.relational",false);
+        if (chatPlaceholderRelational)
+            relChatPlaceholder = (RelationalPlaceholderImpl) tab.getPlaceholderManager().registerRelationalPlaceholder("%rel_chat%",-1,(v,t)->"");
+        else chatPlaceholder = (PlayerPlaceholderImpl) tab.getPlaceholderManager().registerPlayerPlaceholder("%chat%",-1,p->"");
+        chatPlaceholderStay = config.getInt("chat-placeholder.stay",3000);
+
+        bukkitBridgeChatEnabled = plugin.getPlatform().isProxy() && config.getBoolean("chat-from-bukkit-bridge",false);
     }
 
     @Override
@@ -146,6 +175,10 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     }
     public boolean hasChatToggled(TabPlayer player) {
         return toggled.contains(player.getUniqueId());
+    }
+
+    public boolean isBukkitBridgeChatEnabled() {
+        return bukkitBridgeChatEnabled;
     }
 
     @Override
@@ -210,28 +243,52 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (cooldownTime != 0 && !sender.hasPermission("tabadditions.chat.bypass.cooldown"))
             cooldown.put(sender.getUniqueId(),LocalDateTime.now());
 
-        tab.sendConsoleMessage(sender.getName()+"» "+message,true);
-        chatPlaceholder.updateValue(sender,message);
-        TAB.getInstance().getCPUManager().runTaskLater(msgPlaceholderStay,this,"update %rel_chat% for "+sender.getName(),()->{
-            if (chatPlaceholder.getLastValue(sender).equals(message))
-                chatPlaceholder.updateValue(sender,"");
-        });
-
         ChatFormat format = getFormat(sender);
         if (format == null) return;
         String text = format.getText();
+        kyori.console().sendMessage(createMessage(sender,null,message,text));
+
         if (plugin.getPlatform().isPluginEnabled("InteractiveChat"))
             try {text = InteractiveChatAPI.markSender(text,sender.getUniqueId());}
             catch (IllegalStateException ignored) {}
 
+        if (!chatPlaceholderRelational) {
+            String placeholderMsg = legacySerializer.serialize(createMessage(sender,null,message,chatPlaceholderFormat));
+            chatPlaceholder.updateValue(sender, placeholderMsg);
+            TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, this, "update %chat% for " + sender.getName(), () -> {
+                if (chatPlaceholder.getLastValue(sender).equals(placeholderMsg))
+                    chatPlaceholder.updateValue(sender, "");
+            });
+        }
+
         for (TabPlayer viewer : tab.getOnlinePlayers()) {
             if (socialSpyManager != null) socialSpyManager.process(sender,viewer,message,socialSpyManager.isSpying(sender,viewer,format));
-            if (canSee(sender,viewer,format)) sendMessage(viewer, createMessage(sender, viewer, message, text));
+            if (canSee(sender,viewer,format)) {
+                sendMessage(viewer, createMessage(sender, viewer, message, text));
+                if (!chatPlaceholderRelational) continue;
+                String placeholderMsg = legacySerializer.serialize(createMessage(sender,viewer,message,chatPlaceholderFormat));
+                relChatPlaceholder.updateValue(viewer, sender, placeholderMsg);
+                TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, this, "update %rel_chat% for "+viewer.getName()+" and "+ sender.getName(), () -> {
+                    if (relChatPlaceholder.getLastValue(viewer,sender).equals(placeholderMsg))
+                        relChatPlaceholder.updateValue(viewer,sender, "");
+                });
+            }
         }
+
+        List<String> discord = new ArrayList<>(2);
+        if (discordSRV) discord.add("DiscordSRV");
+        if (discordEssX) discord.add("EssentialsX");
+        if (discord.isEmpty()) return;
+        String msgToDiscord = plainTextSerializer.serialize(createMessage(sender,null,message,discordFormat));
+        if (canSee(sender,null,format))
+            plugin.getPlatform().sendToDiscord(sender,msgToDiscord,format.getChannel(),false,discord);
+        else if (getFormat(sender).isViewConditionMet(sender,null))
+            plugin.getPlatform().sendToDiscord(sender,msgToDiscord,format.getChannel(),true,discord);
+
     }
 
     public void sendMessage(TabPlayer player, Component component) {
-        plugin.getPlatform().getAudience(player).sendMessage(component);
+        kyori.player(player.getUniqueId()).sendMessage(component);
     }
     public Component createMessage(TabPlayer sender, TabPlayer viewer, String message, String text) {
         String output = plugin.parsePlaceholders(text,sender,viewer).replace("%msg%", process(sender,viewer,message));
@@ -242,7 +299,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     private String process(TabPlayer sender, TabPlayer viewer, String message) {
         //message = commentMMTags(message);
         if (emojiManager != null) message = emojiManager.process(sender,viewer,message);
-        if (mentionManager != null) message = mentionManager.process(sender,viewer,message);
+        if (mentionManager != null && viewer != null) message = mentionManager.process(sender,viewer,message);
         message = chatFormatter.process(message,sender);
         return message;
     }

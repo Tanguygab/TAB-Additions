@@ -20,10 +20,9 @@ public abstract class Platform {
 	public abstract void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout);
 	public abstract void sendActionbar(TabPlayer p, String text);
 
-	public abstract Audience getAudience(TabPlayer p);
-	public abstract void sendToDiscord(UUID uuid, String msg, String channel, boolean viewCondition, List<String> plugins);
-	public abstract boolean supportsChatSuggestions();
+	public abstract AudienceProvider getKyori();
 	public abstract void sendToDiscord(TabPlayer player, String msg, String channel, boolean viewCondition, List<String> plugins);
+	public abstract boolean supportsChatSuggestions();
 	public abstract void updateChatComplete(TabPlayer p, List<String> emojis, boolean add);
 	public abstract ChatItem getItem(TabPlayer p, boolean offhand);
 	protected String getItemName(String displayname, String type) {

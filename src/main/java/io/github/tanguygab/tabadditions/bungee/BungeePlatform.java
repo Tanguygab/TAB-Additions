@@ -88,8 +88,8 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public Audience getAudience(TabPlayer p) {
-		return kyori.player(p.getUniqueId());
+	public BungeeAudiences getKyori() {
+		return kyori;
 	}
 
 	@Override
