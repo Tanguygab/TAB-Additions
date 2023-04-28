@@ -190,8 +190,8 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     public boolean onCommand(TabPlayer p, String cmd) {
         if (cmd.startsWith("/emojis") || cmd.equals("/toggleemojis")) return emojiManager != null && emojiManager.onCommand(p,cmd);
         if (cmd.equals("/togglemention")) return mentionManager != null && mentionManager.onCommand(p,cmd);
-        if (cmd.equals("/togglemsg") || cmd.startsWith("/reply") || cmd.startsWith("/r") || cmd.startsWith("/msg"))
-            return msgManager != null && msgManager.onCommand(p,cmd);
+        if (msgManager != null && (cmd.equals("/togglemsg") || msgManager.isReplyCmd(cmd,false) || msgManager.isMsgCmd(cmd,false)))
+            return msgManager.onCommand(p,cmd);
         if (cmd.equals("/socialspy")) return p.hasPermission("tabadditions.chat.socialspy") && socialSpyManager != null && socialSpyManager.onCommand(p,cmd);
 
         TranslationFile msgs = plugin.getTranslation();

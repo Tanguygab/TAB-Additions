@@ -44,6 +44,7 @@ public class TranslationFile extends YamlConfigurationFile {
     private final String pmCooldown = getString("msg.cooldown", "&cYou have to wait %seconds% more seconds!");
     public final String cantPmSelf = getString("msg.self", "&cYou can't message yourself!");
     public final String pmEmpty = getString("msg.empty", "&7You have to provide a message!");
+    public final String noPlayerToReplyTo = getString("msg.no_reply", "&cYou don't have any player to reply to!");
     public final String hasPmOff = getString("msg.has_off", "&cThis player doesn't accept private messages");
 
 
