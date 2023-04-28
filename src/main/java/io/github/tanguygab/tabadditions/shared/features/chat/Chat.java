@@ -41,7 +41,6 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacySection();
     private final Map<String,ChatFormat> formats = new LinkedHashMap<>();
 
-
     private final String chatPlaceholderFormat;
     private final boolean chatPlaceholderRelational;
     private PlayerPlaceholderImpl chatPlaceholder;
@@ -297,7 +296,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     }
 
     private String process(TabPlayer sender, TabPlayer viewer, String message) {
-        //message = commentMMTags(message);
+        message = mm.escapeTags(message);
         if (emojiManager != null) message = emojiManager.process(sender,viewer,message);
         if (mentionManager != null && viewer != null) message = mentionManager.process(sender,viewer,message);
         message = chatFormatter.process(message,sender);
@@ -314,7 +313,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         return !sender.hasPermission("tabadditions.chat.bypass.ignore") && ignored.getOrDefault(viewer.getUniqueId(),List.of()).contains(sender.getUniqueId());
     }
 
-    public boolean canSee(TabPlayer sender, TabPlayer viewer, ChatFormat f) {
+    private boolean canSee(TabPlayer sender, TabPlayer viewer, ChatFormat f) {
         if (sender == viewer) return true;
         if (viewer == null) return f.getChannel().equals("") && !f.hasViewCondition();
         if (!f.getChannel().equals(getFormat(viewer).getChannel())) return false;

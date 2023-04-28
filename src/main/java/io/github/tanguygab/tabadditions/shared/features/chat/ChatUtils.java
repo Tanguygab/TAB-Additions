@@ -30,15 +30,15 @@ public class ChatUtils {
     public static String componentsToMM(Map<String,Map<String,Object>> config) {
         StringBuilder output = new StringBuilder();
         config.values().forEach(component->output.append(componentToMM(component)));
-        return toMMColors(output.toString());
+        return output.toString();
     }
 
     public static String componentToMM(Map<String,Object> component) {
         if (component == null) return "";
         StringBuilder output = new StringBuilder();
-        String text = component.get("text")+"";
-        String hover = component.get("hover") instanceof List ? String.join("\n",(List<String>)component.get("hover")) : component.getOrDefault("hover","")+"";
-        String click = component.get("click")+"";
+        String text = toMMColors(component.get("text"));
+        String hover = toMMColors(component.get("hover") instanceof List ? String.join("\n",(List<String>)component.get("hover")) : component.get("hover"));
+        String click = toMMColors(component.get("click"));
         String clickType = click.contains(":") ? click.substring(0,click.indexOf(":")) : "";
         click = click.contains(":") ? click.substring(click.indexOf(":")+1) : "";
         clickType = clickType.contains("_") ? clickType : clickType.replace("command","run_command")
@@ -54,8 +54,11 @@ public class ChatUtils {
         return output.toString();
     }
 
-    public static String toMMColors(String text) {
+    public static String toMMColors(Object str) {
+        if (str == null || str.equals("")) return "";
+        String text = str.toString();
         text = RGBUtils.getInstance().applyFormats(text);
+
         text = text.replace("§","&");
         for (EnumChatFormat c : EnumChatFormat.values())
             text = text.replace("&"+c.getCharacter(),"<"+c.toString().toLowerCase()+">");
