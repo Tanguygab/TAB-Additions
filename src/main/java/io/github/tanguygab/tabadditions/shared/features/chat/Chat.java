@@ -31,7 +31,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     @Getter private final String featureName = "Chat";
     private final TABAdditions plugin = TABAdditions.getInstance();
     private final TAB tab = TAB.getInstance();
-    private final MiniMessage mm = MiniMessage.miniMessage();
+    public final MiniMessage mm = MiniMessage.miniMessage();
     private final Map<String,ChatFormat> formats = new LinkedHashMap<>();
     private final PlayerPlaceholderImpl chatPlaceholder;
     private final int msgPlaceholderStay;
@@ -132,7 +132,6 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
 
     /**
      * TODO:
-     * /emojis
      * Custom Interactions
      */
 

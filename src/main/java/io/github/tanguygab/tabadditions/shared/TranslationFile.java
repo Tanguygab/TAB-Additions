@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.shared;
 
+import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiCategory;
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
@@ -19,6 +20,12 @@ public class TranslationFile extends YamlConfigurationFile {
 
     public final String emojisOn = getString("emojis.on", "&aYou will now see emojis in chat!");
     public final String emojisOff = getString("emojis.off", "&cYou won't see any new emoji in chat!");
+    private final String emojiCategoryHeader = getString("emojis_categories_header","&7All categories of emojis you have access to &8(%amount%, Emojis: %owned%/%max%)&7:");
+    private final String emojiCategory = getString("emojis_category","&7 - &8%category% &8(%owned%/%max%)");
+    public final String emojiCategoryNotFound = getString("emojis_category_not_found","&7This category doesn't exist.");
+    private final String emojiHeader = getString("emojis_emoji_header","&7All emojis in this category &8(%owned%/%max%)&7:");
+    private final String emoji = getString("emojis_emoji", "&7 - %emojiraw%&8: &r%emoji%");
+
     public final String chatOn = getString("chat.on", "&cYou will now receive new chat messages!");
     public final String chatOff = getString("chat.off", "&aYou won't receive any new chat message!");
     private final String chatCooldown = getString("chat.cooldown", "&cYou have to wait %seconds% more seconds!");
@@ -63,4 +70,28 @@ public class TranslationFile extends YamlConfigurationFile {
     public String getPlayerNotFound(String player) {
         return playerNotFound.replace("%player%", player);
     }
+
+    public String getEmojiCategory(TabPlayer p, EmojiCategory category) {
+        return emojiCategory
+                .replace("%category%",category.getName())
+                .replace("%owned%",category.ownedEmojis(p)+"")
+                .replace("%max%",category.getEmojis().size()+"");
+    }
+
+    public String getEmojiCategoryHeader(int amount, TabPlayer p, int owned, int total) {
+        return emojiCategoryHeader
+                .replace("%amount%",amount+"")
+                .replace("%owned%",owned+"")
+                .replace("%max%",total+"");
+    }
+    public String getEmoji(String emojiraw, String emoji) {
+        return this.emoji.replace("%emojiraw%", emojiraw)
+                .replace("%emoji%", emoji);
+    }
+
+    public String getEmojiHeader(int owned, int max) {
+        return emojiHeader.replace("%owned%",owned+"")
+                .replace("%max%",max+"");
+    }
+
 }
