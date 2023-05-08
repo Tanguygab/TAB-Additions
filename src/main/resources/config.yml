@@ -3,7 +3,7 @@ tabname-in-range: 0
 
 conditional-nametags:
   enabled: false
-  show-by-default: false
+  show-by-default: true
 conditional-appearance:
   enabled: false
   show-by-default: true
