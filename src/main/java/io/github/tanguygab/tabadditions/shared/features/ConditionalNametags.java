@@ -46,6 +46,7 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
 
     @Override
     public void unload() {
+        if (!tab.getFeatureManager().isFeatureEnabled("Nametag")) return;
         for (TabPlayer p : tab.getOnlinePlayers())
             tab.getTeamManager().showNametag(p);
     }

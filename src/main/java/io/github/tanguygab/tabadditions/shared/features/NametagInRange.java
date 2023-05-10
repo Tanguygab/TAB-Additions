@@ -42,6 +42,7 @@ public class NametagInRange extends TabFeature implements JoinListener, UnLoadab
 
     @Override
     public void unload() {
+        if (!tab.getFeatureManager().isFeatureEnabled("Nametag")) return;
         for (TabPlayer p : tab.getOnlinePlayers()) {
             for (TabPlayer p2 : tab.getOnlinePlayers()) {
                 if (p != p2)

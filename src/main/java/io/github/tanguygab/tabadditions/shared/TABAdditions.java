@@ -87,6 +87,7 @@ public class TABAdditions {
                 ((UnLoadable)fm.getFeature(feature)).unload();
             fm.unregisterFeature(feature);
         });
+        features.clear();
     }
 
     public void registerFeature(TabFeature feature) {

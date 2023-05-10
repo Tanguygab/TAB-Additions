@@ -38,12 +38,11 @@ public class TabnameInRange extends TabFeature implements UnLoadable, JoinListen
                     else if (p != player) hide(p,player);
                 }
             }
-            if (!enabled) {
-                for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-                    for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
-                        if (p != p2)
-                            show(p, p2);
-                    }
+            if (enabled) return;
+            for (Player p : Bukkit.getServer().getOnlinePlayers()) {
+                for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
+                    if (p != p2)
+                        show(p, p2);
                 }
             }
         },0,10);
