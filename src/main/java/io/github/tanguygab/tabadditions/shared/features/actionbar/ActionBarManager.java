@@ -9,6 +9,7 @@ import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import me.neznamy.tab.shared.platform.TabPlayer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -40,7 +41,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
             bars.put(bar,new ActionBarLine(text,cfg.containsKey("condition") ? Condition.getCondition(cfg.get("condition")) : null));
         });
 
-        tab.getCPUManager().startRepeatingMeasuredTask(2000,this,"handling ActionBar",()->{
+        tab.getCPUManager().startRepeatingMeasuredTask(2000,refreshDisplayName,"handling ActionBar",()->{
             for (TabPlayer p : tab.getOnlinePlayers())
                 refresh(p,false);
         });
@@ -52,7 +53,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
     }
 
     @Override
-    public void refresh(TabPlayer player, boolean force) {
+    public void refresh(@NotNull TabPlayer player, boolean force) {
         String text = announcedBars.containsKey(player) ? announcedBars.get(player) : getActionBar(player).getText();
         if (toggled.contains(player.getUniqueId()) || text.equals("")) return;
 
@@ -71,7 +72,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         addUsedPlaceholders(TAB.getInstance().getPlaceholderManager().detectPlaceholders(actionbar));
         announcedBars.put(player,actionbar);
         refresh(player,true);
-        TAB.getInstance().getCPUManager().runTaskLater(2000,this,"handling ActionBar on join for "+player.getName(),()->{
+        TAB.getInstance().getCPUManager().runTaskLater(2000,refreshDisplayName,"handling ActionBar on join for "+player.getName(),()->{
             if (actionbar.equals(announcedBars.get(player))) announcedBars.remove(player);
         });
     }
@@ -85,7 +86,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
     }
 
     @Override
-    public boolean onCommand(TabPlayer player, String msg) {
+    public boolean onCommand(@NotNull TabPlayer player, String msg) {
         if (msg.equals("/toggleactionbar") && plugin.toggleCmd(toggleCmd,player,toggled,plugin.getTranslation().actionBarOn,plugin.getTranslation().actionBarOff)) {
             refresh(player,true);
             return true;

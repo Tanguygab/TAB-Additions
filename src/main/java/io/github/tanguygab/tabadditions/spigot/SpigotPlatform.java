@@ -88,12 +88,10 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout) {
-		try {
-			((Player) p.getPlayer()).sendTitle(title, subtitle, fadein, stay, fadeout);
-		} catch (Exception e) {
-			((Player) p.getPlayer()).sendTitle(title,subtitle);
-		}
+	@SuppressWarnings("deprecation")
+	public void sendTitle(TabPlayer p, String title, String subtitle, int fadeIn, int stay, int fadeout) {
+		try {((Player) p.getPlayer()).sendTitle(title, subtitle, fadeIn, stay, fadeout);}
+		catch (Exception e) {((Player) p.getPlayer()).sendTitle(title,subtitle);}
 	}
 
 	@Override
@@ -153,15 +151,16 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public ChatItem getItem(TabPlayer p, boolean offhand) {
 		PlayerInventory inv = ((Player)p.getPlayer()).getInventory();
 		ItemStack item;
 		try {item = offhand ? inv.getItemInOffHand() : inv.getItemInMainHand();}
 		catch (Exception e) {item = inv.getItemInHand();}
 		return new ChatItem(item.getType().getKey().toString(),
-				getItemName(item.hasItemMeta() && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : null,item.getType().toString()),
+				getItemName(item.hasItemMeta() && item.getItemMeta() != null && item.getItemMeta().hasDisplayName() ? item.getItemMeta().getDisplayName() : null,item.getType().toString()),
 				item.getAmount(),
-				item.hasItemMeta() ? item.getItemMeta().getAsString() : null);
+				item.hasItemMeta() && item.getItemMeta() != null ? item.getItemMeta().getAsString() : null);
 	}
 
 }

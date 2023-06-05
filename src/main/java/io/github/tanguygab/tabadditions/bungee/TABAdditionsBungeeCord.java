@@ -1,8 +1,6 @@
 package io.github.tanguygab.tabadditions.bungee;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.plugin.Command;
 import net.md_5.bungee.api.plugin.Plugin;
 
 import java.util.HashMap;

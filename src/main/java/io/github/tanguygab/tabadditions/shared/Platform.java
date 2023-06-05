@@ -17,7 +17,7 @@ public abstract class Platform {
 	public abstract boolean isPluginEnabled(String plugin);
 	public abstract void disable();
 
-	public abstract void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout);
+	public abstract void sendTitle(TabPlayer p, String title, String subtitle, int fadeIn, int stay, int fadeout);
 	public abstract void sendActionbar(TabPlayer p, String text);
 
 	public abstract AudienceProvider getKyori();
@@ -25,8 +25,8 @@ public abstract class Platform {
 	public abstract boolean supportsChatSuggestions();
 	public abstract void updateChatComplete(TabPlayer p, List<String> emojis, boolean add);
 	public abstract ChatItem getItem(TabPlayer p, boolean offhand);
-	protected String getItemName(String displayname, String type) {
-		if (displayname != null) return displayname;
+	protected String getItemName(String displayName, String type) {
+		if (displayName != null) return displayName;
 		type = type.replace("_", " ").toLowerCase();
 		StringBuilder type2 = new StringBuilder();
 		List<String> typelist = List.of(type.split(" "));

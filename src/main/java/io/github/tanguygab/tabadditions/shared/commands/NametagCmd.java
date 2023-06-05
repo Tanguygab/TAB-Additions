@@ -1,17 +1,18 @@
 package io.github.tanguygab.tabadditions.shared.commands;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.tab.api.team.TeamManager;
+import me.neznamy.tab.api.nametag.NameTagManager;
 import me.neznamy.tab.shared.command.SubCommand;
 import me.neznamy.tab.shared.platform.TabPlayer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public class NametagCmd extends SubCommand {
 
-    private final TeamManager manager;
+    private final NameTagManager manager;
 
-    public NametagCmd(TeamManager manager) {
+    public NametagCmd(NameTagManager manager) {
         super("nametag+",null);
         this.manager = manager;
     }
@@ -38,7 +39,7 @@ public class NametagCmd extends SubCommand {
 
 
         boolean toggle = action.equals("toggle")
-                ? !(viewer == null ? manager.hasHiddenNametag(target) : manager.hasHiddenNametag(target,viewer))
+                ? !(viewer == null ? manager.hasHiddenNameTag(target) : manager.hasHiddenNameTag(target,viewer))
                 : action.equals("hide");
         toggle(target,viewer,toggle);
         sendMessage(player,(toggle ? "&cHiding " : "&aShowing ")
@@ -49,16 +50,16 @@ public class NametagCmd extends SubCommand {
 
     private void toggle(TabPlayer p, TabPlayer viewer, boolean hide) {
         if (viewer == null) {
-            if (hide) manager.hideNametag(p);
-            else manager.showNametag(p);
+            if (hide) manager.hideNameTag(p);
+            else manager.showNameTag(p);
             return;
         }
-        if (hide) manager.hideNametag(p,viewer);
-        else manager.showNametag(p,viewer);
+        if (hide) manager.hideNameTag(p,viewer);
+        else manager.showNameTag(p,viewer);
     }
 
     @Override
-    public List<String> complete(TabPlayer sender, String[] arguments) {
+    public @NotNull List<String> complete(TabPlayer sender, String[] arguments) {
         return arguments.length == 1 ? getStartingArgument(List.of("hide", "show", "toggle"),arguments[0]) : getOnlinePlayers(arguments[1]);
     }
 }

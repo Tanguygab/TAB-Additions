@@ -9,10 +9,12 @@ import me.neznamy.tab.shared.platform.TabPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 public class ConditionalAppearance extends TabFeature implements Refreshable, UnLoadable, JoinListener {
 
     @Getter private final String featureName = "Conditional Appearance";
+    @Getter private final String refreshDisplayName = "&aConditional Appearance&r";
     private final TAB tab;
     private final Plugin plugin;
     private final boolean def;
@@ -27,10 +29,6 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
             refresh(p,true);
         }
     }
-    @Override
-    public String getRefreshDisplayName() {
-        return "&aConditional Appearance&r";
-    }
 
     @Override
     public void onJoin(TabPlayer p) {
@@ -42,7 +40,7 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
     }
 
     @Override
-    public void refresh(TabPlayer p, boolean force) {
+    public void refresh(@NotNull TabPlayer p, boolean force) {
         for (Player all : Bukkit.getOnlinePlayers()) {
             refresh(p(p),all);
         }
@@ -81,10 +79,12 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
         }
     }
 
+    @SuppressWarnings("deprecation")
     private void show(Player p, Player target) {
         try {p.showPlayer(plugin, target);}
         catch (NoSuchMethodError e) {p.showPlayer(target);}
     }
+    @SuppressWarnings("deprecation")
     private void hide(Player p, Player target) {
         try {p.hidePlayer(plugin, target);}
         catch (NoSuchMethodError e) {p.hidePlayer(target);}

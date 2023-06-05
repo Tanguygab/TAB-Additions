@@ -26,7 +26,7 @@ public class ChatFormatter {
     public String itemOutput;
     public String itemOutputSingle;
     public String itemOutputAir;
-    public boolean itemPermssion;
+    public boolean itemPermission;
 
     private final Map<String,Map<String,Object>> customInteractions;
 
@@ -35,6 +35,7 @@ public class ChatFormatter {
     private final Pattern urlPattern = Pattern.compile("([&§][a-fA-Fk-oK-OrR0-9])?(?<url>(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*))");
     private final Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}\\.){3}[0-9]{1,3}");
 
+    @SuppressWarnings("unchecked")
     public ChatFormatter(ConfigurationFile config) {
         filterEnabled = config.getBoolean("char-filter.enabled",true);
         filterChar = config.getString("char-filter.char-replacement","*");
@@ -49,7 +50,7 @@ public class ChatFormatter {
         itemOutput = config.getString("item.output","%name% x%amount%");
         itemOutputSingle = config.getString("item.output-single","%name%");
         itemOutputAir = config.getString("item.output-air","No Item");
-        itemPermssion = config.getBoolean("item.permission",false);
+        itemPermission = config.getBoolean("item.permission",false);
 
         customInteractions = new HashMap<>(config.getConfigurationSection("custom-interactions"));
         Map<String,String> map = new HashMap<>();
@@ -68,7 +69,7 @@ public class ChatFormatter {
     public String process(String message, TabPlayer sender) {
         if (filterEnabled && !sender.hasPermission("tabadditions.chat.bypass.filter")) message = filter(message);
         if (embedURLs) message = embedURLs(message);
-        if (itemEnabled && (!itemPermssion || sender.hasPermission("tabadditions.chat.item"))) {
+        if (itemEnabled && (!itemPermission || sender.hasPermission("tabadditions.chat.item"))) {
             message = formatItems(sender,message,false);
             message = formatItems(sender,message,true);
         }
@@ -88,14 +89,14 @@ public class ChatFormatter {
                     map.put(m.start(), bypass);
                 }
             }
-            Map<String, Integer> posjumps = new HashMap<>();
+            Map<String, Integer> posJumps = new HashMap<>();
             while (matcher.find()) {
                 String word = matcher.group();
-                StringBuilder wordreplaced = new StringBuilder();
+                StringBuilder wordReplaced = new StringBuilder();
                 int i = filterFakeLength < 1 ? word.length() : filterFakeLength;
-                wordreplaced.append(filterChar.repeat(i));
-                int posjump = posjumps.getOrDefault(word,0);
-                String output = filterOutput.replace("%word%",word).replace("%replacement%", wordreplaced.toString());
+                wordReplaced.append(filterChar.repeat(i));
+                int posJump = posJumps.getOrDefault(word,0);
+                String output = filterOutput.replace("%word%",word).replace("%replacement%", wordReplaced.toString());
 
                 if (map.isEmpty()) {
                     msg = msg.replace(word,output);
@@ -104,10 +105,10 @@ public class ChatFormatter {
                         if (map.get(pos).length() > word.length() && pos <= matcher.start() && pos + map.get(pos).length() > matcher.start())
                             continue;
                         StringBuilder sb = new StringBuilder(msg);
-                        sb.replace(matcher.start() + posjump, matcher.end() + posjump, output);
+                        sb.replace(matcher.start() + posJump, matcher.end() + posJump, output);
                         msg = sb.toString();
 
-                        posjumps.put(word,posjump+output.length()-word.length());
+                        posJumps.put(word,posJump+output.length()-word.length());
                     }
                 }
             }
@@ -144,15 +145,15 @@ public class ChatFormatter {
     }
     private String embedURLs(String message) {
         String msg2 = message.replaceAll("#[A-Fa-f0-9]{6}"," "); // removing RGB colors to avoid IPV4 check from breaking them
-        Matcher urlm = urlPattern.matcher(msg2);
-        Matcher ipv4m = ipv4Pattern.matcher(msg2);
+        Matcher urlMatcher = urlPattern.matcher(msg2);
+        Matcher ipv4Matcher = ipv4Pattern.matcher(msg2);
 
-        while (urlm.find()) {
-            String url = urlm.group("url");
+        while (urlMatcher.find()) {
+            String url = urlMatcher.group("url");
             message = message.replace(url,urlsOutput.replace("%url%",url).replace("%fullurl%","https://"+url));
         }
-        while (ipv4m.find()) {
-            String ipv4 = ipv4m.group();
+        while (ipv4Matcher.find()) {
+            String ipv4 = ipv4Matcher.group();
             message = message.replace(ipv4,urlsOutput.replace("%url%",ipv4));
         }
         return message;

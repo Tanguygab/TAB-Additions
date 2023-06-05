@@ -37,6 +37,7 @@ public class ChatUtils {
         if (component == null) return "";
         StringBuilder output = new StringBuilder();
         String text = toMMColors(component.get("text"));
+        @SuppressWarnings("unchecked")
         String hover = toMMColors(component.get("hover") instanceof List ? String.join("\n",(List<String>)component.get("hover")) : component.get("hover"));
         String click = toMMColors(component.get("click"));
         String clickType = click.contains(":") ? click.substring(0,click.indexOf(":")) : "";

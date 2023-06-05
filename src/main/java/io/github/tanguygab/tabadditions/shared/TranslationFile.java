@@ -79,7 +79,7 @@ public class TranslationFile extends YamlConfigurationFile {
                 .replace("%max%",category.getEmojis().size()+"");
     }
 
-    public String getEmojiCategoryHeader(int amount, TabPlayer p, int owned, int total) {
+    public String getEmojiCategoryHeader(int amount, int owned, int total) {
         return emojiCategoryHeader
                 .replace("%amount%",amount+"")
                 .replace("%owned%",owned+"")

@@ -1,22 +1,25 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
 import lombok.Getter;
-import me.neznamy.tab.api.team.TeamManager;
+import me.neznamy.tab.api.nametag.NameTagManager;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
+import org.jetbrains.annotations.NotNull;
 
 public class ConditionalNametags extends TabFeature implements JoinListener, Refreshable, UnLoadable {
 
     @Getter private final String featureName = "Conditional Nametags";
     @Getter private final String refreshDisplayName = "&aConditional Nametags&r";
     private final TAB tab;
+    private final NameTagManager ntm;
     private final boolean def;
 
-    public ConditionalNametags(boolean def) {
+    public ConditionalNametags(boolean def, NameTagManager ntm) {
         tab = TAB.getInstance();
+        this.ntm = ntm;
         this.def = def;
         for (TabPlayer p : tab.getOnlinePlayers()) {
             p.loadPropertyFromConfig(this,"nametag-condition");
@@ -30,10 +33,9 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
     }
 
     @Override
-    public void refresh(TabPlayer p, boolean force) {
-        TeamManager tm = tab.getTeamManager();
-        if (getCondition(p)) tm.showNametag(p);
-        else tm.hideNametag(p);
+    public void refresh(@NotNull TabPlayer p, boolean force) {
+        if (getCondition(p)) ntm.showNameTag(p);
+        else ntm.hideNameTag(p);
     }
 
     public boolean getCondition(TabPlayer p) {
@@ -46,9 +48,9 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
 
     @Override
     public void unload() {
-        if (!tab.getFeatureManager().isFeatureEnabled("Nametag")) return;
+        if (!tab.getFeatureManager().isFeatureEnabled("NameTags")) return;
         for (TabPlayer p : tab.getOnlinePlayers())
-            tab.getTeamManager().showNametag(p);
+            ntm.showNameTag(p);
     }
 
 }

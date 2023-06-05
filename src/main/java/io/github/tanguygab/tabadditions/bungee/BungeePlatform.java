@@ -56,11 +56,11 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
-	public void sendTitle(TabPlayer p, String title, String subtitle, int fadein, int stay, int fadeout) {
+	public void sendTitle(TabPlayer p, String title, String subtitle, int fadeIn, int stay, int fadeout) {
 		Title t = plugin.getProxy().createTitle()
 				.title(new TextComponent(title))
 				.subTitle(new TextComponent(subtitle))
-				.fadeIn(fadein)
+				.fadeIn(fadeIn)
 				.stay(stay)
 				.fadeOut(fadeout);
 		((ProxiedPlayer)p.getPlayer()).sendTitle(t);
@@ -93,6 +93,7 @@ public class BungeePlatform extends Platform {
 	}
 
 	@Override
+	@SuppressWarnings("UnstableApiUsage")
 	public void sendToDiscord(TabPlayer player, String msg, String channel, boolean viewCondition, List<String> plugins) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF(String.join(",",plugins));

@@ -27,6 +27,7 @@ public class EmojiManager extends ChatManager {
         this.untranslate = untranslateEmojis;
         autoCompleteEnabled = plugin.getPlatform().supportsChatSuggestions() && autoCompleteEmojis;
         for (String category : emojis.keySet()) {
+            @SuppressWarnings("unchecked")
             Map<String,String> emojisMap = (Map<String,String>) emojis.get(category).get("list");
             totalEmojiCount+=emojisMap.size();
             emojiCategories.put(category,new EmojiCategory(category, emojisMap,emojis.get(category).getOrDefault("output","")+""));
@@ -150,7 +151,7 @@ public class EmojiManager extends ChatManager {
             i.getAndIncrement();
         }));
 
-        String output = plugin.parsePlaceholders(translation.getEmojiCategoryHeader(i.get(),sender,emojisOwned.get(),emojiCategories.size())+builder,sender);
+        String output = plugin.parsePlaceholders(translation.getEmojiCategoryHeader(i.get(), emojisOwned.get(),emojiCategories.size())+builder,sender);
         chat.sendMessage(sender,chat.mm.deserialize(ChatUtils.toMMColors(output)));
     }
 

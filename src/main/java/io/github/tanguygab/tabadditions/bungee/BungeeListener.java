@@ -27,6 +27,7 @@ public class BungeeListener implements Listener {
     }
 
     @EventHandler
+    @SuppressWarnings("UnstableApiUsage")
     public void onMessageReceived(PluginMessageEvent e) {
         if (!e.getTag().equalsIgnoreCase("tabadditions:channel")) return;
         ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());

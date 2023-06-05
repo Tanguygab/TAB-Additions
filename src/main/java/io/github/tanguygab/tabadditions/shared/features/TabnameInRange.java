@@ -9,6 +9,7 @@ import me.neznamy.tab.shared.platform.TabPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 public class TabnameInRange extends TabFeature implements UnLoadable, JoinListener {
 
@@ -55,20 +56,22 @@ public class TabnameInRange extends TabFeature implements UnLoadable, JoinListen
     }
 
     @Override
-    public void onJoin(TabPlayer tabPlayer) {
+    public void onJoin(@NotNull TabPlayer p) {
         Bukkit.getServer().getScheduler().runTask(plugin,()->{
-            Player p = (Player) tabPlayer.getPlayer();
-            for (Player p2 : Bukkit.getServer().getOnlinePlayers()) {
-                hide(p,p2);
-                hide(p2,p);
+            Player player = (Player) p.getPlayer();
+            for (Player all : Bukkit.getServer().getOnlinePlayers()) {
+                hide(player,all);
+                hide(all,player);
             }
         });
     }
 
+    @SuppressWarnings("deprecation")
     private void show(Player p, Player target) {
         try {p.showPlayer(plugin, target);}
         catch (NoSuchMethodError e) {p.showPlayer(target);}
     }
+    @SuppressWarnings("deprecation")
     private void hide(Player p, Player target) {
         try {p.hidePlayer(plugin, target);}
         catch (NoSuchMethodError e) {p.hidePlayer(target);}

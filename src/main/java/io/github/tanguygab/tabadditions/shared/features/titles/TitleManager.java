@@ -8,6 +8,7 @@ import me.neznamy.tab.shared.chat.IChatBaseComponent;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.platform.TabPlayer;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -40,7 +41,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
             titles.put(title,new Title(title,subtitle));
         });
 
-        tab.getCPUManager().startRepeatingMeasuredTask(2000,this,"handling Title",()->{
+        tab.getCPUManager().startRepeatingMeasuredTask(2000,refreshDisplayName,"handling Title",()->{
             for (TabPlayer p : tab.getOnlinePlayers())
                 refresh(p,false);
         });
@@ -51,7 +52,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
     }
 
     @Override
-    public void refresh(TabPlayer player, boolean force) {
+    public void refresh(@NotNull TabPlayer player, boolean force) {
         if (!announcedTitles.containsKey(player) || toggled.contains(player.getUniqueId())) return;
         sendTitle(player, true);
     }
@@ -78,7 +79,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
         addUsedPlaceholders(TAB.getInstance().getPlaceholderManager().detectPlaceholders(title));
         announcedTitles.put(player,title);
         sendTitle(player,false);
-        TAB.getInstance().getCPUManager().runTaskLater(2000,this,"handling Title on join for "+player.getName(),()->{
+        TAB.getInstance().getCPUManager().runTaskLater(2000,refreshDisplayName,"handling Title on join for "+player.getName(),()->{
             if (title.equals(announcedTitles.get(player))) announcedTitles.remove(player);
         });
     }
@@ -92,7 +93,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
     }
 
     @Override
-    public boolean onCommand(TabPlayer player, String msg) {
+    public boolean onCommand(@NotNull TabPlayer player, String msg) {
         if (msg.equals("/toggletitle") && plugin.toggleCmd(toggleCmd,player,toggled,plugin.getTranslation().titleOn,plugin.getTranslation().titleOff)) {
             refresh(player,true);
             return true;

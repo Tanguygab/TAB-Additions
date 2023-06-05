@@ -100,15 +100,15 @@ public class TABAdditions {
         if (config.getBoolean("actionbars.enabled",false)) registerFeature(new ActionBarManager());
         if (config.getBoolean("titles.enabled",false)) registerFeature(new TitleManager());
         if (chatConfig.getBoolean("enabled",false)) registerFeature(new Chat(chatConfig));
-        if (config.getBoolean("conditional-nametags.enabled",false) && tab.getTeamManager() != null)
-            registerFeature(new ConditionalNametags(config.getBoolean("conditional-nametags.show-by-default",true)));
+        if (config.getBoolean("conditional-nametags.enabled",false) && tab.getNameTagManager() != null)
+            registerFeature(new ConditionalNametags(config.getBoolean("conditional-nametags.show-by-default",true),tab.getNameTagManager()));
         if (config.getBoolean("conditional-appearance.enabled",false))
             registerFeature(new ConditionalAppearance(plugin,config.getBoolean("conditional-appearance.show-by-default",true)));
-        if (tab.getTeamManager() != null) tab.getCommand().registerSubCommand(new NametagCmd(tab.getTeamManager()));
+        if (tab.getNameTagManager() != null) tab.getCommand().registerSubCommand(new NametagCmd(tab.getNameTagManager()));
 
         if (platform.isProxy()) return;
         int nametagInRange = config.getInt("nametag-in-range", 0);
-        if (!features.contains("Conditional Nametags") && nametagInRange != 0 && tab.getTeamManager() != null) registerFeature(new NametagInRange(nametagInRange));
+        if (!features.contains("Conditional Nametags") && nametagInRange != 0 && tab.getNameTagManager() != null) registerFeature(new NametagInRange(nametagInRange,tab.getNameTagManager()));
         int tablistInRange = config.getInt("tabname-in-range", 0);
         if (!features.contains("Conditional Appearance") && tablistInRange != 0) registerFeature(new TabnameInRange(plugin,tablistInRange));
     }
@@ -128,22 +128,21 @@ public class TABAdditions {
         PlaceholderManagerImpl pm = tab.getPlaceholderManager();
         if (identifier.startsWith("%rel_viewer:")) {
             Placeholder placeholder = pm.getPlaceholder("%" + identifier.substring(12));
-            Placeholder viewerPlaceholder = null;
             if (placeholder instanceof RelationalPlaceholderImpl) {
                 RelationalPlaceholderImpl rel = (RelationalPlaceholderImpl) placeholder;
-                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> rel.getLastValue((TabPlayer) target, (TabPlayer) viewer));
+                e.setRelationalPlaceholder((viewer, target) -> rel.getLastValue((TabPlayer) target, (TabPlayer) viewer));
+                return;
             }
             if (placeholder instanceof PlayerPlaceholderImpl) {
                 PlayerPlaceholderImpl player = (PlayerPlaceholderImpl) placeholder;
-                viewerPlaceholder = pm.registerRelationalPlaceholder(identifier, placeholder.getRefresh(), (viewer, target) -> player.getLastValue((TabPlayer) viewer));
+                e.setRelationalPlaceholder((viewer, target) -> player.getLastValue((TabPlayer) viewer));
             }
-            e.setPlaceholder(viewerPlaceholder);
+            return;
         }
         if (identifier.startsWith("%rel_condition:")) {
             String cond = identifier.substring(15,identifier.length()-1);
             Condition condition = Condition.getCondition(cond);
-            Placeholder placeholder = pm.registerRelationalPlaceholder(identifier, pm.getDefaultRefresh(), (viewer, target) -> viewer == null ? "" : parsePlaceholders(condition.getText((TabPlayer) viewer), (TabPlayer) target, (TabPlayer) viewer));
-            e.setPlaceholder(placeholder);
+            e.setRelationalPlaceholder((viewer, target) -> viewer == null ? "" : parsePlaceholders(condition.getText((TabPlayer) viewer), (TabPlayer) target, (TabPlayer) viewer));
         }
     }
 
