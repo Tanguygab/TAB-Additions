@@ -41,7 +41,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
             actionBars.put(bar,new ActionBarLine(text,cfg.containsKey("condition") ? Condition.getCondition(cfg.get("condition")) : null));
         });
 
-        tab.getCPUManager().startRepeatingMeasuredTask(2000,refreshDisplayName,"handling ActionBar",()->{
+        tab.getCPUManager().startRepeatingMeasuredTask(2000,featureName,"handling ActionBar",()->{
             for (TabPlayer p : tab.getOnlinePlayers())
                 refresh(p,false);
         });
@@ -81,7 +81,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         addUsedPlaceholders(TAB.getInstance().getPlaceholderManager().detectPlaceholders(actionbar));
         announcedBars.put(player,actionbar);
         refresh(player,true);
-        TAB.getInstance().getCPUManager().runTaskLater(2000,refreshDisplayName,"handling ActionBar on join for "+player.getName(),()->{
+        TAB.getInstance().getCPUManager().runTaskLater(2000,featureName,"handling ActionBar on join for "+player.getName(),()->{
             if (actionbar.equals(announcedBars.get(player))) announcedBars.remove(player);
         });
     }

@@ -18,7 +18,7 @@ public class NametagInRange extends TabFeature implements JoinListener, UnLoadab
     public NametagInRange(int range, NameTagManager ntm) {
         tab = TAB.getInstance();
         this.ntm = ntm;
-        tab.getCPUManager().startRepeatingMeasuredTask(500,"&a"+featureName+"&r","handling Nametag In Range",()->{
+        tab.getCPUManager().startRepeatingMeasuredTask(500,featureName,"handling Nametag In Range",()->{
             int zone = (int) Math.pow(range, 2);
             for (Player player : Bukkit.getServer().getOnlinePlayers()) {
                 TabPlayer p = tab.getPlayer(player.getUniqueId());

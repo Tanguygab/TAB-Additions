@@ -41,7 +41,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
             titles.put(name,new Title(title,subtitle));
         });
 
-        tab.getCPUManager().startRepeatingMeasuredTask(2000,refreshDisplayName,"handling Title",()->{
+        tab.getCPUManager().startRepeatingMeasuredTask(2000,featureName,"handling Title",()->{
             for (TabPlayer p : tab.getOnlinePlayers())
                 refresh(p,false);
         });
@@ -79,7 +79,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
         addUsedPlaceholders(TAB.getInstance().getPlaceholderManager().detectPlaceholders(title));
         announcedTitles.put(player,title);
         sendTitle(player,false);
-        TAB.getInstance().getCPUManager().runTaskLater(2000,refreshDisplayName,"handling Title on join for "+player.getName(),()->{
+        TAB.getInstance().getCPUManager().runTaskLater(2000,featureName,"handling Title on join for "+player.getName(),()->{
             if (title.equals(announcedTitles.get(player))) announcedTitles.remove(player);
         });
     }
