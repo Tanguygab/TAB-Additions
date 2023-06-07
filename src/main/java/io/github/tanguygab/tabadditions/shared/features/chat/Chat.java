@@ -256,7 +256,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (!chatPlaceholderRelational) {
             String placeholderMsg = legacySerializer.serialize(createMessage(sender,null,message,chatPlaceholderFormat));
             chatPlaceholder.updateValue(sender, placeholderMsg);
-            TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, "&a"+featureName+"&r", "update %chat% for " + sender.getName(), () -> {
+            TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, featureName, "update %chat% for " + sender.getName(), () -> {
                 if (chatPlaceholder.getLastValue(sender).equals(placeholderMsg))
                     chatPlaceholder.updateValue(sender, "");
             });
@@ -269,7 +269,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
                 if (!chatPlaceholderRelational) continue;
                 String placeholderMsg = legacySerializer.serialize(createMessage(sender,viewer,message,chatPlaceholderFormat));
                 relChatPlaceholder.updateValue(viewer, sender, placeholderMsg);
-                TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, "&a"+featureName+"&r", "update %rel_chat% for "+viewer.getName()+" and "+ sender.getName(), () -> {
+                TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, featureName, "update %rel_chat% for "+viewer.getName()+" and "+ sender.getName(), () -> {
                     if (relChatPlaceholder.getLastValue(viewer,sender).equals(placeholderMsg))
                         relChatPlaceholder.updateValue(viewer,sender, "");
                 });
