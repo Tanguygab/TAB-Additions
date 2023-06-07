@@ -18,7 +18,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
     @Getter private final String refreshDisplayName = "&aTitle&r";
 
     private final TABAdditions plugin;
-    private final Map<String, Title> titles = new HashMap<>();
+    @Getter private final Map<String, Title> titles = new HashMap<>();
     private final Map<TabPlayer, String> announcedTitles = new HashMap<>();
     private final List<UUID> toggled;
     private final boolean toggleCmd;
@@ -38,7 +38,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
             String subtitle = cfg.get("subtitle");
             if (title != null) addUsedPlaceholders(tab.getPlaceholderManager().detectPlaceholders(title));
             if (subtitle != null) addUsedPlaceholders(tab.getPlaceholderManager().detectPlaceholders(subtitle));
-            titles.put(title,new Title(title,subtitle));
+            titles.put(name,new Title(title,subtitle));
         });
 
         tab.getCPUManager().startRepeatingMeasuredTask(2000,refreshDisplayName,"handling Title",()->{
@@ -64,7 +64,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
             title = titles.get(name).getTitle();
             subtitle = titles.get(name).getSubtitle();
         } else {
-            String[] str = name.split("\n");
+            String[] str = name.split("\\n");
             title = str[0];
             subtitle = str.length > 1 ? str[1] : "";
         }

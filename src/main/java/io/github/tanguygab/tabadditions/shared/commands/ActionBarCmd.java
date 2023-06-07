@@ -5,6 +5,10 @@ import io.github.tanguygab.tabadditions.shared.features.actionbar.ActionBarManag
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.command.SubCommand;
 import me.neznamy.tab.shared.platform.TabPlayer;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
 
 public class ActionBarCmd extends SubCommand {
 
@@ -14,7 +18,6 @@ public class ActionBarCmd extends SubCommand {
         super("actionbar",null);
         this.manager = manager;
     }
-
 
     @Override
     public void execute(TabPlayer sender, String[] args) {
@@ -37,6 +40,14 @@ public class ActionBarCmd extends SubCommand {
             return;
         }
         manager.announceBar(player,actionbar);
+    }
+
+    @Override
+    public @NotNull List<String> complete(@Nullable TabPlayer sender, @NotNull String[] arguments) {
+        if (arguments.length == 1) return getStartingArgument(manager.getActionBars().keySet(),arguments[0]);
+        List<String> players = getOnlinePlayers(arguments[1]);
+        players.add("*");
+        return players;
     }
 
 }

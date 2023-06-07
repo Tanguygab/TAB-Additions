@@ -19,7 +19,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
     @Getter private final String refreshDisplayName = "&aActionBar&r";
 
     private final TABAdditions plugin;
-    private final Map<String, ActionBarLine> bars = new LinkedHashMap<>();
+    @Getter private final Map<String, ActionBarLine> actionBars = new LinkedHashMap<>();
     private final Map<TabPlayer, String> announcedBars = new HashMap<>();
     private final List<UUID> toggled;
     private final boolean toggleCmd;
@@ -38,7 +38,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         barsConfig.forEach((bar,cfg)->{
             String text = cfg.get("text");
             if (text != null) addUsedPlaceholders(tab.getPlaceholderManager().detectPlaceholders(text));
-            bars.put(bar,new ActionBarLine(text,cfg.containsKey("condition") ? Condition.getCondition(cfg.get("condition")) : null));
+            actionBars.put(bar,new ActionBarLine(text,cfg.containsKey("condition") ? Condition.getCondition(cfg.get("condition")) : null));
         });
 
         tab.getCPUManager().startRepeatingMeasuredTask(2000,refreshDisplayName,"handling ActionBar",()->{
@@ -54,15 +54,24 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
 
     @Override
     public void refresh(@NotNull TabPlayer player, boolean force) {
-        String text = announcedBars.containsKey(player) ? announcedBars.get(player) : getActionBar(player).getText();
-        if (toggled.contains(player.getUniqueId()) || text.equals("")) return;
+        String text;
+        if (announcedBars.containsKey(player)) {
+            text = announcedBars.get(player);
+            if (actionBars.containsKey(text))
+                text = actionBars.get(text).getText();
+        } else {
+            ActionBarLine bar = getActionBar(player);
+            if (bar == null) return;
+            text = bar.getText();
+        }
+        if (toggled.contains(player.getUniqueId())) return;
 
         text = plugin.parsePlaceholders(text,player);
         plugin.getPlatform().sendActionbar(player, IChatBaseComponent.optimizedComponent(text).toFlatText());
     }
 
     public ActionBarLine getActionBar(TabPlayer player) {
-        for (ActionBarLine bar : bars.values())
+        for (ActionBarLine bar : actionBars.values())
             if (bar.isConditionMet(player))
                 return bar;
         return null;
