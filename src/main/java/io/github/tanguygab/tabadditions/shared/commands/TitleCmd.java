@@ -23,21 +23,29 @@ public class TitleCmd extends SubCommand {
     @Override
     public void execute(TabPlayer sender, String[] args) {
         TABAdditions instance = TABAdditions.getInstance();
+
         if (args.length < 1) {
+            sendMessage(sender,"&cYou have to provide a player!");
+            return;
+        }
+        if (args.length < 2) {
             sendMessage(sender,"&cYou have to provide a title!");
             return;
         }
-        String title = args[0].replace("_"," ");
 
-        if (args.length > 1 && args[1].equals("*")) {
+        String name = args[0];
+        String title = args[1];
+
+        if (name.equals("*")) {
             for (TabPlayer player : TAB.getInstance().getOnlinePlayers())
                 manager.announceTitle(player,title);
             return;
         }
 
-        TabPlayer player = args.length > 1 ? instance.getPlayer(args[1]) : sender;
+        boolean self = name.equalsIgnoreCase("me");
+        TabPlayer player = self ? sender : instance.getPlayer(name);
         if (player == null) {
-            sendMessage(sender,args.length > 1 ? getMessages().getPlayerNotFound(args[1]) : getMessages().getCommandOnlyFromGame());
+            sendMessage(sender,self ? getMessages().getCommandOnlyFromGame() : getMessages().getPlayerNotFound(name));
             return;
         }
         manager.announceTitle(player,title);
@@ -45,9 +53,12 @@ public class TitleCmd extends SubCommand {
 
     @Override
     public @NotNull List<String> complete(@Nullable TabPlayer sender, @NotNull String[] arguments) {
-        if (arguments.length == 1) return getStartingArgument(manager.getTitles().keySet(),arguments[0]);
-        List<String> players = getOnlinePlayers(arguments[1]);
-        players.add("*");
-        return players;
+        if (arguments.length == 1) {
+            List<String> players = getOnlinePlayers(arguments[0]);
+            players.add("*");
+            players.add("me");
+            return players;
+        }
+        return getStartingArgument(manager.getTitles().keySet(),arguments[1]);
     }
 }
