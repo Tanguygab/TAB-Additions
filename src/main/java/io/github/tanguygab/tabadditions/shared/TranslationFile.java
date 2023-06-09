@@ -30,6 +30,8 @@ public class TranslationFile extends YamlConfigurationFile {
     public final String chatOff = getString("chat.off", "&aYou won't receive any new chat message!");
     private final String chatCooldown = getString("chat.cooldown", "&cYou have to wait %seconds% more seconds!");
     private final String chatCleared = getString("chat.cleared", "&aChat cleared by %name%!");
+    private final String CHAT_CMD_JOIN = getString("chat.commands-formats.join", "&7You joined %name%!");
+    private final String CHAT_CMD_LEAVE = getString("chat.commands-formats.leave", "&7You left %name%!");
 
     private final String ignoreOn = getString("ignore.on", "&cYou won't receive any new message from %name%!");
     private final String ignoreOff = getString("ignore.off", "&aYou will now receive new messages from %name%!");
@@ -93,6 +95,13 @@ public class TranslationFile extends YamlConfigurationFile {
     public String getEmojiHeader(int owned, int max) {
         return emojiHeader.replace("%owned%",owned+"")
                 .replace("%max%",max+"");
+    }
+
+    public String getChatCmdJoin(String name) {
+        return CHAT_CMD_JOIN.replace("%name%",name);
+    }
+    public String getChatCmdLeave(String name) {
+        return CHAT_CMD_LEAVE.replace("%name%",name);
     }
 
 }

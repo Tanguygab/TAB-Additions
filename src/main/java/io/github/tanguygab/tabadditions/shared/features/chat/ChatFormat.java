@@ -9,6 +9,7 @@ import me.neznamy.tab.shared.platform.TabPlayer;
 public class ChatFormat {
 
     @Getter private final String name;
+    @Getter private final String displayName;
     private final AdvancedConditions condition;
     @Getter private final AdvancedConditions viewCondition;
     @Getter private final String channel;

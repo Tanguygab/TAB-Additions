@@ -4,6 +4,8 @@ import com.loohp.interactivechat.api.InteractiveChatAPI;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions;
+import io.github.tanguygab.tabadditions.shared.features.chat.commands.CommandManager;
+import io.github.tanguygab.tabadditions.shared.features.chat.commands.FormatCommand;
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.mentions.MentionManager;
 import lombok.Getter;
@@ -53,6 +55,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     private final MentionManager mentionManager;
     private final MsgManager msgManager;
     protected final SocialSpyManager socialSpyManager;
+    private final CommandManager commandsManager;
 
     public Double cooldownTime;
     public Map<UUID, LocalDateTime> cooldown = new HashMap<>();
@@ -84,14 +87,15 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
             String channel = (String) format.get("channel");
             @SuppressWarnings("unchecked")
             Map<String,Map<String,Object>> display = (Map<String, Map<String, Object>>) format.get("display");
-            this.formats.put(name,new ChatFormat(displayName,
+            this.formats.put(name,new ChatFormat(name,
+                    displayName,
                     AdvancedConditions.getCondition(condition),
                     AdvancedConditions.getCondition(viewCondition),
                     channel == null ? "" : channel,
                     ChatUtils.componentsToMM(display)));
         });
         PlaceholderManager pm = tab.getPlaceholderManager();
-        pm.registerPlayerPlaceholder("%chat-format%",1000,p->getFormat((TabPlayer) p).getName());
+        pm.registerPlayerPlaceholder("%chat-format%",1000,p->getFormat((TabPlayer) p).getDisplayName());
 
         emojiManager = config.getBoolean("emojis.enabled",false)
                 ? new EmojiManager(this,
@@ -130,6 +134,10 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
                 config.getBoolean("socialspy.view-conditions.spy",true),
                 ChatUtils.componentToMM(config.getConfigurationSection("socialspy.view-conditions.output")))
                 : null;
+        commandsManager = config.hasConfigOption("commands-formats")
+                && !config.getConfigurationSection("commands-formats").isEmpty()
+                ? new CommandManager(this,config.getConfigurationSection("commands-formats"))
+                : null;
 
         cooldownTime = config.getDouble("cooldown",0);
 
@@ -166,6 +174,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (mentionManager != null) mentionManager.unload();
         if (msgManager != null) msgManager.unload();
         if (socialSpyManager != null) socialSpyManager.unload();
+        if (commandsManager != null) commandsManager.unload();
     }
 
     public ChatFormat getFormat(TabPlayer player) {
@@ -228,7 +237,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
             return true;
         }
 
-        return false;
+        return commandsManager != null && commandsManager.onCommand(p,cmd);
     }
 
     public void onChat(TabPlayer sender, String message) {
@@ -244,7 +253,16 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (cooldownTime != 0 && !sender.hasPermission("tabadditions.chat.bypass.cooldown"))
             cooldown.put(sender.getUniqueId(),LocalDateTime.now());
 
-        ChatFormat format = getFormat(sender);
+        ChatFormat format = null;
+        if (commandsManager != null) {
+            format = commandsManager.getFromPrefix(sender,message);
+            if (format != null)
+                message = message.substring(((FormatCommand) format).getPrefix().length());
+
+            else if (commandsManager.contains(sender))
+                format = commandsManager.getFormat(sender);
+        }
+        if (format == null) format = getFormat(sender);
         if (format == null) return;
         String text = format.getText();
         kyori.console().sendMessage(createMessage(sender,null,message,text));

@@ -18,6 +18,11 @@ public abstract class ChatManager {
     private final String data;
     protected final boolean toggleCmd;
     protected final List<UUID> toggled;
+
+    public ChatManager(Chat chat) {
+        this(chat,false,null,null,null);
+    }
+
     public ChatManager(Chat chat, boolean toggleCmd, String data, String cmd, String placeholder) {
         this.chat = chat;
         this.toggleCmd = toggleCmd;

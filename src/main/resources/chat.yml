@@ -35,6 +35,7 @@ commands-formats:
     name: "&2LocalChat"
     view-condition: "inRange" # view-conditions use advanced-conditions which support relational placeholders (check TAB-Additions' config.yml)
     channel: "local"
+    prefix: "!"
     display:
       prefix:
         text: "%chat-format% &a%player% &8» "
@@ -46,6 +47,8 @@ commands-formats:
     name: "&4StaffChat"
     condition: "permission:tab.staff"
     view-condition: "permission:tab.staff"
+    keep-on-reload: true
+    prefix: "s!"
     display:
       prefix:
         text: "%chat-format% &c%player% &8» "
