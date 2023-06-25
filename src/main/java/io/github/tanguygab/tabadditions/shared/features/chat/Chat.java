@@ -154,9 +154,9 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         clearChatAmount = config.getInt("clearchat.amount",100);
         clearChatLine = config.getString("clearchat.line","");
 
-        discordFormat = config.getString("discord.format","%msg%");
-        discordEssX = config.getBoolean("discord.EssentialsX",true);
-        discordSRV = config.getBoolean("discord.DiscordSRV",true);
+        discordFormat = config.getString("discord-support.format","%msg%");
+        discordEssX = config.getBoolean("discord-support.EssentialsX",true);
+        discordSRV = config.getBoolean("discord-support.DiscordSRV",true);
 
         chatPlaceholderFormat = config.getString("chat-placeholder.format","%msg%");
         chatPlaceholderRelational = config.getBoolean("chat-placeholder.relational",false);
