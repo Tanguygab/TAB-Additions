@@ -94,12 +94,11 @@ public class BungeePlatform extends Platform {
 
 	@Override
 	@SuppressWarnings("UnstableApiUsage")
-	public void sendToDiscord(TabPlayer player, String msg, String channel, boolean viewCondition, List<String> plugins) {
+	public void sendToDiscord(TabPlayer player, String msg, String channel, List<String> plugins) {
 		ByteArrayDataOutput out = ByteStreams.newDataOutput();
 		out.writeUTF(String.join(",",plugins));
 		out.writeUTF(msg);
 		out.writeUTF(channel);
-		out.writeUTF(viewCondition+"");
 		((ProxiedPlayer)player.getPlayer()).sendData("tabadditions:channel",out.toByteArray());
 	}
 

@@ -21,7 +21,7 @@ public abstract class Platform {
 	public abstract void sendActionbar(TabPlayer p, String text);
 
 	public abstract AudienceProvider getKyori();
-	public abstract void sendToDiscord(TabPlayer player, String msg, String channel, boolean viewCondition, List<String> plugins);
+	public abstract void sendToDiscord(TabPlayer player, String msg, String channel, List<String> plugins);
 	public abstract boolean supportsChatSuggestions();
 	public abstract void updateChatComplete(TabPlayer p, List<String> emojis, boolean add);
 	public abstract ChatItem getItem(TabPlayer p, boolean offhand);

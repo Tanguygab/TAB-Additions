@@ -282,16 +282,15 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
 
         for (TabPlayer viewer : tab.getOnlinePlayers()) {
             if (socialSpyManager != null) socialSpyManager.process(sender,viewer,message,socialSpyManager.isSpying(sender,viewer,format));
-            if (canSee(sender,viewer,format)) {
-                sendMessage(viewer, createMessage(sender, viewer, message, text));
-                if (!chatPlaceholderRelational) continue;
-                String placeholderMsg = legacySerializer.serialize(createMessage(sender,viewer,message,chatPlaceholderFormat));
-                relChatPlaceholder.updateValue(viewer, sender, placeholderMsg);
-                TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, featureName, "update %rel_chat% for "+viewer.getName()+" and "+ sender.getName(), () -> {
-                    if (relChatPlaceholder.getLastValue(viewer,sender).equals(placeholderMsg))
-                        relChatPlaceholder.updateValue(viewer,sender, "");
-                });
-            }
+            if (!canSee(sender,viewer,format)) continue;
+            sendMessage(viewer, createMessage(sender, viewer, message, text));
+            if (!chatPlaceholderRelational) continue;
+            String placeholderMsg = legacySerializer.serialize(createMessage(sender,viewer,message,chatPlaceholderFormat));
+            relChatPlaceholder.updateValue(viewer, sender, placeholderMsg);
+            TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, featureName, "update %rel_chat% for "+viewer.getName()+" and "+ sender.getName(), () -> {
+                if (relChatPlaceholder.getLastValue(viewer,sender).equals(placeholderMsg))
+                    relChatPlaceholder.updateValue(viewer,sender, "");
+            });
         }
 
         List<String> discord = new ArrayList<>(2);
@@ -299,11 +298,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (discordEssX) discord.add("EssentialsX");
         if (discord.isEmpty()) return;
         String msgToDiscord = plainTextSerializer.serialize(createMessage(sender,null,message,discordFormat));
-        if (canSee(sender,null,format))
-            plugin.getPlatform().sendToDiscord(sender,msgToDiscord,format.getChannel(),false,discord);
-        else if (getFormat(sender).isViewConditionMet(sender,null))
-            plugin.getPlatform().sendToDiscord(sender,msgToDiscord,format.getChannel(),true,discord);
-
+        if (!format.hasViewCondition()) plugin.getPlatform().sendToDiscord(sender,msgToDiscord,format.getChannel(),discord);
     }
 
     public void sendMessage(TabPlayer player, Component component) {

@@ -32,7 +32,7 @@ public class AdvancedConditions {
                 put("-|", line -> new StringCondition(line.split("-|"), String::endsWith)::isMet);
                 put("!=", line -> new StringCondition(line.split("!="), (left, right) -> !left.equals(right))::isMet);
                 put("=", line -> new StringCondition(line.split("="), String::equals)::isMet);
-                put("permission:", line -> (viewer,target) -> target.hasPermission(line.split(":")[1]));
+                put("permission:", line -> (viewer,target) -> viewer == null || viewer.hasPermission(line.split(":")[1]));
             }};
 
     /** Name of this condition defined in configuration */
