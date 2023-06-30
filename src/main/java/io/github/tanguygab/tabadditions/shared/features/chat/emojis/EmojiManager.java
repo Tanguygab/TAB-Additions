@@ -21,28 +21,29 @@ public class EmojiManager extends ChatManager {
     private final Map<TabPlayer, List<String>> emojisAutoCompleteList = new HashMap<>();
     @Getter private final boolean emojisCmdEnabled;
 
+    @SuppressWarnings("unchecked")
     public EmojiManager(Chat chat, String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, Map<String,Map<String,Object>> emojis, boolean emojisCmdEnabled, boolean toggleCmd) {
         super(chat,toggleCmd,"emojis-off","toggleemojis","chat-emojis");
         this.output = emojiOutput;
         this.untranslate = untranslateEmojis;
         autoCompleteEnabled = plugin.getPlatform().supportsChatSuggestions() && autoCompleteEmojis;
         for (String category : emojis.keySet()) {
-            @SuppressWarnings("unchecked")
             Map<String,String> emojisMap = (Map<String,String>) emojis.get(category).get("list");
             totalEmojiCount+=emojisMap.size();
-            emojiCategories.put(category,new EmojiCategory(category, emojisMap,emojis.get(category).getOrDefault("output","")+""));
+            emojiCategories.put(category,new EmojiCategory(category, emojisMap,ChatUtils.componentToMM((Map<String, Object>) emojis.get(category).get("output"))));
         }
 
         this.emojisCmdEnabled = emojisCmdEnabled;
         if (emojisCmdEnabled) plugin.getPlatform().registerCommand("emojis");
 
-        for (TabPlayer p : tab.getOnlinePlayers())
-            if (autoCompleteEmojis && !hasCmdToggled(p))
-                loadAutoComplete(p);
+        if (autoCompleteEmojis)
+            for (TabPlayer p : tab.getOnlinePlayers())
+                if (!hasCmdToggled(p))
+                    loadAutoComplete(p);
 
         PlaceholderManager pm = tab.getPlaceholderManager();
-        pm.registerServerPlaceholder("%chat-emoji-total%",-1, ()-> totalEmojiCount +"");
-        pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->ownedEmojis((TabPlayer) p)+"");
+        pm.registerServerPlaceholder("%chat-emoji-total%",-1, ()->String.valueOf(totalEmojiCount));
+        pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->String.valueOf(ownedEmojis((TabPlayer) p)));
     }
 
     @Override
