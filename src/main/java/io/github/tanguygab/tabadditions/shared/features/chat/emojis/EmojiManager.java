@@ -73,7 +73,7 @@ public class EmojiManager extends ChatManager {
                 int counted = 0;
                 String output = plugin.parsePlaceholders(getOutput(category)
                         .replace("%emojiraw%",emoji)
-                        .replace("%emoji%",emojis.get(emoji)),
+                        .replace("%emoji%",emojis.get(emoji).replace("\"","''")),
                         sender,viewer);
                 if (list.isEmpty()) return output.repeat(count);
                 StringBuilder msgBuilder = new StringBuilder(msg);
