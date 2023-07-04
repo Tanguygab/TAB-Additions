@@ -19,11 +19,11 @@ public class ChatFormat {
         return condition == null || condition.isMet(p);
     }
 
-    public boolean hasViewCondition() {
-        return viewCondition != null;
+    public boolean hasNoViewCondition() {
+        return viewCondition == null;
     }
 
     public boolean isViewConditionMet(TabPlayer sender, TabPlayer viewer) {
-        return !hasViewCondition() || viewCondition.isMet(viewer,sender);
+        return hasNoViewCondition() || viewCondition.isMet(viewer,sender);
     }
 }

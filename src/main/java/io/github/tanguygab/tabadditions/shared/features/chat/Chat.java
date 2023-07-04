@@ -298,7 +298,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (discordEssX) discord.add("EssentialsX");
         if (discord.isEmpty()) return;
         String msgToDiscord = plainTextSerializer.serialize(createMessage(sender,null,message,discordFormat));
-        if (!format.hasViewCondition()) plugin.getPlatform().sendToDiscord(sender,msgToDiscord,format.getChannel(),discord);
+        if (format.hasNoViewCondition()) plugin.getPlatform().sendToDiscord(sender,msgToDiscord,format.getChannel(),discord);
     }
 
     public void sendMessage(TabPlayer player, Component component) {
@@ -330,7 +330,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
 
     private boolean canSee(TabPlayer sender, TabPlayer viewer, ChatFormat f) {
         if (sender == viewer) return true;
-        if (viewer == null) return f.getChannel().equals("") && !f.hasViewCondition();
+        if (viewer == null) return f.getChannel().equals("") && f.hasNoViewCondition();
         if (!f.getChannel().equals(getFormat(viewer).getChannel())) return false;
         return f.isViewConditionMet(sender, viewer);
     }

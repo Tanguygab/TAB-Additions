@@ -123,11 +123,11 @@ public class ChatFormatter {
         ChatItem item = TABAdditions.getInstance().getPlatform().getItem(sender, offhand);
         if (item.getType().equals("AIR")) return message.replace(input,itemOutputAir);
 
-        String text = "<hover:show_item:'"+item.getType()+"':"+item.getAmount()+"";
+        String text = "<hover:show_item:'"+item.getType()+"':"+item.getAmount();
         if (item.getNbt() != null) text+=":'"+item.getNbt().replace("'","\\'")+"'";
         text+=">"+(item.getAmount() == 1 ? itemOutputSingle : itemOutput)
                 .replace("%name%",item.getName())
-                .replace("%amount%",item.getAmount()+"")
+                .replace("%amount%",String.valueOf(item.getAmount()))
                 +"</hover>";
         return message.replace(input,text);
     }
@@ -138,8 +138,8 @@ public class ChatFormatter {
                     && !sender.hasPermission("tabadditions.chat.interaction." + key)) continue;
             if (interaction.getOrDefault("input","").equals("")) continue;
 
-            message = message.replace(interaction.get("input")+"",
-                    TABAdditions.getInstance().parsePlaceholders(interaction.get("output")+"",sender));
+            message = message.replace(String.valueOf(interaction.get("input")),
+                    TABAdditions.getInstance().parsePlaceholders(String.valueOf(interaction.get("output")),sender));
         }
         return message;
     }

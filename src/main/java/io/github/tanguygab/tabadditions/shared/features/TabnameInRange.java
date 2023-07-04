@@ -31,10 +31,11 @@ public class TabnameInRange extends TabFeature implements UnLoadable, JoinListen
             int zone = (int) Math.pow(range, 2);
             for (Player p : Bukkit.getServer().getOnlinePlayers()) {
                 for (Player player : Bukkit.getServer().getOnlinePlayers()) {
+                    TabPlayer tp = TAB.getInstance().getPlayer(p.getUniqueId());
                     if (p != player
                             && p.getWorld().equals(player.getWorld())
                             && player.getLocation().distanceSquared(p.getLocation()) < zone
-                            && !TAB.getInstance().getPlayer(p.getUniqueId()).isVanished()
+                            && (tp == null || tp.isVanished())
                     ) show(p,player);
                     else if (p != player) hide(p,player);
                 }

@@ -62,13 +62,13 @@ public class TranslationFile extends YamlConfigurationFile {
     }
 
     public String getCooldown(double time) {
-        return chatCooldown.replace("%seconds%",time+"");
+        return chatCooldown.replace("%seconds%", String.valueOf(time));
     }
     public String getIgnore(String ignored, boolean on) {
         return (on ? ignoreOn : ignoreOff).replace("%name%",ignored);
     }
     public String getPmCooldown(double time) {
-        return pmCooldown.replace("%seconds%",time+"");
+        return pmCooldown.replace("%seconds%", String.valueOf(time));
     }
     public String getPlayerNotFound(String player) {
         return playerNotFound.replace("%player%", player);
@@ -77,15 +77,15 @@ public class TranslationFile extends YamlConfigurationFile {
     public String getEmojiCategory(TabPlayer p, EmojiCategory category) {
         return emojiCategory
                 .replace("%category%",category.getName())
-                .replace("%owned%",category.ownedEmojis(p)+"")
-                .replace("%max%",category.getEmojis().size()+"");
+                .replace("%owned%", String.valueOf(category.ownedEmojis(p)))
+                .replace("%max%", String.valueOf(category.getEmojis().size()));
     }
 
     public String getEmojiCategoryHeader(int amount, int owned, int total) {
         return emojiCategoryHeader
-                .replace("%amount%",amount+"")
-                .replace("%owned%",owned+"")
-                .replace("%max%",total+"");
+                .replace("%amount%", String.valueOf(amount))
+                .replace("%owned%", String.valueOf(owned))
+                .replace("%max%", String.valueOf(total));
     }
     public String getEmoji(String emojiraw, String emoji) {
         return this.emoji.replace("%emojiraw%", emojiraw)
@@ -93,8 +93,8 @@ public class TranslationFile extends YamlConfigurationFile {
     }
 
     public String getEmojiHeader(int owned, int max) {
-        return emojiHeader.replace("%owned%",owned+"")
-                .replace("%max%",max+"");
+        return emojiHeader.replace("%owned%", String.valueOf(owned))
+                .replace("%max%", String.valueOf(max));
     }
 
     public String getChatCmdJoin(String name) {

@@ -52,9 +52,9 @@ public class TABAdditions {
 
     public void load() {
         loadFiles();
-        tab.getEventBus().register(TabPlaceholderRegisterEvent.class,this::onPlaceholderRegister);
+        if (tab.getEventBus() != null) tab.getEventBus().register(TabPlaceholderRegisterEvent.class,this::onPlaceholderRegister);
         reload();
-        tab.getEventBus().register(TabLoadEvent.class,e->platform.runTask(this::reload));
+        if (tab.getEventBus() != null) tab.getEventBus().register(TabLoadEvent.class,e->platform.runTask(this::reload));
     }
 
     public void loadFiles() {

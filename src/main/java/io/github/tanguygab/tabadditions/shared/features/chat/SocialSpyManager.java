@@ -41,7 +41,10 @@ public class SocialSpyManager extends ChatManager {
             chat.sendMessage(viewer,chat.createMessage(sender,viewer,message,output));
             return;
         }
-        toggled.removeIf(uuid -> tab.getPlayer(uuid) != null && !tab.getPlayer(uuid).hasPermission("tabadditions.chat.socialspy"));
+        toggled.removeIf(uuid ->{
+            TabPlayer p = tab.getPlayer(uuid);
+            return p != null && p.hasPermission("tabadditions.chat.socialspy");
+        });
         toggled.forEach(uuid->{
             TabPlayer spy = tab.getPlayer(uuid);
             if (spy == null || spy == sender) return;

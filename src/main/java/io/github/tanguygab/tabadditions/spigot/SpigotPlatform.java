@@ -130,7 +130,7 @@ public class SpigotPlatform extends Platform {
 		DiscordSRV discord = DiscordSRV.getPlugin();
 		String mainChannel = discord.getMainChatChannel();
 		String optionalChannel = discord.getOptionalChannel(channel);
-		discord.processChatMessage(p, msg, msg.equals("") || optionalChannel.equals(mainChannel) ? mainChannel : optionalChannel, false);
+		discord.processChatMessage(p, msg, msg.equals("") || optionalChannel.equals(mainChannel) ? mainChannel : optionalChannel, false,null);
 	}
 	private void sendEssentialsX(Player p, String msg) {
 		DiscordService api = plugin.getServer().getServicesManager().load(DiscordService.class);
