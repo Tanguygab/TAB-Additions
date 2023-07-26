@@ -188,7 +188,7 @@ embed-urls:
 clearchat:
   enabled: true
   amount: 100
-  line: ""
+  line: " "
 
 discord-support:
   format: "%msg%"
