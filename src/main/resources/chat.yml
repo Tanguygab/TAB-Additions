@@ -157,6 +157,7 @@ emojis:
 
 char-filter:
   enabled: true
+  cancel-message: true
   char-replacement: "*"
   fake-length: 0
   output:
@@ -171,6 +172,7 @@ char-filter:
     - fuck(er(s)?)?
     - bitch(es)?
     - ass(hole|es)?
+    - (?i)n[i1l!|¡]gg[ae@3€](r)?
   exempt:
     - bypass
 embed-urls:

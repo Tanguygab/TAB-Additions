@@ -53,6 +53,8 @@ public class TranslationFile extends YamlConfigurationFile {
     public final String socialSpyOn = getString("socialspy.on", "&aSocialSpy enabled.");
     public final String socialSpyOff = getString("socialspy.off", "&cSocialSpy disabled.");
 
+    public final String cantSwear = getString("msg.cant-swear","&cYou are not allowed to swear on this server!");
+
     public TranslationFile(InputStream source, File destination) throws IOException {
         super(source,destination);
     }

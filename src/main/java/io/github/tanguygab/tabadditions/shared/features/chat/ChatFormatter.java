@@ -13,20 +13,21 @@ import java.util.stream.Collectors;
 
 public class ChatFormatter {
 
-    public boolean filterEnabled;
-    public String filterChar;
-    public int filterFakeLength;
-    public String filterOutput;
-    public List<Pattern> filterPatterns;
-    public List<String> filterExempt;
+    private final boolean filterEnabled;
+    private final boolean filterCancelMessage;
+    private final String filterChar;
+    private final int filterFakeLength;
+    private final String filterOutput;
+    private final List<Pattern> filterPatterns;
+    private final List<String> filterExempt;
 
-    public boolean itemEnabled;
-    public String itemMainHand;
-    public String itemOffHand;
-    public String itemOutput;
-    public String itemOutputSingle;
-    public String itemOutputAir;
-    public boolean itemPermission;
+    private final boolean itemEnabled;
+    private final String itemMainHand;
+    private final String itemOffHand;
+    private final String itemOutput;
+    private final String itemOutputSingle;
+    private final String itemOutputAir;
+    private final boolean itemPermission;
 
     private final Map<String,Map<String,Object>> customInteractions;
 
@@ -38,6 +39,7 @@ public class ChatFormatter {
     @SuppressWarnings("unchecked")
     public ChatFormatter(ConfigurationFile config) {
         filterEnabled = config.getBoolean("char-filter.enabled",true);
+        filterCancelMessage = config.getBoolean("char-filter.cancel-message",false);
         filterChar = config.getString("char-filter.char-replacement","*");
         filterFakeLength = config.getInt("char-filter.fake-length",0);
         filterOutput = ChatUtils.componentToMM(config.getConfigurationSection("char-filter.output"));
@@ -65,7 +67,6 @@ public class ChatFormatter {
         urlsOutput = ChatUtils.componentToMM(config.getConfigurationSection("embed-urls.output"));
     }
 
-
     public String process(String message, TabPlayer sender) {
         if (filterEnabled && !sender.hasPermission("tabadditions.chat.bypass.filter")) message = filter(message);
         if (embedURLs) message = embedURLs(message);
@@ -76,6 +77,27 @@ public class ChatFormatter {
         if (!customInteractions.isEmpty()) message = formatInteractions(sender,message);
 
         return message;
+    }
+
+    protected boolean shouldBlock(String msg, TabPlayer sender) {
+        if (!filterEnabled || !filterCancelMessage || sender.hasPermission("tabadditions.chat.bypass.filter")) return false;
+
+        Map<Integer, String> map = new HashMap<>();
+        for (String bypass : filterExempt) {
+            if (!msg.contains(bypass)) continue;
+            Matcher m = Pattern.compile(bypass).matcher(msg);
+            while (m.find()) map.put(m.start(), bypass);
+        }
+        for (Pattern pattern : filterPatterns) {
+            Matcher matcher = pattern.matcher(msg);
+            if (matcher.find()) {
+                if (map.isEmpty()) return true;
+                for (int pos : map.keySet())
+                    if (map.get(pos).length() <= matcher.group().length() || pos > matcher.start() || pos + map.get(pos).length() <= matcher.start())
+                        return true;
+            }
+        }
+        return false;
     }
 
     private String filter(String msg) {

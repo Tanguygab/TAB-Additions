@@ -253,6 +253,11 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (cooldownTime != 0 && !sender.hasPermission("tabadditions.chat.bypass.cooldown"))
             cooldown.put(sender.getUniqueId(),LocalDateTime.now());
 
+        if (chatFormatter.shouldBlock(message,sender)) {
+            sender.sendMessage(plugin.getTranslation().cantSwear,true);
+            return;
+        }
+
         ChatFormat format = null;
         if (commandsManager != null) {
             format = commandsManager.getFromPrefix(sender,message);
