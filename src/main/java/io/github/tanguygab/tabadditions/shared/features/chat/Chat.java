@@ -213,8 +213,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
             String lineBreaks = ("\n"+clearChatLine)
                     .repeat(clearChatAmount)
                     +"\n"+msgs.getChatCleared(p);
-            for (TabPlayer all : tab.getOnlinePlayers())
-                all.sendMessage(lineBreaks,false);
+            for (TabPlayer all : tab.getOnlinePlayers()) all.sendMessage(lineBreaks,true);
             return true;
         }
         if (cmd.startsWith("/ignore")) {
