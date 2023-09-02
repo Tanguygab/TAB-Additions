@@ -26,8 +26,8 @@ public class TranslationFile extends YamlConfigurationFile {
     private final String emojiHeader = getString("emojis.category.header","&7All emojis in this category &8(%owned%/%max%)&7:");
     private final String emoji = getString("emojis.category.emoji", "&7 - %emojiraw%&8: &r%emoji%");
 
-    public final String chatOn = getString("chat.on", "&cYou will now receive new chat messages!");
-    public final String chatOff = getString("chat.off", "&aYou won't receive any new chat message!");
+    public final String chatOn = getString("chat.on", "&aYou will now receive new chat messages!");
+    public final String chatOff = getString("chat.off", "&cYou won't receive any new chat message!");
     private final String chatCooldown = getString("chat.cooldown", "&cYou have to wait %seconds% more seconds!");
     private final String chatCleared = getString("chat.cleared", "&aChat cleared by %name%!");
     private final String CHAT_CMD_JOIN = getString("chat.commands-formats.join", "&7You joined %name%!");

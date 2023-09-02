@@ -74,6 +74,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     private final boolean discordEssX;
     private final boolean discordSRV;
 
+    @Getter
     private final boolean bukkitBridgeChatEnabled;
 
     public Chat(ConfigurationFile config) {
@@ -104,14 +105,14 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
                         config.getBoolean("emojis.auto-complete",true),
                         config.getConfigurationSection("emojis.categories"),
                         config.getBoolean("emojis./emojis",true),
-                        config.getBoolean("emojis./toggleemoji",true))
+                        config.getBoolean("emojis./toggleemojis",true))
                 : null;
         mentionManager = config.getBoolean("mention.enabled",true)
                 ? new MentionManager(this,
                         config.getString("mention.input","@%player%"),
                         ChatUtils.componentToMM(config.getConfigurationSection("mention.output")),
                         config.getString("mention.sound","BLOCK_NOTE_BLOCK_PLING"),
-                        config.getBoolean("mention./togglemention",true),
+                        config.getBoolean("mention./togglementions",true),
                         config.getBoolean("mention.output-for-everyone",true),
                         config.getConfigurationSection("mention.custom-mentions"))
             : null;
@@ -142,7 +143,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         cooldownTime = config.getDouble("cooldown",0);
 
         toggleCmd = config.getBoolean("/togglechat",true);
-        toggled = ChatUtils.registerToggleCmd(toggleCmd,"chat-off","togglechat","chat-status",p->hasChatToggled((TabPlayer) p) ? "Off" : "No");
+        toggled = ChatUtils.registerToggleCmd(toggleCmd,"chat-off","togglechat","chat-status",p->hasChatToggled((TabPlayer) p) ? "Off" : "On");
 
         ignoreCmd = config.getBoolean("/ignore",true);
         if (ignoreCmd) {
@@ -187,10 +188,6 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         return toggled.contains(player.getUniqueId());
     }
 
-    public boolean isBukkitBridgeChatEnabled() {
-        return bukkitBridgeChatEnabled;
-    }
-
     @Override
     public void onJoin(@NotNull TabPlayer player) {
         if (emojiManager != null && emojiManager.isAutoCompleteEnabled() && !emojiManager.hasCmdToggled(player))
@@ -200,7 +197,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     @Override
     public boolean onCommand(@NotNull TabPlayer p, String cmd) {
         if (cmd.startsWith("/emojis") || cmd.equals("/toggleemojis")) return emojiManager != null && emojiManager.onCommand(p,cmd);
-        if (cmd.equals("/togglemention")) return mentionManager != null && mentionManager.onCommand(p,cmd);
+        if (cmd.equals("/togglementions")) return mentionManager != null && mentionManager.onCommand(p,cmd);
         if (msgManager != null && (cmd.equals("/togglemsg") || msgManager.isReplyCmd(cmd,false) || msgManager.isMsgCmd(cmd,false)))
             return msgManager.onCommand(p,cmd);
         if (cmd.equals("/socialspy")) return p.hasPermission("tabadditions.chat.socialspy") && socialSpyManager != null && socialSpyManager.onCommand(p,cmd);
@@ -334,7 +331,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
 
     private boolean canSee(TabPlayer sender, TabPlayer viewer, ChatFormat f) {
         if (sender == viewer) return true;
-        if (viewer == null) return f.getChannel().equals("") && f.hasNoViewCondition();
+        if (viewer == null) return f.getChannel().isEmpty() && f.hasNoViewCondition();
         if (!f.getChannel().equals(getFormat(viewer).getChannel())) return false;
         return f.isViewConditionMet(sender, viewer);
     }

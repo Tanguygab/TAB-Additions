@@ -42,7 +42,7 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
         Property prop = p.getProperty("nametag-condition");
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
-        if (cond.equals("")) return def;
+        if (cond.isEmpty()) return def;
         return Condition.getCondition(cond).isMet(p);
     }
 

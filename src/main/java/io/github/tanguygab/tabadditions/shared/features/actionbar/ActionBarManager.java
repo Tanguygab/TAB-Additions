@@ -90,7 +90,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
     public void onJoin(TabPlayer player) {
         player.loadPropertyFromConfig(this,"join-actionbar");
         String prop = player.getProperty("join-actionbar").getCurrentRawValue();
-        if (prop.equals("")) return;
+        if (prop.isEmpty()) return;
         announceBar(player,prop);
     }
 

@@ -142,7 +142,7 @@ public class AdvancedConditions {
      * @return  condition from string
      */
     public static AdvancedConditions getCondition(String string) {
-        if (string == null || string.equals("")) return null;
+        if (string == null || string.isEmpty()) return null;
         if (registeredConditions.containsKey(string))
             return registeredConditions.get(string);
 

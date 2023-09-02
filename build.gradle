@@ -53,7 +53,7 @@ dependencies {
 
     compileOnly 'com.discordsrv:discordsrv:1.26.2'
     compileOnly 'net.essentialsx:EssentialsXDiscord:2.19.4'
-    compileOnly 'com.loohp:InteractiveChat:4.2.3.13'
+    compileOnly 'com.loohp:InteractiveChat:4.2.7.2'
     compileOnly 'com.github.DevLeoko:AdvancedBan:2.3.0'
     compileOnly 'dev.simplix:protocolize-api:2.2.6'
 

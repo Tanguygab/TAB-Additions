@@ -62,7 +62,7 @@ public class EmojiManager extends ChatManager {
 
             for (String emoji : emojis.keySet()) {
                 int count = ChatUtils.countMatches(msg, emoji);
-                if (count == 0 || emoji.equals("")) continue;
+                if (count == 0 || emoji.isEmpty()) continue;
                 if (!category.canUse(sender,emoji)) {
                     if (untranslate && msg.contains(emojis.get(emoji)))
                         msg = msg.replace(emojis.get(emoji), emoji);
@@ -90,7 +90,7 @@ public class EmojiManager extends ChatManager {
     }
 
     public String getOutput(EmojiCategory category) {
-        return category == null || category.getOutput().equals("") ? output : category.getOutput();
+        return category == null || category.getOutput().isEmpty() ? output : category.getOutput();
     }
 
     public int ownedEmojis(TabPlayer p) {
@@ -122,7 +122,7 @@ public class EmojiManager extends ChatManager {
     public boolean onCommand(TabPlayer sender, String command) {
         if (command.startsWith("/emojis") && emojisCmdEnabled) {
             String cat = command.contains(" ") ? command.split(" ")[1] : "";
-            if (cat.equals("")) {
+            if (cat.isEmpty()) {
                 getEmojisCategories(sender);
                 return true;
             }

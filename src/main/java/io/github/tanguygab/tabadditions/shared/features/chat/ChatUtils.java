@@ -21,7 +21,7 @@ public class ChatUtils {
     private static final Pattern tabRGBPattern = Pattern.compile("#[0-9a-fA-F]{6}");
 
     public static int countMatches(String str, String sub) {
-        if (str == null || str.length() == 0 || sub == null || sub.length() == 0) return 0;
+        if (str == null || str.isEmpty() || sub == null || sub.isEmpty()) return 0;
         int count = 0;
         for (int idx = 0; (idx = str.indexOf(sub,idx)) != -1; idx += sub.length()) ++count;
         return count;
@@ -47,11 +47,11 @@ public class ChatUtils {
                 .replace("url","open_url")
                 .replace("copy","copy_to_clipboard")
                 .replace("file","open_file");
-        if (!hover.equals("")) output.append("<hover:show_text:\"").append(hover).append("\">");
-        if (!click.equals("")) output.append("<click:").append(clickType).append(":\"").append(click).append("\">");
+        if (!hover.isEmpty()) output.append("<hover:show_text:\"").append(hover).append("\">");
+        if (!click.isEmpty()) output.append("<click:").append(clickType).append(":\"").append(click).append("\">");
         output.append(text);
-        if (!click.equals("")) output.append("</click>");
-        if (!hover.equals("")) output.append("</hover>");
+        if (!click.isEmpty()) output.append("</click>");
+        if (!hover.isEmpty()) output.append("</hover>");
         return output.toString();
     }
 

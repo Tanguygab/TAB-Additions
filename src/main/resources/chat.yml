@@ -99,7 +99,7 @@ mention:
     click: "suggest:@%player%"
   sound: block.note_block.pling
   output-for-everyone: true
-  /togglemention: true
+  /togglementions: true
   custom-mentions:
     staff:
       input: "@staff"
@@ -110,7 +110,7 @@ mention:
 emojis:
   enabled: true
   /emojis: true
-  /toggleemoji: true
+  /toggleemojis: true
   auto-complete: true #only works on 1.19.4+!
   output:
     text: "%emoji%"

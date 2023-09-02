@@ -5,11 +5,12 @@ import io.github.tanguygab.tabadditions.shared.features.chat.ChatFormat;
 import lombok.Getter;
 import lombok.experimental.Accessors;
 
+@Getter
 public class FormatCommand extends ChatFormat {
 
-    @Getter @Accessors(fluent = true)
+    @Accessors(fluent = true)
     private final boolean saveOnReload;
-    @Getter private final String prefix;
+    private final String prefix;
 
     public FormatCommand(String name, String displayName, AdvancedConditions condition, AdvancedConditions viewCondition, String channel, String text, boolean saveOnReload, String prefix) {
         super(name, displayName, condition, viewCondition, channel, text.replace("%chat-format%",displayName));

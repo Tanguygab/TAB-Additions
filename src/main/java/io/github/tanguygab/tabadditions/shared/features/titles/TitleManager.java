@@ -88,7 +88,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
     public void onJoin(TabPlayer player) {
         player.loadPropertyFromConfig(this,"join-title");
         String prop = player.getProperty("join-title").getCurrentRawValue();
-        if (prop.equals("")) return;
+        if (prop.isEmpty()) return;
         announceTitle(player,prop);
     }
 

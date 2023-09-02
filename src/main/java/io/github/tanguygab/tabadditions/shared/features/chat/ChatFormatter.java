@@ -140,7 +140,7 @@ public class ChatFormatter {
     }
     private String formatItems(TabPlayer sender, String message, boolean offhand) {
         String input = offhand ? itemOffHand : itemMainHand;
-        if (input.equals("") || !message.contains(input)) return message;
+        if (input.isEmpty() || !message.contains(input)) return message;
 
         ChatItem item = TABAdditions.getInstance().getPlatform().getItem(sender, offhand);
         if (item.getType().equals("AIR")) return message.replace(input,itemOutputAir);

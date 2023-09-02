@@ -124,13 +124,13 @@ public class SpigotPlatform extends Platform {
 	public void sendToDiscord(TabPlayer player, String msg, String channel, List<String> plugins) {
 		Player p = (Player) player.getPlayer();
 		if (plugins.contains("DiscordSRV") && isPluginEnabled("DiscordSRV")) sendDiscordSRV(p,msg,channel);
-		if (plugins.contains("EssentialsX") && isPluginEnabled("EssentialsDiscord") && !channel.equals("")) sendEssentialsX(p,msg);
+		if (plugins.contains("EssentialsX") && isPluginEnabled("EssentialsDiscord") && !channel.isEmpty()) sendEssentialsX(p,msg);
 	}
 	private void sendDiscordSRV(Player p, String msg, String channel) {
 		DiscordSRV discord = DiscordSRV.getPlugin();
 		String mainChannel = discord.getMainChatChannel();
 		String optionalChannel = discord.getOptionalChannel(channel);
-		discord.processChatMessage(p, msg, msg.equals("") || optionalChannel.equals(mainChannel) ? mainChannel : optionalChannel, false,null);
+		discord.processChatMessage(p, msg, msg.isEmpty() || optionalChannel.equals(mainChannel) ? mainChannel : optionalChannel, false,null);
 	}
 	private void sendEssentialsX(Player p, String msg) {
 		DiscordService api = plugin.getServer().getServicesManager().load(DiscordService.class);

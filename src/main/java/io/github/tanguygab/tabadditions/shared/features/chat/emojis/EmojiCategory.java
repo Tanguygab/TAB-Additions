@@ -6,12 +6,13 @@ import lombok.Getter;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import java.util.Map;
 
+@Getter
 @AllArgsConstructor
 public class EmojiCategory {
 
-    @Getter private final String name;
-    @Getter private final Map<String,String> emojis;
-    @Getter private final String output;
+    private final String name;
+    private final Map<String,String> emojis;
+    private final String output;
 
     public boolean canUse(TabPlayer p) {
         return p.hasPermission("tabadditions.chat.emoji.category."+name);

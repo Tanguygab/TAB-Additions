@@ -88,7 +88,7 @@ public class MsgManager extends ChatManager {
             sender.sendMessage(reply ? translation.noPlayerToReplyTo : translation.providePlayer,true);
             return;
         }
-        if (msg.equals("")) {
+        if (msg.isEmpty()) {
             sender.sendMessage(translation.pmEmpty, true);
             return;
         }

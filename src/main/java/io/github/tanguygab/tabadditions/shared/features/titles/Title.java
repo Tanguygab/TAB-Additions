@@ -3,9 +3,10 @@ package io.github.tanguygab.tabadditions.shared.features.titles;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
 public class Title {
 
-    @Getter private final String title;
-    @Getter private final String subtitle;
+    private final String title;
+    private final String subtitle;
 }

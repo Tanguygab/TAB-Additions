@@ -3,12 +3,13 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+@Getter
 @AllArgsConstructor
 public class ChatItem {
 
-    @Getter private final String type;
-    @Getter private final String name;
-    @Getter private final int amount;
-    @Getter private final String nbt;
+    private final String type;
+    private final String name;
+    private final int amount;
+    private final String nbt;
 
 }

@@ -32,7 +32,7 @@ public class MentionManager extends ChatManager {
 
     public boolean isMentioned(String msg, TabPlayer sender, TabPlayer viewer) {
         String input = plugin.parsePlaceholders(this.input,viewer);
-        if (input.equals("") || viewer == null) return false;
+        if (input.isEmpty() || viewer == null) return false;
         if (!sender.hasPermission("tabadditions.chat.bypass.togglemention") && hasCmdToggled(viewer)) return false;
         if (chat.isIgnored(sender,viewer)) return false;
         return msg.toLowerCase().contains(input.toLowerCase());

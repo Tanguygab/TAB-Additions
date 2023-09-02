@@ -66,7 +66,7 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
         Property prop = p.getProperty("appearance-condition");
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
-        if (cond.equals("")) return def;
+        if (cond.isEmpty()) return def;
         return Condition.getCondition(cond).isMet(p);
     }
 
