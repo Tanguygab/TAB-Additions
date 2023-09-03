@@ -22,6 +22,7 @@ public class MsgManager extends ChatManager {
 
     public MsgManager(Chat chat, String senderOutput, String viewerOutput, double cooldown, List<String> aliases, boolean msgSelf, boolean toggleCmd, boolean replyCmd, boolean saveLastSenderForReply) {
         super(chat,toggleCmd,"msg-off","togglemsg","chat-pm");
+        setToggleCmdMsgs(translation.pmOn,translation.pmOff);
         this.senderOutput = senderOutput;
         this.viewerOutput = viewerOutput;
         this.cooldown = cooldown;
@@ -80,7 +81,7 @@ public class MsgManager extends ChatManager {
             onMsgCommand(sender,player,msg,isReplyCmd(command,false));
             return true;
         }
-        return command.equals("/togglemsg") && plugin.toggleCmd(toggleCmd,sender,toggled,translation.pmOn,translation.pmOff);
+        return command.equals("/togglemsg") && toggleCmd(sender);
     }
 
     private void onMsgCommand(TabPlayer sender, String player, String msg, boolean reply) {

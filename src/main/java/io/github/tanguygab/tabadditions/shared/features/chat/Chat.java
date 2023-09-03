@@ -61,7 +61,8 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     public Map<UUID, LocalDateTime> cooldown = new HashMap<>();
 
     private final boolean toggleCmd;
-    private final List<UUID> toggled;
+    private List<UUID> toggled;
+    private PlayerPlaceholderImpl toggleChatPlaceholder;
 
     private final boolean ignoreCmd;
     private final Map<UUID,List<UUID>> ignored = new HashMap<>();
@@ -143,7 +144,11 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         cooldownTime = config.getDouble("cooldown",0);
 
         toggleCmd = config.getBoolean("/togglechat",true);
-        toggled = ChatUtils.registerToggleCmd(toggleCmd,"chat-off","togglechat","chat-status",p->hasChatToggled((TabPlayer) p) ? "Off" : "On");
+        if (toggleCmd) {
+            plugin.getPlatform().registerCommand("togglechat");
+            toggleChatPlaceholder = tab.getPlaceholderManager().registerPlayerPlaceholder("%chat-status%",-1,p->hasChatToggled((TabPlayer)p) ? "Off" : "On");
+            toggled = plugin.loadData("chat-off",true);
+        }
 
         ignoreCmd = config.getBoolean("/ignore",true);
         if (ignoreCmd) {
@@ -203,7 +208,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (cmd.equals("/socialspy")) return p.hasPermission("tabadditions.chat.socialspy") && socialSpyManager != null && socialSpyManager.onCommand(p,cmd);
 
         TranslationFile msgs = plugin.getTranslation();
-        if (cmd.equals("/togglechat")) return plugin.toggleCmd(toggleCmd,p,toggled,msgs.chatOn,msgs.chatOff);
+        if (cmd.equals("/togglechat")) return plugin.toggleCmd(toggleCmd,p,toggled,toggleChatPlaceholder,msgs.chatOn,msgs.chatOff,false);
         if (cmd.equals("/clearchat")) {
             if (!clearchatEnabled || !p.hasPermission("tabadditions.chat.clearchat")) return false;
 

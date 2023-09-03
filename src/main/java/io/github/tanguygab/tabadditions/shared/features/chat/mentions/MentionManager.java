@@ -22,6 +22,7 @@ public class MentionManager extends ChatManager {
 
     public MentionManager(Chat chat, String input, String output, String sound, boolean toggleCmd, boolean outputForEveryone, Map<String,Map<String,String>> customMentions) {
         super(chat,toggleCmd,"mentions-off","togglementions","chat-mentions");
+        setToggleCmdMsgs(translation.mentionOn,translation.mentionOff);
         this.input = input;
         this.output = output;
         this.sound = ChatUtils.getSound(sound);
@@ -72,8 +73,9 @@ public class MentionManager extends ChatManager {
         chat.kyori.player(player.getUniqueId()).playSound(sound);
     }
 
+    @Override
     public boolean onCommand(TabPlayer sender, String message) {
-        return plugin.toggleCmd(toggleCmd,sender,toggled,translation.mentionOn,translation.mentionOff);
+        return toggleCmd(sender);
     }
 
 }

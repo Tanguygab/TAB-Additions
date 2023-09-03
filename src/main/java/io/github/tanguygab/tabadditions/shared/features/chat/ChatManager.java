@@ -3,6 +3,7 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.List;
@@ -17,7 +18,11 @@ public abstract class ChatManager {
 
     private final String data;
     protected final boolean toggleCmd;
-    protected final List<UUID> toggled;
+    protected List<UUID> toggled;
+    private PlayerPlaceholderImpl placeholder;
+    private boolean invertPlaceholder = false;
+    private String toggledOn;
+    private String toggledOff;
 
     public ChatManager(Chat chat) {
         this(chat,false,null,null,null);
@@ -27,15 +32,29 @@ public abstract class ChatManager {
         this.chat = chat;
         this.toggleCmd = toggleCmd;
         this.data = data;
-        toggled = ChatUtils.registerToggleCmd(toggleCmd,data,cmd,placeholder,p->hasCmdToggled((TabPlayer)p) ? "Off" : "On");
+        if (!toggleCmd) return;
+        plugin.getPlatform().registerCommand(cmd);
+        this.placeholder = tab.getPlaceholderManager().registerPlayerPlaceholder("%"+placeholder+"%",-1,p->hasCmdToggled((TabPlayer)p) ? "Off" : "On");
+        toggled = plugin.loadData(data,true);
     }
 
     public void unload() {
         plugin.unloadData(data,toggled,toggleCmd);
     }
 
+    protected void setToggleCmdMsgs(String toggledOn, String toggledOff) {
+        this.toggledOn = toggledOn;
+        this.toggledOff = toggledOff;
+    }
+    protected void invertToggleCmdPlaceholder() {
+        invertPlaceholder = true;
+    }
     protected boolean hasCmdToggled(TabPlayer p) {
         return p != null && toggled.contains(p.getUniqueId());
+    }
+
+    public boolean toggleCmd(TabPlayer player) {
+        return plugin.toggleCmd(toggleCmd,player,toggled,placeholder,toggledOn,toggledOff,invertPlaceholder);
     }
 
     public abstract boolean onCommand(TabPlayer sender, String command);

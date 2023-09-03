@@ -13,6 +13,8 @@ public class SocialSpyManager extends ChatManager {
 
     public SocialSpyManager(Chat chat, boolean msgSpy, String msgOutput, boolean channelSpy, String channelOutput, boolean viewConditionSpy, String viewConditionOutput) {
         super(chat, true, "socialspy", "socialspy", "socialspy");
+        setToggleCmdMsgs(translation.socialSpyOff,translation.socialSpyOn);
+        invertToggleCmdPlaceholder();
         this.msgSpy = msgSpy;
         this.msgOutput = msgOutput;
         this.channelSpy = channelSpy;
@@ -54,6 +56,6 @@ public class SocialSpyManager extends ChatManager {
 
     @Override
     public boolean onCommand(TabPlayer sender, String command) {
-        return plugin.toggleCmd(true,sender,toggled,translation.socialSpyOff,translation.socialSpyOn);
+        return toggleCmd(sender);
     }
 }

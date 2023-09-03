@@ -24,6 +24,7 @@ public class EmojiManager extends ChatManager {
     @SuppressWarnings("unchecked")
     public EmojiManager(Chat chat, String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, Map<String,Map<String,Object>> emojis, boolean emojisCmdEnabled, boolean toggleCmd) {
         super(chat,toggleCmd,"emojis-off","toggleemojis","chat-emojis");
+        setToggleCmdMsgs(translation.emojisOn,translation.emojisOff);
         this.output = emojiOutput;
         this.untranslate = untranslateEmojis;
         autoCompleteEnabled = plugin.getPlatform().supportsChatSuggestions() && autoCompleteEmojis;
@@ -119,6 +120,7 @@ public class EmojiManager extends ChatManager {
             plugin.getPlatform().updateChatComplete(p, emojisAutoCompleteList.get(p),false);
     }
 
+    @Override
     public boolean onCommand(TabPlayer sender, String command) {
         if (command.startsWith("/emojis") && emojisCmdEnabled) {
             String cat = command.contains(" ") ? command.split(" ")[1] : "";
@@ -135,7 +137,7 @@ public class EmojiManager extends ChatManager {
             getEmojiCategory(sender,category);
             return true;
         }
-        return command.equals("/toggleemojis") && plugin.toggleCmd(toggleCmd,sender,toggled,translation.emojisOn,translation.emojisOff);
+        return command.equals("/toggleemojis") && toggleCmd(sender);
     }
 
     private void getEmojisCategories(TabPlayer sender) {

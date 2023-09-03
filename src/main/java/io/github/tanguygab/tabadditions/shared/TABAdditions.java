@@ -187,11 +187,15 @@ public class TABAdditions {
     }
 
     public boolean toggleCmd(boolean toggleCmd, TabPlayer player, List<UUID> toggled, String on, String off) {
+        return toggleCmd(toggleCmd,player,toggled,null,on,off,false);
+    }
+    public boolean toggleCmd(boolean toggleCmd, TabPlayer player, List<UUID> toggled, PlayerPlaceholderImpl placeholder, String on, String off, boolean invert) {
         if (!toggleCmd) return false;
-        if (toggled.contains(player.getUniqueId()))
-            toggled.remove(player.getUniqueId());
+        boolean contains = !toggled.contains(player.getUniqueId());
+        if (!contains) toggled.remove(player.getUniqueId());
         else toggled.add(player.getUniqueId());
-        player.sendMessage(toggled.contains(player.getUniqueId()) ? off : on,true);
+        if (placeholder != null) placeholder.updateValue(player,contains ? "Off" : "On");
+        player.sendMessage(contains != invert ? off : on,true);
         return true;
     }
 
