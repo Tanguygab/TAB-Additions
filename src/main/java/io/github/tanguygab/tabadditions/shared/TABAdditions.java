@@ -207,7 +207,7 @@ public class TABAdditions {
         if (modifier.getColor() != null) builder.append("#").append(modifier.getColor().getHexCode());
         builder.append(modifier.getMagicCodes());
         if (chat.getText() != null) builder.append(chat.getText());
-        chat.getExtra().forEach(builder::append);
+        chat.getExtra().forEach(extra->builder.append(toFlatText(extra)));
         return builder.toString();
     }
 
