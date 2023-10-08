@@ -67,7 +67,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         if (toggled.contains(player.getUniqueId())) return;
 
         text = plugin.parsePlaceholders(text,player);
-        plugin.getPlatform().sendActionbar(player, IChatBaseComponent.optimizedComponent(text).toFlatText());
+        plugin.getPlatform().sendActionbar(player, plugin.toFlatText(IChatBaseComponent.optimizedComponent(text)));
     }
 
     public ActionBarLine getActionBar(TabPlayer player) {

@@ -72,7 +72,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
     }
 
     private String parse(TabPlayer player, String text) {
-        return IChatBaseComponent.optimizedComponent(plugin.parsePlaceholders(text,player)).toFlatText();
+        return plugin.toFlatText(IChatBaseComponent.optimizedComponent(plugin.parsePlaceholders(text,player)));
     }
     public void announceTitle(TabPlayer player, String title) {
         if (toggled.contains(player.getUniqueId())) return;

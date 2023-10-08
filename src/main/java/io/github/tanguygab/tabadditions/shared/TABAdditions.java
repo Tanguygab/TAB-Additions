@@ -17,7 +17,9 @@ import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.chat.ChatModifier;
 import me.neznamy.tab.shared.chat.EnumChatFormat;
+import me.neznamy.tab.shared.chat.IChatBaseComponent;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile;
 import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
@@ -197,6 +199,16 @@ public class TABAdditions {
         if (placeholder != null) placeholder.updateValue(player,contains ? "Off" : "On");
         player.sendMessage(contains != invert ? off : on,true);
         return true;
+    }
+
+    public String toFlatText(IChatBaseComponent chat) {
+        ChatModifier modifier = chat.getModifier();
+        StringBuilder builder = new StringBuilder();
+        if (modifier.getColor() != null) builder.append("#").append(modifier.getColor().getHexCode());
+        builder.append(modifier.getMagicCodes());
+        if (chat.getText() != null) builder.append(chat.getText());
+        chat.getExtra().forEach(builder::append);
+        return builder.toString();
     }
 
 }
