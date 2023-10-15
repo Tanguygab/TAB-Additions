@@ -54,7 +54,9 @@ public class ChatUtils {
     public static String toMMColors(Object str) {
         if (str == null || str.equals("")) return "";
         String text = str.toString();
+        text = "§r"+text; // This prevents TAB from applying the MiniMessage format which yeeted everything MM related aside from colors
         text = RGBUtils.getInstance().applyFormats(text);
+        text = text.substring(2);
 
         text = text.replace("§","&");
         for (EnumChatFormat c : EnumChatFormat.values())
