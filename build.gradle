@@ -51,7 +51,7 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.20'
     annotationProcessor 'org.projectlombok:lombok:1.18.20'
 
-    compileOnly 'com.discordsrv:discordsrv:1.26.2'
+    compileOnly 'com.discordsrv:discordsrv:1.27.0-SNAPSHOT'
     compileOnly 'net.essentialsx:EssentialsXDiscord:2.19.4'
     compileOnly 'com.loohp:InteractiveChat:4.2.8.0'
     compileOnly 'com.github.DevLeoko:AdvancedBan:2.3.0'
