@@ -14,10 +14,7 @@ import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
-import me.neznamy.tab.shared.features.types.CommandListener;
-import me.neznamy.tab.shared.features.types.JoinListener;
-import me.neznamy.tab.shared.features.types.TabFeature;
-import me.neznamy.tab.shared.features.types.UnLoadable;
+import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
 import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
 import me.neznamy.tab.shared.platform.TabPlayer;
@@ -33,9 +30,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Chat extends TabFeature implements UnLoadable, JoinListener, CommandListener {
+public class Chat extends TabFeature implements UnLoadable, JoinListener, CommandListener, Refreshable {
 
     @Getter private final String featureName = "Chat";
+    @Getter private final String refreshDisplayName = "&aChat&r";
     private final TABAdditions plugin = TABAdditions.getInstance();
     private final TAB tab = TAB.getInstance();
     public final MiniMessage mm = MiniMessage.miniMessage();
@@ -172,7 +170,18 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         chatPlaceholderStay = config.getInt("chat-placeholder.stay",3000);
 
         bukkitBridgeChatEnabled = plugin.getPlatform().isProxy() && config.getBoolean("chat-from-bukkit-bridge",false);
+
+        for (TabPlayer player : tab.getOnlinePlayers()) loadProperties(player);
     }
+
+    private void loadProperties(TabPlayer player) {
+        player.loadPropertyFromConfig(this,"chatprefix");
+        player.loadPropertyFromConfig(this,"customchatname", player.getName());
+        player.loadPropertyFromConfig(this,"chatsuffix");
+    }
+
+    @Override
+    public void refresh(@NotNull TabPlayer player, boolean force) {}
 
     @Override
     public void unload() {
@@ -195,6 +204,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
 
     @Override
     public void onJoin(@NotNull TabPlayer player) {
+        loadProperties(player);
         if (emojiManager != null && emojiManager.isAutoCompleteEnabled() && !emojiManager.hasCmdToggled(player))
             emojiManager.loadAutoComplete(player);
     }
@@ -340,4 +350,5 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (!f.getChannel().equals(getFormat(viewer).getChannel())) return false;
         return f.isViewConditionMet(sender, viewer);
     }
+
 }
