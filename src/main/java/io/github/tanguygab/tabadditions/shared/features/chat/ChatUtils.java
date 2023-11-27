@@ -59,8 +59,11 @@ public class ChatUtils {
         text = text.substring(2);
 
         text = text.replace("§","&");
-        for (EnumChatFormat c : EnumChatFormat.values())
-            text = text.replace("&"+c.getCharacter(),"<"+c.toString().toLowerCase()+">");
+        for (EnumChatFormat c : EnumChatFormat.values()) {
+            String string = c.toString().toLowerCase();
+            if (string.equals("underline")) string+="d";
+            text = text.replace("&" + c.getCharacter(), "<" + string + ">");
+        }
         text = text.replace("<reset>","<bold:false><italic:false><underlined:false><strikethrough:false><obfuscated:false><white>");
 
         Matcher m = tabRGBPattern.matcher(text);
