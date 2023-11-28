@@ -64,6 +64,7 @@ public class ChatUtils {
             if (string.equals("underline")) string+="d";
             text = text.replace("&" + c.getCharacter(), "<" + string + ">");
         }
+        text = text.replace("&u","<rainbow>");
         text = text.replace("<reset>","<bold:false><italic:false><underlined:false><strikethrough:false><obfuscated:false><white>");
 
         Matcher m = tabRGBPattern.matcher(text);
