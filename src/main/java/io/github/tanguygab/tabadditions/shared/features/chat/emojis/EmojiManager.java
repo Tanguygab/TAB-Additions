@@ -57,7 +57,6 @@ public class EmojiManager extends ChatManager {
         if (hasCmdToggled(viewer) || hasCmdToggled(sender)) return msg;
 
         for (EmojiCategory category : emojiCategories.values()) {
-            if (!category.canUse(sender)) continue;
             Map<String, String> emojis = category.getEmojis();
             if (emojis == null || emojis.isEmpty()) continue;
 
