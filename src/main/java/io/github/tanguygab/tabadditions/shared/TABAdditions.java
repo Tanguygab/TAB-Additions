@@ -26,9 +26,9 @@ import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
 import me.neznamy.tab.shared.features.types.TabFeature;
 import me.neznamy.tab.shared.features.types.UnLoadable;
-import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
-import me.neznamy.tab.shared.placeholders.RelationalPlaceholderImpl;
-import me.neznamy.tab.shared.placeholders.ServerPlaceholderImpl;
+import me.neznamy.tab.shared.placeholders.types.PlayerPlaceholderImpl;
+import me.neznamy.tab.shared.placeholders.types.RelationalPlaceholderImpl;
+import me.neznamy.tab.shared.placeholders.types.ServerPlaceholderImpl;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
 import me.neznamy.tab.shared.placeholders.conditions.Condition;

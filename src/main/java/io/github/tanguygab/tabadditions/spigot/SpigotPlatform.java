@@ -5,7 +5,7 @@ import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.platforms.bukkit.nms.BukkitReflection;
 import net.essentialsx.api.v2.services.discord.DiscordService;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.md_5.bungee.api.ChatMessageType;
@@ -40,7 +40,7 @@ public class SpigotPlatform extends Platform {
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
 		kyori = BukkitAudiences.create(plugin);
-		chatSuggestions = TAB.getInstance().getServerVersion().getNetworkId() >= 762;
+		chatSuggestions = BukkitReflection.is1_19_3Plus();
 		try {
 			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
 		} catch (Exception ignored) {}
@@ -76,7 +76,7 @@ public class SpigotPlatform extends Platform {
 	public void registerCommand(String cmd, String... aliases) {
 		try {
 			Command command = new BukkitCommand(cmd,"","/"+cmd,List.of(aliases)) {
-				@Override public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, String[] args) {return true;}
+				@Override public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {return true;}
 			};
 			((SimpleCommandMap)getCommandMap.invoke(plugin.getServer())).register(cmd,"chat",command);
 		} catch (Exception e) {e.printStackTrace();}

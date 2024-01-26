@@ -6,7 +6,7 @@ import java.util.function.Function;
 
 import lombok.Getter;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.placeholders.TabPlaceholder;
+import me.neznamy.tab.shared.placeholders.types.TabPlaceholder;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
 
@@ -63,15 +63,13 @@ public class AdvancedConditions {
      */
     public AdvancedConditions(String name, Map<String,String> conditions) {
         this.name = name;
-        if (conditions == null) {
-            TAB.getInstance().getMisconfigurationHelper().conditionHasNoConditions(name);
-            return;
-        }
+        if (conditions == null) return;
+
         PlaceholderManagerImpl pm = TAB.getInstance().getPlaceholderManager();
         conditions.forEach((line,text)->{
             BiFunction<TabPlayer, TabPlayer, Boolean> condition = compile(line);
             if (condition == null && !line.equals("else")) {
-                TAB.getInstance().getMisconfigurationHelper().invalidConditionPattern("[TAB-Additions]-"+name, line);
+                TAB.getInstance().getConfigHelper().startup().invalidConditionPattern("[TAB-Additions]-"+name, line);
                 return;
             }
             subConditions.put(condition,text);

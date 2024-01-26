@@ -3,7 +3,7 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.TranslationFile;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.placeholders.PlayerPlaceholderImpl;
+import me.neznamy.tab.shared.placeholders.types.PlayerPlaceholderImpl;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.List;
