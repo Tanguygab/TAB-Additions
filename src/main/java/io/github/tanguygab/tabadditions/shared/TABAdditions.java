@@ -75,8 +75,8 @@ public class TABAdditions {
     public void reload() {
         platform.reload();
         loadFiles();
-        loadFeatures();
         loadPlaceholders();
+        loadFeatures();
     }
 
     public void disable() {
