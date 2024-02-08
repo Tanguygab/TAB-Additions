@@ -60,7 +60,7 @@ public class ChatUtils {
 
         text = text.replace("§","&");
         for (EnumChatFormat c : EnumChatFormat.values()) {
-            String string = c.toString().toLowerCase();
+            String string = c.name().toLowerCase();
             if (string.equals("underline")) string+="d";
             text = text.replace("&" + c.getCharacter(), "<" + string + ">");
         }
