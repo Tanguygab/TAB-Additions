@@ -18,12 +18,14 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
     private final TAB tab;
     private final Plugin plugin;
     private final boolean def;
-
+    private final boolean pwp;
 
     public ConditionalAppearance(Object plugin, boolean def) {
         tab = TAB.getInstance();
         this.plugin = (Plugin) plugin;
         this.def = def;
+        pwp = tab.getFeatureManager().isFeatureEnabled("Per world PlayerList");
+        if (pwp) addUsedPlaceholder("%world%");
         for (TabPlayer p : tab.getOnlinePlayers()) onJoin(p);
     }
 
@@ -55,6 +57,7 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
 
     public boolean getCondition(TabPlayer player, TabPlayer player2) {
         if (player == null || player2 == null) return def;
+        if (pwp && !player.getWorld().equals(player2.getWorld())) return def;
         Property prop = player.getProperty("appearance-condition");
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
