@@ -1,10 +1,10 @@
 package io.github.tanguygab.tabadditions.shared.features;
 
+import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions;
 import lombok.Getter;
 import me.neznamy.tab.shared.Property;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.types.*;
-import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -24,32 +24,25 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
         tab = TAB.getInstance();
         this.plugin = (Plugin) plugin;
         this.def = def;
-        for (TabPlayer p : tab.getOnlinePlayers()) {
-            p.loadPropertyFromConfig(this,"appearance-condition");
-            refresh(p,true);
-        }
+        for (TabPlayer p : tab.getOnlinePlayers()) onJoin(p);
     }
 
     @Override
     public void onJoin(TabPlayer p) {
         p.loadPropertyFromConfig(this,"appearance-condition");
-        for (Player all : Bukkit.getOnlinePlayers()) {
-            refresh(p(p),all);
-            refresh(all,p(p));
-        }
+        refresh(p,true);
     }
 
     @Override
     public void refresh(@NotNull TabPlayer p, boolean force) {
-        for (Player all : Bukkit.getOnlinePlayers()) {
-            refresh(p(p),all);
-        }
+        for (TabPlayer all : tab.getOnlinePlayers())
+            refresh(p,all);
     }
 
-    private void refresh(Player p, Player all) {
+    private void refresh(TabPlayer p, TabPlayer all) {
         if (p == all) return;
-        if (getCondition(p)) sync(()->show(p,all));
-        else sync(()->hide(p,all));
+        if (getCondition(p,all)) sync(()->show(p(p),p(all)));
+        else sync(()->hide(p(p),p(all)));
     }
 
     private void sync(Runnable run) {
@@ -60,14 +53,13 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
         return (Player) p.getPlayer();
     }
 
-    public boolean getCondition(Player player) {
-        TabPlayer p = tab.getPlayer(player.getUniqueId());
-        if (p == null) return def;
-        Property prop = p.getProperty("appearance-condition");
+    public boolean getCondition(TabPlayer player, TabPlayer player2) {
+        if (player == null || player2 == null) return def;
+        Property prop = player.getProperty("appearance-condition");
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
         if (cond.isEmpty()) return def;
-        return Condition.getCondition(cond).isMet(p);
+        return def != AdvancedConditions.getCondition(cond).isMet(player,player2);
     }
 
     @Override

@@ -101,16 +101,12 @@ public class TABAdditions {
         if (config.getBoolean("titles.enabled",false)) registerFeature(new TitleManager());
         if (chatConfig.getBoolean("enabled",false)) registerFeature(new Chat(chatConfig));
         if (config.getBoolean("conditional-nametags.enabled",false) && tab.getNameTagManager() != null)
-            registerFeature(new ConditionalNametags(config.getBoolean("conditional-nametags.show-by-default",true),tab.getNameTagManager()));
-        if (config.getBoolean("conditional-appearance.enabled",false))
+            registerFeature(new ConditionalNametags(
+                    config.getBoolean("conditional-nametags.show-by-default",true),
+                    config.getBoolean("conditional-nametags.relational",false)));
+        if (!platform.isProxy() && config.getBoolean("conditional-appearance.enabled",false))
             registerFeature(new ConditionalAppearance(plugin,config.getBoolean("conditional-appearance.show-by-default",true)));
         if (tab.getNameTagManager() != null) tab.getCommand().registerSubCommand(new NametagCmd(tab.getNameTagManager()));
-
-        if (platform.isProxy()) return;
-        int nametagInRange = config.getInt("nametag-in-range", 0);
-        if (!features.contains("Conditional Nametags") && nametagInRange != 0 && tab.getNameTagManager() != null) registerFeature(new NametagInRange(nametagInRange,tab.getNameTagManager()));
-        int tablistInRange = config.getInt("tabname-in-range", 0);
-        if (!features.contains("Conditional Appearance") && tablistInRange != 0) registerFeature(new TabnameInRange(plugin,tablistInRange));
     }
 
     private void loadPlaceholders() {
