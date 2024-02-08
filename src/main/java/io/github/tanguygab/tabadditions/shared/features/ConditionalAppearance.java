@@ -24,7 +24,7 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
         tab = TAB.getInstance();
         this.plugin = (Plugin) plugin;
         this.def = def;
-        pwp = tab.getFeatureManager().isFeatureEnabled("Per world PlayerList");
+        pwp = tab.getFeatureManager().isFeatureEnabled("PerWorldPlayerList");
         if (pwp) addUsedPlaceholder("%world%");
         for (TabPlayer p : tab.getOnlinePlayers()) onJoin(p);
     }
