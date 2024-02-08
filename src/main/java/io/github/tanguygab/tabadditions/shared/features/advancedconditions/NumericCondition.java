@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.shared.features.advancedconditions;
 
 import me.neznamy.tab.shared.platform.TabPlayer;
-import me.neznamy.tab.shared.TAB;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiFunction;
@@ -55,7 +54,7 @@ public class NumericCondition extends SimpleCondition {
         if (leftSideStatic) return leftSideValue;
         String value = parseLeftSide(viewer,target);
         if (value.contains(",")) value = value.replace(",", "");
-        return parseDouble(leftSide,value,0,viewer);
+        return parseDouble(value);
     }
 
     /**
@@ -68,7 +67,7 @@ public class NumericCondition extends SimpleCondition {
         if (rightSideStatic) return rightSideValue;
         String value = parseRightSide(viewer,target);
         if (value.contains(",")) value = value.replace(",", "");
-        return parseDouble(rightSide,value,0,viewer);
+        return parseDouble(value);
     }
 
     @Override
@@ -80,22 +79,12 @@ public class NumericCondition extends SimpleCondition {
      * Parses double in given string and returns it.
      * Returns second argument if string is not valid and prints a console warn.
      *
-     * @param   placeholder
-     *          Raw placeholder, used in error message
      * @param   output
      *          string to parse
-     * @param   defaultValue
-     *          value to return if string is not valid
-     * @param   player
-     *          Player name used in error message
      * @return  parsed double or {@code defaultValue} if input is invalid
      */
-    public double parseDouble(@NotNull String placeholder, @NotNull String output, double defaultValue, TabPlayer player) {
-        try {
-            return Double.parseDouble(output);
-        } catch (NumberFormatException e) {
-            TAB.getInstance().getConfigHelper().runtime().invalidNumberForCondition(placeholder, output, player);
-            return defaultValue;
-        }
+    public double parseDouble(@NotNull String output) {
+        try {return Double.parseDouble(output);}
+        catch (NumberFormatException e) {return 0;}
     }
 }
