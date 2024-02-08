@@ -3,7 +3,7 @@ package io.github.tanguygab.tabadditions.shared.features.actionbar;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.ActionBarCmd;
 import lombok.Getter;
-import me.neznamy.tab.shared.chat.IChatBaseComponent;
+import me.neznamy.tab.shared.chat.TabComponent;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.TAB;
@@ -67,7 +67,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         if (toggled.contains(player.getUniqueId())) return;
 
         text = plugin.parsePlaceholders(text,player);
-        plugin.getPlatform().sendActionbar(player, plugin.toFlatText(IChatBaseComponent.optimizedComponent(text)));
+        plugin.getPlatform().sendActionbar(player, plugin.toFlatText(TabComponent.optimized(text)));
     }
 
     public ActionBarLine getActionBar(TabPlayer player) {

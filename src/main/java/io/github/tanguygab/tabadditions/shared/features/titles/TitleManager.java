@@ -4,7 +4,7 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.TitleCmd;
 import lombok.Getter;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.chat.IChatBaseComponent;
+import me.neznamy.tab.shared.chat.TabComponent;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.platform.TabPlayer;
@@ -72,7 +72,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
     }
 
     private String parse(TabPlayer player, String text) {
-        return plugin.toFlatText(IChatBaseComponent.optimizedComponent(plugin.parsePlaceholders(text,player)));
+        return plugin.toFlatText(TabComponent.optimized(plugin.parsePlaceholders(text,player)));
     }
     public void announceTitle(TabPlayer player, String title) {
         if (toggled.contains(player.getUniqueId())) return;
