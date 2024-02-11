@@ -37,14 +37,16 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
 
     @Override
     public void refresh(@NotNull TabPlayer p, boolean force) {
-        for (TabPlayer all : tab.getOnlinePlayers())
-            refresh(p,all);
+        for (TabPlayer all : tab.getOnlinePlayers()) {
+            if (p == all) return;
+            refresh(p, all);
+            refresh(all, p);
+        }
     }
 
-    private void refresh(TabPlayer p, TabPlayer all) {
-        if (p == all) return;
-        if (getCondition(p,all)) sync(()->show(p(p),p(all)));
-        else sync(()->hide(p(p),p(all)));
+    private void refresh(TabPlayer target, TabPlayer viewer) {
+        if (getCondition(target,viewer)) sync(()->show(p(viewer),p(target)));
+        else sync(()->hide(p(viewer),p(target)));
     }
 
     private void sync(Runnable run) {
@@ -55,14 +57,14 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
         return (Player) p.getPlayer();
     }
 
-    public boolean getCondition(TabPlayer player, TabPlayer player2) {
-        if (player == null || player2 == null) return def;
-        if (pwp && !player.getWorld().equals(player2.getWorld())) return def;
-        Property prop = player.getProperty("appearance-condition");
+    public boolean getCondition(TabPlayer target, TabPlayer viewer) {
+        if (target == null || viewer == null) return def;
+        if (pwp && !target.getWorld().equals(viewer.getWorld())) return def;
+        Property prop = target.getProperty("appearance-condition");
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
         if (cond.isEmpty()) return def;
-        return def != AdvancedConditions.getCondition(cond).isMet(player,player2);
+        return def != AdvancedConditions.getCondition(cond).isMet(viewer,target);
     }
 
     @Override
@@ -75,14 +77,14 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
     }
 
     @SuppressWarnings("deprecation")
-    private void show(Player p, Player target) {
-        try {p.showPlayer(plugin, target);}
-        catch (NoSuchMethodError e) {p.showPlayer(target);}
+    private void show(Player viewer, Player target) {
+        try {viewer.showPlayer(plugin, target);}
+        catch (NoSuchMethodError e) {viewer.showPlayer(target);}
     }
     @SuppressWarnings("deprecation")
-    private void hide(Player p, Player target) {
-        try {p.hidePlayer(plugin, target);}
-        catch (NoSuchMethodError e) {p.hidePlayer(target);}
+    private void hide(Player viewer, Player target) {
+        try {viewer.hidePlayer(plugin, target);}
+        catch (NoSuchMethodError e) {viewer.hidePlayer(target);}
     }
 
 }

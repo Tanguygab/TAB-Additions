@@ -23,7 +23,7 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
         this.ntm = tab.getNameTagManager();
         this.def = def;
         this.relational = relational;
-        for (TabPlayer p : tab.getOnlinePlayers()) onJoin(p);
+        for (TabPlayer all : tab.getOnlinePlayers()) onJoin(all);
     }
 
     @Override
@@ -37,22 +37,32 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
         if (relational) {
             for (TabPlayer all : tab.getOnlinePlayers()) {
                 if (p == all) continue;
-                if (getCondition(p,all)) ntm.showNameTag(p,all);
-                else ntm.hideNameTag(p,all);
+                refresh(p, all);
+                refresh(all, p);
             }
             return;
         }
-        if (getCondition(p,p)) ntm.showNameTag(p);
-        else ntm.hideNameTag(p);
+        refresh(p,p);
     }
 
-    public boolean getCondition(TabPlayer player, TabPlayer player2) {
-        if (player == null || player2 == null) return def;
-        Property prop = player.getProperty("nametag-condition");
+    private void refresh(TabPlayer target, TabPlayer viewer) {
+        if (target != viewer) {
+            if (getCondition(target,viewer)) ntm.showNameTag(target,viewer);
+            else ntm.hideNameTag(target,viewer);
+            return;
+        }
+        if (getCondition(target,target)) ntm.showNameTag(target);
+        else ntm.hideNameTag(target);
+    }
+
+
+    public boolean getCondition(TabPlayer target, TabPlayer viewer) {
+        if (target == null || viewer == null) return def;
+        Property prop = target.getProperty("nametag-condition");
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
         if (cond.isEmpty()) return def;
-        return def != AdvancedConditions.getCondition(cond).isMet(player,player2);
+        return def != AdvancedConditions.getCondition(cond).isMet(viewer,target);
     }
 
     @Override
