@@ -1,6 +1,8 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
+import me.neznamy.tab.shared.chat.EnumChatFormat;
+import me.neznamy.tab.shared.chat.rgb.RGBUtils;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
@@ -68,6 +70,15 @@ public class ChatFormatter {
     }
 
     public String process(String message, TabPlayer sender) {
+        for (EnumChatFormat color : EnumChatFormat.values())
+            if (!sender.hasPermission("tabadditions.chat.color.&"+color.getCharacter()))
+                message = message.replace("&" + color.getCharacter(),"");
+        message = RGBUtils.getInstance().applyFormats(message);
+        if (!sender.hasPermission("tabadditions.chat.color.rgb"))
+            message = ChatUtils.tabRGBPattern.matcher(message).replaceAll("");
+
+
+
         if (filterEnabled && !sender.hasPermission("tabadditions.chat.bypass.filter")) message = filter(message);
         if (embedURLs) message = embedURLs(message);
         if (itemEnabled && (!itemPermission || sender.hasPermission("tabadditions.chat.item"))) {

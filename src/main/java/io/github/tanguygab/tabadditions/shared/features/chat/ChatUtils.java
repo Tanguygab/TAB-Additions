@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 public class ChatUtils {
 
-    private static final Pattern tabRGBPattern = Pattern.compile("#[0-9a-fA-F]{6}");
+    protected static final Pattern tabRGBPattern = Pattern.compile("#[0-9a-fA-F]{6}");
 
     public static int countMatches(String str, String sub) {
         if (str == null || str.isEmpty() || sub == null || sub.isEmpty()) return 0;
