@@ -25,6 +25,7 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -34,6 +35,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
 
     @Getter private final String featureName = "Chat";
     @Getter private final String refreshDisplayName = "&aChat&r";
+    @Getter private final String command = "/togglechat";
     private final TABAdditions plugin = TABAdditions.getInstance();
     private final TAB tab = TAB.getInstance();
     public final MiniMessage mm = MiniMessage.miniMessage();
@@ -172,6 +174,15 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         bukkitBridgeChatEnabled = plugin.getPlatform().isProxy() && config.getBoolean("chat-from-bukkit-bridge",false);
 
         for (TabPlayer player : tab.getOnlinePlayers()) loadProperties(player);
+
+        try {
+            Field cmds = tab.getFeatureManager().getClass().getDeclaredField("listeningCommands");
+            cmds.setAccessible(true);
+            ((List<String>) cmds.get(tab.getFeatureManager())).addAll(List.of("/ignore", "/clearchat",
+                    "/togglemsg", "/socialspy", "/togglementions", "/toggleemojis", "/emojis"));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     private void loadProperties(TabPlayer player) {
@@ -218,7 +229,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (cmd.equals("/socialspy")) return p.hasPermission("tabadditions.chat.socialspy") && socialSpyManager != null && socialSpyManager.onCommand(p,cmd);
 
         TranslationFile msgs = plugin.getTranslation();
-        if (cmd.equals("/togglechat")) return plugin.toggleCmd(toggleCmd,p,toggled,toggleChatPlaceholder,msgs.chatOn,msgs.chatOff,false);
+        if (cmd.equals(command)) return plugin.toggleCmd(toggleCmd,p,toggled,toggleChatPlaceholder,msgs.chatOn,msgs.chatOff,false);
         if (cmd.equals("/clearchat")) {
             if (!clearchatEnabled || !p.hasPermission("tabadditions.chat.clearchat")) return false;
 

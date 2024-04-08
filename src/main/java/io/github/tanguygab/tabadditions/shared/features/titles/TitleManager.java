@@ -16,6 +16,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
 
     @Getter private final String featureName = "Title";
     @Getter private final String refreshDisplayName = "&aTitle&r";
+    @Getter private final String command = "/toggletitle";
 
     private final TABAdditions plugin;
     @Getter private final Map<String, Title> titles = new HashMap<>();
@@ -94,7 +95,7 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
 
     @Override
     public boolean onCommand(@NotNull TabPlayer player, String msg) {
-        if (msg.equals("/toggletitle") && plugin.toggleCmd(toggleCmd,player,toggled,plugin.getTranslation().titleOn,plugin.getTranslation().titleOff)) {
+        if (msg.equals(command) && plugin.toggleCmd(toggleCmd,player,toggled,plugin.getTranslation().titleOn,plugin.getTranslation().titleOff)) {
             refresh(player,true);
             return true;
         }

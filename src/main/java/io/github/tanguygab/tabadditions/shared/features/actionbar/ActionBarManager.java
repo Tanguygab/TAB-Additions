@@ -17,6 +17,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
 
     @Getter private final String featureName = "ActionBar";
     @Getter private final String refreshDisplayName = "&aActionBar&r";
+    @Getter private final String command = "/toggleactionbar";
 
     private final TABAdditions plugin;
     @Getter private final Map<String, ActionBarLine> actionBars = new LinkedHashMap<>();
@@ -96,7 +97,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
 
     @Override
     public boolean onCommand(@NotNull TabPlayer player, String msg) {
-        if (msg.equals("/toggleactionbar") && plugin.toggleCmd(toggleCmd,player,toggled,plugin.getTranslation().actionBarOn,plugin.getTranslation().actionBarOff)) {
+        if (msg.equals(command) && plugin.toggleCmd(toggleCmd,player,toggled,plugin.getTranslation().actionBarOn,plugin.getTranslation().actionBarOff)) {
             refresh(player,true);
             return true;
         }
