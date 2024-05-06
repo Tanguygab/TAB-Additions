@@ -25,7 +25,6 @@ import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -174,15 +173,6 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         bukkitBridgeChatEnabled = plugin.getPlatform().isProxy() && config.getBoolean("chat-from-bukkit-bridge",false);
 
         for (TabPlayer player : tab.getOnlinePlayers()) loadProperties(player);
-
-        try {
-            Field cmds = tab.getFeatureManager().getClass().getDeclaredField("listeningCommands");
-            cmds.setAccessible(true);
-            ((List<String>) cmds.get(tab.getFeatureManager())).addAll(List.of("/ignore", "/clearchat",
-                    "/togglemsg", "/socialspy", "/togglementions", "/toggleemojis", "/emojis"));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     private void loadProperties(TabPlayer player) {
@@ -221,7 +211,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     }
 
     @Override
-    public boolean onCommand(@NotNull TabPlayer p, String cmd) {
+    public boolean onCommand(@NotNull TabPlayer p, @NotNull String cmd) {
         if (cmd.startsWith("/emojis") || cmd.equals("/toggleemojis")) return emojiManager != null && emojiManager.onCommand(p,cmd);
         if (cmd.equals("/togglementions")) return mentionManager != null && mentionManager.onCommand(p,cmd);
         if (msgManager != null && (cmd.equals("/togglemsg") || msgManager.isReplyCmd(cmd,false) || msgManager.isMsgCmd(cmd,false)))
@@ -245,12 +235,17 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
                 p.sendMessage(msgs.providePlayer, true);
                 return true;
             }
-            String player = cmd.substring(cmd.indexOf(8)).toLowerCase();
+            String player = cmd.substring(8).toLowerCase();
             if (p.getName().equalsIgnoreCase(player)) {
                 p.sendMessage(msgs.cantIgnoreSelf,true);
                 return true;
             }
-            UUID playerUUID = plugin.getPlayer(player).getUniqueId();
+            TabPlayer tabPlayer = plugin.getPlayer(player);
+            if (tabPlayer == null) {
+                p.sendMessage(msgs.getPlayerNotFound(player),true);
+                return true;
+            }
+            UUID playerUUID = tabPlayer.getUniqueId();
             List<UUID> ignored = this.ignored.computeIfAbsent(p.getUniqueId(), uuid->new ArrayList<>());
             if (ignored.contains(playerUUID))
                 ignored.remove(playerUUID);

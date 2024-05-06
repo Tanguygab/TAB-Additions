@@ -19,15 +19,20 @@ public class BungeeListener implements Listener {
 
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onChat(ChatEvent e) {
-        if (e.isCommand() || e.isCancelled()) return;
+        if (e.isCancelled()) return;
         Chat chat = tab.getFeatureManager().getFeature("Chat");
-        if (chat == null || chat.isBukkitBridgeChatEnabled()) return;
+        if (chat == null) return;
+        TabPlayer player = getPlayer(e.getSender());
+        if (e.isCommand() && chat.onCommand(player,e.getMessage())) {
+            e.setCancelled(true);
+            return;
+        }
+        if (chat.isBukkitBridgeChatEnabled()) return;
         e.setCancelled(true);
-        chat.onChat(getPlayer(e.getSender()),e.getMessage());
+        chat.onChat(player,e.getMessage());
     }
 
     @EventHandler
-    @SuppressWarnings("UnstableApiUsage")
     public void onMessageReceived(PluginMessageEvent e) {
         if (!e.getTag().equalsIgnoreCase("tabadditions:channel")) return;
         ByteArrayDataInput in = ByteStreams.newDataInput(e.getData());

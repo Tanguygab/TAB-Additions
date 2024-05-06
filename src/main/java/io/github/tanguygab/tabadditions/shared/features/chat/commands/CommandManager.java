@@ -35,6 +35,7 @@ public class CommandManager extends ChatManager {
                     ChatUtils.componentsToMM(display),
                     save,
                     prefix));
+            plugin.getPlatform().registerCommand(name);
         });
 
         Map<String,String> data = plugin.getPlayerData().getConfigurationSection("chat-commands-formats");
