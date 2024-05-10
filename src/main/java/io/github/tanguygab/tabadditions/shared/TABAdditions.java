@@ -124,13 +124,11 @@ public class TABAdditions {
         PlaceholderManagerImpl pm = tab.getPlaceholderManager();
         if (identifier.startsWith("%rel_viewer:")) {
             Placeholder placeholder = pm.getPlaceholder("%" + identifier.substring(12));
-            if (placeholder instanceof RelationalPlaceholderImpl) {
-                RelationalPlaceholderImpl rel = (RelationalPlaceholderImpl) placeholder;
+            if (placeholder instanceof RelationalPlaceholderImpl rel) {
                 e.setRelationalPlaceholder((viewer, target) -> rel.getLastValue((TabPlayer) target, (TabPlayer) viewer));
                 return;
             }
-            if (placeholder instanceof PlayerPlaceholderImpl) {
-                PlayerPlaceholderImpl player = (PlayerPlaceholderImpl) placeholder;
+            if (placeholder instanceof PlayerPlaceholderImpl player) {
                 e.setRelationalPlaceholder((viewer, target) -> player.getLastValue((TabPlayer) viewer));
             }
             return;

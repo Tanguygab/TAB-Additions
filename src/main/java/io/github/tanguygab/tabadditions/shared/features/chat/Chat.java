@@ -11,10 +11,11 @@ import io.github.tanguygab.tabadditions.shared.features.chat.mentions.MentionMan
 import lombok.Getter;
 import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
-import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
+import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
 import me.neznamy.tab.shared.features.types.*;
+import me.neznamy.tab.shared.placeholders.expansion.TabExpansion;
 import me.neznamy.tab.shared.placeholders.types.PlayerPlaceholderImpl;
 import me.neznamy.tab.shared.placeholders.types.RelationalPlaceholderImpl;
 import me.neznamy.tab.shared.platform.TabPlayer;
@@ -30,11 +31,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Chat extends TabFeature implements UnLoadable, JoinListener, CommandListener, Refreshable {
+public class Chat extends TabFeature implements UnLoadable, JoinListener, Refreshable {
 
     @Getter private final String featureName = "Chat";
     @Getter private final String refreshDisplayName = "&aChat&r";
-    @Getter private final String command = "/togglechat";
     private final TABAdditions plugin = TABAdditions.getInstance();
     private final TAB tab = TAB.getInstance();
     public final MiniMessage mm = MiniMessage.miniMessage();
@@ -62,6 +62,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
     private final boolean toggleCmd;
     private List<UUID> toggled;
     private PlayerPlaceholderImpl toggleChatPlaceholder;
+    public final List<PlayerPlaceholderImpl> placeholders = new ArrayList<>();
 
     private final boolean ignoreCmd;
     private final Map<UUID,List<UUID>> ignored = new HashMap<>();
@@ -95,8 +96,8 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
                     channel == null ? "" : channel,
                     ChatUtils.componentsToMM(display)));
         });
-        PlaceholderManager pm = tab.getPlaceholderManager();
-        pm.registerPlayerPlaceholder("%chat-format%",1000,p->getFormat((TabPlayer) p).getDisplayName());
+        PlaceholderManagerImpl pm = tab.getPlaceholderManager();
+        placeholders.add(pm.registerPlayerPlaceholder("%chat-format%",1000,p->getFormat((TabPlayer) p).getDisplayName()));
 
         emojiManager = config.getBoolean("emojis.enabled",false)
                 ? new EmojiManager(this,
@@ -145,7 +146,8 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         toggleCmd = config.getBoolean("/togglechat",true);
         if (toggleCmd) {
             plugin.getPlatform().registerCommand("togglechat");
-            toggleChatPlaceholder = tab.getPlaceholderManager().registerPlayerPlaceholder("%chat-status%",-1,p->hasChatToggled((TabPlayer)p) ? "Off" : "On");
+            toggleChatPlaceholder = pm.registerPlayerPlaceholder("%chat-status%",-1,p->hasChatToggled((TabPlayer)p) ? "Off" : "On");
+            placeholders.add(toggleChatPlaceholder);
             toggled = plugin.loadData("chat-off",true);
         }
 
@@ -166,8 +168,8 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         chatPlaceholderFormat = config.getString("chat-placeholder.format","%msg%");
         chatPlaceholderRelational = config.getBoolean("chat-placeholder.relational",false);
         if (chatPlaceholderRelational)
-            relChatPlaceholder = tab.getPlaceholderManager().registerRelationalPlaceholder("%rel_chat%",-1,(v,t)->"");
-        else chatPlaceholder = tab.getPlaceholderManager().registerPlayerPlaceholder("%chat%",-1,p->"");
+            relChatPlaceholder = pm.registerRelationalPlaceholder("%rel_chat%",-1,(v,t)->"");
+        else placeholders.add(chatPlaceholder = pm.registerPlayerPlaceholder("%chat%",-1,p->""));
         chatPlaceholderStay = config.getInt("chat-placeholder.stay",3000);
 
         bukkitBridgeChatEnabled = plugin.getPlatform().isProxy() && config.getBoolean("chat-from-bukkit-bridge",false);
@@ -179,6 +181,9 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         player.loadPropertyFromConfig(this,"chatprefix");
         player.loadPropertyFromConfig(this,"customchatname", player.getName());
         player.loadPropertyFromConfig(this,"chatsuffix");
+        TabExpansion exp = tab.getPlaceholderManager().getTabExpansion();
+        placeholders.forEach(placeholder -> exp.setPlaceholderValue(player,placeholder.getIdentifier(), placeholder.getLastValue(player)));
+
     }
 
     @Override
@@ -210,7 +215,6 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
             emojiManager.loadAutoComplete(player);
     }
 
-    @Override
     public boolean onCommand(@NotNull TabPlayer p, @NotNull String cmd) {
         if (cmd.startsWith("/emojis") || cmd.equals("/toggleemojis")) return emojiManager != null && emojiManager.onCommand(p,cmd);
         if (cmd.equals("/togglementions")) return mentionManager != null && mentionManager.onCommand(p,cmd);
@@ -219,7 +223,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Comman
         if (cmd.equals("/socialspy")) return p.hasPermission("tabadditions.chat.socialspy") && socialSpyManager != null && socialSpyManager.onCommand(p,cmd);
 
         TranslationFile msgs = plugin.getTranslation();
-        if (cmd.equals(command)) return plugin.toggleCmd(toggleCmd,p,toggled,toggleChatPlaceholder,msgs.chatOn,msgs.chatOff,false);
+        if (cmd.equals("/togglechat")) return plugin.toggleCmd(toggleCmd,p,toggled,toggleChatPlaceholder,msgs.chatOn,msgs.chatOff,false);
         if (cmd.equals("/clearchat")) {
             if (!clearchatEnabled || !p.hasPermission("tabadditions.chat.clearchat")) return false;
 

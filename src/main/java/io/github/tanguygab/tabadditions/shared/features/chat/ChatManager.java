@@ -35,6 +35,7 @@ public abstract class ChatManager {
         if (!toggleCmd) return;
         plugin.getPlatform().registerCommand(cmd);
         this.placeholder = tab.getPlaceholderManager().registerPlayerPlaceholder("%"+placeholder+"%",-1,p->hasCmdToggled((TabPlayer)p) ? "Off" : "On");
+        chat.placeholders.add(this.placeholder);
         toggled = plugin.loadData(data,true);
     }
 

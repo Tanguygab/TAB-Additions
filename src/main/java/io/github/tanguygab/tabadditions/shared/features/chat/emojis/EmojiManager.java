@@ -42,9 +42,8 @@ public class EmojiManager extends ChatManager {
                 if (!hasCmdToggled(p))
                     loadAutoComplete(p);
 
-        PlaceholderManager pm = tab.getPlaceholderManager();
-        pm.registerServerPlaceholder("%chat-emoji-total%",-1, ()->String.valueOf(totalEmojiCount));
-        pm.registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->String.valueOf(ownedEmojis((TabPlayer) p)));
+        tab.getPlaceholderManager().registerServerPlaceholder("%chat-emoji-total%",-1, ()->String.valueOf(totalEmojiCount));
+        chat.placeholders.add(tab.getPlaceholderManager().registerPlayerPlaceholder("%chat-emoji-owned%",5000,p->String.valueOf(ownedEmojis((TabPlayer) p))));
     }
 
     @Override
