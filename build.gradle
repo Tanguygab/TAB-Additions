@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'io.github.tanguygab'
-version = '2.0.11'
+version = '2.0.12'
 
 compileJava.options.encoding = 'UTF-8'
 

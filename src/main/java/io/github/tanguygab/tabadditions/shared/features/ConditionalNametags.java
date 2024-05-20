@@ -34,9 +34,10 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
 
     @Override
     public void refresh(@NotNull TabPlayer p, boolean force) {
+        if (!p.isLoaded()) return;
         if (relational) {
             for (TabPlayer all : tab.getOnlinePlayers()) {
-                if (p == all) continue;
+                if (p == all || !all.isLoaded()) continue;
                 refresh(p, all);
                 refresh(all, p);
             }
@@ -69,7 +70,8 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
     public void unload() {
         if (!tab.getFeatureManager().isFeatureEnabled("NameTags")) return;
         for (TabPlayer p : tab.getOnlinePlayers())
-            ntm.showNameTag(p);
+            if (p.isLoaded())
+                ntm.showNameTag(p);
     }
 
 }
