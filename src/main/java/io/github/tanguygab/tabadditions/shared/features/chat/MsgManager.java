@@ -94,7 +94,7 @@ public class MsgManager extends ChatManager {
             return;
         }
         TabPlayer receiver = plugin.getPlayer(player);
-        if (receiver == null) {
+        if (receiver == null || receiver.isVanished() && !sender.hasPermission("tab.seevanished")) {
             sender.sendMessage(translation.getPlayerNotFound(player), true);
             return;
         }
