@@ -19,7 +19,6 @@ import me.neznamy.tab.shared.placeholders.expansion.TabExpansion;
 import me.neznamy.tab.shared.placeholders.types.PlayerPlaceholderImpl;
 import me.neznamy.tab.shared.placeholders.types.RelationalPlaceholderImpl;
 import me.neznamy.tab.shared.platform.TabPlayer;
-import net.kyori.adventure.platform.AudienceProvider;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
@@ -38,7 +37,6 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Refres
     private final TABAdditions plugin = TABAdditions.getInstance();
     private final TAB tab = TAB.getInstance();
     public final MiniMessage mm = MiniMessage.miniMessage();
-    public final AudienceProvider kyori = plugin.getPlatform().getKyori();
     private final PlainTextComponentSerializer plainTextSerializer = PlainTextComponentSerializer.plainText();
     private final LegacyComponentSerializer legacySerializer = LegacyComponentSerializer.legacySection();
     private final Map<String,ChatFormat> formats = new LinkedHashMap<>();
@@ -291,7 +289,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Refres
         if (format == null) format = getFormat(sender);
         if (format == null) return;
         String text = format.getText();
-        kyori.console().sendMessage(createMessage(sender,null,message,text));
+        plugin.getPlatform().audience(null).sendMessage(createMessage(sender,null,message,text));
 
         if (plugin.getPlatform().isPluginEnabled("InteractiveChat"))
             try {text = InteractiveChatAPI.markSender(text,sender.getUniqueId());}
@@ -328,7 +326,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Refres
     }
 
     public void sendMessage(TabPlayer player, Component component) {
-        kyori.player(player.getUniqueId()).sendMessage(component);
+        plugin.getPlatform().audience(player).sendMessage(component);
     }
     public Component createMessage(TabPlayer sender, TabPlayer viewer, String message, String text) {
         String output = plugin.parsePlaceholders(text,sender,viewer).replace("%msg%", process(sender,viewer,message));

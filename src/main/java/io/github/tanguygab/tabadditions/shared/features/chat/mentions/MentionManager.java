@@ -10,7 +10,6 @@ import net.kyori.adventure.sound.Sound;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class MentionManager extends ChatManager {
 
@@ -43,7 +42,7 @@ public class MentionManager extends ChatManager {
     public String process(TabPlayer sender, TabPlayer viewer, String msg) {
         //checking custom mentions
         String finalMsg = msg;
-        List<CustomMention> mentions = this.mentions.values().stream().filter(mention->mention.matches(finalMsg)).collect(Collectors.toList());
+        List<CustomMention> mentions = this.mentions.values().stream().filter(mention->mention.matches(finalMsg)).toList();
         for (TabPlayer p : tab.getOnlinePlayers()) {
             CustomMention mention = mentions.stream().findFirst().orElse(null);
             if (mention != null && mention.isConditionMet(p) && mention.getSound() != null)
@@ -70,7 +69,7 @@ public class MentionManager extends ChatManager {
     }
 
     private void playSound(TabPlayer player, Sound sound) {
-        chat.kyori.player(player.getUniqueId()).playSound(sound);
+        plugin.getPlatform().audience(player).playSound(sound);
     }
 
     @Override

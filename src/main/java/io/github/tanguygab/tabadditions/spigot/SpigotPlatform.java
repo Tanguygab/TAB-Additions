@@ -7,6 +7,7 @@ import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.platforms.bukkit.nms.BukkitReflection;
 import net.essentialsx.api.v2.services.discord.DiscordService;
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
 import net.md_5.bungee.api.ChatMessageType;
 import net.md_5.bungee.api.chat.TextComponent;
@@ -116,8 +117,8 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
-	public BukkitAudiences getKyori() {
-		return kyori;
+	public Audience audience(TabPlayer player) {
+		return player == null ? kyori.console() : kyori.player(player.getUniqueId());
 	}
 
 	@Override

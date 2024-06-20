@@ -1,7 +1,12 @@
-package io.github.tanguygab.tabadditions.bungee;
+package io.github.tanguygab.tabadditions.velocity;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.velocitypowered.api.command.BrigadierCommand;
+import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import dev.simplix.protocolize.api.Protocolize;
 import dev.simplix.protocolize.api.inventory.PlayerInventory;
 import dev.simplix.protocolize.api.item.BaseItemStack;
@@ -11,26 +16,21 @@ import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.platform.bungeecord.BungeeAudiences;
-import net.md_5.bungee.api.ChatMessageType;
-import net.md_5.bungee.api.CommandSender;
-import net.md_5.bungee.api.ProxyServer;
-import net.md_5.bungee.api.Title;
-import net.md_5.bungee.api.chat.TextComponent;
-import net.md_5.bungee.api.connection.ProxiedPlayer;
-import net.md_5.bungee.api.plugin.Command;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 
+import java.time.Duration;
 import java.util.List;
 
-public class BungeePlatform extends Platform {
+public class VelocityPlatform extends Platform {
 
-	private final TABAdditionsBungeeCord plugin;
-	private BungeeListener listener;
-	private final BungeeAudiences kyori;
+	public static final MinecraftChannelIdentifier IDENTIFIER = MinecraftChannelIdentifier.from("tabadditions:channel");
 
-	public BungeePlatform(TABAdditionsBungeeCord plugin) {
+	private final TABAdditionsVelocity plugin;
+	private VelocityListener listener;
+
+	public VelocityPlatform(TABAdditionsVelocity plugin) {
 		this.plugin = plugin;
-		kyori = BungeeAudiences.create(plugin);
 	}
 
 	@Override
@@ -40,58 +40,56 @@ public class BungeePlatform extends Platform {
 
     @Override
 	public void registerPlaceholders(PlaceholderManager pm) {
-		for (String server : ProxyServer.getInstance().getServers().keySet())
-			pm.registerServerPlaceholder("%server-status:" + server + "%",10000,()->plugin.getServerStatus(server));
+		for (RegisteredServer server : plugin.server.getAllServers())
+			pm.registerServerPlaceholder("%server-status:" + server.getServerInfo().getName() + "%",10000,()->plugin.getServerStatus(server));
 	}
 
 	@Override
 	public void registerCommand(String cmd, String... aliases) {
-		plugin.getProxy().getPluginManager().registerCommand(plugin, new Command(cmd,null,aliases) {
-			@Override public void execute(CommandSender sender, String[] args) {}
-		});
+		BrigadierCommand command = new BrigadierCommand(LiteralArgumentBuilder.literal(cmd));
+		plugin.server.getCommandManager().register(command);
+		if (aliases.length > 0) plugin.server.getCommandManager().register(aliases[0],command,aliases);
 	}
 
 	@Override
 	public boolean isPluginEnabled(String plugin) {
-		return this.plugin.getProxy().getPluginManager().getPlugin(plugin) != null;
+		return this.plugin.server.getPluginManager().getPlugin(plugin).isPresent();
 	}
 
 	@Override
 	public void sendTitle(TabPlayer p, String title, String subtitle, int fadeIn, int stay, int fadeout) {
-		Title t = plugin.getProxy().createTitle()
-				.title(new TextComponent(title))
-				.subTitle(new TextComponent(subtitle))
-				.fadeIn(fadeIn)
-				.stay(stay)
-				.fadeOut(fadeout);
-		((ProxiedPlayer)p.getPlayer()).sendTitle(t);
+		Title t = Title.title(
+				Component.text(title),
+				Component.text(subtitle),
+				Title.Times.times(Duration.ofSeconds(fadeIn), Duration.ofSeconds(stay), Duration.ofSeconds(fadeout))
+		);
+		((Player)p.getPlayer()).showTitle(t);
 	}
 
 	@Override
 	public void sendActionbar(TabPlayer p, String text) {
-		((ProxiedPlayer)p.getPlayer()).sendMessage(ChatMessageType.ACTION_BAR,TextComponent.fromLegacyText(text));
+		((Player)p.getPlayer()).sendActionBar(Component.text(text));
 	}
 
 	@Override
 	public void reload() {
-		plugin.getProxy().getPluginManager().unregisterListener(listener);
-		plugin.getProxy().getPluginManager().registerListener(plugin,listener = new BungeeListener());
+		if (listener != null) plugin.server.getEventManager().unregisterListener(plugin, listener);
+		plugin.server.getEventManager().register(plugin, listener = new VelocityListener());
 	}
 
 	@Override
 	public void disable() {
-		plugin.getProxy().getPluginManager().unregisterListener(listener);
-		plugin.getProxy().getPluginManager().unregisterCommands(plugin);
+		plugin.server.getEventManager().unregisterListener(plugin, listener);
 	}
 
 	@Override
 	public void runTask(Runnable run) {
-		plugin.getProxy().getScheduler().runAsync(plugin,run);
+		plugin.server.getScheduler().buildTask(plugin,run).schedule();
 	}
 
 	@Override
 	public Audience audience(TabPlayer player) {
-		return player == null ? kyori.console() : kyori.player(player.getUniqueId());
+		return player == null ? plugin.server.getConsoleCommandSource() : plugin.server.getPlayer(player.getUniqueId()).orElse(null);
 	}
 
 	@Override
@@ -100,7 +98,7 @@ public class BungeePlatform extends Platform {
 		out.writeUTF(String.join(",",plugins));
 		out.writeUTF(msg);
 		out.writeUTF(channel);
-		((ProxiedPlayer)player.getPlayer()).sendData("tabadditions:channel",out.toByteArray());
+		((Player)player.getPlayer()).sendPluginMessage(IDENTIFIER,out.toByteArray());
 	}
 
 	@Override

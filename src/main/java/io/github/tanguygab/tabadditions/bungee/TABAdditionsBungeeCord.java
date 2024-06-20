@@ -16,10 +16,7 @@ public final class TABAdditionsBungeeCord extends Plugin {
                 servers.put(server,true);
             else servers.put(server,false);
         });
-        String output = "Offline";
-        if (servers.containsKey(server) && servers.get(server))
-            output = "Online";
-        return output;
+        return servers.containsKey(server) && servers.get(server) ? "Online" : "Offline";
     }
 
     @Override

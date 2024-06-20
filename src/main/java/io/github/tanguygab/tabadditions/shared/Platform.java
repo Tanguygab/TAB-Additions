@@ -3,7 +3,7 @@ package io.github.tanguygab.tabadditions.shared;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
-import net.kyori.adventure.platform.AudienceProvider;
+import net.kyori.adventure.audience.Audience;
 
 import java.util.List;
 
@@ -20,7 +20,7 @@ public abstract class Platform {
 	public abstract void sendTitle(TabPlayer p, String title, String subtitle, int fadeIn, int stay, int fadeout);
 	public abstract void sendActionbar(TabPlayer p, String text);
 
-	public abstract AudienceProvider getKyori();
+	public abstract Audience audience(TabPlayer player);
 	public abstract void sendToDiscord(TabPlayer player, String msg, String channel, List<String> plugins);
 	public abstract boolean supportsChatSuggestions();
 	public abstract void updateChatComplete(TabPlayer p, List<String> emojis, boolean add);
