@@ -59,9 +59,14 @@ public class ChatFormatter {
         ConfigurationSection customInteractionsSection = config.getConfigurationSection("custom-interactions");
         customInteractionsSection.getKeys().forEach(key0 -> {
             String key = key0.toString();
-            String component = ChatUtils.componentToMM(customInteractionsSection.getConfigurationSection("output"));
-            Map<String, Object> map = new HashMap<>(customInteractionsSection.getMap(key, Map.of()));
-            map.put("output", component);
+            ConfigurationSection section = customInteractionsSection.getConfigurationSection(key);
+
+            String component = ChatUtils.componentToMM(section.getConfigurationSection("output"));
+            Map<String, Object> map = new HashMap<>() {{
+                put("input", section.getString("input"));
+                put("permission", Boolean.TRUE.equals(section.getBoolean("permission")));
+                put("output", component);
+            }};
             customInteractions.put(key, map);
         });
 
@@ -154,7 +159,7 @@ public class ChatFormatter {
         if (input.isEmpty() || !message.contains(input)) return message;
 
         ChatItem item = TABAdditions.getInstance().getPlatform().getItem(sender, offhand);
-        if (item.type().equals("AIR")) return message.replace(input,itemOutputAir);
+        if (item.type().equals("minecraft:air")) return message.replace(input,itemOutputAir);
 
         String text = "<hover:show_item:'"+item.type()+"':"+item.amount();
         if (item.nbt() != null) text+=":'"+item.nbt().replace("'","\\'")+"'";
