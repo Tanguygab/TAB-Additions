@@ -27,7 +27,7 @@ public class CommandManager extends ChatManager {
             String condition = command.getString("condition");
             String viewCondition = command.getString("view-condition");
             String channel = command.getString("channel");
-            boolean save = command.getBoolean("keep-on-reload",false);
+            boolean save = Boolean.TRUE.equals(command.getBoolean("keep-on-reload"));
             String prefix = command.getString("prefix");
             ConfigurationSection display = command.getConfigurationSection("display");
             this.commands.put(name,new FormatCommand(name,
