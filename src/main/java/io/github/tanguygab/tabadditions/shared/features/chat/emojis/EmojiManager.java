@@ -38,7 +38,7 @@ public class EmojiManager extends ChatManager {
         this.emojisCmdEnabled = emojisCmdEnabled;
         if (emojisCmdEnabled) plugin.getPlatform().registerCommand("emojis");
 
-        if (autoCompleteEmojis)
+        if (autoCompleteEnabled)
             for (TabPlayer p : tab.getOnlinePlayers())
                 if (!hasCmdToggled(p))
                     loadAutoComplete(p);
@@ -136,7 +136,11 @@ public class EmojiManager extends ChatManager {
             getEmojiCategory(sender,category);
             return true;
         }
-        return command.equals("/toggleemojis") && toggleCmd(sender);
+        if (command.equals("/toggleemojis")) {
+            if (toggleCmd(sender)) loadAutoComplete(sender);
+            else unloadAutoComplete(sender);
+        }
+        return false;
     }
 
     private void getEmojisCategories(TabPlayer sender) {

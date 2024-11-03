@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
+import java.util.Collection;
 import java.util.List;
 
 public class SpigotPlatform extends Platform {
@@ -41,7 +42,7 @@ public class SpigotPlatform extends Platform {
 		this.plugin = plugin;
 		kyori = BukkitAudiences.create(plugin);
         try {
-			Player.class.getDeclaredMethod("addCustomChatCompletions");
+			Player.class.getDeclaredMethod("addCustomChatCompletions", Collection.class);
             chatSuggestions = true;
         } catch (NoSuchMethodException ignored) {
 			chatSuggestions = false;

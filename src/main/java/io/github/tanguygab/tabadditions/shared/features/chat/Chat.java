@@ -190,7 +190,6 @@ public class Chat extends RefreshableFeature implements UnLoadable, JoinListener
         player.loadPropertyFromConfig(this,"chatsuffix", "");
         TabExpansion exp = tab.getPlaceholderManager().getTabExpansion();
         placeholders.forEach(placeholder -> exp.setPlaceholderValue(player,placeholder.getIdentifier(), placeholder.getLastValue(player)));
-
     }
 
     @Override
