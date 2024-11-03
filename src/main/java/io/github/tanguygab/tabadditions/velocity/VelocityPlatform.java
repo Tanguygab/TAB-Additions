@@ -2,8 +2,8 @@ package io.github.tanguygab.tabadditions.velocity;
 
 import com.google.common.io.ByteArrayDataOutput;
 import com.google.common.io.ByteStreams;
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.velocitypowered.api.command.BrigadierCommand;
+import com.velocitypowered.api.command.CommandManager;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
@@ -46,9 +46,9 @@ public class VelocityPlatform extends Platform {
 
 	@Override
 	public void registerCommand(String cmd, String... aliases) {
-		BrigadierCommand command = new BrigadierCommand(LiteralArgumentBuilder.literal(cmd));
-		plugin.server.getCommandManager().register(command);
-		if (aliases.length > 0) plugin.server.getCommandManager().register(aliases[0],command,aliases);
+		BrigadierCommand command = new BrigadierCommand(BrigadierCommand.literalArgumentBuilder(cmd));
+		CommandManager cmds = plugin.server.getCommandManager();
+		cmds.register(cmds.metaBuilder(command).aliases(aliases).plugin(this).build(), command);
 	}
 
 	@Override

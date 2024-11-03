@@ -9,7 +9,10 @@ import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import org.jetbrains.annotations.NotNull;
 
-public class ConditionalNametags extends TabFeature implements JoinListener, Refreshable, UnLoadable {
+import java.util.HashMap;
+import java.util.Map;
+
+public class ConditionalNametags extends RefreshableFeature implements JoinListener, QuitListener, UnLoadable {
 
     @Getter private final String featureName = "Conditional Nametags";
     @Getter private final String refreshDisplayName = "&aConditional Nametags&r";
@@ -17,6 +20,7 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
     private final NameTagManager ntm;
     private final boolean def;
     private final boolean relational;
+    private final Map<TabPlayer, Property> properties = new HashMap<>();
 
     public ConditionalNametags(boolean def, boolean relational) {
         tab = TAB.getInstance();
@@ -27,9 +31,14 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
     }
 
     @Override
-    public void onJoin(TabPlayer p) {
-        p.loadPropertyFromConfig(this,"nametag-condition");
-        refresh(p,true);
+    public void onJoin(@NotNull TabPlayer player) {
+        properties.put(player, player.loadPropertyFromConfig(this,"nametag-condition", ""));
+        refresh(player, true);
+    }
+
+    @Override
+    public void onQuit(@NotNull TabPlayer player) {
+        properties.remove(player);
     }
 
     @Override
@@ -59,7 +68,7 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
 
     public boolean getCondition(TabPlayer target, TabPlayer viewer) {
         if (target == null || viewer == null) return def;
-        Property prop = target.getProperty("nametag-condition");
+        Property prop = properties.get(target);
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
         if (cond.isEmpty()) return def;
@@ -73,5 +82,4 @@ public class ConditionalNametags extends TabFeature implements JoinListener, Ref
             if (p.isLoaded())
                 ntm.showNameTag(p);
     }
-
 }

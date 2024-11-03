@@ -19,7 +19,7 @@ import java.util.Map;
 @Plugin(
         id = "tabadditions",
         name = "TAB-Additions",
-        version = "2.0.14",
+        version = "2.1.0",
         authors = {"Tanguygab"},
         description = "More features for the plugin TAB !",
         dependencies = {

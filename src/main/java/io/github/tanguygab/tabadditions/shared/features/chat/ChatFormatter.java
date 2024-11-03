@@ -4,6 +4,7 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import me.neznamy.tab.shared.chat.EnumChatFormat;
 import me.neznamy.tab.shared.chat.rgb.RGBUtils;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
+import me.neznamy.tab.shared.config.file.ConfigurationSection;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.HashMap;
@@ -31,14 +32,13 @@ public class ChatFormatter {
     private final String itemOutputAir;
     private final boolean itemPermission;
 
-    private final Map<String,Map<String,Object>> customInteractions;
+    private final Map<String,Map<String,Object>> customInteractions = new HashMap<>();
 
     private final boolean embedURLs;
     private final String urlsOutput;
     private final Pattern urlPattern = Pattern.compile("([&§][a-fA-Fk-oK-OrR0-9])?(?<url>(http(s)?:/.)?(www\\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\\.[a-z]{2,6}\\b([-a-zA-Z0-9@:%_+.~#?&/=]*))");
     private final Pattern ipv4Pattern = Pattern.compile("(?:[0-9]{1,3}\\.){3}[0-9]{1,3}");
 
-    @SuppressWarnings("unchecked")
     public ChatFormatter(ConfigurationFile config) {
         filterEnabled = config.getBoolean("char-filter.enabled",true);
         filterCancelMessage = config.getBoolean("char-filter.cancel-message",false);
@@ -56,13 +56,13 @@ public class ChatFormatter {
         itemOutputAir = config.getString("item.output-air","No Item");
         itemPermission = config.getBoolean("item.permission",false);
 
-        customInteractions = new HashMap<>(config.getConfigurationSection("custom-interactions"));
-        Map<String,String> map = new HashMap<>();
-        customInteractions.forEach((key,cfg)->map.put(key,ChatUtils.componentToMM((Map<String, Object>) cfg.get("output"))));
-        map.forEach((key,output)->{
-            Map<String,Object> cfg = new HashMap<>(customInteractions.get(key));
-            cfg.put("output",output);
-            customInteractions.put(key,cfg);
+        ConfigurationSection customInteractionsSection = config.getConfigurationSection("custom-interactions");
+        customInteractionsSection.getKeys().forEach(key0 -> {
+            String key = key0.toString();
+            String component = ChatUtils.componentToMM(customInteractionsSection.getConfigurationSection("output"));
+            Map<String, Object> map = new HashMap<>(customInteractionsSection.getMap(key, Map.of()));
+            map.put("output", component);
+            customInteractions.put(key, map);
         });
 
         embedURLs = config.getBoolean("embed-urls.enabled",true);
@@ -154,13 +154,13 @@ public class ChatFormatter {
         if (input.isEmpty() || !message.contains(input)) return message;
 
         ChatItem item = TABAdditions.getInstance().getPlatform().getItem(sender, offhand);
-        if (item.getType().equals("AIR")) return message.replace(input,itemOutputAir);
+        if (item.type().equals("AIR")) return message.replace(input,itemOutputAir);
 
-        String text = "<hover:show_item:'"+item.getType()+"':"+item.getAmount();
-        if (item.getNbt() != null) text+=":'"+item.getNbt().replace("'","\\'")+"'";
-        text+=">"+(item.getAmount() == 1 ? itemOutputSingle : itemOutput)
-                .replace("%name%",item.getName())
-                .replace("%amount%",String.valueOf(item.getAmount()))
+        String text = "<hover:show_item:'"+item.type()+"':"+item.amount();
+        if (item.nbt() != null) text+=":'"+item.nbt().replace("'","\\'")+"'";
+        text+=">"+(item.amount() == 1 ? itemOutputSingle : itemOutput)
+                .replace("%name%",item.name())
+                .replace("%amount%",String.valueOf(item.amount()))
                 +"</hover>";
         return message.replace(input,text);
     }

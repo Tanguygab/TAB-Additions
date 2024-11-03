@@ -67,7 +67,7 @@ public class TABAdditions {
             translation = new TranslationFile(null, translationFile);
         } catch (IOException e) {
             platform.disable();
-            e.printStackTrace();
+            throw new RuntimeException(e);
         }
     }
 
@@ -114,7 +114,7 @@ public class TABAdditions {
         platform.registerPlaceholders(pm);
 
         AdvancedConditions.clearConditions();
-        Map<String, Map<String, String>> conditions = config.getConfigurationSection("advanced-conditions");
+        Map<String, Map<String, String>> conditions = config.getMap("advanced-conditions");
         conditions.forEach(AdvancedConditions::new);
         AdvancedConditions.finishSetups();
     }
@@ -148,7 +148,7 @@ public class TABAdditions {
     }
 
     public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer) {
-        return parsePlaceholders(str,sender,viewer,tab.getPlaceholderManager().detectPlaceholders(str));
+        return parsePlaceholders(str,sender,viewer, PlaceholderManagerImpl.detectPlaceholders(str));
     }
     public String parsePlaceholders(String str, TabPlayer sender, TabPlayer viewer, List<String> placeholders) {
         for (String pl : placeholders) {
@@ -194,14 +194,13 @@ public class TABAdditions {
     }
 
     public String toFlatText(TabComponent component) {
-        if (!(component instanceof StructuredComponent)) return ((SimpleComponent)component).toLegacyText();
-        StructuredComponent structured = (StructuredComponent) component;
+        if (!(component instanceof StructuredComponent structured)) return component.toLegacyText();
         ChatModifier modifier = structured.getModifier();
         StringBuilder builder = new StringBuilder();
         if (modifier.getColor() != null) builder.append("#").append(modifier.getColor().getHexCode());
         builder.append(modifier.getMagicCodes());
         builder.append(structured.getText());
-        structured.getExtra().forEach(extra->builder.append(toFlatText(extra)));
+        structured.getExtra().forEach(extra -> builder.append(toFlatText(extra)));
         return builder.toString();
     }
 

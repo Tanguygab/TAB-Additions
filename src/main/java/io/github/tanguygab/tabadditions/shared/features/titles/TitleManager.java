@@ -4,15 +4,21 @@ import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.TitleCmd;
 import lombok.Getter;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.chat.TabComponent;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
+import me.neznamy.tab.shared.config.file.ConfigurationSection;
+import me.neznamy.tab.shared.cpu.CpuManager;
+import me.neznamy.tab.shared.cpu.TimedCaughtTask;
+import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.platform.TabPlayer;
+import me.neznamy.tab.shared.util.cache.StringToComponentCache;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class TitleManager extends TabFeature implements UnLoadable, Refreshable, CommandListener, JoinListener {
+public class TitleManager extends RefreshableFeature implements UnLoadable, CommandListener, JoinListener {
+
+    private static final StringToComponentCache cache = new StringToComponentCache("Title", 100);
 
     @Getter private final String featureName = "Title";
     @Getter private final String refreshDisplayName = "&aTitle&r";
@@ -33,19 +39,22 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
         if (toggleCmd) plugin.getPlatform().registerCommand("toggletitle");
         toggled = plugin.loadData("title-off",toggleCmd);
 
-        Map<String, Map<String,String>> titlesConfig = config.getConfigurationSection("titles.titles");
-        titlesConfig.forEach((name,cfg)->{
-            String title = cfg.get("title");
-            String subtitle = cfg.get("subtitle");
-            if (title != null) addUsedPlaceholders(tab.getPlaceholderManager().detectPlaceholders(title));
-            if (subtitle != null) addUsedPlaceholders(tab.getPlaceholderManager().detectPlaceholders(subtitle));
+        ConfigurationSection titlesConfig = config.getConfigurationSection("titles.titles");
+        titlesConfig.getKeys().forEach(key -> {
+            String name = key.toString();
+            ConfigurationSection section = titlesConfig.getConfigurationSection(name);
+
+            String title = section.getString("title");
+            String subtitle = section.getString("subtitle");
+            if (title != null) addUsedPlaceholders(PlaceholderManagerImpl.detectPlaceholders(title));
+            if (subtitle != null) addUsedPlaceholders(PlaceholderManagerImpl.detectPlaceholders(subtitle));
             titles.put(name,new Title(title,subtitle));
         });
 
-        tab.getCPUManager().startRepeatingMeasuredTask(2000,featureName,"handling Title",()->{
+        tab.getCPUManager().getProcessingThread().repeatTask(new TimedCaughtTask(tab.getCPUManager(), ()->{
             for (TabPlayer p : tab.getOnlinePlayers())
                 refresh(p,false);
-        });
+        }, featureName, "handling Title"), 2000);
     }
     @Override
     public void unload() {
@@ -62,8 +71,8 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
         String name = announcedTitles.get(player);
         String title,subtitle;
         if (titles.containsKey(name)) {
-            title = titles.get(name).getTitle();
-            subtitle = titles.get(name).getSubtitle();
+            title = titles.get(name).title();
+            subtitle = titles.get(name).subtitle();
         } else {
             String[] str = name.split("\\n");
             title = str[0];
@@ -73,24 +82,26 @@ public class TitleManager extends TabFeature implements UnLoadable, Refreshable,
     }
 
     private String parse(TabPlayer player, String text) {
-        return plugin.toFlatText(TabComponent.optimized(plugin.parsePlaceholders(text,player)));
+        return plugin.toFlatText(cache.get(plugin.parsePlaceholders(text,player)));
     }
     public void announceTitle(TabPlayer player, String title) {
         if (toggled.contains(player.getUniqueId())) return;
-        addUsedPlaceholders(TAB.getInstance().getPlaceholderManager().detectPlaceholders(title));
+        addUsedPlaceholders(PlaceholderManagerImpl.detectPlaceholders(title));
         announcedTitles.put(player,title);
         sendTitle(player,false);
-        TAB.getInstance().getCPUManager().runTaskLater(2000,featureName,"handling Title on join for "+player.getName(),()->{
+
+        CpuManager cpu = TAB.getInstance().getCPUManager();
+        cpu.getProcessingThread().executeLater(new TimedCaughtTask(cpu, () -> {
             if (title.equals(announcedTitles.get(player))) announcedTitles.remove(player);
-        });
+        }, featureName, "handling Title on join for "+player.getName()),2000);
+
     }
 
     @Override
     public void onJoin(TabPlayer player) {
-        player.loadPropertyFromConfig(this,"join-title");
-        String prop = player.getProperty("join-title").getCurrentRawValue();
-        if (prop.isEmpty()) return;
-        announceTitle(player,prop);
+        String property = player.loadPropertyFromConfig(this,"join-title", "").getCurrentRawValue();
+        if (property.isEmpty()) return;
+        announceTitle(player,property);
     }
 
     @Override

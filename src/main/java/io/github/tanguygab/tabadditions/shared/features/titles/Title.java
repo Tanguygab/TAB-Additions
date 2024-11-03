@@ -1,12 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features.titles;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+public record Title(String title, String subtitle) {
 
-@Getter
-@AllArgsConstructor
-public class Title {
-
-    private final String title;
-    private final String subtitle;
 }

@@ -4,6 +4,7 @@ import io.github.tanguygab.tabadditions.shared.features.advancedconditions.Advan
 import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatUtils;
+import me.neznamy.tab.shared.config.file.ConfigurationSection;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.HashMap;
@@ -15,18 +16,20 @@ public class CommandManager extends ChatManager {
     private final Map<String,FormatCommand> commands = new HashMap<>();
     private final Map<UUID,FormatCommand> players = new HashMap<>();
 
-    public CommandManager(Chat chat, Map<String,Map<String,Object>> commands) {
+    public CommandManager(Chat chat, ConfigurationSection commands) {
         super(chat);
 
-        commands.forEach((name,cmd)-> {
-            String displayName = (String) cmd.getOrDefault("name",name);
-            String condition = (String) cmd.get("condition");
-            String viewCondition = (String) cmd.get("view-condition");
-            String channel = (String) cmd.get("channel");
-            boolean save = (boolean) cmd.getOrDefault("keep-on-reload",false);
-            String prefix = (String) cmd.get("prefix");
-            @SuppressWarnings("unchecked")
-            Map<String,Map<String,Object>> display = (Map<String, Map<String, Object>>) cmd.get("display");
+        commands.getKeys().forEach(key -> {
+            String name = key.toString();
+            ConfigurationSection command = commands.getConfigurationSection(name);
+
+            String displayName = command.getString("name",name);
+            String condition = command.getString("condition");
+            String viewCondition = command.getString("view-condition");
+            String channel = command.getString("channel");
+            boolean save = command.getBoolean("keep-on-reload",false);
+            String prefix = command.getString("prefix");
+            ConfigurationSection display = command.getConfigurationSection("display");
             this.commands.put(name,new FormatCommand(name,
                     displayName,
                     AdvancedConditions.getCondition(condition),
@@ -37,8 +40,7 @@ public class CommandManager extends ChatManager {
                     prefix));
             plugin.getPlatform().registerCommand(name);
         });
-
-        Map<String,String> data = plugin.getPlayerData().getConfigurationSection("chat-commands-formats");
+        Map<String,String> data = plugin.getPlayerData().getMap("chat-commands-formats");
         data.forEach((uuid,cmd)->{
             if (this.commands.containsKey(cmd))
                 players.put(UUID.fromString(uuid),this.commands.get(cmd));

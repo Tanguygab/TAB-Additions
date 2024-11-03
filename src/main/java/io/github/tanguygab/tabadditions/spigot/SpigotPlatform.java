@@ -5,7 +5,6 @@ import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
 import me.neznamy.tab.api.TabAPI;
 import me.neznamy.tab.api.TabPlayer;
-import me.neznamy.tab.platforms.bukkit.nms.BukkitReflection;
 import net.essentialsx.api.v2.services.discord.DiscordService;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.platform.bukkit.BukkitAudiences;
@@ -35,14 +34,19 @@ public class SpigotPlatform extends Platform {
 	private final BukkitAudiences kyori;
 	private static final DecimalFormat format = new DecimalFormat("#.##");
 
-	private final boolean chatSuggestions;
+	private boolean chatSuggestions;
 	private Method getCommandMap;
 
 	public SpigotPlatform(TABAdditionsSpigot plugin) {
 		this.plugin = plugin;
 		kyori = BukkitAudiences.create(plugin);
-		chatSuggestions = BukkitReflection.is1_19_3Plus();
-		try {
+        try {
+			Player.class.getDeclaredMethod("addCustomChatCompletions");
+            chatSuggestions = true;
+        } catch (NoSuchMethodException ignored) {
+			chatSuggestions = false;
+		}
+        try {
 			getCommandMap = plugin.getServer().getClass().getMethod("getCommandMap");
 		} catch (Exception ignored) {}
 	}
@@ -68,9 +72,9 @@ public class SpigotPlatform extends Platform {
 				if (viewer0.getWorld().equals(all0.getWorld()) && viewer0.canSee(all0))
 					count++;
 			}
-			return count;
+			return String.valueOf(count);
 		});
-		pm.registerPlayerPlaceholder("%sneak%",-1,player->((Player)player.getPlayer()).isSneaking());
+		pm.registerPlayerPlaceholder("%sneak%",-1,player-> String.valueOf(((Player)player.getPlayer()).isSneaking()));
 	}
 
 	@Override
@@ -80,7 +84,9 @@ public class SpigotPlatform extends Platform {
 				@Override public boolean execute(@NotNull CommandSender sender, @NotNull String commandLabel, @NotNull String[] args) {return true;}
 			};
 			((SimpleCommandMap)getCommandMap.invoke(plugin.getServer())).register(cmd,"chat",command);
-		} catch (Exception e) {e.printStackTrace();}
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
 	}
 
 	@Override
@@ -96,6 +102,7 @@ public class SpigotPlatform extends Platform {
 	}
 
 	@Override
+	@SuppressWarnings("deprecation")
 	public void sendActionbar(TabPlayer p, String text) {
 		((Player)p.getPlayer()).spigot().sendMessage(ChatMessageType.ACTION_BAR, TextComponent.fromLegacyText(text));
 	}

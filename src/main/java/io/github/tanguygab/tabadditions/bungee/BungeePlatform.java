@@ -69,7 +69,7 @@ public class BungeePlatform extends Platform {
 
 	@Override
 	public void sendActionbar(TabPlayer p, String text) {
-		((ProxiedPlayer)p.getPlayer()).sendMessage(ChatMessageType.ACTION_BAR,TextComponent.fromLegacyText(text));
+		((ProxiedPlayer)p.getPlayer()).sendMessage(ChatMessageType.ACTION_BAR,TextComponent.fromLegacy(text));
 	}
 
 	@Override

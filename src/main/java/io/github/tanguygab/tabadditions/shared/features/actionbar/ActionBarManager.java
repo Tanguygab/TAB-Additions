@@ -3,17 +3,23 @@ package io.github.tanguygab.tabadditions.shared.features.actionbar;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 import io.github.tanguygab.tabadditions.shared.commands.ActionBarCmd;
 import lombok.Getter;
-import me.neznamy.tab.shared.chat.TabComponent;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
+import me.neznamy.tab.shared.config.file.ConfigurationSection;
+import me.neznamy.tab.shared.cpu.CpuManager;
+import me.neznamy.tab.shared.cpu.TimedCaughtTask;
+import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import me.neznamy.tab.shared.platform.TabPlayer;
+import me.neznamy.tab.shared.util.cache.StringToComponentCache;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
-public class ActionBarManager extends TabFeature implements UnLoadable, CommandListener, JoinListener, Refreshable {
+public class ActionBarManager extends RefreshableFeature implements UnLoadable, CommandListener, JoinListener {
+
+    private static final StringToComponentCache cache = new StringToComponentCache("ActionBar", 100);
 
     @Getter private final String featureName = "ActionBar";
     @Getter private final String refreshDisplayName = "&aActionBar&r";
@@ -35,17 +41,22 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         if (toggleCmd) plugin.getPlatform().registerCommand("toggleactionbar");
         toggled = plugin.loadData("actionbar-off",toggleCmd);
 
-        Map<String,Map<String,String>> barsConfig = config.getConfigurationSection("actionbars.bars");
-        barsConfig.forEach((bar,cfg)->{
-            String text = cfg.get("text");
-            if (text != null) addUsedPlaceholders(tab.getPlaceholderManager().detectPlaceholders(text));
-            actionBars.put(bar,new ActionBarLine(text,cfg.containsKey("condition") ? Condition.getCondition(cfg.get("condition")) : null));
+        ConfigurationSection barsConfig = config.getConfigurationSection("actionbars.bars");
+        barsConfig.getKeys().forEach(key -> {
+            String bar = key.toString();
+            ConfigurationSection section = barsConfig.getConfigurationSection(bar);
+
+            String text = section.getString("text");
+            String condition = section.getString("condition");
+
+            if (text != null) addUsedPlaceholders(PlaceholderManagerImpl.detectPlaceholders(text));
+            actionBars.put(bar,new ActionBarLine(text,condition == null ? null : Condition.getCondition(condition)));
         });
 
-        tab.getCPUManager().startRepeatingMeasuredTask(2000,featureName,"handling ActionBar",()->{
+        tab.getCPUManager().getProcessingThread().repeatTask(new TimedCaughtTask(tab.getCPUManager(), ()->{
             for (TabPlayer p : tab.getOnlinePlayers())
                 refresh(p,false);
-        });
+        },featureName,"handling ActionBar"),2000);
     }
 
     @Override
@@ -68,7 +79,7 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
         if (toggled.contains(player.getUniqueId())) return;
 
         text = plugin.parsePlaceholders(text,player);
-        plugin.getPlatform().sendActionbar(player, plugin.toFlatText(TabComponent.optimized(text)));
+        plugin.getPlatform().sendActionbar(player, plugin.toFlatText(cache.get(text)));
     }
 
     public ActionBarLine getActionBar(TabPlayer player) {
@@ -79,20 +90,21 @@ public class ActionBarManager extends TabFeature implements UnLoadable, CommandL
     }
 
     public void announceBar(TabPlayer player, String actionbar) {
-        addUsedPlaceholders(TAB.getInstance().getPlaceholderManager().detectPlaceholders(actionbar));
+        addUsedPlaceholders(PlaceholderManagerImpl.detectPlaceholders(actionbar));
         announcedBars.put(player,actionbar);
         refresh(player,true);
-        TAB.getInstance().getCPUManager().runTaskLater(2000,featureName,"handling ActionBar on join for "+player.getName(),()->{
+
+        CpuManager cpu = TAB.getInstance().getCPUManager();
+        cpu.getProcessingThread().executeLater(new TimedCaughtTask(cpu, () -> {
             if (actionbar.equals(announcedBars.get(player))) announcedBars.remove(player);
-        });
+        }, featureName, "handling ActionBar on join for "+player.getName()),2000);
     }
 
     @Override
     public void onJoin(TabPlayer player) {
-        player.loadPropertyFromConfig(this,"join-actionbar");
-        String prop = player.getProperty("join-actionbar").getCurrentRawValue();
-        if (prop.isEmpty()) return;
-        announceBar(player,prop);
+        String property = player.loadPropertyFromConfig(this,"join-actionbar", "").getCurrentRawValue();
+        if (property.isEmpty()) return;
+        announceBar(player,property);
     }
 
     @Override

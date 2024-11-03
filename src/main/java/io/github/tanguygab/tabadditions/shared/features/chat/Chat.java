@@ -13,6 +13,9 @@ import me.leoko.advancedban.manager.PunishmentManager;
 import me.leoko.advancedban.manager.UUIDManager;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
+import me.neznamy.tab.shared.config.file.ConfigurationSection;
+import me.neznamy.tab.shared.cpu.CpuManager;
+import me.neznamy.tab.shared.cpu.TimedCaughtTask;
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl;
 import me.neznamy.tab.shared.features.types.*;
 import me.neznamy.tab.shared.placeholders.expansion.TabExpansion;
@@ -30,7 +33,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class Chat extends TabFeature implements UnLoadable, JoinListener, Refreshable {
+public class Chat extends RefreshableFeature implements UnLoadable, JoinListener {
 
     @Getter private final String featureName = "Chat";
     @Getter private final String refreshDisplayName = "&aChat&r";
@@ -79,14 +82,16 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Refres
     public Chat(ConfigurationFile config) {
         chatFormatter = new ChatFormatter(config);
 
-        Map<String,Map<String,Object>> formats = config.getConfigurationSection("formats");
-        formats.forEach((name,format)->{
-            String displayName = (String) format.getOrDefault("name",name);
-            String condition = (String) format.get("condition");
-            String viewCondition = (String) format.get("view-condition");
-            String channel = (String) format.get("channel");
-            @SuppressWarnings("unchecked")
-            Map<String,Map<String,Object>> display = (Map<String, Map<String, Object>>) format.get("display");
+        ConfigurationSection formats = config.getConfigurationSection("formats");
+        formats.getKeys().forEach( key -> {
+            String name = key.toString();
+            ConfigurationSection format = formats.getConfigurationSection(name);
+
+            String displayName = format.getString("name",name);
+            String condition = format.getString("condition");
+            String viewCondition = format.getString("view-condition");
+            String channel = format.getString("channel");
+            ConfigurationSection display = format.getConfigurationSection("display");
             this.formats.put(name,new ChatFormat(name,
                     displayName,
                     AdvancedConditions.getCondition(condition),
@@ -135,7 +140,7 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Refres
                 ChatUtils.componentToMM(config.getConfigurationSection("socialspy.view-conditions.output")))
                 : null;
         commandsManager = config.hasConfigOption("commands-formats")
-                && !config.getConfigurationSection("commands-formats").isEmpty()
+                && !config.getConfigurationSection("commands-formats").getKeys().isEmpty()
                 ? new CommandManager(this,config.getConfigurationSection("commands-formats"))
                 : null;
 
@@ -151,8 +156,12 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Refres
 
         ignoreCmd = config.getBoolean("/ignore",true);
         if (ignoreCmd) {
-            Map<String, List<String>> ignored = plugin.getPlayerData().getConfigurationSection("ignored");
-            ignored.forEach((player, ignoredList) -> this.ignored.put(UUID.fromString(player), ignoredList.stream().map(UUID::fromString).collect(Collectors.toCollection(ArrayList::new))));
+            ConfigurationSection ignored = plugin.getPlayerData().getConfigurationSection("ignored");
+            ignored.getKeys().forEach(key -> {
+                String player = key.toString();
+                List<UUID> list = ignored.getStringList(player, List.of()).stream().map(UUID::fromString).collect(Collectors.toCollection(ArrayList::new));
+                this.ignored.put(UUID.fromString(player), list);
+            });
         }
 
         clearchatEnabled = config.getBoolean("clearchat.enabled",false);
@@ -176,9 +185,9 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Refres
     }
 
     private void loadProperties(TabPlayer player) {
-        player.loadPropertyFromConfig(this,"chatprefix");
+        player.loadPropertyFromConfig(this,"chatprefix", "");
         player.loadPropertyFromConfig(this,"customchatname", player.getName());
-        player.loadPropertyFromConfig(this,"chatsuffix");
+        player.loadPropertyFromConfig(this,"chatsuffix", "");
         TabExpansion exp = tab.getPlaceholderManager().getTabExpansion();
         placeholders.forEach(placeholder -> exp.setPlaceholderValue(player,placeholder.getIdentifier(), placeholder.getLastValue(player)));
 
@@ -295,13 +304,15 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Refres
             try {text = InteractiveChatAPI.markSender(text,sender.getUniqueId());}
             catch (IllegalStateException ignored) {}
 
+        CpuManager cpu = tab.getCpu();
         if (!chatPlaceholderRelational) {
             String placeholderMsg = legacySerializer.serialize(createMessage(sender,null,message,chatPlaceholderFormat));
             chatPlaceholder.updateValue(sender, placeholderMsg);
-            TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, featureName, "update %chat% for " + sender.getName(), () -> {
+
+            cpu.getProcessingThread().executeLater(new TimedCaughtTask(cpu,() -> {
                 if (chatPlaceholder.getLastValue(sender).equals(placeholderMsg))
                     chatPlaceholder.updateValue(sender, "");
-            });
+            }, featureName, "update %chat% for " + sender.getName()), chatPlaceholderStay);
         }
 
         for (TabPlayer viewer : tab.getOnlinePlayers()) {
@@ -311,10 +322,11 @@ public class Chat extends TabFeature implements UnLoadable, JoinListener, Refres
             if (!chatPlaceholderRelational) continue;
             String placeholderMsg = legacySerializer.serialize(createMessage(sender,viewer,message,chatPlaceholderFormat));
             relChatPlaceholder.updateValue(viewer, sender, placeholderMsg);
-            TAB.getInstance().getCPUManager().runTaskLater(chatPlaceholderStay, featureName, "update %rel_chat% for "+viewer.getName()+" and "+ sender.getName(), () -> {
+
+            cpu.getProcessingThread().executeLater(new TimedCaughtTask(cpu,() -> {
                 if (relChatPlaceholder.getLastValue(viewer,sender).equals(placeholderMsg))
                     relChatPlaceholder.updateValue(viewer,sender, "");
-            });
+            }, featureName, "update %rel_chat% for "+viewer.getName()+" and "+ sender.getName()), chatPlaceholderStay);
         }
 
         List<String> discord = new ArrayList<>(2);

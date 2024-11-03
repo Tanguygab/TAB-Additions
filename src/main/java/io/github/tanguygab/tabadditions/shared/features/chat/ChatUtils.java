@@ -2,13 +2,13 @@ package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import me.neznamy.tab.shared.chat.EnumChatFormat;
 import me.neznamy.tab.shared.chat.rgb.RGBUtils;
+import me.neznamy.tab.shared.config.file.ConfigurationSection;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.intellij.lang.annotations.Subst;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,19 +23,17 @@ public class ChatUtils {
         return count;
     }
 
-    public static String componentsToMM(Map<String,Map<String,Object>> config) {
+    public static String componentsToMM(ConfigurationSection config) {
         StringBuilder output = new StringBuilder();
-        config.values().forEach(component->output.append(componentToMM(component)));
+        config.getKeys().forEach(component->output.append(componentToMM(config.getConfigurationSection(component.toString()))));
         return output.toString();
     }
 
-    public static String componentToMM(Map<String,Object> component) {
-        if (component == null) return "";
+    public static String componentToMM(ConfigurationSection component) {
         StringBuilder output = new StringBuilder();
-        String text = toMMColors(component.get("text"));
-        @SuppressWarnings("unchecked")
-        String hover = toMMColors(component.get("hover") instanceof List ? String.join("\n",(List<String>)component.get("hover")) : component.get("hover"));
-        String click = toMMColors(component.get("click"));
+        String text = toMMColors(component.getString("text"));
+        String hover = toMMColors(component.getObject("hover") instanceof List ? String.join("\n", component.getStringList("hover", List.of())) : component.getString("hover"));
+        String click = toMMColors(component.getString("click"));
         String clickType = click.contains(":") ? click.substring(0,click.indexOf(":")) : "";
         click = click.contains(":") ? click.substring(click.indexOf(":")+1) : "";
         clickType = clickType.contains("_") ? clickType : clickType.replace("command","run_command")
@@ -51,9 +49,8 @@ public class ChatUtils {
         return output.toString();
     }
 
-    public static String toMMColors(Object str) {
-        if (str == null || str.equals("")) return "";
-        String text = str.toString();
+    public static String toMMColors(String text) {
+        if (text == null || text.isEmpty()) return "";
         text = "§r"+text; // This prevents TAB from applying the MiniMessage format which yeeted everything MM related aside from colors
         text = RGBUtils.getInstance().applyFormats(text);
         text = text.substring(2);

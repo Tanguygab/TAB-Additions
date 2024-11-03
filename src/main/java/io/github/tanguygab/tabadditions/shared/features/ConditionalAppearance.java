@@ -11,7 +11,10 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 
-public class ConditionalAppearance extends TabFeature implements Refreshable, UnLoadable, JoinListener {
+import java.util.HashMap;
+import java.util.Map;
+
+public class ConditionalAppearance extends RefreshableFeature implements JoinListener, QuitListener, UnLoadable {
 
     @Getter private final String featureName = "Conditional Appearance";
     @Getter private final String refreshDisplayName = "&aConditional Appearance&r";
@@ -19,6 +22,7 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
     private final Plugin plugin;
     private final boolean def;
     private final boolean pwp;
+    private final Map<TabPlayer, Property> properties = new HashMap<>();
 
     public ConditionalAppearance(Object plugin, boolean def) {
         tab = TAB.getInstance();
@@ -30,9 +34,14 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
     }
 
     @Override
-    public void onJoin(TabPlayer p) {
-        p.loadPropertyFromConfig(this,"appearance-condition");
-        refresh(p,true);
+    public void onJoin(@NotNull TabPlayer player) {
+        properties.put(player, player.loadPropertyFromConfig(this,"appearance-condition", ""));
+        refresh(player,true);
+    }
+
+    @Override
+    public void onQuit(@NotNull TabPlayer player) {
+        properties.remove(player);
     }
 
     @Override
@@ -59,8 +68,8 @@ public class ConditionalAppearance extends TabFeature implements Refreshable, Un
 
     public boolean getCondition(TabPlayer target, TabPlayer viewer) {
         if (target == null || viewer == null) return def;
-        if (pwp && !target.getWorld().equals(viewer.getWorld())) return def;
-        Property prop = target.getProperty("appearance-condition");
+        if (pwp && !target.world.equals(viewer.world)) return def;
+        Property prop = properties.get(target);
         if (prop == null) return def;
         String cond = prop.getCurrentRawValue();
         if (cond.isEmpty()) return def;

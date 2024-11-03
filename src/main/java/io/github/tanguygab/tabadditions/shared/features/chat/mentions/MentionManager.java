@@ -3,6 +3,7 @@ package io.github.tanguygab.tabadditions.shared.features.chat.mentions;
 import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatUtils;
+import me.neznamy.tab.shared.config.file.ConfigurationSection;
 import me.neznamy.tab.shared.placeholders.conditions.Condition;
 import me.neznamy.tab.shared.platform.TabPlayer;
 import net.kyori.adventure.sound.Sound;
@@ -19,7 +20,7 @@ public class MentionManager extends ChatManager {
     private final boolean outputForEveryone;
     private final Map<String,CustomMention> mentions = new HashMap<>();
 
-    public MentionManager(Chat chat, String input, String output, String sound, boolean toggleCmd, boolean outputForEveryone, Map<String,Map<String,String>> customMentions) {
+    public MentionManager(Chat chat, String input, String output, String sound, boolean toggleCmd, boolean outputForEveryone, ConfigurationSection customMentions) {
         super(chat,toggleCmd,"mentions-off","togglementions","chat-mentions");
         setToggleCmdMsgs(translation.mentionOn,translation.mentionOff);
         this.input = input;
@@ -27,7 +28,16 @@ public class MentionManager extends ChatManager {
         this.sound = ChatUtils.getSound(sound);
         this.outputForEveryone = outputForEveryone;
         if (customMentions != null)
-            customMentions.forEach((mention,cfg)-> mentions.put(mention,new CustomMention(cfg.get("input"),cfg.get("output"),Condition.getCondition(cfg.get("condition")),ChatUtils.getSound(cfg.get("sound")))));
+            customMentions.getKeys().forEach(key -> {
+                String mention = key.toString();
+                ConfigurationSection mentionSection = customMentions.getConfigurationSection(mention);
+                mentions.put(mention, new CustomMention(
+                        mentionSection.getString("input"),
+                        mentionSection.getString("output"),
+                        Condition.getCondition(mentionSection.getString("condition")),
+                        ChatUtils.getSound(mentionSection.getString("sound"))
+                ));
+            });
     }
 
     public boolean isMentioned(String msg, TabPlayer sender, TabPlayer viewer) {

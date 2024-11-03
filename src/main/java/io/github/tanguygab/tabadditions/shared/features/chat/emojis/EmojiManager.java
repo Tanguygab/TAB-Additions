@@ -4,7 +4,7 @@ import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatUtils;
 import lombok.Getter;
-import me.neznamy.tab.api.placeholder.PlaceholderManager;
+import me.neznamy.tab.shared.config.file.ConfigurationSection;
 import me.neznamy.tab.shared.platform.TabPlayer;
 
 import java.util.*;
@@ -21,17 +21,18 @@ public class EmojiManager extends ChatManager {
     private final Map<TabPlayer, List<String>> emojisAutoCompleteList = new HashMap<>();
     @Getter private final boolean emojisCmdEnabled;
 
-    @SuppressWarnings("unchecked")
-    public EmojiManager(Chat chat, String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, Map<String,Map<String,Object>> emojis, boolean emojisCmdEnabled, boolean toggleCmd) {
+    public EmojiManager(Chat chat, String emojiOutput, boolean untranslateEmojis, boolean autoCompleteEmojis, ConfigurationSection emojis, boolean emojisCmdEnabled, boolean toggleCmd) {
         super(chat,toggleCmd,"emojis-off","toggleemojis","chat-emojis");
         setToggleCmdMsgs(translation.emojisOn,translation.emojisOff);
         this.output = emojiOutput;
         this.untranslate = untranslateEmojis;
         autoCompleteEnabled = plugin.getPlatform().supportsChatSuggestions() && autoCompleteEmojis;
-        for (String category : emojis.keySet()) {
-            Map<String,String> emojisMap = (Map<String,String>) emojis.get(category).get("list");
+        for (Object key : emojis.getKeys()) {
+            String category = key.toString();
+            ConfigurationSection categorySection = emojis.getConfigurationSection(category);
+            Map<String,String> emojisMap = categorySection.getMap("list", Map.of());
             totalEmojiCount+=emojisMap.size();
-            emojiCategories.put(category,new EmojiCategory(category, emojisMap,ChatUtils.componentToMM((Map<String, Object>) emojis.get(category).get("output"))));
+            emojiCategories.put(category, new EmojiCategory(category, emojisMap, ChatUtils.componentToMM(categorySection.getConfigurationSection("output"))));
         }
 
         this.emojisCmdEnabled = emojisCmdEnabled;
@@ -56,7 +57,7 @@ public class EmojiManager extends ChatManager {
         if (hasCmdToggled(viewer) || hasCmdToggled(sender)) return msg;
 
         for (EmojiCategory category : emojiCategories.values()) {
-            Map<String, String> emojis = category.getEmojis();
+            Map<String, String> emojis = category.emojis();
             if (emojis == null || emojis.isEmpty()) continue;
 
             for (String emoji : emojis.keySet()) {
@@ -89,7 +90,7 @@ public class EmojiManager extends ChatManager {
     }
 
     public String getOutput(EmojiCategory category) {
-        return category == null || category.getOutput().isEmpty() ? output : category.getOutput();
+        return category == null || category.output().isEmpty() ? output : category.output();
     }
 
     public int ownedEmojis(TabPlayer p) {
@@ -103,10 +104,10 @@ public class EmojiManager extends ChatManager {
         List<String> list = new ArrayList<>();
         for (EmojiCategory category : emojiCategories.values()) {
             if (category.canUse(p)) {
-                list.addAll(category.getEmojis().keySet());
+                list.addAll(category.emojis().keySet());
                 continue;
             }
-            for (String emoji : category.getEmojis().keySet())
+            for (String emoji : category.emojis().keySet())
                 if (category.canUse(p,emoji))
                     list.add(emoji);
         }
@@ -158,7 +159,7 @@ public class EmojiManager extends ChatManager {
 
     private void getEmojiCategory(TabPlayer sender, EmojiCategory category) {
         StringBuilder builder = new StringBuilder();
-        Map<String,String> emojis = category.getEmojis();
+        Map<String,String> emojis = category.emojis();
         AtomicInteger i = new AtomicInteger(0);
         emojis.forEach((emoji,output)->{
             if (!category.canUse(sender,emoji)) return;

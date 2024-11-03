@@ -18,7 +18,7 @@ public class SpigotListener implements Listener {
 
     @EventHandler
     public void onSneak(PlayerToggleSneakEvent e) {
-        ((PlayerPlaceholder) tab.getPlaceholderManager().getPlaceholder("%sneak%")).updateValue(getPlayer(e),e.isSneaking());
+        ((PlayerPlaceholder) tab.getPlaceholderManager().getPlaceholder("%sneak%")).updateValue(getPlayer(e), String.valueOf(e.isSneaking()));
     }
 
 

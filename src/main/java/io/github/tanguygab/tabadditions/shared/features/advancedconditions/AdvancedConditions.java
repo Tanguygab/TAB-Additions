@@ -65,7 +65,6 @@ public class AdvancedConditions {
         this.name = name;
         if (conditions == null) return;
 
-        PlaceholderManagerImpl pm = TAB.getInstance().getPlaceholderManager();
         conditions.forEach((line,text)->{
             BiFunction<TabPlayer, TabPlayer, Boolean> condition = compile(line);
             if (condition == null && !line.equals("else")) {
@@ -73,13 +72,14 @@ public class AdvancedConditions {
                 return;
             }
             subConditions.put(condition,text);
-            if (!line.startsWith("permission:")) placeholdersInConditions.addAll(pm.detectPlaceholders(line));
+            if (!line.startsWith("permission:")) placeholdersInConditions.addAll(PlaceholderManagerImpl.detectPlaceholders(line));
             else if (refresh > 1000 || refresh == -1) refresh = 1000; //permission refreshing will be done every second
-            placeholdersInConditions.addAll(pm.detectPlaceholders(text));
+            placeholdersInConditions.addAll(PlaceholderManagerImpl.detectPlaceholders(text));
         });
         hasRelationalPlaceholders = placeholdersInConditions.stream().anyMatch(placeholder->placeholder.startsWith("%rel_"));
         registeredConditions.put(name, this);
 
+        PlaceholderManagerImpl pm = TAB.getInstance().getPlaceholderManager();
         if (hasRelationalPlaceholders) pm.registerRelationalPlaceholder("%rel_condition+:"+name+"%", refresh, (viewer,target) -> getText((TabPlayer) viewer,(TabPlayer) target));
         else pm.registerPlayerPlaceholder("%condition+:"+name+"%", refresh, p -> getText((TabPlayer) p,null));
     }
