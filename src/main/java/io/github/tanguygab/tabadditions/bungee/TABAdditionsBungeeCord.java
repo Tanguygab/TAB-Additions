@@ -8,7 +8,11 @@ import java.util.Map;
 
 public final class TABAdditionsBungeeCord extends Plugin {
 
-    Map<String,Boolean> servers = new HashMap<>();
+    private final Map<String,Boolean> servers = new HashMap<>();
+
+    public TABAdditionsBungeeCord() {
+        TABAdditions.addProperties();
+    }
 
     public String getServerStatus(String server) {
         getProxy().getServers().get(server).ping((result, error) -> {

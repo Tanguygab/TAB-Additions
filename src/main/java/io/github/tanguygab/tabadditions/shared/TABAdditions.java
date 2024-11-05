@@ -18,6 +18,7 @@ import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.chat.*;
+import me.neznamy.tab.shared.config.PropertyConfiguration;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile;
 import me.neznamy.tab.shared.event.impl.TabPlaceholderRegisterEvent;
@@ -48,6 +49,17 @@ public class TABAdditions {
         this.dataFolder = dataFolder;
     	this.platform = platform;
     	this.plugin = plugin;
+    }
+    
+    public static void addProperties() {
+        PropertyConfiguration.VALID_PROPERTIES.addAll(List.of("chatprefix",
+                "customchatname",
+                "chatsuffix",
+                "join-actionbar",
+                "join-title",
+                "appearance-condition",
+                "nametag-condition"
+        ));
     }
 
     public void load() {

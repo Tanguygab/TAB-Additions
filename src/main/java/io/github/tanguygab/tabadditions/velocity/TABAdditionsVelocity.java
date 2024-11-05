@@ -19,7 +19,7 @@ import java.util.Map;
 @Plugin(
         id = "tabadditions",
         name = "TAB-Additions",
-        version = "2.1.0",
+        version = "@version@",
         authors = {"Tanguygab"},
         description = "More features for the plugin TAB !",
         dependencies = {
@@ -30,14 +30,15 @@ public final class TABAdditionsVelocity {
 
     final ProxyServer server;
     private final File dataFolder;
+    private final Map<String,Boolean> servers = new HashMap<>();
 
     @Inject
     public TABAdditionsVelocity(ProxyServer server, @DataDirectory Path dataDirectory) {
         this.server = server;
         this.dataFolder = dataDirectory.toFile();
+        TABAdditions.addProperties();
     }
 
-    Map<String,Boolean> servers = new HashMap<>();
 
     public String getServerStatus(RegisteredServer server) {
         String name = server.getServerInfo().getName();
