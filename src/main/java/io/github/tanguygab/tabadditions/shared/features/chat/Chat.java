@@ -236,23 +236,23 @@ public class Chat extends RefreshableFeature implements UnLoadable, JoinListener
             String lineBreaks = ("\n"+clearChatLine)
                     .repeat(clearChatAmount)
                     +"\n"+msgs.getChatCleared(p);
-            for (TabPlayer all : tab.getOnlinePlayers()) all.sendMessage(lineBreaks,true);
+            for (TabPlayer all : tab.getOnlinePlayers()) all.sendMessage(lineBreaks);
             return true;
         }
         if (cmd.startsWith("/ignore")) {
             if (!ignoreCmd) return false;
             if (!cmd.startsWith("/ignore ")) {
-                p.sendMessage(msgs.providePlayer, true);
+                p.sendMessage(msgs.providePlayer);
                 return true;
             }
             String player = cmd.substring(8).toLowerCase();
             if (p.getName().equalsIgnoreCase(player)) {
-                p.sendMessage(msgs.cantIgnoreSelf,true);
+                p.sendMessage(msgs.cantIgnoreSelf);
                 return true;
             }
             TabPlayer tabPlayer = plugin.getPlayer(player);
             if (tabPlayer == null) {
-                p.sendMessage(msgs.getPlayerNotFound(player),true);
+                p.sendMessage(msgs.getPlayerNotFound(player));
                 return true;
             }
             UUID playerUUID = tabPlayer.getUniqueId();
@@ -260,7 +260,7 @@ public class Chat extends RefreshableFeature implements UnLoadable, JoinListener
             if (ignored.contains(playerUUID))
                 ignored.remove(playerUUID);
             else ignored.add(playerUUID);
-            p.sendMessage(msgs.getIgnore(player,ignored.contains(playerUUID)), true);
+            p.sendMessage(msgs.getIgnore(player,ignored.contains(playerUUID)));
             return true;
         }
 
@@ -273,7 +273,7 @@ public class Chat extends RefreshableFeature implements UnLoadable, JoinListener
         if (cooldown.containsKey(sender.getUniqueId())) {
             long time = ChronoUnit.SECONDS.between(cooldown.get(sender.getUniqueId()),LocalDateTime.now());
             if (time < cooldownTime) {
-                sender.sendMessage(plugin.getTranslation().getCooldown(cooldownTime-time), true);
+                sender.sendMessage(plugin.getTranslation().getCooldown(cooldownTime-time));
                 return;
             }
         }
@@ -281,7 +281,7 @@ public class Chat extends RefreshableFeature implements UnLoadable, JoinListener
             cooldown.put(sender.getUniqueId(),LocalDateTime.now());
 
         if (chatFormatter.shouldBlock(message,sender)) {
-            sender.sendMessage(plugin.getTranslation().cantSwear,true);
+            sender.sendMessage(plugin.getTranslation().cantSwear);
             return;
         }
 

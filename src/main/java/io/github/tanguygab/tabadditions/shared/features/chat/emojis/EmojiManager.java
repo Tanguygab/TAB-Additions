@@ -130,7 +130,7 @@ public class EmojiManager extends ChatManager {
 
             EmojiCategory category = emojiCategories.get(cat);
             if (category == null || !category.canUse(sender)) {
-                sender.sendMessage(translation.emojiCategoryNotFound,true);
+                sender.sendMessage(translation.emojiCategoryNotFound);
                 return true;
             }
             getEmojiCategory(sender,category);
@@ -173,7 +173,7 @@ public class EmojiManager extends ChatManager {
         });
 
         if (i.get() == 0) {
-            sender.sendMessage(translation.emojiCategoryNotFound, true);
+            sender.sendMessage(translation.emojiCategoryNotFound);
             return;
         }
         String output = plugin.parsePlaceholders(translation.getEmojiHeader(i.get(),emojis.size())+builder,sender);

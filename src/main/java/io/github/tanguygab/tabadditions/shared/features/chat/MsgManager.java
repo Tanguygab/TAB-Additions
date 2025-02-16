@@ -62,7 +62,7 @@ public class MsgManager extends ChatManager {
                 return false;
             if (chat.isMuted(sender)) return true;
             if (isOnCooldown(sender)) {
-                sender.sendMessage(translation.getPmCooldown(getCooldown(sender)), true);
+                sender.sendMessage(translation.getPmCooldown(getCooldown(sender)));
                 return true;
             }
             setCooldown(sender);
@@ -86,28 +86,28 @@ public class MsgManager extends ChatManager {
 
     private void onMsgCommand(TabPlayer sender, String player, String msg, boolean reply) {
         if (player == null) {
-            sender.sendMessage(reply ? translation.noPlayerToReplyTo : translation.providePlayer,true);
+            sender.sendMessage(reply ? translation.noPlayerToReplyTo : translation.providePlayer);
             return;
         }
         if (msg.isEmpty()) {
-            sender.sendMessage(translation.pmEmpty, true);
+            sender.sendMessage(translation.pmEmpty);
             return;
         }
         TabPlayer receiver = plugin.getPlayer(player);
         if (receiver == null || receiver.isVanished() && !sender.hasPermission("tab.seevanished")) {
-            sender.sendMessage(translation.getPlayerNotFound(player), true);
+            sender.sendMessage(translation.getPlayerNotFound(player));
             return;
         }
         if (!msgSelf && sender == receiver) {
-            sender.sendMessage(translation.cantPmSelf, true);
+            sender.sendMessage(translation.cantPmSelf);
             return;
         }
         if (!sender.hasPermission("tabadditions.chat.bypass.togglemsg") && hasCmdToggled(receiver)) {
-            sender.sendMessage(translation.hasPmOff, true);
+            sender.sendMessage(translation.hasPmOff);
             return;
         }
         if (chat.isIgnored(sender,receiver)) {
-            sender.sendMessage(translation.isIgnored, true);
+            sender.sendMessage(translation.isIgnored);
             return;
         }
         chat.sendMessage(sender,chat.createMessage(sender,receiver,msg,senderOutput));

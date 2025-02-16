@@ -78,17 +78,17 @@ public class CommandManager extends ChatManager {
         if (cmd == null) return false;
 
         if (!cmd.isConditionMet(sender)) {
-            sender.sendMessage(tab.getConfiguration().getMessages().getNoPermission(), true);
+            sender.sendMessage(tab.getConfiguration().getMessages().getNoPermission());
             return true;
         }
         String name = cmd.getDisplayName();
         if (players.containsKey(sender.getUniqueId())) {
             players.remove(sender.getUniqueId());
-            sender.sendMessage(translation.getChatCmdLeave(name), true);
+            sender.sendMessage(translation.getChatCmdLeave(name));
             return true;
         }
         players.put(sender.getUniqueId(), cmd);
-        sender.sendMessage(translation.getChatCmdJoin(name), true);
+        sender.sendMessage(translation.getChatCmdJoin(name));
         return true;
     }
 }

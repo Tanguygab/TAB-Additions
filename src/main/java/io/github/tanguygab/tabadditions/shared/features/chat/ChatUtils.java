@@ -1,7 +1,9 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
-import me.neznamy.tab.shared.chat.EnumChatFormat;
-import me.neznamy.tab.shared.chat.rgb.RGBUtils;
+import me.neznamy.chat.EnumChatFormat;
+import me.neznamy.chat.TextColor;
+import me.neznamy.chat.rgb.RGBUtils;
+import me.neznamy.chat.util.TriFunction;
 import me.neznamy.tab.shared.config.file.ConfigurationSection;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -9,12 +11,20 @@ import org.intellij.lang.annotations.Subst;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChatUtils {
 
     protected static final Pattern tabRGBPattern = Pattern.compile("#[0-9a-fA-F]{6}");
+
+    /** Formatter to use Kyori's &lt;gradient:#RRGGBB:#RRGGBB>Text&lt;/gradient> */
+    private static final TriFunction<TextColor, String, TextColor, String> kyoriGradientFormatter =
+            (start, text, end) -> String.format("<gradient:#%s:#%s>%s</gradient>", start.getHexCode(), end.getHexCode(), text);
+
+    /** Formatter to convert RGB code to use Kyori's &lt;color:#RRGGBB>*/
+    private static final Function<TextColor, String> kyoriRGBFormatter = color -> String.format("<color:#%s>", color.getHexCode());
 
     public static int countMatches(String str, String sub) {
         if (str == null || str.isEmpty() || sub == null || sub.isEmpty()) return 0;
@@ -49,10 +59,14 @@ public class ChatUtils {
         return output.toString();
     }
 
+    public static String applyFormats(String text) {
+        return RGBUtils.getInstance().applyFormats(text, kyoriGradientFormatter, kyoriRGBFormatter);
+    }
+
     public static String toMMColors(String text) {
         if (text == null || text.isEmpty()) return "";
         text = "§r"+text; // This prevents TAB from applying the MiniMessage format which yeeted everything MM related aside from colors
-        text = RGBUtils.getInstance().applyFormats(text);
+        text = applyFormats(text);
         text = text.substring(2);
 
         text = text.replace("§","&");

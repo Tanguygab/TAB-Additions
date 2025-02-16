@@ -13,11 +13,14 @@ import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager;
 import lombok.Getter;
 import lombok.Setter;
+import me.neznamy.chat.ChatModifier;
+import me.neznamy.chat.EnumChatFormat;
+import me.neznamy.chat.component.TabComponent;
+import me.neznamy.chat.component.TextComponent;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.TAB;
-import me.neznamy.tab.shared.chat.*;
 import me.neznamy.tab.shared.config.PropertyConfiguration;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile;
@@ -201,18 +204,18 @@ public class TABAdditions {
         if (!contains) toggled.remove(player.getUniqueId());
         else toggled.add(player.getUniqueId());
         if (placeholder != null) placeholder.updateValue(player,contains ? "Off" : "On");
-        player.sendMessage(contains != invert ? off : on,true);
+        player.sendMessage(contains != invert ? off : on);
         return true;
     }
 
     public String toFlatText(TabComponent component) {
-        if (!(component instanceof StructuredComponent structured)) return component.toLegacyText();
-        ChatModifier modifier = structured.getModifier();
+        if (!(component instanceof TextComponent text)) return component.toLegacyText();
+        ChatModifier modifier = text.getModifier();
         StringBuilder builder = new StringBuilder();
         if (modifier.getColor() != null) builder.append("#").append(modifier.getColor().getHexCode());
         builder.append(modifier.getMagicCodes());
-        builder.append(structured.getText());
-        structured.getExtra().forEach(extra -> builder.append(toFlatText(extra)));
+        builder.append(text.getText());
+        component.getExtra().forEach(extra -> builder.append(toFlatText(extra)));
         return builder.toString();
     }
 

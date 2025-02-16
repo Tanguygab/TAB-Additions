@@ -1,5 +1,9 @@
 package io.github.tanguygab.tabadditions.shared;
 
+import dev.simplix.protocolize.api.Protocolize;
+import dev.simplix.protocolize.api.inventory.PlayerInventory;
+import dev.simplix.protocolize.api.item.BaseItemStack;
+import dev.simplix.protocolize.api.player.ProtocolizePlayer;
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem;
 import me.neznamy.tab.api.TabPlayer;
 import me.neznamy.tab.api.placeholder.PlaceholderManager;
@@ -24,7 +28,15 @@ public abstract class Platform {
 	public abstract void sendToDiscord(TabPlayer player, String msg, String channel, List<String> plugins);
 	public abstract boolean supportsChatSuggestions();
 	public abstract void updateChatComplete(TabPlayer p, List<String> emojis, boolean add);
-	public abstract ChatItem getItem(TabPlayer p, boolean offhand);
+
+	public ChatItem getItem(TabPlayer p, boolean offhand) {
+		ProtocolizePlayer player = Protocolize.playerProvider().player(p.getUniqueId());
+		PlayerInventory inv = player.proxyInventory();
+		BaseItemStack item = inv.item(offhand ? inv.heldItem() : 45);
+		String displayName = getItemName(item.displayName(),item.itemType().toString());
+		return new ChatItem(item.itemType().toString(),displayName,item.amount(),item.nbtData().toString());
+	}
+
 	protected String getItemName(String displayName, String type) {
 		if (displayName != null) return displayName;
 		type = type.replace("_", " ").toLowerCase();
