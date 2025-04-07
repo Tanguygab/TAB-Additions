@@ -9,15 +9,13 @@ import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import org.intellij.lang.annotations.Subst;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ChatUtils {
 
-    protected static final Pattern tabRGBPattern = Pattern.compile("#[0-9a-fA-F]{6}");
+    protected static final Pattern tabRGBPattern = Pattern.compile("([^:</]|^)(?<rgb>#[0-9a-fA-F]{6})");
 
     /** Formatter to use Kyori's &lt;gradient:#RRGGBB:#RRGGBB>Text&lt;/gradient> */
     private static final TriFunction<TextColor, String, TextColor, String> kyoriGradientFormatter =
@@ -65,9 +63,7 @@ public class ChatUtils {
 
     public static String toMMColors(String text) {
         if (text == null || text.isEmpty()) return "";
-        text = "§r"+text; // This prevents TAB from applying the MiniMessage format which yeeted everything MM related aside from colors
         text = applyFormats(text);
-        text = text.substring(2);
 
         text = text.replace("§","&");
         for (EnumChatFormat c : EnumChatFormat.values()) {
@@ -78,14 +74,10 @@ public class ChatUtils {
         text = text.replace("&u","<rainbow>");
         text = text.replace("<reset>","<bold:false><italic:false><underlined:false><strikethrough:false><obfuscated:false><white>");
 
-        Matcher m = tabRGBPattern.matcher(text);
-        List<String> rgbs = new ArrayList<>();
-        while (m.find()) {
-            String rgb = m.group();
-            if (rgbs.contains(rgb)) continue;
-            rgbs.add(rgb);
-            text = text.replace(rgb,"<"+rgb+">");
-        }
+        text = tabRGBPattern.matcher(text).replaceAll(result -> {
+            String rgb = result.group();
+            return rgb.substring(0, rgb.length()-7) + "<color:" + rgb.substring(rgb.length()-7) + ">";
+        });
         return text;
     }
 
