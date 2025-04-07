@@ -123,7 +123,7 @@ public class Chat extends RefreshableFeature implements UnLoadable, JoinListener
         msgManager = config.getBoolean("msg.enabled",true)
                 ? new MsgManager(this,ChatUtils.componentToMM(config.getConfigurationSection("msg.sender")),
                         ChatUtils.componentToMM(config.getConfigurationSection("msg.viewer")),
-                        config.getDouble("msg.cooldown",0),
+                        ChatUtils.getDouble(config.getObject("msg.cooldown")),
                         config.getStringList("msg./msg-aliases",Arrays.asList("tell","whisper","w","m")),
                         config.getBoolean("msg.msg-self",true),
                         config.getBoolean("msg./togglemsg",true),
@@ -144,7 +144,7 @@ public class Chat extends RefreshableFeature implements UnLoadable, JoinListener
                 ? new CommandManager(this,config.getConfigurationSection("commands-formats"))
                 : null;
 
-        cooldownTime = config.getDouble("cooldown",0);
+        cooldownTime = ChatUtils.getDouble(config.getObject("cooldown"));
 
         toggleCmd = config.getBoolean("/togglechat",true);
         if (toggleCmd) {

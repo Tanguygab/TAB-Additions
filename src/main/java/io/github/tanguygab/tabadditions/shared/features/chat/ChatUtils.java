@@ -95,4 +95,8 @@ public class ChatUtils {
         catch (Exception e) {key = Key.key("block.note_block.pling");}
         return Sound.sound(key,Sound.Source.MASTER,1,1);
     }
+
+    public static double getDouble(Object object) {
+        return object instanceof Double d ? d : 0;
+    }
 }
