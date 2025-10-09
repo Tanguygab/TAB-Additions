@@ -1,8 +1,7 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
-import me.neznamy.chat.EnumChatFormat;
-import me.neznamy.chat.rgb.RGBUtils;
+import me.neznamy.tab.shared.chat.EnumChatFormat;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.config.file.ConfigurationSection;
 import me.neznamy.tab.shared.platform.TabPlayer;

@@ -13,14 +13,14 @@ import io.github.tanguygab.tabadditions.shared.features.chat.Chat;
 import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager;
 import lombok.Getter;
 import lombok.Setter;
-import me.neznamy.chat.ChatModifier;
-import me.neznamy.chat.EnumChatFormat;
-import me.neznamy.chat.component.TabComponent;
-import me.neznamy.chat.component.TextComponent;
+import me.neznamy.tab.shared.chat.EnumChatFormat;
+import me.neznamy.tab.shared.chat.TabStyle;
+import me.neznamy.tab.shared.chat.component.TabComponent;
 import me.neznamy.tab.api.event.plugin.TabLoadEvent;
 import me.neznamy.tab.api.placeholder.Placeholder;
 import me.neznamy.tab.shared.FeatureManager;
 import me.neznamy.tab.shared.TAB;
+import me.neznamy.tab.shared.chat.component.TabTextComponent;
 import me.neznamy.tab.shared.config.PropertyConfiguration;
 import me.neznamy.tab.shared.config.file.ConfigurationFile;
 import me.neznamy.tab.shared.config.file.YamlConfigurationFile;
@@ -150,7 +150,7 @@ public class TABAdditions {
         }
         if (identifier.startsWith("%rel_condition:")) {
             String cond = identifier.substring(15,identifier.length()-1);
-            Condition condition = Condition.getCondition(cond);
+            Condition condition = tab.getPlaceholderManager().getConditionManager().getByNameOrExpression(cond);
             e.setRelationalPlaceholder((viewer, target) -> viewer == null ? "" : parsePlaceholders(condition.getText((TabPlayer) viewer), (TabPlayer) target, (TabPlayer) viewer));
         }
     }
@@ -186,7 +186,7 @@ public class TABAdditions {
     }
 
     public ConfigurationFile getPlayerData() {
-        return tab.getConfiguration().getPlayerDataFile();
+        return tab.getConfiguration().getPlayerData();
     }
     public List<UUID> loadData(String data, boolean enabled) {
         return enabled ? getPlayerData().getStringList(data, new ArrayList<>()).stream().map(UUID::fromString).collect(Collectors.toCollection(ArrayList::new)) : List.of();
@@ -209,8 +209,8 @@ public class TABAdditions {
     }
 
     public String toFlatText(TabComponent component) {
-        if (!(component instanceof TextComponent text)) return component.toLegacyText();
-        ChatModifier modifier = text.getModifier();
+        if (!(component instanceof TabTextComponent text)) return component.toLegacyText();
+        TabStyle modifier = text.getModifier();
         StringBuilder builder = new StringBuilder();
         if (modifier.getColor() != null) builder.append("#").append(modifier.getColor().getHexCode());
         builder.append(modifier.getMagicCodes());

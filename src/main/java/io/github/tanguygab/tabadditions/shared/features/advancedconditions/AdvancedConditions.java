@@ -68,7 +68,6 @@ public class AdvancedConditions {
         conditions.forEach((line,text)->{
             BiFunction<TabPlayer, TabPlayer, Boolean> condition = compile(line);
             if (condition == null && !line.equals("else")) {
-                TAB.getInstance().getConfigHelper().startup().invalidConditionPattern("[TAB-Additions]-"+name, line);
                 return;
             }
             subConditions.put(condition,text);

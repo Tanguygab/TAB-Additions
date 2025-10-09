@@ -34,7 +34,7 @@ public class MentionManager extends ChatManager {
                 mentions.put(mention, new CustomMention(
                         mentionSection.getString("input"),
                         mentionSection.getString("output"),
-                        Condition.getCondition(mentionSection.getString("condition")),
+                        tab.getPlaceholderManager().getConditionManager().getByNameOrExpression(mentionSection.getString("condition")),
                         ChatUtils.getSound(mentionSection.getString("sound"))
                 ));
             });

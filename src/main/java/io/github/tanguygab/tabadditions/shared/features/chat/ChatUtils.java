@@ -1,9 +1,9 @@
 package io.github.tanguygab.tabadditions.shared.features.chat;
 
-import me.neznamy.chat.EnumChatFormat;
-import me.neznamy.chat.TextColor;
-import me.neznamy.chat.rgb.RGBUtils;
-import me.neznamy.chat.util.TriFunction;
+import me.neznamy.tab.shared.chat.EnumChatFormat;
+import me.neznamy.tab.shared.chat.TabTextColor;
+import me.neznamy.tab.shared.chat.rgb.RGBUtils;
+import me.neznamy.tab.shared.util.function.TriFunction;
 import me.neznamy.tab.shared.config.file.ConfigurationSection;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
@@ -18,11 +18,11 @@ public class ChatUtils {
     protected static final Pattern tabRGBPattern = Pattern.compile("([^:</]|^)(?<rgb>#[0-9a-fA-F]{6})");
 
     /** Formatter to use Kyori's &lt;gradient:#RRGGBB:#RRGGBB>Text&lt;/gradient> */
-    private static final TriFunction<TextColor, String, TextColor, String> kyoriGradientFormatter =
+    private static final TriFunction<TabTextColor, String, TabTextColor, String> kyoriGradientFormatter =
             (start, text, end) -> String.format("<gradient:#%s:#%s>%s</gradient>", start.getHexCode(), end.getHexCode(), text);
 
     /** Formatter to convert RGB code to use Kyori's &lt;color:#RRGGBB>*/
-    private static final Function<TextColor, String> kyoriRGBFormatter = color -> String.format("<color:#%s>", color.getHexCode());
+    private static final Function<TabTextColor, String> kyoriRGBFormatter = color -> String.format("<color:#%s>", color.getHexCode());
 
     public static int countMatches(String str, String sub) {
         if (str == null || str.isEmpty() || sub == null || sub.isEmpty()) return 0;

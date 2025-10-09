@@ -50,7 +50,7 @@ public class ActionBarManager extends RefreshableFeature implements UnLoadable, 
             String condition = section.getString("condition");
 
             if (text != null) addUsedPlaceholders(PlaceholderManagerImpl.detectPlaceholders(text));
-            actionBars.put(bar,new ActionBarLine(text,condition == null ? null : Condition.getCondition(condition)));
+            actionBars.put(bar,new ActionBarLine(text,condition == null ? null : tab.getPlaceholderManager().getConditionManager().getByNameOrExpression(condition)));
         });
 
         tab.getCPUManager().getProcessingThread().repeatTask(new TimedCaughtTask(tab.getCPUManager(), ()->{
