@@ -27,7 +27,7 @@ titles:
 advanced-conditions:
   health:
     "%health%>=15": "&a%health%"
-    "%health%>=10": "e%health%"
+    "%health%>=10": "&e%health%"
     "%health%>=5": "&c%health%"
     "%health%>=0": "&4%health%"
   inRange:

@@ -1,0 +1,37 @@
+[versions]
+kotlin = "2.2.20-RC2"
+blossom = "2.1.0"
+
+spigot = "1.21.9-R0.1-SNAPSHOT"
+bungee = "1.21-R0.3"
+velocity = "3.4.0-SNAPSHOT"
+
+protocolize = "2.4.2"
+advancedban = "2.3.0"
+
+discordsrv = "1.30.1"
+essentials-discord = "2.21.2"
+interactivechat = "4.3.2.0"
+
+adventure-platform = "4.4.1"
+adventure-minimessage = "4.25.0"
+
+[libraries]
+spigot = { module = "io.papermc.paper:paper-api", version.ref = "spigot" }
+bungee = { module = "net.md-5:bungeecord-api", version.ref = "bungee" }
+velocity = { module = "com.velocitypowered:velocity-api", version.ref = "velocity" }
+
+protocolize = { module = "dev.simplix:protocolize-api", version.ref = "protocolize" }
+advancedban = { module = "com.github.DevLeoko:AdvancedBan", version.ref = "advancedban" }
+
+discordsrv = { module = "com.discordsrv:discordsrv", version.ref = "discordsrv" }
+essentials-discord = { module = "net.essentialsx:EssentialsXDiscord", version.ref = "essentials-discord" }
+interactivechat = { module = "com.loohp:InteractiveChat", version.ref = "interactivechat" }
+
+adventure-platform-bukkit = { module = "net.kyori:adventure-platform-bukkit", version.ref = "adventure-platform" }
+adventure-platform-bungee = { module = "net.kyori:adventure-platform-bungeecord", version.ref = "adventure-platform" }
+adventure-minimessage = { module = "net.kyori:adventure-text-minimessage", version.ref = "adventure-minimessage" }
+adventure-serializer = { module = "net.kyori:adventure-text-serializer-plain", version.ref = "adventure-minimessage" }
+
+[plugins]
+blossom = { id = "net.kyori.blossom", version.ref = "blossom" }

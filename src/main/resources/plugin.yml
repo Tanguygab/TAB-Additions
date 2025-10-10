@@ -1,8 +1,13 @@
 name: TAB-Additions
-version: '${version}'
+version: "${version}"
 main: io.github.tanguygab.tabadditions.spigot.TABAdditionsSpigot
 api-version: 1.13
 depend: [TAB]
 softdepend: [floodgate-bukkit,DiscordSRV,AdvancedBan,InteractiveChat]
 author: Tanguygab
 description: More features for the plugin TAB !
+libraries:
+  - org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}
+  - net.kyori:adventure-platform-bukkit:${adventurePlatformVersion}
+  - net.kyori:adventure-text-minimessage:${adventureMiniMessageVersion}
+  - net.kyori:adventure-text-serializer-plain:${adventureMiniMessageVersion}

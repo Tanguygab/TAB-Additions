@@ -5,3 +5,8 @@ description: More features for the plugin TAB !
 depends: [TAB]
 softDepends: [floodgate-bungee,AdvancedBan]
 author: Tanguygab
+libraries:
+  - org.jetbrains.kotlin:kotlin-stdlib-jdk8:${kotlinVersion}
+  - net.kyori:adventure-platform-bungeecord:${adventurePlatformVersion}
+  - net.kyori:adventure-text-minimessage:${adventureMiniMessageVersion}
+  - net.kyori:adventure-text-serializer-plain:${adventureMiniMessageVersion}
