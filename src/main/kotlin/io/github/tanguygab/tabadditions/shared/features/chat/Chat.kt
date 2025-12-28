@@ -78,10 +78,10 @@ class Chat(config: ConfigurationFile) : RefreshableFeature(), UnLoadable, JoinLi
 
             this.formats[name] = ChatFormat(
                 name,
-                format.getString("name", name),
+                format.getString("name") ?: name,
                 AdvancedConditions.getCondition(format.getString("condition")),
                 AdvancedConditions.getCondition(format.getString("view-condition")),
-                format.getString("channel", ""),
+                format.getString("channel") ?: "",
                 ChatUtils.componentsToMM(format.getConfigurationSection("display"))
             )
         }

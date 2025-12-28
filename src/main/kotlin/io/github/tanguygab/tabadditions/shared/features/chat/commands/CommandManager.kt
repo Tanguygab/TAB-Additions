@@ -21,7 +21,7 @@ class CommandManager(chat: Chat, commands: ConfigurationSection) : ChatManager(c
             val condition = command.getString("condition")
             val viewCondition = command.getString("view-condition")
             val channel = command.getString("channel")
-            val save = command.getBoolean("keep-on-reload", true)
+            val save = command.getBoolean("keep-on-reload") ?: true
             val prefix = command.getString("prefix")
             val display = command.getConfigurationSection("display")
             this.commands[name] = FormatCommand(

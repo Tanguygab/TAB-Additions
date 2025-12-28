@@ -40,7 +40,7 @@ class ChatFormatter(config: ConfigurationFile) {
 
             customInteractions[key] = Interaction(
                 section.getString("input", ""),
-                section.getBoolean("permission", false),
+                section.getBoolean("permission") ?: false,
                 componentToMM(section.getConfigurationSection("output"))
             )
         }
