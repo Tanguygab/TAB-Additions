@@ -43,6 +43,7 @@ class TABAdditions(
 
     fun load() {
         loadFiles()
+        tab.eventBus?.register(TabPlaceholderRegisterEvent::class.java) { onPlaceholderRegister(it) }
         reload()
         tab.eventBus?.register(TabLoadEvent::class.java){ platform.runTask { reload() } }
     }
@@ -115,6 +116,28 @@ class TABAdditions(
         val conditions = config.getMap<String, Map<String, String>>("advanced-conditions")
         conditions.forEach { (name: String, conditions: Map<String, String>) -> AdvancedConditions(name, conditions) }
         AdvancedConditions.finishSetups()
+    }
+
+    private fun onPlaceholderRegister(e: TabPlaceholderRegisterEvent) {
+        val identifier = e.identifier
+        val pm = tab.placeholderManager
+        if (identifier.startsWith("%rel_viewer:")) {
+            val placeholder = pm.getPlaceholder("%" + identifier.substring(12))
+
+            e.relationalPlaceholder = when (placeholder) {
+                is RelationalPlaceholderImpl -> BiFunction { viewer: TabPlayer, target: TabPlayer ->
+                    placeholder.getLastValue(
+                        target as me.neznamy.tab.shared.platform.TabPlayer,
+                        viewer as me.neznamy.tab.shared.platform.TabPlayer
+                    )
+                }
+                is PlayerPlaceholderImpl -> BiFunction { viewer: TabPlayer, _: TabPlayer ->
+                    placeholder.getLastValue(viewer as me.neznamy.tab.shared.platform.TabPlayer)
+                }
+                else -> e.relationalPlaceholder
+            }
+            return
+        }
     }
 
     fun parsePlaceholders(string: String?, player: me.neznamy.tab.shared.platform.TabPlayer): String {
