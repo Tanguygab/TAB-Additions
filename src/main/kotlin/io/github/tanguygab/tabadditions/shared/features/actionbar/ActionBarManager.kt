@@ -5,7 +5,6 @@ import io.github.tanguygab.tabadditions.shared.commands.ActionBarCmd
 import me.neznamy.tab.shared.TAB
 import me.neznamy.tab.shared.cpu.TimedCaughtTask
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl
-import me.neznamy.tab.shared.features.types.CommandListener
 import me.neznamy.tab.shared.features.types.JoinListener
 import me.neznamy.tab.shared.features.types.RefreshableFeature
 import me.neznamy.tab.shared.features.types.UnLoadable
@@ -13,24 +12,29 @@ import me.neznamy.tab.shared.platform.TabPlayer
 import me.neznamy.tab.shared.util.cache.StringToComponentCache
 import java.util.UUID
 
-class ActionBarManager : RefreshableFeature(), UnLoadable, CommandListener, JoinListener {
+class ActionBarManager : RefreshableFeature(), UnLoadable, JoinListener {
     private val plugin: TABAdditions = TABAdditions.INSTANCE
 
     override fun getFeatureName() = "ActionBar"
     override fun getRefreshDisplayName() = "&aActionBar&r"
-    override fun getCommand() = "/toggleactionbar"
 
     val actionBars = mutableMapOf<String, ActionBarLine>()
     private val announcedBars = mutableMapOf<TabPlayer, String>()
     private val toggled: MutableList<UUID>
-    private val toggleCmd: Boolean
+    val toggleCmd: Boolean
 
     init {
         val tab = TAB.getInstance()
         tab.command.registerSubCommand(ActionBarCmd(this))
 
         toggleCmd = plugin.config.getBoolean("actionbars./toggleactionbar", true)
-        if (toggleCmd) plugin.platform.registerCommand("toggleactionbar")
+        if (toggleCmd) {
+            tab.platform.registerCustomCommand("toggleactionbar") { sender, _ ->
+                if (plugin.toggleCmd(sender, toggled, plugin.translation.actionBarOn, plugin.translation.actionBarOff)) {
+                    refresh(sender, true)
+                }
+            }
+        }
         toggled = plugin.loadData("actionbar-off", toggleCmd)
 
         val barsConfig = plugin.config.getConfigurationSection("actionbars.bars")
@@ -87,21 +91,6 @@ class ActionBarManager : RefreshableFeature(), UnLoadable, CommandListener, Join
         val property = player.loadPropertyFromConfig(this, "join-actionbar", "").currentRawValue
         if (property.isEmpty()) return
         announceBar(player, property)
-    }
-
-    override fun onCommand(player: TabPlayer, msg: String): Boolean {
-        if (msg == command && plugin.toggleCmd(
-                toggleCmd,
-                player,
-                toggled,
-                plugin.translation.actionBarOn,
-                plugin.translation.actionBarOff
-            )
-        ) {
-            refresh(player, true)
-            return true
-        }
-        return false
     }
 
     companion object {

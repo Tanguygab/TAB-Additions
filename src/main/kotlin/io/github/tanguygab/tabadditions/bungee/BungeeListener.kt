@@ -20,12 +20,7 @@ class BungeeListener : Listener {
         val chat = tab.featureManager.getFeature<Chat>("Chat") ?: return
         val player = getPlayer(e.sender)
 
-        if (e.isCommand && chat.onCommand(player, e.message)) {
-            e.isCancelled = true
-            return
-        }
-
-        if (chat.bukkitBridgeChatEnabled) return
+        if (chat.bukkitBridgeChatEnabled || e.isCommand) return
         e.isCancelled = true
         chat.onChat(player, e.message)
     }

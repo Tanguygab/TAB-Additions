@@ -78,5 +78,5 @@ class MentionManager(
         plugin.platform.audience(player).playSound(sound)
     }
 
-    override fun onCommand(sender: TabPlayer, command: String) = toggleCmd(sender)
+    override fun onCommand(sender: TabPlayer, command: String) { toggleCmd(sender) }
 }

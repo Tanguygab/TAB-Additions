@@ -3,20 +3,14 @@ package io.github.tanguygab.tabadditions.spigot
 import github.scarsz.discordsrv.DiscordSRV
 import io.github.tanguygab.tabadditions.shared.Platform
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatItem
-import me.neznamy.tab.api.TabAPI
 import me.neznamy.tab.api.TabPlayer
 import me.neznamy.tab.api.placeholder.PlaceholderManager
 import net.essentialsx.api.v2.services.discord.DiscordService
 import net.kyori.adventure.platform.bukkit.BukkitAudiences
 import net.md_5.bungee.api.ChatMessageType
 import net.md_5.bungee.api.chat.TextComponent
-import org.bukkit.command.Command
-import org.bukkit.command.CommandSender
-import org.bukkit.command.SimpleCommandMap
-import org.bukkit.command.defaults.BukkitCommand
 import org.bukkit.entity.Player
 import org.bukkit.event.HandlerList
-import java.lang.reflect.Method
 import java.text.DecimalFormat
 import kotlin.math.roundToInt
 import kotlin.math.sqrt
@@ -25,16 +19,12 @@ class SpigotPlatform(private val plugin: TABAdditionsSpigot) : Platform() {
     private var listener: SpigotListener? = null
     private val kyori = BukkitAudiences.create(plugin)
     private var chatSuggestions = false
-    private var getCommandMap: Method? = null
 
     init {
         try {
             Player::class.java.getDeclaredMethod("addCustomChatCompletions", MutableCollection::class.java)
             chatSuggestions = true
         } catch (_: NoSuchMethodException) {}
-        try {
-            getCommandMap = plugin.server.javaClass.getMethod("getCommandMap")
-        } catch (_: Exception) {}
     }
 
     override val isProxy = false
@@ -49,21 +39,6 @@ class SpigotPlatform(private val plugin: TABAdditionsSpigot) : Platform() {
             val tLoc = target0.location
             format.format(sqrt(vLoc.distanceSquared(tLoc)).roundToInt())
         }
-        pm.registerPlayerPlaceholder("%canseeworldonline%", 1000) { viewer: TabPlayer ->
-            val viewer0 = viewer.player as Player
-            TabAPI.getInstance().onlinePlayers.count {
-                val player = it.player as Player
-                viewer0.world == player.world && viewer0.canSee(player)
-            }.toString()
-        }
-        pm.registerPlayerPlaceholder("%sneak%", -1) { (it.player as Player).isSneaking.toString() }
-    }
-
-    override fun registerCommand(command: String, vararg aliases: String) {
-        val cmd: Command = object : BukkitCommand(command, "", "/$command", listOf(*aliases)) {
-            override fun execute(sender: CommandSender, commandLabel: String, args: Array<String>) = true
-        }
-        (getCommandMap?.invoke(plugin.server) as SimpleCommandMap).register(command, "chat", cmd)
     }
 
     override fun isPluginEnabled(plugin: String) = this.plugin.server.pluginManager.isPluginEnabled(plugin)
@@ -94,6 +69,7 @@ class SpigotPlatform(private val plugin: TABAdditionsSpigot) : Platform() {
         plugin.server.pluginManager.registerEvents(SpigotListener().also { listener = it }, plugin)
     }
 
+    @Suppress("removal")
     override fun disable() {
         plugin.pluginLoader.disablePlugin(plugin)
     }

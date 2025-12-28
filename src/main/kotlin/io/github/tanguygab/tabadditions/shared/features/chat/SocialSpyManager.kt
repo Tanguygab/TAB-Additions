@@ -42,10 +42,7 @@ class SocialSpyManager(
             chat.sendMessage(viewer, chat.createMessage(sender, viewer, message, output))
             return
         }
-        toggled.removeIf {
-            val p = tab.getPlayer(it)
-            p != null && p.hasPermission("tabadditions.chat.socialspy")
-        }
+        toggled.removeIf { tab.getPlayer(it)?.hasPermission("tabadditions.chat.socialspy") == true}
         toggled.forEach {
             val spy = tab.getPlayer(it)
             if (spy == null || spy === sender) return@forEach
@@ -53,5 +50,8 @@ class SocialSpyManager(
         }
     }
 
-    override fun onCommand(sender: TabPlayer, command: String) = toggleCmd(sender)
+    override fun onCommand(sender: TabPlayer, command: String) {
+        if (sender.hasPermission("tabadditions.chat.socialspy"))
+            toggleCmd(sender)
+    }
 }

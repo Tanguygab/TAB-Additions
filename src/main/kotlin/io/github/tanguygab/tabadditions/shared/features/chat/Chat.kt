@@ -143,8 +143,23 @@ class Chat(config: ConfigurationFile) : RefreshableFeature(), UnLoadable, JoinLi
             else null
         }
 
+        if (chatPlaceholderRelational) relChatPlaceholder = pm.registerRelationalPlaceholder("%rel_chat%", -1) { _, _ -> "" }
+        else placeholders.add(pm.registerPlayerPlaceholder("%chat%", -1) { "" }.also { chatPlaceholder = it })
+
+        tab.onlinePlayers.forEach { loadProperties(it) }
+
+        val lang = plugin.translation
+        if (clearChatEnabled) tab.platform.registerCustomCommand("clearchat") { sender, _ ->
+            if (!sender.hasPermission("tabadditions.chat.clearchat")) return@registerCustomCommand
+
+            val lineBreaks = ("\n" + clearChatLine).repeat(clearChatAmount) + "\n" + lang.getChatCleared(sender)
+            tab.onlinePlayers.forEach { _ -> sender.sendMessage(lineBreaks) }
+        }
+
         if (toggleCmd) {
-            plugin.platform.registerCommand("togglechat")
+            tab.platform.registerCustomCommand("togglechat") { sender, _ ->
+                plugin.toggleCmd(sender, toggled!!, toggleChatPlaceholder, lang.chatOn, lang.chatOff, false)
+            }
             toggleChatPlaceholder = pm.registerPlayerPlaceholder(
                 "%chat-status%",
                 -1
@@ -165,10 +180,27 @@ class Chat(config: ConfigurationFile) : RefreshableFeature(), UnLoadable, JoinLi
             }
         }
 
-        if (chatPlaceholderRelational) relChatPlaceholder = pm.registerRelationalPlaceholder("%rel_chat%", -1) { _, _ -> "" }
-        else placeholders.add(pm.registerPlayerPlaceholder("%chat%", -1) { "" }.also { chatPlaceholder = it })
-
-        tab.onlinePlayers.forEach { loadProperties(it) }
+        if (ignoreCmd) tab.platform.registerCustomCommand("ignore") { sender, args ->
+            if (args.isEmpty()) {
+                sender.sendMessage(lang.providePlayer)
+                return@registerCustomCommand
+            }
+            val arg = args[0]
+            if (sender.name.equals(arg, ignoreCase = true)) {
+                sender.sendMessage(lang.cantIgnoreSelf)
+                return@registerCustomCommand
+            }
+            val tabPlayer = plugin.getPlayer(arg)
+            if (tabPlayer == null) {
+                sender.sendMessage(lang.getPlayerNotFound(arg))
+                return@registerCustomCommand
+            }
+            val playerUUID = tabPlayer.uniqueId
+            val ignored = ignored.computeIfAbsent(sender.uniqueId) { mutableListOf() }
+            if (playerUUID in ignored) ignored.remove(playerUUID)
+            else ignored.add(playerUUID)
+            sender.sendMessage(lang.getIgnore(arg, playerUUID in ignored))
+        }
     }
 
     private fun loadProperties(player: TabPlayer) {
@@ -197,52 +229,6 @@ class Chat(config: ConfigurationFile) : RefreshableFeature(), UnLoadable, JoinLi
         loadProperties(player)
         if (emojiManager != null && emojiManager.autoCompleteEnabled && !emojiManager.hasCmdToggled(player))
             emojiManager.loadAutoComplete(player)
-    }
-
-    fun onCommand(p: TabPlayer, cmd: String): Boolean {
-        if (cmd.startsWith("/emojis") || cmd == "/toggleemojis") return emojiManager?.onCommand(p, cmd) == true
-        if (cmd == "/togglementions") return mentionManager?.onCommand(p, cmd) == true
-        if (msgManager != null && (cmd == "/togglemsg"
-                    || msgManager.isReplyCmd(cmd, false)
-                    || msgManager.isMsgCmd(cmd, false)
-                )
-        ) return msgManager.onCommand(p, cmd)
-        if (cmd == "/socialspy") return p.hasPermission("tabadditions.chat.socialspy") && socialSpyManager?.onCommand(p, cmd) == true
-
-        val msgs = plugin.translation
-        if (cmd == "/togglechat") return plugin.toggleCmd(toggleCmd, p, toggled!!, toggleChatPlaceholder, msgs.chatOn, msgs.chatOff, false)
-        if (cmd == "/clearchat") {
-            if (!clearChatEnabled || !p.hasPermission("tabadditions.chat.clearchat")) return false
-
-            val lineBreaks = ("\n" + clearChatLine).repeat(clearChatAmount) + "\n" + msgs.getChatCleared(p)
-            tab.onlinePlayers.forEach { it.sendMessage(lineBreaks) }
-            return true
-        }
-        if (cmd.startsWith("/ignore")) {
-            if (!ignoreCmd) return false
-            if (!cmd.startsWith("/ignore ")) {
-                p.sendMessage(msgs.providePlayer)
-                return true
-            }
-            val player = cmd.substring(8).lowercase()
-            if (p.name.equals(player, ignoreCase = true)) {
-                p.sendMessage(msgs.cantIgnoreSelf)
-                return true
-            }
-            val tabPlayer = plugin.getPlayer(player)
-            if (tabPlayer == null) {
-                p.sendMessage(msgs.getPlayerNotFound(player))
-                return true
-            }
-            val playerUUID = tabPlayer.uniqueId
-            val ignored = ignored.computeIfAbsent(p.uniqueId) { mutableListOf() }
-            if (playerUUID in ignored) ignored.remove(playerUUID)
-            else ignored.add(playerUUID)
-            p.sendMessage(msgs.getIgnore(player, playerUUID in ignored))
-            return true
-        }
-
-        return commandsManager?.onCommand(p, cmd) == true
     }
 
     fun onChat(sender: TabPlayer, message: String) {
@@ -329,11 +315,7 @@ class Chat(config: ConfigurationFile) : RefreshableFeature(), UnLoadable, JoinLi
         return mm.deserialize(output)
     }
 
-    private fun process(
-        sender: TabPlayer,
-        viewer: TabPlayer?,
-        message: String
-    ): String {
+    private fun process(sender: TabPlayer, viewer: TabPlayer?, message: String): String {
         var message = mm.escapeTags(message)
         if (emojiManager != null) message = emojiManager.process(sender, viewer, message)
         if (mentionManager != null && viewer != null) message = mentionManager.process(sender, viewer, message)

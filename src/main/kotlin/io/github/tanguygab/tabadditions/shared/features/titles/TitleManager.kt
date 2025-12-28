@@ -5,7 +5,6 @@ import io.github.tanguygab.tabadditions.shared.commands.TitleCmd
 import me.neznamy.tab.shared.TAB
 import me.neznamy.tab.shared.cpu.TimedCaughtTask
 import me.neznamy.tab.shared.features.PlaceholderManagerImpl
-import me.neznamy.tab.shared.features.types.CommandListener
 import me.neznamy.tab.shared.features.types.JoinListener
 import me.neznamy.tab.shared.features.types.RefreshableFeature
 import me.neznamy.tab.shared.features.types.UnLoadable
@@ -13,12 +12,11 @@ import me.neznamy.tab.shared.platform.TabPlayer
 import me.neznamy.tab.shared.util.cache.StringToComponentCache
 import java.util.UUID
 
-class TitleManager : RefreshableFeature(), UnLoadable, CommandListener, JoinListener {
+class TitleManager : RefreshableFeature(), UnLoadable, JoinListener {
     private val plugin: TABAdditions = TABAdditions.INSTANCE
 
     override fun getFeatureName() = "Title"
     override fun getRefreshDisplayName() = "&aTitle&r"
-    override fun getCommand() = "/toggletitle"
 
     val titles = mutableMapOf<String, Title>()
     private val announcedTitles = mutableMapOf<TabPlayer, Title>()
@@ -31,7 +29,13 @@ class TitleManager : RefreshableFeature(), UnLoadable, CommandListener, JoinList
 
         val config = plugin.config
         toggleCmd = config.getBoolean("titles./toggletitle", true)
-        if (toggleCmd) plugin.platform.registerCommand("toggletitle")
+        if (toggleCmd) {
+            tab.platform.registerCustomCommand("toggletitle") { sender, _ ->
+                if (plugin.toggleCmd(sender, toggled, plugin.translation.titleOn, plugin.translation.titleOff)) {
+                    refresh(sender, true)
+                }
+            }
+        }
         toggled = plugin.loadData("title-off", toggleCmd)
 
         val titlesConfig = config.getConfigurationSection("titles.titles")
@@ -94,21 +98,6 @@ class TitleManager : RefreshableFeature(), UnLoadable, CommandListener, JoinList
         val property = player.loadPropertyFromConfig(this, "join-title", "").currentRawValue
         if (property.isEmpty()) return
         announceTitle(player, property)
-    }
-
-    override fun onCommand(player: TabPlayer, msg: String): Boolean {
-        if (msg == command && plugin.toggleCmd(
-                toggleCmd,
-                player,
-                toggled,
-                plugin.translation.titleOn,
-                plugin.translation.titleOff
-            )
-        ) {
-            refresh(player, true)
-            return true
-        }
-        return false
     }
 
     companion object {

@@ -25,7 +25,8 @@ abstract class ChatManager @JvmOverloads constructor(
 
     init {
         if (toggleCmd) {
-            plugin.platform.registerCommand(cmd!!)
+            tab.platform.registerCustomCommand(cmd!!) { sender, args -> onCommand(sender, args.joinToString("")) }
+
             this.placeholder = tab.placeholderManager.registerPlayerPlaceholder("%$placeholder%", -1)
             { if (hasCmdToggled(it as TabPlayer)) "Off" else "On" }
             chat.placeholders.add(this.placeholder)
@@ -48,9 +49,7 @@ abstract class ChatManager @JvmOverloads constructor(
 
     fun hasCmdToggled(p: TabPlayer?) = p?.uniqueId in toggled
 
-    fun toggleCmd(player: TabPlayer): Boolean {
-        return plugin.toggleCmd(toggleCmd, player, toggled, placeholder, toggledOn!!, toggledOff!!, invertPlaceholder)
-    }
+    fun toggleCmd(player: TabPlayer) = plugin.toggleCmd(player, toggled, placeholder, toggledOn!!, toggledOff!!, invertPlaceholder)
 
-    abstract fun onCommand(sender: TabPlayer, command: String): Boolean
+    open fun onCommand(sender: TabPlayer, command: String) {}
 }

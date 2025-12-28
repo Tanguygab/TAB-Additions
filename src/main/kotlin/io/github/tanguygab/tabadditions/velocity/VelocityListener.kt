@@ -2,7 +2,6 @@ package io.github.tanguygab.tabadditions.velocity
 
 import com.google.common.io.ByteStreams
 import com.velocitypowered.api.event.Subscribe
-import com.velocitypowered.api.event.command.CommandExecuteEvent
 import com.velocitypowered.api.event.connection.PluginMessageEvent
 import com.velocitypowered.api.event.player.PlayerChatEvent
 import com.velocitypowered.api.proxy.Player
@@ -20,21 +19,6 @@ class VelocityListener {
 
         e.result = PlayerChatEvent.ChatResult.denied()
         chat.onChat(getPlayer(e.player), e.message)
-    }
-
-    @Subscribe
-    fun onCommand(e: CommandExecuteEvent) {
-        if (!e.result.isAllowed) return
-
-        val chat = tab.featureManager.getFeature<Chat>("Chat")
-        val sender = e.commandSource
-
-        if (chat == null || sender !is Player) return
-        val player = getPlayer(sender)
-
-        if (chat.onCommand(player, e.command)) {
-            e.result = CommandExecuteEvent.CommandResult.denied()
-        }
     }
 
     @Subscribe

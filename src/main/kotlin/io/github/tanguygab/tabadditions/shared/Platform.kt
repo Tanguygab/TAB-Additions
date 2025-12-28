@@ -11,7 +11,6 @@ abstract class Platform {
     abstract fun runTask(run: () -> Unit)
     abstract fun reload()
     abstract fun registerPlaceholders(pm: PlaceholderManager)
-    abstract fun registerCommand(command: String, vararg aliases: String)
     abstract fun isPluginEnabled(plugin: String): Boolean
     abstract fun disable()
 

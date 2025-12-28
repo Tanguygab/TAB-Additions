@@ -6,11 +6,9 @@ import me.neznamy.tab.api.TabPlayer
 import me.neznamy.tab.api.placeholder.PlaceholderManager
 import net.kyori.adventure.platform.bungeecord.BungeeAudiences
 import net.md_5.bungee.api.ChatMessageType
-import net.md_5.bungee.api.CommandSender
 import net.md_5.bungee.api.ProxyServer
 import net.md_5.bungee.api.chat.TextComponent
 import net.md_5.bungee.api.connection.ProxiedPlayer
-import net.md_5.bungee.api.plugin.Command
 
 class BungeePlatform(private val plugin: TABAdditionsBungeeCord) : Platform() {
     private var listener: BungeeListener? = null
@@ -22,12 +20,6 @@ class BungeePlatform(private val plugin: TABAdditionsBungeeCord) : Platform() {
         for (server in ProxyServer.getInstance().servers.keys) {
             pm.registerServerPlaceholder("%server-status:$server%", 10000) { plugin.getServerStatus(server) }
         }
-    }
-
-    override fun registerCommand(command: String, vararg aliases: String) {
-        plugin.proxy.pluginManager.registerCommand(plugin, object : Command(command, null, *aliases) {
-            override fun execute(sender: CommandSender, args: Array<String>) {}
-        })
     }
 
     override fun isPluginEnabled(plugin: String) = this.plugin.proxy.pluginManager.getPlugin(plugin) != null

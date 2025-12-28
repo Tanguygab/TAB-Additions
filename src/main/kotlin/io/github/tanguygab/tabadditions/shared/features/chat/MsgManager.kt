@@ -9,10 +9,10 @@ class MsgManager(
     private val senderOutput: String,
     private val viewerOutput: String,
     private val cooldown: Double,
-    private val aliases: List<String>,
+    aliases: List<String>,
     private val msgSelf: Boolean,
     toggleCmd: Boolean,
-    private val replyCmd: Boolean,
+    replyCmd: Boolean,
     private val saveLastSenderForReply: Boolean
 ) : ChatManager(chat, toggleCmd, "msg-off", "togglemsg", "chat-pm") {
 
@@ -22,8 +22,16 @@ class MsgManager(
     init {
         setToggleCmdMsgs(translation.pmOn, translation.pmOff)
 
-        plugin.platform.registerCommand("msg", *aliases.toTypedArray())
-        if (replyCmd) plugin.platform.registerCommand("reply", "r")
+        aliases.plus("msg").forEach {
+            tab.platform.registerCustomCommand(it) { sender, args ->
+                onCommand(sender, args, false)
+            }
+        }
+        if (replyCmd) listOf("reply", "r").forEach {
+            tab.platform.registerCustomCommand(it) { sender, args ->
+                onCommand(sender, args, true)
+            }
+        }
     }
 
     fun setCooldown(player: TabPlayer) {
@@ -38,48 +46,31 @@ class MsgManager(
 
     fun getCooldown(player: TabPlayer) = cooldown - ChronoUnit.SECONDS.between(msgCooldown[player], LocalDateTime.now())
 
-    fun isMsgCmd(command: String, exact: Boolean): Boolean {
-        return command == "/msg"
-                || command.substring(1) in aliases
-                || !exact
-                && (command.startsWith("/msg ") || command.split(" ")[0].substring(1) in aliases)
-    }
+    override fun onCommand(sender: TabPlayer, command: String) { toggleCmd(sender) }
 
-    fun isReplyCmd(command: String, exact: Boolean): Boolean {
-        return command == "/reply"
-                || command == "/r"
-                || !exact
-                && (command.startsWith("/reply ") || command.startsWith("/r "))
-    }
-
-    override fun onCommand(sender: TabPlayer, command: String): Boolean {
-        if (isReplyCmd(command, false) || isMsgCmd(command, false)) {
-            if (!replyCmd && (isReplyCmd(command, true) || isReplyCmd(command, false))) return false
-            if (chat.isMuted(sender)) return true
-            if (isOnCooldown(sender)) {
-                sender.sendMessage(translation.getPmCooldown(getCooldown(sender)))
-                return true
-            }
-            setCooldown(sender)
-
-            val args = command.split(" ")
-            val player: String
-            val msg: String
-            if (isReplyCmd(command, false)) {
-                player = replies[sender.name]!!
-                msg = if (args.size > 1) command.substringAfter(args[0] + " ") else ""
-            } else {
-                player = (if (args.size > 1) args[1] else null)!!
-                msg = if (args.size > 2) command.substringAfter(args[0] + " $player ") else ""
-            }
-
-            onMsgCommand(sender, player, msg, isReplyCmd(command, false))
-            return true
+    // too tired to rework this better rn
+    private fun onCommand(sender: TabPlayer, args: Array<String>, isReply: Boolean) {
+        val player: String
+        val msg: String
+        if (isReply && args.isNotEmpty()) {
+            player = replies[sender.name]!!
+            msg = args.joinToString(" ")
+        } else {
+            player = (if (args.size > 1) args[1] else null)!!
+            msg = args.copyOfRange(1, args.size).joinToString(" ")
         }
-        return command == "/togglemsg" && toggleCmd(sender)
+
+        onMsgCommand(sender, player, msg, isReply)
     }
 
     private fun onMsgCommand(sender: TabPlayer, player: String?, msg: String, reply: Boolean) {
+        if (chat.isMuted(sender)) return
+        if (isOnCooldown(sender)) {
+            sender.sendMessage(translation.getPmCooldown(getCooldown(sender)))
+            return
+        }
+        setCooldown(sender)
+
         if (player == null) {
             sender.sendMessage(if (reply) translation.noPlayerToReplyTo else translation.providePlayer)
             return

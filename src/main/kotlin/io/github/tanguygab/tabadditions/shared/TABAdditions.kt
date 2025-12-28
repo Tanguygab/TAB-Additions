@@ -43,7 +43,6 @@ class TABAdditions(
 
     fun load() {
         loadFiles()
-        tab.eventBus?.register(TabPlaceholderRegisterEvent::class.java) { onPlaceholderRegister(it) }
         reload()
         tab.eventBus?.register(TabLoadEvent::class.java){ platform.runTask { reload() } }
     }
@@ -118,39 +117,6 @@ class TABAdditions(
         AdvancedConditions.finishSetups()
     }
 
-    private fun onPlaceholderRegister(e: TabPlaceholderRegisterEvent) {
-        val identifier = e.identifier
-        val pm = tab.placeholderManager
-        if (identifier.startsWith("%rel_viewer:")) {
-            val placeholder = pm.getPlaceholder("%" + identifier.substring(12))
-
-            e.relationalPlaceholder = when (placeholder) {
-                is RelationalPlaceholderImpl -> BiFunction { viewer: TabPlayer, target: TabPlayer ->
-                    placeholder.getLastValue(
-                        target as me.neznamy.tab.shared.platform.TabPlayer,
-                        viewer as me.neznamy.tab.shared.platform.TabPlayer
-                    )
-                }
-                is PlayerPlaceholderImpl -> BiFunction { viewer: TabPlayer, _: TabPlayer ->
-                    placeholder.getLastValue(viewer as me.neznamy.tab.shared.platform.TabPlayer)
-                }
-                else -> e.relationalPlaceholder
-            }
-            return
-        }
-        if (identifier.startsWith("%rel_condition:")) {
-            val cond = identifier.substring(15, identifier.length - 1)
-            val condition = tab.placeholderManager.conditionManager.getByNameOrExpression(cond)
-            e.relationalPlaceholder = BiFunction { viewer: TabPlayer, target: TabPlayer ->
-                parsePlaceholders(
-                    condition.getText(viewer as me.neznamy.tab.shared.platform.TabPlayer),
-                    target as me.neznamy.tab.shared.platform.TabPlayer,
-                    viewer
-                )
-            }
-        }
-    }
-
     fun parsePlaceholders(string: String?, player: me.neznamy.tab.shared.platform.TabPlayer): String {
         if (string == null) return ""
         if ("%" !in string) return EnumChatFormat.color(string)
@@ -192,15 +158,13 @@ class TABAdditions(
     }
 
     fun toggleCmd(
-        toggleCmd: Boolean,
         player: me.neznamy.tab.shared.platform.TabPlayer,
         toggled: MutableList<UUID>,
         on: String,
         off: String
-    ) = toggleCmd(toggleCmd, player, toggled, null, on, off, false)
+    ) = toggleCmd(player, toggled, null, on, off, false)
 
     fun toggleCmd(
-        toggleCmd: Boolean,
         player: me.neznamy.tab.shared.platform.TabPlayer,
         toggled: MutableList<UUID>,
         placeholder: PlayerPlaceholderImpl?,
@@ -208,8 +172,6 @@ class TABAdditions(
         off: String,
         invert: Boolean
     ): Boolean {
-        if (!toggleCmd) return false
-
         val contains = player.uniqueId in toggled
         if (contains) toggled.remove(player.uniqueId)
         else toggled.add(player.uniqueId)

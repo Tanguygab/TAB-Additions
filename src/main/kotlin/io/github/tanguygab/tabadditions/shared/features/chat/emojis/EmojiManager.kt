@@ -14,7 +14,7 @@ class EmojiManager(
     private val untranslate: Boolean,
     autoCompleteEmojis: Boolean,
     emojis: ConfigurationSection,
-    val emojisCmdEnabled: Boolean,
+    emojisCmdEnabled: Boolean,
     toggleCmd: Boolean
 ) : ChatManager(chat, toggleCmd, "emojis-off", "toggleemojis", "chat-emojis") {
     val autoCompleteEnabled = plugin.platform.supportsChatSuggestions() && autoCompleteEmojis
@@ -32,7 +32,19 @@ class EmojiManager(
             emojiCategories[category] = EmojiCategory(category, emojisMap, componentToMM(categorySection.getConfigurationSection("output")))
         }
 
-        if (emojisCmdEnabled) plugin.platform.registerCommand("emojis")
+        if (emojisCmdEnabled) tab.platform.registerCustomCommand("emojis") { sender, args ->
+            if (args.isEmpty()) {
+                getEmojisCategories(sender)
+                return@registerCustomCommand
+            }
+
+            val category = emojiCategories[args.joinToString(" ")]
+            if (category == null || !category.canUse(sender)) {
+                sender.sendMessage(translation.emojiCategoryNotFound)
+                return@registerCustomCommand
+            }
+            getEmojiCategory(sender, category)
+        }
         if (autoCompleteEnabled) tab.onlinePlayers.forEach { if (!hasCmdToggled(it)) loadAutoComplete(it) }
 
         tab.placeholderManager.registerServerPlaceholder("%chat-emoji-total%", -1) { totalEmojiCount.toString() }
@@ -62,26 +74,13 @@ class EmojiManager(
                     if (untranslate && emoji in msg) msg = msg.replace(emoji, rawEmoji)
                     continue
                 }
-                // I really need to take a look at this again, I can't even remember why I split this instead of just replacing lol
-                val list = msg.split(rawEmoji)
-                msg = ""
-                var counted = 0
                 val output = plugin.parsePlaceholders(
                     getOutput(category)
                         .replace("%emojiraw%", rawEmoji)
                         .replace("%emoji%", emoji.replace("\"", "''")),
                     sender, viewer
                 )
-                if (list.isEmpty()) return output.repeat(count)
-
-                val msgBuilder = StringBuilder(msg)
-                for (part in list) {
-                    if (list.indexOf(part) + 1 != list.size || counted != count) {
-                        msgBuilder.append(part).append(output)
-                        counted++
-                    } else msgBuilder.append(part)
-                }
-                msg = msgBuilder.toString()
+                msg = msg.replace(rawEmoji, output)
             }
         }
         return msg
@@ -106,29 +105,6 @@ class EmojiManager(
 
     fun unloadAutoComplete(player: TabPlayer) {
         if (player in emojisAutoCompleteList) plugin.platform.updateChatComplete(player, emojisAutoCompleteList[player]!!, false)
-    }
-
-    override fun onCommand(sender: TabPlayer, command: String): Boolean {
-        if (command.startsWith("/emojis") && emojisCmdEnabled) {
-            val cat = if (" " in command) command.split(" ")[1] else ""
-            if (cat.isEmpty()) {
-                getEmojisCategories(sender)
-                return true
-            }
-
-            val category = emojiCategories[cat]
-            if (category == null || !category.canUse(sender)) {
-                sender.sendMessage(translation.emojiCategoryNotFound)
-                return true
-            }
-            getEmojiCategory(sender, category)
-            return true
-        }
-        if (command == "/toggleemojis") {
-            if (toggleCmd(sender)) loadAutoComplete(sender)
-            else unloadAutoComplete(sender)
-        }
-        return false
     }
 
     private fun getEmojisCategories(sender: TabPlayer) {
@@ -173,5 +149,10 @@ class EmojiManager(
         }
         val output = plugin.parsePlaceholders(translation.getEmojiHeader(i, emojis.size) + builder, sender)
         chat.sendMessage(sender, chat.mm.deserialize(toMMColors(output)))
+    }
+
+    override fun onCommand(sender: TabPlayer, command: String) {
+        if (toggleCmd(sender)) loadAutoComplete(sender)
+        else unloadAutoComplete(sender)
     }
 }

@@ -1,7 +1,6 @@
 package io.github.tanguygab.tabadditions.velocity
 
 import com.google.common.io.ByteStreams
-import com.velocitypowered.api.command.BrigadierCommand
 import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier
 import io.github.tanguygab.tabadditions.shared.Platform
@@ -20,12 +19,6 @@ class VelocityPlatform(private val plugin: TABAdditionsVelocity) : Platform() {
         for (server in plugin.server.allServers) {
             pm.registerServerPlaceholder("%server-status:${server.serverInfo.name}%", 10000) { plugin.getServerStatus(server) }
         }
-    }
-
-    override fun registerCommand(command: String, vararg aliases: String) {
-        val command = BrigadierCommand(BrigadierCommand.literalArgumentBuilder(command))
-        val commands = plugin.server.commandManager
-        commands.register(commands.metaBuilder(command).aliases(*aliases).plugin(this).build(), command)
     }
 
     override fun isPluginEnabled(plugin: String) = this.plugin.server.pluginManager.getPlugin(plugin).isPresent

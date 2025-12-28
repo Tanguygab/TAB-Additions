@@ -7,7 +7,6 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.player.AsyncPlayerChatEvent
-import org.bukkit.event.player.PlayerCommandPreprocessEvent
 import org.bukkit.event.player.PlayerEvent
 import org.bukkit.event.player.PlayerToggleSneakEvent
 
@@ -22,19 +21,11 @@ class SpigotListener : Listener {
         )
     }
 
-
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onChat(e: AsyncPlayerChatEvent) {
         if (!tab.featureManager.isFeatureEnabled("Chat")) return
         e.isCancelled = true
         tab.featureManager.getFeature<Chat>("Chat").onChat(getPlayer(e), e.message)
-    }
-
-    @EventHandler
-    fun onCommand(e: PlayerCommandPreprocessEvent) {
-        if (!tab.featureManager.isFeatureEnabled("Chat")) return
-        if (tab.featureManager.getFeature<Chat>("Chat").onCommand(getPlayer(e), e.message))
-            e.isCancelled = true
     }
 
     private fun getPlayer(e: PlayerEvent) = tab.getPlayer(e.player.uniqueId)!!

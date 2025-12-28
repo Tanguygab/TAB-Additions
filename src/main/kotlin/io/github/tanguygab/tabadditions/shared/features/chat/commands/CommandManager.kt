@@ -17,14 +17,14 @@ class CommandManager(chat: Chat, commands: ConfigurationSection) : ChatManager(c
             val name = it.toString()
             val command = commands.getConfigurationSection(name)
 
-            val displayName = command.getString("name", name)
+            val displayName = command.getString("name") ?: name
             val condition = command.getString("condition")
             val viewCondition = command.getString("view-condition")
             val channel = command.getString("channel")
             val save = command.getBoolean("keep-on-reload") ?: true
             val prefix = command.getString("prefix")
             val display = command.getConfigurationSection("display")
-            this.commands[name] = FormatCommand(
+            val cmd = FormatCommand(
                 name,
                 displayName,
                 AdvancedConditions.getCondition(condition),
@@ -34,7 +34,22 @@ class CommandManager(chat: Chat, commands: ConfigurationSection) : ChatManager(c
                 save,
                 prefix!!
             )
-            plugin.platform.registerCommand(name)
+            this.commands[name] = cmd
+
+            tab.platform.registerCustomCommand(name) { sender, _ ->
+                if (!cmd.isConditionMet(sender)) {
+                    sender.sendMessage(tab.configuration.messages.noPermission)
+                    return@registerCustomCommand
+                }
+                val name = cmd.displayName
+                if (players.containsKey(sender.uniqueId)) {
+                    players.remove(sender.uniqueId)
+                    sender.sendMessage(translation.getChatCmdLeave(name))
+                    return@registerCustomCommand
+                }
+                players[sender.uniqueId] = cmd
+                sender.sendMessage(translation.getChatCmdJoin(name))
+            }
         }
         val data = plugin.playerData.getMap<String, String>("chat-commands-formats")
         data.forEach { (uuid: String, cmd: String) ->
@@ -57,21 +72,4 @@ class CommandManager(chat: Chat, commands: ConfigurationSection) : ChatManager(c
 
     fun getFromPrefix(sender: TabPlayer, message: String) = commands.values.find { message.startsWith(it.prefix) && it.isConditionMet(sender) }
 
-    override fun onCommand(sender: TabPlayer, command: String): Boolean {
-        val cmd = commands[command.substring(1)] ?: return false
-
-        if (!cmd.isConditionMet(sender)) {
-            sender.sendMessage(tab.configuration.messages.noPermission)
-            return true
-        }
-        val name = cmd.displayName
-        if (players.containsKey(sender.uniqueId)) {
-            players.remove(sender.uniqueId)
-            sender.sendMessage(translation.getChatCmdLeave(name))
-            return true
-        }
-        players[sender.uniqueId] = cmd
-        sender.sendMessage(translation.getChatCmdJoin(name))
-        return true
-    }
 }
