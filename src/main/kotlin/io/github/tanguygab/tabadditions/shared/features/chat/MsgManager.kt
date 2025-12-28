@@ -52,8 +52,8 @@ class MsgManager(
     private fun onCommand(sender: TabPlayer, args: Array<String>, isReply: Boolean) {
         val player: String?
         val msg: String
-        if (isReply && args.isNotEmpty()) {
-            player = replies[sender.name]!!
+        if (isReply) {
+            player = replies[sender.name]
             msg = args.joinToString(" ")
         } else if (args.isNotEmpty()) {
             player = args[0]
