@@ -12,9 +12,7 @@ import me.neznamy.tab.shared.platform.TabPlayer
 import me.neznamy.tab.shared.util.cache.StringToComponentCache
 import java.util.UUID
 
-class ActionBarManager : RefreshableFeature(), UnLoadable, JoinListener {
-    private val plugin: TABAdditions = TABAdditions.INSTANCE
-
+class ActionBarManager(private val plugin: TABAdditions) : RefreshableFeature(), UnLoadable, JoinListener {
     override fun getFeatureName() = "ActionBar"
     override fun getRefreshDisplayName() = "&aActionBar&r"
 

@@ -2,7 +2,6 @@ package io.github.tanguygab.tabadditions.shared.features.chat
 
 import com.loohp.interactivechat.api.InteractiveChatAPI
 import io.github.tanguygab.tabadditions.shared.TABAdditions
-import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions
 import io.github.tanguygab.tabadditions.shared.features.chat.commands.CommandManager
 import io.github.tanguygab.tabadditions.shared.features.chat.emojis.EmojiManager
 import io.github.tanguygab.tabadditions.shared.features.chat.mentions.MentionManager
@@ -24,8 +23,7 @@ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
 import java.time.LocalDateTime
 import java.util.UUID
 
-class Chat(config: ConfigurationFile) : RefreshableFeature(), UnLoadable, JoinListener {
-    private val plugin = TABAdditions.INSTANCE
+class Chat(private val plugin: TABAdditions, config: ConfigurationFile) : RefreshableFeature(), UnLoadable, JoinListener {
     private val tab = TAB.getInstance()
 
     internal val mm = MiniMessage.miniMessage()
@@ -79,8 +77,8 @@ class Chat(config: ConfigurationFile) : RefreshableFeature(), UnLoadable, JoinLi
             this.formats[name] = ChatFormat(
                 name,
                 format.getString("name") ?: name,
-                AdvancedConditions.getCondition(format.getString("condition")),
-                AdvancedConditions.getCondition(format.getString("view-condition")),
+                tab.placeholderManager.conditionManager.getByNameOrExpression(format.getString("condition")),
+                tab.placeholderManager.conditionManager.getByNameOrExpression(format.getString("view-condition")),
                 format.getString("channel") ?: "",
                 ChatUtils.componentsToMM(format.getConfigurationSection("display"))
             )

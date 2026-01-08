@@ -12,9 +12,7 @@ import me.neznamy.tab.shared.platform.TabPlayer
 import me.neznamy.tab.shared.util.cache.StringToComponentCache
 import java.util.UUID
 
-class TitleManager : RefreshableFeature(), UnLoadable, JoinListener {
-    private val plugin: TABAdditions = TABAdditions.INSTANCE
-
+class TitleManager(private val plugin: TABAdditions) : RefreshableFeature(), UnLoadable, JoinListener {
     override fun getFeatureName() = "Title"
     override fun getRefreshDisplayName() = "&aTitle&r"
 

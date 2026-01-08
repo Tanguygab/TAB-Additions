@@ -1,13 +1,13 @@
 package io.github.tanguygab.tabadditions.shared.features.chat
 
-import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions
+import me.neznamy.tab.shared.placeholders.conditions.Condition
 import me.neznamy.tab.shared.platform.TabPlayer
 
 open class ChatFormat(
     val name: String,
     val displayName: String,
-    private val condition: AdvancedConditions?,
-    val viewCondition: AdvancedConditions?,
+    private val condition: Condition?,
+    val viewCondition: Condition?,
     val channel: String,
     val text: String
 ) {

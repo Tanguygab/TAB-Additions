@@ -3,9 +3,10 @@ package io.github.tanguygab.tabadditions.shared
 import io.github.tanguygab.tabadditions.shared.features.ConditionalAppearance
 import io.github.tanguygab.tabadditions.shared.features.ConditionalNametags
 import io.github.tanguygab.tabadditions.shared.features.actionbar.ActionBarManager
-import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions
 import io.github.tanguygab.tabadditions.shared.features.chat.Chat
 import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager
+import io.github.tanguygab.tabadditions.shared.features.unlimitednametags.UnlimitedNametags
+import io.github.tanguygab.tabadditions.shared.features.unlimitednametags.UnlimitedNametagsConfig
 import me.neznamy.tab.api.TabPlayer
 import me.neznamy.tab.api.event.plugin.TabLoadEvent
 import me.neznamy.tab.shared.TAB
@@ -29,7 +30,7 @@ import java.util.function.BiFunction
 
 class TABAdditions(
     val platform: Platform,
-    private val plugin: Any?,
+    val plugin: Any?,
     private val dataFolder: File?
 ) {
     private val tab = TAB.getInstance()
@@ -87,35 +88,36 @@ class TABAdditions(
         features.clear()
     }
 
-    fun registerFeature(feature: TabFeature) {
+    fun registerFeature(feature: TabFeature, name: String = feature.featureName) {
         val fm = tab.featureManager
-        features.add(feature.featureName)
-        fm.registerFeature(feature.featureName, feature)
+        features.add(name)
+        fm.registerFeature(name, feature)
     }
 
     private fun loadFeatures() {
-        if (config.getBoolean("actionbars.enabled", false)) registerFeature(ActionBarManager())
-        if (config.getBoolean("titles.enabled", false)) registerFeature(TitleManager())
-        if (chatConfig.getBoolean("enabled", false)) registerFeature(Chat(chatConfig))
+        if (config.getBoolean("actionbars.enabled", false)) registerFeature(ActionBarManager(this))
+        if (config.getBoolean("titles.enabled", false)) registerFeature(TitleManager(this))
+        if (chatConfig.getBoolean("enabled", false)) registerFeature(Chat(this, chatConfig))
         if (config.getBoolean("conditional-nametags.enabled", false) && tab.nameTagManager != null)
             registerFeature(
-            ConditionalNametags(
-                config.getBoolean("conditional-nametags.show-by-default", true),
-                config.getBoolean("conditional-nametags.relational", false)
+                ConditionalNametags(
+                    config.getBoolean("conditional-nametags.show-by-default", true),
+                    config.getBoolean("conditional-nametags.relational", false)
+                )
             )
-        )
-        if (!platform.isProxy && config.getBoolean("conditional-appearance.enabled", false))
-            registerFeature(ConditionalAppearance(plugin, config.getBoolean("conditional-appearance.show-by-default", true)))
+        if (!platform.isProxy) {
+            if (config.getBoolean("conditional-appearance.enabled", false))
+                registerFeature(ConditionalAppearance(plugin, config.getBoolean("conditional-appearance.show-by-default", true)))
+            if (config.getBoolean("unlimited-nametags.enabled", false))
+                registerFeature(UnlimitedNametags(
+                    this,
+                    UnlimitedNametagsConfig.fromSection(config.getConfigurationSection("unlimited-nametags")))
+                )
+        }
     }
 
     private fun loadPlaceholders() {
-        val pm = tab.placeholderManager
-        platform.registerPlaceholders(pm)
-
-        AdvancedConditions.clearConditions()
-        val conditions = config.getMap<String, Map<String, String>>("advanced-conditions")
-        conditions.forEach { (name: String, conditions: Map<String, String>) -> AdvancedConditions(name, conditions) }
-        AdvancedConditions.finishSetups()
+        platform.registerPlaceholders(tab.placeholderManager)
     }
 
     private fun onPlaceholderRegister(e: TabPlaceholderRegisterEvent) {

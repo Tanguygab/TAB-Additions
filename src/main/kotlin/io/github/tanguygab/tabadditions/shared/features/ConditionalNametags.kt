@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features
 
-import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions
 import me.neznamy.tab.shared.Property
 import me.neznamy.tab.shared.TAB
 import me.neznamy.tab.shared.features.types.JoinListener
@@ -59,7 +58,7 @@ class ConditionalNametags(private val def: Boolean, private val relational: Bool
         val prop = properties[target] ?: return def
         val cond = prop.currentRawValue
         if (cond.isEmpty()) return def
-        return def != AdvancedConditions.getCondition(cond)!!.isMet(viewer, target)
+        return def != tab.placeholderManager.conditionManager.getByNameOrExpression(cond)!!.isMet(viewer, target)
     }
 
     override fun unload() {

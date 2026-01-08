@@ -1,6 +1,5 @@
 package io.github.tanguygab.tabadditions.shared.features.chat.commands
 
-import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions
 import io.github.tanguygab.tabadditions.shared.features.chat.Chat
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatManager
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatUtils
@@ -27,8 +26,8 @@ class CommandManager(chat: Chat, commands: ConfigurationSection) : ChatManager(c
             val cmd = FormatCommand(
                 name,
                 displayName,
-                AdvancedConditions.getCondition(condition),
-                AdvancedConditions.getCondition(viewCondition),
+                tab.placeholderManager.conditionManager.getByNameOrExpression(condition),
+                tab.placeholderManager.conditionManager.getByNameOrExpression(viewCondition),
                 channel ?: "",
                 ChatUtils.componentsToMM(display),
                 save,

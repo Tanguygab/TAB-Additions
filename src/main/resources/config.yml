@@ -24,12 +24,19 @@ titles:
       title: "&2Welcome &a%player%&2,"
       subtitle: "&2on &aplay.servername.com&2!"
 
-advanced-conditions:
-  health:
-    "%health%>=15": "&a%health%"
-    "%health%>=10": "&e%health%"
-    "%health%>=5": "&c%health%"
-    "%health%>=0": "&4%health%"
-  inRange:
-    "%rel_distance%<=10": "&aIn range!"
-    "else": "&cNot in range!"
+unlimited-nametags:
+  enabled: true
+  toggle-command: /nametags
+  rotation: true
+  lines:
+    admin:
+      display-condition: "permission:tab.admin"
+      type: block
+      block: diamond_block
+    staff:
+      display-condition: "permission:tab.staff;!permission:tab.admin"
+      type: item
+      material: diamond
+    name:
+      type: text
+      text: "%tab_tagprefix%%tab_customtagname%%tab_tagsuffix%"

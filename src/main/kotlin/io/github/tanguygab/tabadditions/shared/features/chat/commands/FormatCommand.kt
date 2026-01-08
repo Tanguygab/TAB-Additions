@@ -1,13 +1,13 @@
 package io.github.tanguygab.tabadditions.shared.features.chat.commands
 
-import io.github.tanguygab.tabadditions.shared.features.advancedconditions.AdvancedConditions
 import io.github.tanguygab.tabadditions.shared.features.chat.ChatFormat
+import me.neznamy.tab.shared.placeholders.conditions.Condition
 
 class FormatCommand(
     name: String,
     displayName: String,
-    condition: AdvancedConditions?,
-    viewCondition: AdvancedConditions?,
+    condition: Condition?,
+    viewCondition: Condition?,
     channel: String,
     text: String,
     val saveOnReload: Boolean,
