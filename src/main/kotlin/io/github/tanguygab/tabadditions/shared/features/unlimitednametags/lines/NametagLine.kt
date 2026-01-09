@@ -13,6 +13,7 @@ import me.neznamy.tab.shared.platform.TabPlayer
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.entity.Display
+import org.bukkit.entity.Entity
 import org.bukkit.entity.EntityType
 import org.bukkit.entity.Player
 import org.bukkit.persistence.PersistentDataType
@@ -34,10 +35,12 @@ class NametagLine(
         TAB.getInstance().onlinePlayers.forEach { onJoin(it) }
     }
 
+    fun Entity.delete() {
+        scheduler.run(feature.bukkit, { _ -> remove() }, null)
+    }
+
     override fun unload() {
-        if (feature.bukkit.isEnabled) players.values.forEach {
-            it.entity.scheduler.run(feature.bukkit, { _ -> it.entity.remove() }, null)
-        }
+        if (feature.bukkit.isEnabled) players.values.forEach { it.entity.delete() }
         players.clear()
     }
 
@@ -47,7 +50,7 @@ class NametagLine(
 
     override fun onQuit(player: TabPlayer) {
         val entity = players[player]?.entity
-        entity?.scheduler?.run(feature.bukkit, { entity.remove() }, null)
+        entity?.delete()
         players.remove(player)
     }
 
@@ -55,47 +58,52 @@ class NametagLine(
         if (player in loading) return
         var data = players[player]
         if (config.displayCondition?.isMet(player) == false) {
-            data?.entity?.remove()
-            players.remove(player)
+            onQuit(player)
             return
         }
         val loc = player.bukkit.location
         loading.add(player)
         Bukkit.getRegionScheduler().run(feature.bukkit, loc) {
+            var force = force
             if (data == null) {
+                force = true
                 val entity = loc.world.spawnEntity(loc, when (config.type) {
                     is NametagLineItem -> EntityType.ITEM_DISPLAY
                     is NametagLineBlock -> EntityType.BLOCK_DISPLAY
                     else -> EntityType.TEXT_DISPLAY
                 }) as Display
-                entity.persistentDataContainer.set(feature.entityKey, PersistentDataType.BOOLEAN, true)
                 data = NametagLineData(player, entity, config.type.properties.mapValues { Property(this, player, it.value) })
                 players[player] = data
                 player.bukkit.addPassenger(entity)
             }
             loading.remove(player)
 
-            config.type.refresh(data, force)
-            data.entity.apply {
-                data.billboard.update(true) { billboard = Display.Billboard.entries.get(it) ?: Display.Billboard.FIXED }
+            data.entity.scheduler.run(feature.bukkit, { _ ->
+                config.type.refresh(data, force)
+                data.entity.apply {
+                    if (!persistentDataContainer.has(feature.entityKey))
+                        persistentDataContainer.set(feature.entityKey, PersistentDataType.BOOLEAN, true)
 
-                if (data.brightnessBlock.update().or(data.brightnessSky.update()) || force) {
-                    brightness = if (data.brightnessBlock.get().isBlank() && data.brightnessSky.get().isBlank()) null
-                    else {
-                        Display.Brightness(
-                            data.brightnessBlock.get().toIntOrNull() ?: 0,
-                            data.brightnessSky.get().toIntOrNull() ?: 0
-                        )
+                    data.billboard.update(true) { billboard = Display.Billboard.entries.get(it) ?: Display.Billboard.FIXED }
+
+                    if (data.brightnessBlock.update().or(data.brightnessSky.update()) || force) {
+                        brightness = if (data.brightnessBlock.get().isBlank() && data.brightnessSky.get().isBlank()) null
+                        else {
+                            Display.Brightness(
+                                data.brightnessBlock.get().toIntOrNull() ?: 0,
+                                data.brightnessSky.get().toIntOrNull() ?: 0
+                            )
+                        }
                     }
-                }
 
-                data.height.update(true) { displayHeight = it.toFloatOrNull() ?: 0f }
-                data.width.update(true) { displayWidth = it.toFloatOrNull() ?: 0f }
-                data.glow.update(true) { glowColorOverride = try { Color.fromRGB(it.hexToInt()) } catch (_: Exception) { null } }
-                data.shadowRadius.update(true) { shadowRadius = it.toFloatOrNull() ?: 0f }
-                data.shadowStrength.update(true) { shadowStrength = it.toFloatOrNull() ?: 0f }
-                data.viewRange.update(true) { viewRange = it.toFloatOrNull() ?: 0f }
-            }
+                    data.height.update(true) { displayHeight = it.toFloatOrNull() ?: 0f }
+                    data.width.update(true) { displayWidth = it.toFloatOrNull() ?: 0f }
+                    data.glow.update(true) { glowColorOverride = try { Color.fromRGB(it.hexToInt()) } catch (_: Exception) { null } }
+                    data.shadowRadius.update(true) { shadowRadius = it.toFloatOrNull() ?: 0f }
+                    data.shadowStrength.update(true) { shadowStrength = it.toFloatOrNull() ?: 0f }
+                    data.viewRange.update(true) { viewRange = it.toFloatOrNull() ?: 0f }
+                }
+            }, null)
         }
     }
 

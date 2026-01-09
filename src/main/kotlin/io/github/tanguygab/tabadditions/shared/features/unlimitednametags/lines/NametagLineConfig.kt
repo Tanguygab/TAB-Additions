@@ -45,7 +45,7 @@ data class NametagLineConfig(
                     section.getString("text", "<red>Missing text")
                 )
             },
-            TAB.getInstance().placeholderManager.conditionManager.getByNameOrExpression(section.getString("condition")),
+            TAB.getInstance().placeholderManager.conditionManager.getByNameOrExpression(section.getString("display-condition")),
             section.getString("billboard") ?: "FIXED",
             section.getOptString("brightness.block", ""),
             section.getOptString("brightness.sky", ""),
