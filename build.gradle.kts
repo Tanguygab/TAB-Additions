@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "io.github.tanguygab"
-version = "2.1.5"
+version = "2.1.6"
 
 kotlin {
     jvmToolchain(21)

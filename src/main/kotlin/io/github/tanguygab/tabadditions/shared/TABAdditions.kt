@@ -117,8 +117,8 @@ class TABAdditions(
     private fun loadPlaceholders() {
         val pm = tab.placeholderManager
         platform.registerPlaceholders(pm)
-        pm.registerRelationalPlaceholder("%rel_viewer:[^%]*%".toPattern(), 1000) { identifier ->
-            val placeholder = pm.getPlaceholder(identifier.group())
+        pm.registerRelationalPlaceholder("%rel_viewer:(?<identifier>[^%]*)%".toPattern(), 1000) { identifier ->
+            val placeholder = pm.getPlaceholder("%" + identifier.group("identifier") + "%")
             if (placeholder is RelationalPlaceholderImpl) BiFunction { viewer, target -> placeholder.getLastValue(
                 target as me.neznamy.tab.shared.platform.TabPlayer,
                 viewer as me.neznamy.tab.shared.platform.TabPlayer
