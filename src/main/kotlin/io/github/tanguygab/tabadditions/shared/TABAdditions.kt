@@ -7,7 +7,6 @@ import io.github.tanguygab.tabadditions.shared.features.chat.Chat
 import io.github.tanguygab.tabadditions.shared.features.titles.TitleManager
 import io.github.tanguygab.tabadditions.shared.features.unlimitednametags.UnlimitedNametags
 import io.github.tanguygab.tabadditions.shared.features.unlimitednametags.UnlimitedNametagsConfig
-import me.neznamy.tab.api.TabPlayer
 import me.neznamy.tab.api.event.plugin.TabLoadEvent
 import me.neznamy.tab.shared.TAB
 import me.neznamy.tab.shared.chat.EnumChatFormat
@@ -142,7 +141,7 @@ class TABAdditions(
         for (pl in placeholders) {
             val output = when (val placeholder = tab.placeholderManager.getPlaceholder(pl)) {
                 is PlayerPlaceholderImpl -> placeholder.getLastValue(sender)
-                is ServerPlaceholderImpl -> placeholder.lastValue
+                is ServerPlaceholderImpl -> placeholder.getLastValue(sender)
                 is RelationalPlaceholderImpl -> if (viewer == null) "" else placeholder.getLastValue(viewer, sender)
                 else -> pl
             }

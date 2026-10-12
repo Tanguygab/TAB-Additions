@@ -54,11 +54,11 @@ object ChatUtils {
             .replace("url", "open_url")
             .replace("copy", "copy_to_clipboard")
             .replace("file", "open_file")
-        if (!hover.isEmpty()) output.append("<hover:show_text:\"$hover\">")
-        if (!click.isEmpty()) output.append("<click:$clickType:\"$click\">")
+        if (hover.isNotEmpty()) output.append("<hover:show_text:\"$hover\">")
+        if (click.isNotEmpty()) output.append("<click:$clickType:\"$click\">")
         output.append(text)
-        if (!click.isEmpty()) output.append("</click>")
-        if (!hover.isEmpty()) output.append("</hover>")
+        if (click.isNotEmpty()) output.append("</click>")
+        if (hover.isNotEmpty()) output.append("</hover>")
         return output.toString()
     }
 

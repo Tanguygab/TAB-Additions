@@ -4,10 +4,10 @@ plugins {
 }
 
 group = "io.github.tanguygab"
-version = "2.1.6"
+version = "2.2.0"
 
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
 
 repositories {
@@ -42,6 +42,7 @@ dependencies {
     compileOnly(libs.adventure.platform.bungee)
     compileOnly(libs.adventure.minimessage)
     compileOnly(libs.adventure.serializer)
+    testImplementation(kotlin("test"))
 }
 
 tasks.processResources {

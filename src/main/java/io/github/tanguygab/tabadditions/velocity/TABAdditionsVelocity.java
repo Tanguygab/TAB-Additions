@@ -1,5 +1,6 @@
 package io.github.tanguygab.tabadditions.velocity;
 
+import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent;
@@ -11,7 +12,6 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import io.github.tanguygab.tabadditions.ProjectVariables;
 import io.github.tanguygab.tabadditions.shared.TABAdditions;
 
-import javax.inject.Inject;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.HashMap;
